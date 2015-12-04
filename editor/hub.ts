@@ -82,7 +82,6 @@ module TDev.Browser {
                     calcSearchArt: true,
                     tokenRefactoring: true,
                     // misc
-                    groupAllowExportApp: true,
                     changeSkillLevel: true,
                     // edit
                     copyPaste: true,
@@ -171,7 +170,6 @@ module TDev.Browser {
                     makeAsyncRefactoring: true,
                     tokenRefactoring: true,
                     // misc
-                    groupAllowExportApp: true,
                     changeSkillLevel: true,
                     // edit
                     copyPaste: true,
@@ -252,7 +250,6 @@ module TDev.Browser {
                     scriptPropertiesData: true,
                     wallLogsButton: true,
                     scriptPropertiesPropertyCloud: true,
-                    scriptPropertiesPropertyAllowExport: true,
                     stringEditFullScreen: true,
                     persistanceRadio: true,
                     awaitClock: true,
@@ -275,7 +272,6 @@ module TDev.Browser {
                     hubTopAndNew: true,
                     hubScriptUpdates: true,
                     hubUsers: true,
-                    hubTags: true,
                     hubMyArt: true,
                     hubChannels: Cloud.lite,
                     publicationComments: true,
@@ -911,7 +907,7 @@ module TDev.Browser {
                 .then(r => {
                     var full = r.output.replace(/\x1b\[[0-9;]*m/g, "")
                     var m = ModalDialog.showText("...[snip]...\n" + full.slice(-3000), null, <any>div(null, 
-                        HTML.mkButton("full", () => {
+                        HTML.mkButton(lf("full"), () => {
                             ModalDialog.showText(full)
                         }),
                         HTML.mkAsyncButton("save tag " + args[1], () => {
@@ -921,7 +917,7 @@ module TDev.Browser {
                             return Cloud.postPrivateApiAsync("config/compiletag", opts)
                             .then(r => r, e => Cloud.handlePostingError(e, ""))
                         }),
-                        HTML.mkButton("cancel", () => {
+                        HTML.mkButton(lf("cancel"), () => {
                             m.dismiss()
                     })))
                 }, e => Cloud.handlePostingError(e, ""))
@@ -3003,7 +2999,7 @@ module TDev.Browser {
                     Util.setHash('#topic:gettingstarted');
                 }, Ticks.hubBeginnersGettingStarted, true)),
                 ccgaEl = toTutBtn(this.smallBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateInWindow("http://aka.ms/ccgaaboutcourse");
+                    Util.navigateInWindow("/ccga");
                 }, Ticks.hubCCGA, true)),
                 /*
                 apiEl = toTutBtn(this.smallBtn(lf("API Docs"), () => {
@@ -3034,77 +3030,6 @@ module TDev.Browser {
             this.layoutTiles(container, elements);
         }
 
-        private showTags(container:HTMLElement)
-        {
-            TheApiCacheMgr.getAnd("tags?count=1000", (tgs:JsonList) => {
-                var elements = [];
-                var existing:any = {}
-
-                var byName = (n) => unique.filter((t) => t.name == n)[0];
-
-                var unique = <JsonTag[]>tgs.items.filter((t:JsonTag) => {
-                    if (existing[t.id]) return false;
-                    existing[t.id] = 1;
-                    return true;
-                });
-
-                var mkBtn = (n:string, sz:number) => {
-                    var t = byName(n);
-                    if (!t) return; // shouldn't happen
-                    var lbl = t.name;
-
-                    //if (groupName == "libraries")
-                    //    lbl = lbl.replace(" libraries", "");
-                    var elt = div("hubTile hubTileBtn hubTileSize" + sz,
-                                  div("hubTileTagTitle", lbl),
-                                  div("hubTileTagNumber", t.instances + ""));
-                    this.tileClick(elt, () => {
-                        tick(Ticks.hubTag);
-                        this.hide();
-                        this.browser().showList(t.id + "/scripts");
-                    });
-                    elements.push(elt);
-                }
-
-                unique.sort((a:JsonTag, b:JsonTag) => b.instances - a.instances); // a.name.localeCompare(b.name));
-
-                mkBtn("games", 3);
-                mkBtn("libraries", 2);
-                mkBtn("tools", 0);
-                mkBtn("entertainment", 0);
-                mkBtn("education", 0);
-                mkBtn("productivity", 0);
-                mkBtn("music", 0);
-                mkBtn("business", 0);
-
-                var search = this.mkFnBtn(lf("See More"), () => { this.showTagList(unique) }, Ticks.hubTagSearch, true);
-                search.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-                elements.push(search);
-
-                this.layoutTiles(container, elements);
-            });
-        }
-
-        private showTagList(tags:JsonTag[])
-        {
-            function fullName(c:JsonTag) { return c.category ? c.category + " :: " + c.name : c.name; }
-            var boxes =
-                tags.map((c) =>
-                    div("hubTagBox",
-                        div("sdCmtTopic",
-                            span("sdBold", fullName(c)),
-                            " x" + c.instances + ""
-                            ),
-                        Host.expandableTextBox(c.description)).withClick(() => {
-                            m.dismiss();
-                            tick(Ticks.hubTagFromList);
-                            this.hide();
-                            this.browser().showList(c.id + "/scripts");
-                        }));
-            var m = new ModalDialog();
-            m.choose(boxes);
-        }
-
         private updateSections()
         {
             var widgets = EditorSettings.widgets();
@@ -3123,8 +3048,6 @@ module TDev.Browser {
                 sects["social"] = { title: lf("social") };
             if (widgets.hubTopAndNew)
                 sects["top"] = { title: lf("top & new") };
-            if (widgets.hubTags)
-                sects["tags"] = { title: lf("categories") };
             if (widgets.hubMyArt)
                 sects["myart"] = { title: lf("my art") };
 
@@ -3239,8 +3162,6 @@ module TDev.Browser {
                     this.showSimplifiedLearn(c);
                 else if (s == "learn")
                     this.showLearn(c);
-                else if (s == "tags")
-                    this.showTags(c);
                 else if (s == "myart") {
                     if (Cloud.getUserId())
                         this.browser().getLocationList(Cloud.getUserId() + "/art?count=6", (items, cont) => this.addPageTiles(s, c, items));

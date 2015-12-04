@@ -32,12 +32,7 @@ module TDev {
         name: string;
         iconurl: string;
     }
-
-    export interface JsonCanExportApp {
-        canExport: boolean;
-        reason?: string;
-    }
-
+    
     export interface JsonIdObject
     {
         kind:string;
@@ -136,8 +131,6 @@ module TDev {
     export interface JsonGroup extends JsonPublication {
         name: string;
         description: string;
-        allowexport: boolean;
-        allowappstatistics: boolean;
         isrestricted : boolean;
         isclass: boolean;
         pictureid : string;

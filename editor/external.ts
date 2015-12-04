@@ -39,12 +39,30 @@ module TDev {
         LIVE: 'https://microbit.codekingdoms.com'
       };
 
-      var ckOrigin;
+      var PY_ORIGINS = {
+        LOCAL: 'http://localhost:8000',
+        TEST: 'https://microbit-test.pythonanywhere.com',
+        STAGE: 'https://microbit-staging.pythonanywhere.com',
+        LIVE: 'https://microbit.pythonanywhere.com'
+      };
 
-      if (isLocal) ckOrigin = CK_ORIGINS.LOCAL;
-      else if (isTest) ckOrigin = CK_ORIGINS.TEST;
-      else if (isStage) ckOrigin = CK_ORIGINS.STAGE;
-      else ckOrigin = CK_ORIGINS.LIVE;
+
+      var ckOrigin;
+      var pyOrigin;
+
+      if (isLocal) {
+        ckOrigin = CK_ORIGINS.LOCAL;
+        pyOrigin = PY_ORIGINS.LOCAL;
+      } else if (isTest) {
+        ckOrigin = CK_ORIGINS.TEST;
+        pyOrigin = PY_ORIGINS.TEST;
+      } else if (isStage) {
+        ckOrigin = CK_ORIGINS.STAGE;
+        pyOrigin = PY_ORIGINS.STAGE;
+      } else {
+        ckOrigin = CK_ORIGINS.LIVE;
+        pyOrigin = PY_ORIGINS.LIVE;
+      }
 
       var ckPath = isLocal ? '/microbit/sequencer/bin/' : '/';
 
@@ -64,7 +82,7 @@ module TDev {
           origin: origin,
           path: path + "blockly/editor.html",
           logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
-          order: 0,
+          order: 1,
         }, {
           company: "Code Kingdoms",
           name: "CK JavaScript",
@@ -73,20 +91,20 @@ module TDev {
           origin: ckOrigin,
           path: ckPath,
           logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
-          order: 1,
+          order: 0,
         }];
 
-      if (TDev.isBeta) {
+      if (TDev.isBeta || isLocal) {
         externalEditorsCache.push(
         {
           company: "The Python Software Foundation",
           name: "MicroPython",
           description: "Hack your micro:bit with MicroPython!",
           id: "python",
-          origin: "https://microbit.pythonanywhere.com",
+          origin: pyOrigin,
           path: "/editor.html",
-          logoUrl: origin + '/static/img/python-powered.png',
-          order:3
+          logoUrl: pyOrigin + '/static/img/python-powered.png',
+          order: 3
         })
       }
     }
@@ -220,11 +238,60 @@ module TDev {
         var w = <HTMLElement> document.querySelector(".wallFullScreenContainer");
         w.style.height = "auto";
         w.style.display = "";
-        var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl));
-        var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
-        var wrapper = div("wallFullScreenWrapper");
-        wrapper.setChildren([w]);
-
+        if(TheChannel.editor.id == 'python') {
+            // A nice Pythonic sidebar (Python doesn't use the simulator).
+            elt("externalEditorSide").style.background = "#336699 url(https://az742082.vo.msecnd.net/pub/psopafpj) 0 0 repeat";
+            var bbcLogo_src = TheChannel.editor.origin + '/static/img/bbcLogo.png';
+            var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(bbcLogo_src));
+            var link = HTML.mkA(null, 'http://micropython.org/', "_blank", null);
+            var logo_src = TheChannel.editor.origin + '/static/img/micropython.png';
+            var logo_image = HTML.mkImg(logo_src);
+            link.appendChildren([logo_image]);
+            var logo = div("wallFullScreenLogo", link);
+            //var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
+            var wrapper = div("wallFullScreenWrapper");
+            var snake_src = TheChannel.editor.origin + '/static/img/snake.png';
+            var snake_img = HTML.mkImg(snake_src);
+            snake_img.style.position = "absolute";
+            snake_img.style.marginTop = "-48px";
+            snake_img.style.marginLeft = "-14px";
+            var header = document.createElement("span");
+            header.setChildren("Instructions");
+            header.style.fontSize = "3rem";
+            header.style.color = "#1A354C";
+            header.style.fontFamily = '"Segoe UI Light","Segoe UI","Segoe WP Light","Segoe WP","HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif';
+            var list_items = [];
+            var instructions = [
+                "Type in your Python program",
+                "Click 'Download' and save the file",
+                "Plug in your BBC micro:bit, it'll show up as USB storage",
+                "Drag the saved file onto the BBC micro:bit",
+                "That's it!"
+            ];
+            instructions.forEach(function(val, index, arr) {
+                var item = document.createElement('li');
+                item.setChildren(val);
+                list_items.push(item);
+            });
+            var ordered_list = document.createElement("ol");
+            ordered_list.style.fontSize = "18px";
+            ordered_list.setChildren(list_items);
+            var info_box = div("infobox", [snake_img, header, ordered_list]);
+            info_box.style.border = "6px solid #FFCC33";
+            info_box.style.background = "#FFFFFF";
+            info_box.style.borderRadius = "0px 20px 20px 20px";
+            info_box.style.width = "100%";
+            info_box.style.padding = "8px";
+            info_box.style.marginTop = "32px";
+            info_box.style.marginBottom = "64px";
+            wrapper.setChildren([info_box]);
+        } else {
+            elt("externalEditorSide").style.background = "#FFFFFF url(https://az742082.vo.msecnd.net/pub/psopafpj) 0 0 repeat";
+            var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(Cloud.config.companyLogoHorizontalUrl));
+            var logo = div("wallFullScreenLogo", HTML.mkImg(TheChannel.editor.logoUrl));
+            var wrapper = div("wallFullScreenWrapper");
+            wrapper.setChildren([w]);
+        }
         elt("externalEditorSide").setChildren([bbcLogo, wrapper, logo]);
       }
 
@@ -305,8 +372,15 @@ module TDev {
         switch ((<Message> event.data).type) {
           case MessageType.Save: {
             tick(Ticks.externalSave);
-            var message = <Message_Save> event.data;
-            World.getInstalledHeaderAsync(this.guid).then((header: Cloud.Header) => {
+            var message = <Message_Save>event.data;
+            Promise.join([
+              World.getInstalledHeaderAsync(this.guid),
+              World.getInstalledScriptAsync(this.guid),
+              World.getInstalledEditorStateAsync(this.guid)
+            ]).then((res: any[]) => {
+              var header: Cloud.Header = <Cloud.Header>res[0];              
+              var installedState = JSON.stringify(res);
+
               var scriptText = message.script.scriptText;
               var editorState = JSON.stringify(message.script.editorState);
               header.scriptVersion.baseSnapshot = message.script.baseSnapshot;
@@ -326,9 +400,12 @@ module TDev {
               // appears both on the header and in the metadata.
               header.name = metadata.name;
 
+              // don't update if no changes
+              var backgroundUpdate = installedState == JSON.stringify([header, scriptText, editorState]);
+              
               // Writes into local storage. Also clears the scriptVersionInCloud
               // field (fifth argument).
-              World.updateInstalledScriptAsync(header, scriptText, editorState, false, "").then(() => {
+              World.updateInstalledScriptAsync(header, scriptText, editorState, backgroundUpdate).then(() => {
                 console.log("[external] script saved properly");
                 this.post(<Message_SaveAck>{
                   type: MessageType.SaveAck,
@@ -566,7 +643,8 @@ module TDev {
                     scriptText: text
                   }).done(() => {
                     // Release focus, kill the channel.
-                    (<HTMLElement> document.activeElement).blur();
+                    if (document.activeElement instanceof HTMLElement)
+                      (<HTMLElement> document.activeElement).blur();
                     TheChannel = null;
                   });                  
                 }),

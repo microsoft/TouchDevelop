@@ -4,7 +4,7 @@ module TDev.Cloud {
     export var lite = true;
     export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
-    export var microbitGitTag = "ext2";
+    export var microbitGitTag = "v29";
 
     export var _migrate: () => void;
 
@@ -38,7 +38,6 @@ module TDev.Cloud {
         gotoNavigation?: boolean;
 
         // misc
-        groupAllowExportApp?: boolean;
         changeSkillLevel?: boolean;
         forceMainAsAction?: boolean;
         singleReturnValue?: boolean;
@@ -115,7 +114,6 @@ module TDev.Cloud {
         githubLinks?: boolean;
         hubSocialTiles?: boolean;
         hubTopAndNew?: boolean;
-        hubTags?: boolean;
         hubMyArt?: boolean;
         hubLearn?: boolean;
         hubTutorials?: boolean;
@@ -145,7 +143,6 @@ module TDev.Cloud {
         scriptPropertiesData?: boolean;
         wallLogsButton?: boolean;
         scriptPropertiesPropertyCloud?: boolean;
-        scriptPropertiesPropertyAllowExport?: boolean;
         scriptPropertiesPropertyAtomic?: boolean;
         scriptPropertiesUseCppCompiler?: boolean;
         stringEditFullScreen?: boolean;
@@ -826,8 +823,6 @@ module TDev.Cloud {
         description: string;
         school?:string;
         grade?:string;
-        allowexport: boolean;
-        allowappstatistics: boolean;
         userplatform: string[];
         isclass?: boolean;
     }

@@ -14,7 +14,6 @@ module TDev
         private splashArtIdContainer = div("scriptPropContainer");
         private isLibrary:HTMLElement;
         private useCppCompiler: HTMLElement;
-        private allowExport: HTMLElement;
         private isCloud: HTMLElement;
         private formRoot = div(null);
         private mdRoot = div(null);
@@ -33,14 +32,12 @@ module TDev
 
         static allPlatforms = {
             "HTML5": PlatformCapability.AnyWeb,
-            "App Studio": PlatformCapability.AppStudio,
             "Cordova mobile app": PlatformCapability.CordovaApp,
             "Azure Web app": PlatformCapability.AzureWebSite,
         }
 
         static shortPlatforms = {
             "web": PlatformCapability.AnyWeb,
-            "appstudio": PlatformCapability.AppStudio,
             "cordova": PlatformCapability.CordovaApp,
             "azure": PlatformCapability.AzureWebSite,
         }
@@ -91,10 +88,6 @@ module TDev
             m.add(div("wall-dialog-buttons",
                 HTML.mkButton(lf("set to current"), () => {
                     platforms = PlatformCapability.Current;
-                    m.dismiss()
-                }),
-                HTML.mkButton(lf("App Studio"), () => {
-                    platforms = PlatformCapability.AppStudio;
                     m.dismiss()
                 }),
                 HTML.mkButton(lf("Cordova mobile app"), () => {
@@ -183,8 +176,6 @@ module TDev
             this.isLibrary = HTML.mkCheckBox(lf("this script is a library"), (v) => this.theScript.isLibrary = v);
             this.isLibrary.appendChild(Editor.mkHelpLink("libraries"));
             this.useCppCompiler = HTML.mkCheckBox(lf("use C++ compiler"), (v) => this.theScript.useCppCompiler = v);
-            this.allowExport = HTML.mkCheckBox(lf("allow other users to export to app"), (v) => this.exportChanged(v));
-            this.allowExport.appendChild(Editor.mkHelpLink("allow export to app"));
             this.isCloud = HTML.mkCheckBox(lf("this script is a web service"), (v) => this.theScript.isCloud = v)
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
             this.formRoot.setChildren([div("varLabel", lf("script")),
@@ -229,9 +220,8 @@ module TDev
                     ),
                 this.settingsSection = div("formLine",
                     this.isLibrary,
-                    this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
-                    this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null,
-                    this.editor.widgetEnabled("scriptPropertiesPropertyAllowExport") ? this.allowExport : null),
+                    isBeta && this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
+                    this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null),
                 dbg ? div("formLine",
                     div("varLabel", lf("under the hood (dbg)")),
                     HTML.mkButton(lf("test merge"), () => this.mergeWithScript(true)),
@@ -654,13 +644,6 @@ module TDev
 
         private isActive() { return !!this.theScript; }
 
-        private exportChanged(v:boolean) : void
-        {
-            if (v)
-                ModalDialog.info(lf("allow export to app"), lf("This option only has an effect if you are the author of all base scripts, or if the base script has an effective 'allow other users to export to app' checkmark."));
-            this.theScript.allowExport = v;
-        }
-
         private setIconColor(elts:string[], clr:(s:string)=>string, icon:(s:string)=>HTMLElement, setIt:(s:string)=>void)
         {
             var m = new ModalDialog();
@@ -771,7 +754,6 @@ module TDev
 
             HTML.setCheckboxValue(this.isLibrary, this.theScript.isLibrary);
             HTML.setCheckboxValue(this.useCppCompiler, this.theScript.useCppCompiler);
-            HTML.setCheckboxValue(this.allowExport, this.theScript.allowExport);
             HTML.setCheckboxValue(this.isCloud, this.theScript.isCloud);
 
             this.revertButton.style.display = (ScriptEditorWorldInfo.status !== "published" && ScriptEditorWorldInfo.baseId) ? "inline-block" : "none";

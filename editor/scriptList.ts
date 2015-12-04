@@ -1299,11 +1299,6 @@
                                     div('wall-dialog-header', lf("for group")),
                                     groupInfo.mkSmallBox()
                                 ]);
-                                if (group.allowexport)
-                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner can export your scripts to app."), Editor.mkHelpLink("groups")));
-                                if (group.allowappstatistics)
-                                    errorDiv.appendChild(div('wall-dialog-body', lf("group owner has access to statistics of exported apps."), Editor.mkHelpLink("groups")));
-
                                 if (!!Cloud.getUserId())
                                     Cloud.getPublicApiAsync("me/groups?count=100")
                                         .done((groups: JsonList) => {
@@ -1345,9 +1340,6 @@
             descr.placeholder = lf("enter a description");
             descr.value = "";
 
-            var allowExport = HTML.mkCheckBox(lf("owner can export user's scripts to app"));
-            HTML.setCheckboxValue(allowExport, false);
-
             var div1, cancelBtn;
             var m = new ModalDialog();
             var groupInfo : GroupInfo;
@@ -1357,8 +1349,7 @@
                 div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',
                     div('', div('', lf("name (minimum 4 characters)")), name),
-                    div('', div('', lf("description")), descr),
-                    EditorSettings.widgets().groupAllowExportApp ? div('', allowExport) : undefined
+                    div('', div('', lf("description")), descr)
                 ),
                 div("wall-dialog-body", lf("The group name cannot be changed afterwards.")),
                 div("wall-dialog-buttons",
@@ -1367,8 +1358,6 @@
                         var request = <Cloud.PostApiGroupsBody>{
                             name: name.value,
                             description: descr.value,
-                            allowexport: HTML.getCheckboxValue(allowExport),
-                            allowappstatistics: false,
                             userplatform: Browser.platformCaps,
                             isclass: Cloud.isRestricted(),
                         };
@@ -6503,7 +6492,7 @@
             }
             return this.app.htmlColor()
         }
-
+        
         public mkBoxExt(big:boolean, isTopic:boolean)
         {
             var icon = div("sdIcon");
@@ -6532,23 +6521,25 @@
                 res.className += " sdBigHeader";
 
             var setLocal = () => {
-                var deleted = (<any>this.jsonScript) === false;
+                var deleted = this.isDeleted();
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
-                icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled") ]);
-                                
+                icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
+
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
                 if (!time && this.cloudHeader && this.cloudHeader.scriptVersion) time = this.cloudHeader.scriptVersion.time;
                 var timeStr = "";
-                if (time) timeStr = Util.timeSince(time);
-                if (this.publicId) timeStr += " :: /" + this.publicId;
-                if (this.publicId && this.jsonScript) {
-                    if (this.jsonScript.ishidden)
-                        timeStr += lf(" [hidden]")
-                    else if (this.jsonScript.unmoderated)
-                        timeStr += lf(" [class]")
+                if (!deleted) {                    
+                    if (time) timeStr = Util.timeSince(time);
+                    if (this.publicId) timeStr += " :: /" + this.publicId;
+                    if (this.publicId && this.jsonScript) {
+                        if (this.jsonScript.ishidden)
+                            timeStr += lf(" [hidden]")
+                        else if (this.jsonScript.unmoderated)
+                            timeStr += lf(" [class]")
+                    }
                 }
                 //if(!timeStr) debugger;
                 addInfo.setChildren([timeStr]);
@@ -6994,10 +6985,11 @@
             var guid = this.getGuid();
             var json: string;
             
+            var p = Promise.as();
             if (Browser.isMobileSafari || Browser.isMobileSafariOld)
-                HTML.showWarningNotification(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."));
-                
-            return Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)])
+                p = p.then(() => ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app.")));
+
+            return p.then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
                 .then(r => {
                     var text = <string>r[0];
                     var header = <Cloud.Header>r[1];
@@ -7269,42 +7261,6 @@
                                 .then(r => r, e => Cloud.handlePostingError(e, lf("update pointer"))))
                     ])
             })()
-
-            if (!Cloud.isRestricted() && !this.isLibrary() && !this.isCloud()) {
-                var appStudioDiv = div("wall-dialog-buttons text-left")
-                appStudioDiv.style.height = "2.8em";
-                m.add(appStudioDiv)
-                this.appStudioUrlAsync().done((appStudioUrl:string) => {
-                        if (appStudioUrl) {
-                            var lnk = HTML.mkA('appStudio', appStudioUrl, '_blank',
-                                HTML.mkButtonElt("wall-button", lf("make it an app")),
-                                SVG.getAppStudioLogo(),
-                                null)
-                            appStudioDiv.setChildren(lnk);
-                            Util.fadeIn(lnk);
-                        } else if (appStudioUrl === "") {
-                            var dlnk = div('appStudio',
-                                HTML.mkButtonElt("wall-button", lf("want an app?")),
-                                SVG.getAppStudioLogo(),
-                                null)
-                            .withClick(() => {
-                                ModalDialog.ask(
-                                    lf("Your script is currently using features unsupported in App Studio.")
-                                    + " " + lf("If you set your platform settings to 'App Studio', we will give you hints about which particular ones are problematic.")
-                                    + " " + lf("Look for a blue pencil next to function name."),
-                                    lf("set platform to App Studio"),
-                                    () => {
-                                        Script.setPlatform(PlatformCapability.AppStudio)
-                                        TheEditor.queueNavRefresh()
-                                    })
-                            })
-                            appStudioDiv.setChildren(dlnk);
-                            Util.fadeIn(dlnk);
-                        }
-                    }, e => {
-                        Util.reportError('appstudioexport', e, false);
-                    });
-            }
         }
 
         public share()
@@ -7592,22 +7548,6 @@
             }
         }
 
-        public appStudioUrlAsync(): Promise {
-            if (!this.publicId) return Promise.as(undefined);
-            return Cloud.getPublicApiAsync(this.publicId + "/canexportapp/" + Cloud.getUserId() + "?features=anonBrowser")
-                .then((res: JsonCanExportApp) => {
-                    if (res.canExport)
-                        return TDev.AppExport.getExportScriptsTokenAsync()
-                            .then((tok: string) =>
-                                'https://appstudio.windows.com/projects/CreateTouchDevelopApp/' +
-                                this.publicId + "?token=" + encodeURIComponent(tok))
-                    else if (/missing the feature/.test(res.reason))
-                        return Promise.as("")
-                    else
-                        return Promise.as(null)
-                })
-        }
-
         private publishFinished(m:ModalDialog, fromHub:boolean, isPull:boolean)
         {
             m.empty();
@@ -7736,7 +7676,7 @@
                     load(3, getScriptHeartCount(jscript));
                     Browser.Hub.askToEnableNotifications();
                 }, (e: any) => {
-                    Cloud.handlePostingError(e, "add hearts");
+                    Cloud.handlePostingError(e, lf("add hearts"));
                 });
             }
 
@@ -7753,7 +7693,7 @@
                     patchScriptHeartCount(jscript, Math.max(hd, 1)-1);
                     load(3, getScriptHeartCount(jscript));
                 }, (e: any) => {
-                    Cloud.handlePostingError(e, "remove hearts");
+                    Cloud.handlePostingError(e, lf("remove hearts"));
                 });
             }
 
@@ -9251,15 +9191,6 @@
                         if (!u.isrestricted)
                             ad.appendChild(HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); }));
                     });
-
-                if (u.allowexport)
-                    remainingContainer.appendChild(div('sdExpandableText',
-                        lf("group owner can export your scripts to app."),
-                        Editor.mkHelpLink("groups")));
-                if (u.allowappstatistics)
-                    remainingContainer.appendChild(div('sdExpandableText',
-                        lf("group owner has access to runtime statistics of exported apps."),
-                        Editor.mkHelpLink("groups")));
             });
         }
 
@@ -10619,7 +10550,7 @@
 
         public initTab() {
             this.withUpdate(this.tabContent, (u:JsonRelease) => {
-                var ch = ["current", "beta", "latest", "cloud"].map(n => HTML.mkButton("make " + n, () => {
+                var ch = ["current", "beta", "latest", "cloud"].map(n => HTML.mkButton(lf("make {0}", n), () => {
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
                         .done(r => this.reload())

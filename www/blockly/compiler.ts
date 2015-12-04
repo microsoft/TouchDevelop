@@ -363,7 +363,6 @@ module Helpers {
       platform: "current",
       isLibrary: false,
       useCppCompiler: false,
-      allowExport: true,
       showAd: false,
       hasIds: false,
       rootId: "TODO",
@@ -1267,10 +1266,20 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "button is pressed",
     args: [ "NAME" ]
   },
+  device_get_button2: {
+    namespace: "input",
+    f: "button is pressed",
+    args: [ "NAME" ]
+  },
   device_get_acceleration: {
     namespace: "input",
     f: "acceleration",
     args: [ "NAME" ]
+  },
+  device_get_running_time: {
+    namespace: "input",
+  f: "running time",
+    args: []
   },
   device_get_digital_pin: {
     namespace: "pins",
@@ -1306,6 +1315,21 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     namespace: "music",
     f: "play note",
     args: [ "note", "duration" ]
+  },
+  device_ring: {
+    namespace: "music",
+    f: "ring",
+    args: [ "note" ]
+  },
+  game_start_countdown: {
+    namespace: "game",
+    f: "start countdown",
+    args: ["duration"]
+  },
+  game_add_score: {
+    namespace: "game",
+    f: "add score",
+    args: ["points"]
   }
 }
 

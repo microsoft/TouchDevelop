@@ -31,7 +31,7 @@ var digitalPinsDropdown = [
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
 Blockly.Blocks['device_print_message'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/show-string');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/show-string');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("show");
@@ -53,7 +53,7 @@ Blockly.Blocks['device_print_message'] = {
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#xiu9u7
 Blockly.Blocks['device_show_number'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/show-number');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/show-number');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("show number");
@@ -73,7 +73,7 @@ Blockly.Blocks['device_show_number'] = {
 
 Blockly.Blocks['device_shake_event'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/on-shake');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/on-shake');
     this.setColour(120);
     this.appendDummyInput()
         .appendField("on shake");
@@ -87,7 +87,7 @@ Blockly.Blocks['device_shake_event'] = {
 
 Blockly.Blocks['device_pin_event'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/on-pin-pressed');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/on-pin-pressed');
     this.setColour(120);
     this.appendDummyInput()
         .appendField("on pin");
@@ -105,7 +105,7 @@ Blockly.Blocks['device_pin_event'] = {
 
 Blockly.Blocks['device_button_event'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/on-button-pressed');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/on-button-pressed');
     this.setColour(120);
     this.appendDummyInput()
         .appendField("on button");
@@ -121,7 +121,26 @@ Blockly.Blocks['device_button_event'] = {
   }
 };
 
+// The old "button is pressed" that also has A+B. We have to keep this one
+// defined otherwise old scripts won't load!
 Blockly.Blocks['device_get_button'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/button-is-pressed');
+    this.setColour(210);
+    this.appendDummyInput()
+        .appendField("button");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(buttonsDropdownOn), "NAME");
+    this.appendDummyInput()
+        .appendField("is pressed");
+    this.setInputsInline(true);
+    this.setOutput(true, "Boolean");
+    this.setTooltip('Test whether a button is pressed or not.');
+  }
+};
+
+// The new "button is pressed" that doesn't have A+B.
+Blockly.Blocks['device_get_button2'] = {
   init: function() {
     this.setHelpUrl('https://live.microbit.co.uk/functions/button-is-pressed');
     this.setColour(210);
@@ -139,7 +158,7 @@ Blockly.Blocks['device_get_button'] = {
 
 Blockly.Blocks['device_get_digital_pin'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/digital-read-pin');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/digital-read-pin');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("digital read pin (0,1)")
@@ -152,7 +171,7 @@ Blockly.Blocks['device_get_digital_pin'] = {
 
 Blockly.Blocks['device_set_digital_pin'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/digital-write-pin');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/digital-write-pin');
         this.setColour(160);
         this.appendDummyInput()
             .appendField("digital write (0,1)");
@@ -170,7 +189,7 @@ Blockly.Blocks['device_set_digital_pin'] = {
 
 Blockly.Blocks['device_get_analog_pin'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/analog-read-pin');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/analog-read-pin');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("analog read pin")
@@ -183,7 +202,7 @@ Blockly.Blocks['device_get_analog_pin'] = {
 
 Blockly.Blocks['device_set_analog_pin'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/analog-write-pin');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/analog-write-pin');
         this.setColour(160);
         this.appendDummyInput()
             .appendField("analog write");
@@ -201,7 +220,7 @@ Blockly.Blocks['device_set_analog_pin'] = {
 
 Blockly.Blocks['device_get_brightness'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/brightness');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/brightness');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("brightness");
@@ -212,7 +231,7 @@ Blockly.Blocks['device_get_brightness'] = {
 
 Blockly.Blocks['device_set_brightness'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/set-brightness');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/set-brightness');
         this.setColour(160);
         this.appendDummyInput()
             .appendField("set brightness");
@@ -227,7 +246,7 @@ Blockly.Blocks['device_set_brightness'] = {
 
 Blockly.Blocks['device_get_acceleration'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/acceleration');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/acceleration');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("acceleration (mg)");
@@ -243,10 +262,21 @@ Blockly.Blocks['device_get_acceleration'] = {
     }
 };
 
+Blockly.Blocks['device_get_running_time'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/running_time');
+        this.setColour(230);
+        this.appendDummyInput()
+            .appendField("running time (ms)");
+        this.setOutput(true, "Number");
+        this.setTooltip('Get the number of milliseconds elapsed since the script began. 1,000 milliseconds = 1 second');
+    }
+};
+
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#nwf7c5
 Blockly.Blocks['device_clear_display'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/clear-screen');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/clear-screen');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("clear screen");
@@ -260,7 +290,7 @@ Blockly.Blocks['device_clear_display'] = {
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#rhpgfx
 Blockly.Blocks['device_plot'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/plot');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/plot');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("plot");
@@ -278,7 +308,7 @@ Blockly.Blocks['device_plot'] = {
 };
 Blockly.Blocks['device_unplot'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/unplot');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/unplot');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("unplot");
@@ -298,7 +328,7 @@ Blockly.Blocks['device_unplot'] = {
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#jw5b4i
 Blockly.Blocks['device_point'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/point');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/point');
     this.setColour(210);
     this.appendDummyInput()
         .appendField("point");
@@ -316,7 +346,7 @@ Blockly.Blocks['device_point'] = {
 
 Blockly.Blocks['device_temperature'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/temperature');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/temperature');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("temperature (°C)");
@@ -328,7 +358,7 @@ Blockly.Blocks['device_temperature'] = {
 
 Blockly.Blocks['device_heading'] = {
     init: function () {
-        this.setHelpUrl('https://live.microbit.co.uk/functions/compass-heading');
+        this.setHelpUrl('https://www.microbit.co.uk/functions/compass-heading');
         this.setColour(230);
         this.appendDummyInput()
             .appendField("compass heading (°)");
@@ -352,7 +382,7 @@ Blockly.Blocks['device_show_leds'] = {
         this.appendDummyInput().appendField("3").appendField(new Blockly.FieldCheckbox("FALSE"), "LED03").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED13").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED23").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED33").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED43");
         this.appendDummyInput().appendField("4").appendField(new Blockly.FieldCheckbox("FALSE"), "LED04").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED14").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED24").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED34").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED44");
         this.setTooltip('Show the given led pattern on the display.');
-        this.setHelpUrl("https://live.microbit.co.uk/functions/show-leds");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/show-leds");
     }
 };
 
@@ -369,7 +399,7 @@ Blockly.Blocks['device_build_image'] = {
         this.appendDummyInput().appendField("4").appendField(new Blockly.FieldCheckbox("FALSE"), "LED04").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED14").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED24").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED34").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED44");
         this.setOutput(true, 'sprite');
         this.setTooltip('An image that fits on the LED array.');
-        this.setHelpUrl("https://live.microbit.co.uk/functions/create-image");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/create-image");
     }
 };
 
@@ -398,13 +428,13 @@ Blockly.Blocks['device_build_big_image'] = {
 
         this.setOutput(true, 'sprite');
         this.setTooltip("A larger image that will be scrolled across the LED display.");
-        this.setHelpUrl("https://live.microbit.co.uk/functions/create-image");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/create-image");
     }
 };
 
 Blockly.Blocks['device_show_image_offset'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/show-image');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/show-image');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("show image");
@@ -421,7 +451,7 @@ Blockly.Blocks['device_show_image_offset'] = {
 
 Blockly.Blocks['device_scroll_image'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/scroll-image');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/scroll-image');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("scroll image");
@@ -447,7 +477,7 @@ Blockly.Blocks['device_scroll_image'] = {
 
 Blockly.Blocks['device_pause'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/pause');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/pause');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("pause (ms)");
@@ -462,7 +492,7 @@ Blockly.Blocks['device_pause'] = {
 
 Blockly.Blocks['device_forever'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/forever');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/forever');
     this.setColour(120);
     this.appendDummyInput()
         .appendField("forever");
@@ -476,7 +506,7 @@ Blockly.Blocks['device_forever'] = {
 
 Blockly.Blocks['device_comment2'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/td/comment');
+    this.setHelpUrl('https://www.microbit.co.uk/td/comment');
     this.setColour(180);
     this.appendDummyInput()
         .appendField("note:")
@@ -489,7 +519,7 @@ Blockly.Blocks['device_comment2'] = {
 
 Blockly.Blocks['device_comment'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/td/comment');
+    this.setHelpUrl('https://www.microbit.co.uk/td/comment');
     this.setColour(180);
     this.appendDummyInput()
         .appendField("// comment");
@@ -504,7 +534,7 @@ Blockly.Blocks['device_comment'] = {
 
 Blockly.Blocks['math_op2'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/contents');
     this.setColour(230);
     this.appendValueInput("x")
         .setCheck("Number")
@@ -521,7 +551,7 @@ Blockly.Blocks['math_op2'] = {
 
 Blockly.Blocks['math_op3'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/contents');
     this.setColour(230);
     this.appendDummyInput()
         .appendField("absolute of");
@@ -535,7 +565,7 @@ Blockly.Blocks['math_op3'] = {
 
 Blockly.Blocks['device_while'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/td/while');
+    this.setHelpUrl('https://www.microbit.co.uk/td/while');
     this.setColour(120);
     this.appendValueInput("COND")
         .setCheck("Boolean")
@@ -550,7 +580,7 @@ Blockly.Blocks['device_while'] = {
 
 Blockly.Blocks['device_random'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/blocks/contents');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/contents');
     this.setColour(230);
     this.appendDummyInput()
         .appendField("pick random 0 to")
@@ -561,13 +591,45 @@ Blockly.Blocks['device_random'] = {
   }
 };
 
+Blockly.Blocks['game_start_countdown'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(230);
+    this.appendValueInput("duration")
+        .setCheck("Number")
+        .appendField("start countdown of ");
+    this.appendDummyInput()
+        .appendField("ms");
+    this.setInputsInline(true);
+    this.setTooltip('Starts a countdown game.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  }
+};
+
+Blockly.Blocks['game_add_score'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(230);
+    this.appendValueInput("points")
+        .setCheck("Number")
+        .appendField("add");
+    this.appendDummyInput()
+        .appendField("points to score");
+    this.setInputsInline(true);
+    this.setTooltip('Add points to the user score.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  }
+};
+
 Blockly.Blocks['controls_simple_for'] = {
   /**
    * Block for 'for' loop.
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl("https://live.microbit.co.uk/td/for");
+    this.setHelpUrl("https://www.microbit.co.uk/td/for");
     this.setColour(Blockly.Blocks.loops.HUE);
     this.appendDummyInput()
         .appendField("for")
@@ -631,7 +693,7 @@ Blockly.Blocks['controls_simple_for'] = {
 ["A", "B", "C", "D", "E", "F", "G"].forEach(function (x) {
     Blockly.Blocks['device_note_'+x] = {
         init: function () {
-            this.setHelpUrl('https://live.microbit.co.uk/functions/note');
+            this.setHelpUrl('https://www.microbit.co.uk/functions/note');
             this.setColour(230);
             this.appendDummyInput().appendField(x);
             this.setInputsInline(true);
@@ -644,7 +706,7 @@ Blockly.Blocks['controls_simple_for'] = {
 ["1", "1/2", "1/4", "1/8", "1/16"].forEach(function (x) {
     Blockly.Blocks['device_duration_'+x] = {
         init: function () {
-            this.setHelpUrl('https://live.microbit.co.uk/functions/note');
+            this.setHelpUrl('https://www.microbit.co.uk/functions/note');
             this.setColour(230);
             this.appendDummyInput().appendField(x == "1" ? "one whole note" : x+" note");
             this.setInputsInline(true);
@@ -657,7 +719,7 @@ Blockly.Blocks['controls_simple_for'] = {
 
 Blockly.Blocks['device_play_note'] = {
   init: function() {
-    this.setHelpUrl('https://live.microbit.co.uk/functions/play-note');
+    this.setHelpUrl('https://www.microbit.co.uk/functions/play-note');
     this.setColour(160);
     this.appendDummyInput()
         .appendField("play");
@@ -671,6 +733,21 @@ Blockly.Blocks['device_play_note'] = {
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Play a given note on P0. You can also provide a specific frequency.');
+  }
+};
+
+Blockly.Blocks['device_ring'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/ring');
+    this.setColour(160);
+    this.appendDummyInput()
+        .appendField("ring");
+    this.appendValueInput("note")
+        .setCheck("Number");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Rings a given note on P0. You can also provide a specific frequency.');
   }
 };
 
@@ -689,13 +766,13 @@ function monkeyPatchBlock(name, url) {
     };
 }
 
-monkeyPatchBlock("controls_if", "https://live.microbit.co.uk/td/if");
-// monkeyPatchBlock("controls_repeat_ext", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("variables_set", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("variables_get", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("math_number", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_compare", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_operation", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_negate", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_boolean", "https://live.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_arithmetic", "https://live.microbit.co.uk/blocks/contents");
+monkeyPatchBlock("controls_if", "https://www.microbit.co.uk/td/if");
+// monkeyPatchBlock("controls_repeat_ext", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("variables_set", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("variables_get", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("math_number", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_compare", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_operation", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_negate", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_boolean", "https://www.microbit.co.uk/blocks/contents");
+// monkeyPatchBlock("logic_arithmetic", "https://www.microbit.co.uk/blocks/contents");

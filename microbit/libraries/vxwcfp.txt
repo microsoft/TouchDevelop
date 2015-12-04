@@ -4,7 +4,6 @@ meta icon "Command";
 meta color "#ff008000";
 meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
-meta allowExport "yes";
 meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
@@ -14,6 +13,8 @@ action \_libinit() {
   #oCEOjqaW4CH7lS4r // Initialize the library
   #aCYMP4THhnQkBd4N // {shim:}
   #x3z5eK4ybVcTCWJh if data→board→is_invalid then {
+    #diswbwoJ0rRtyUbA data→logger := app→create_logger("simulator");
+    #YKJMortE5mXaazK7 data→event_queues := collections→create_string_map;
     #JjsD2sJPrJ6vUU5w data→counters := web→create_json_builder;
     #dSJI8h1ZUeMsbz21 data→compass_heading_value := invalid→number;
     #BamJivB3cALMYQoQ data→start_time := time→now;
@@ -32,7 +33,7 @@ action \_libinit() {
     #JoeW2bsnEkDyWSyt data→finger→set_opacity(0);
     #mEta1VHYHeLZUHiH data→back_leds := data→board→create_sprite_set;
     #xWKGWdrq4hPuEt6s data→leds := data→board→create_sprite_set;
-    #SfZi0Q4PST9W8C6f $led_opacity := 127 / 255;
+    #SfZi0Q4PST9W8C6f $led_opacity := 1;
     #md36WuHm2WM6OUim $led_w := 10;
     #wL4ZbsjEBlcHVdT4 $led_offset := 48;
     #czF5GDH9tIShJiHQ $led_h := 20;
@@ -62,7 +63,6 @@ action \_libinit() {
     #qLoyPDrDUdeG77Vv code→set_theme("");
     #ByFADaJmirytJ02b code→background_animation;
     #xmVrpXc8aqbE3dq6 `async` code→animation_worker;
-    #xkycDjt57DBUf4Xz `async` code→event_bus_worker;
     #pNdJy7kyaeqKZhfS data→board→on_every_frame;
     #xbsS9F4HXWsdVT8s where `implicit` \_body\_() {
       #WF6Md7jUVLVAe3m4 code→update_board;
@@ -458,6 +458,13 @@ action button_is_pressed(#dwrDe5YG33oG3MHB name: String) returns(#RdtB26hD1lA5OO
     #PhXWkNR6epuZNkBa if data→finger→overlaps_with($target) then {
       #IKV9abE47o0mPXbn `return` true;
     }
+    else { #xvwUV2et9kypbYOc if $name→equals("a") `or` $name→equals("b") then {
+      #wM0dFQyl00dy9W8y $target := code→button_from_id("a+b");
+      #Sg4UFkSp2RJWNX7P if data→finger→overlaps_with($target) then {
+        #VhRVWWt2X81ZkFV0 `return` true;
+      }
+    }
+    else { } } 
   }
   #rujS852B1Sx8Gh1f if $name→equals("a") `and` (senses→is_key_pressed("a") `or` senses→is_key_pressed("left")) then {
     #eNt8xKqeXVB6CgMS `return` true;
@@ -555,7 +562,7 @@ action on_button_pressed(#M03fUuuX2m9eRu7n name: String, #LzMsXwEMSCmDzfWI body:
   #xOIGjOLy2Zmt99MW code→clear_button_handler($name);
   #F5Y2ciTtYo87uZSG $ev := $btn→on_touch_down($touch_up);
   #j0K6jsuWQ4V0EcaI where touch_up(x: Number, y: Number) {
-    #zvnW22u4MgaK24ge code→queue_event_bus($body, $evid);
+    #zvnW22u4MgaK24ge code→queue_event($body, $evid);
   }
   #hijH5eY42toXLOFF code→store_button_handler($name, $ev);
   meta sync;
@@ -1631,7 +1638,7 @@ action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Ac
   #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
   #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
   #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
-    #NbkK6P2y62Y9tOIt code→queue_event_bus($body, $evid);
+    #NbkK6P2y62Y9tOIt code→queue_event($body, $evid);
   }
   meta sync;
 }
@@ -2085,9 +2092,6 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #PAYMs0BDD8RbLR3B // {weight:10}
   #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
   #Xh232b04YquKwayo // {hints:micros:20000}
-  #eskzFxC3911B24dS if `not` data→pitch_pin→is_invalid `and` data→pitch_pin→equals($pin) then {
-    #iJ3KsCdT2LKFuhZU $p := code→pin_by_name($pin);
-  }
   meta sync;
 }
 #AuigaLeUb4929mNA
@@ -2111,20 +2115,21 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
   #Nv7yTShmVzRRmckP // {hints:frequency:440}
   #lyVvmxzXMSk4YDmd // {hints:ms:500}
   #fx1pQM2jYhWeMW8F if data→pitch_pin→is_invalid `or` data→pitch_pin→is_empty then {
-    #X9dWOHCIYzY5e4Eq code→warning("Pitch pin not set! Use `pins->set pitch pin` to setup which pin to use.");
-    #xhsHV4U6nnbq4LYZ `return` ;
+    #bqUsIek5pKDTe6Pe code→warning("pitch pin not set");
+    #ifW5htAtZseohisz `return` ;
   }
-  #wunHmKjgrpZ9byII if $frequency < 0 then {
-    #Ml7QifWVhfftWKcq code→warning("frequency is too low");
+  #wunHmKjgrpZ9byII if $frequency ≤ 0 then {
+    #xXcOYe7q4TdBfOsz media→tone(0, 1);
     #H9Y66i52F23oOeSD `return` ;
   }
   #qvLwajJDb3fREXyj if $ms ≤ 0 then {
-    #c1DrtuRyJPSPijM8 code→warning("millis should be positive");
-    #xk1nhHhK4p6I76aX `return` ;
+    #xHlePNztv5JpESZp media→tone($frequency, 1);
   }
-  #xbFhJ20GSASivmak $secs := math→max(1, $ms) / 1000;
-  #c9RnAE2uzKh6Cqax media→play_note($frequency, 1, $secs);
-  #Bdrwg0EArm46eHAx time→sleep($secs);
+  else {
+    #xbFhJ20GSASivmak $secs := $ms / 1000;
+    #c9RnAE2uzKh6Cqax media→play_note($frequency, 1, $secs);
+    #Bdrwg0EArm46eHAx time→sleep($secs);
+  }
 }
 #KgNK732SuRLWRKOO
 var pitch_pin : String {
@@ -2171,7 +2176,7 @@ action show_leds(#Agy1tNVQeIcg2pFD leds: String, #H23Wq0aPH08LnwS6 ms: Number) {
 }
 #t4AKY0PCv6CBzZ12
 action play_note(#zExdWNZANFRC5nyu frequency: Number, #Ulhn7NcyJhmRukqz ms: Number) {
-  #RQfvAHuFsy3gBARR // Plays a music tone through pin `P0` for the given duration.
+  #RQfvAHuFsy3gBARR // Plays a music tone through pin ``P0`` for the given duration.
   #cyajATGMs74bzPW7 // {help:functions/play-note}
   #xQkMwqu2Oa6nrGiE // {namespace:music}
   #ZTzyTPXsUFIyRaeU // {weight:90}
@@ -2440,11 +2445,12 @@ table Event_Bus {
   }
 }
 #xQHQZkhjqzpE4CRi
-action event_bus_worker() {
+action event_bus_worker(#VnWE2Q9sB2A5uIXD name: String) {
   #xDyM0UomTSCQXKSV // {shim:}
   #HakK0IQSqWKY8zju while true do {
-    #FTMD9oKdw4fcscHD $ev := records→Event_Bus_table→row_at(0);
-    #xG44rWke0lFZ2GrH if `not` $ev→is_invalid then {
+    #B2MyaPSqynIjfXO5 code→pause(1);
+    #Zg9hZK25Zv1Ub2Ym $ev := code→first_event($name);
+    #lN4KZZuuN9p2paSM if `not` $ev→is_invalid then {
       #qUZz8iwjSjiyyavq $ev→fn→run;
       #E7aHvwM2U423dBK6 $ev→delete_row;
     }
@@ -2455,18 +2461,25 @@ action event_bus_worker() {
   meta private;
 }
 #uBLXg1puXSO4QzoW
-action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
-  #chlGhAEHEEsL01Wv // {shim:}
+action queue_event(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
+  #TvMY9sg6cL0LP4R4 // Queues an event to be executed in its own queue. **simulator only**.
+  #G4HX55fpvnZloONU // {namespace:simulator}
+  #x6pUJ4oEgynKekYO // {shim:TD_NOOP}
   #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
   #xv0tUVTZQbNE3PW4 if $c < 10 then {
     #mbqwhgLr24hPftS9 $ev := records→Event_Bus_table→add_row;
     #Guj24KBD912FcSYv $ev→name := $name;
     #OvyZqeICJJ2sQbR4 $ev→fn := $body;
+    #J6B4LYyWUMTT4MXF data→logger→debug("queued " ∥ $name);
+    #N8pNCkiRuu6GYHAN if data→event_queues→at($name)→is_invalid then {
+      #xSpLhvkqOzz2Y2Xp data→event_queues→set_at($name, "on");
+      #Dcn5h1NYD742two9 `async` code→event_bus_worker($name);
+      #VtF252bO2GPFA1zp data→logger→debug("started queue for " ∥ $name);
+    }
   }
   else {
-    #SzvR3GyWF2k4aEW8 app→log("skipped event " ∥ $name ∥ ", bus full");
+    #SzvR3GyWF2k4aEW8 data→logger→debug("skipped event " ∥ $name ∥ ", bus full");
   }
-  meta private;
   meta sync;
 }
 #HHvqKQqbQ5Uea74Z
@@ -2474,4 +2487,53 @@ var boar\u002esvg : String {
   is\_resource = true;
   url = "data:text/plain;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0OTggNDA2IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA0OTggNDA2IiB3aWR0aD0iNDk4IiBoZWlnaHQ9IjQwNiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBhdGggZD0iTTQ5OCwzMS45QzQ5OCwxNC4zLDQ4My43LDAsNDY2LjEsMEgzMS45QzE0LjMsMCwwLDE0LjMsMCwzMS45djM0Mi4yQzAsMzkxLjcsMTQuMyw0MDYsMzEuOSw0MDZoNDM0LjIKCQljMTcuNiwwLDMxLjktMTQuMywzMS45LTMxLjlWMzEuOXogTTE0LjMsMjA2LjdjLTIuNywwLTQuOC0yLjItNC44LTQuOGMwLTIuNywyLjItNC44LDQuOC00LjhjMi43LDAsNC44LDIuMiw0LjgsNC44CgkJQzE5LjIsMjA0LjYsMTcsMjA2LjcsMTQuMywyMDYuN3ogTTQ4Ni4yLDIwNi43Yy0yLjcsMC00LjgtMi4yLTQuOC00LjhjMC0yLjcsMi4yLTQuOCw0LjgtNC44YzIuNywwLDQuOCwyLjIsNC44LDQuOAoJCUM0OTEsMjA0LjYsNDg4LjgsMjA2LjcsNDg2LjIsMjA2Ljd6Ii8+CgkJCTxwYXRoIGZpbGw9IiNENEFGMzciIGQ9Ik0wLDM1Ny43djE5LjJjMCwxMC44LDYuMiwyMC4yLDE0LjQsMjUuMnYtNDQuNEgweiIvPgoJCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDgzLjYsNDAyYzguMi01LDE0LjQtMTQuNCwxNC40LTI1LjF2LTE5LjJoLTE0LjRWNDAyeiIvPgoJCTxyZWN0IHg9IjY2LjciIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSI3OS4xIiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iOTEuNCIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjEwMy43IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTY0LjMiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTc2LjYiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMTg4LjkiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjAxLjMiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjEzLjYiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iMTAuMyIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMjc1LjIiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSIyODcuNSIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjI5OS44IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjkuMiIgaGVpZ2h0PSI0OS4zIi8+CgkJPHJlY3QgeD0iMzEyLjEiIHk9IjM1Ni43IiBmaWxsPSIjRDRBRjM3IiB3aWR0aD0iOS4yIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cmVjdCB4PSIzMjQuNSIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSI5LjIiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjM4NS4xIiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjM5Ny40IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjQwOS43IiB5PSIzNTYuNyIgZmlsbD0iI0Q0QUYzNyIgd2lkdGg9IjEwLjMiIGhlaWdodD0iNDkuMyIvPgoJCTxyZWN0IHg9IjQyMiIgeT0iMzU2LjciIGZpbGw9IiNENEFGMzciIHdpZHRoPSIxMC4zIiBoZWlnaHQ9IjQ5LjMiLz4KCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNMTM5LjEsMzE3LjNjLTEyLjgsMC0yMi4xLDEwLjMtMjMuMSwyMy4xVjQwNmg0Ni4ydi02NS42QzE2Mi4yLDMyNy43LDE1MS45LDMxNy4zLDEzOS4xLDMxNy4zegoJCQkgTTEzOS4zLDM2MC4xYy0xMC43LDAtMTkuMy04LjYtMTkuMy0xOS4zYzAtMTAuNyw4LjYtMTkuMywxOS4zLTE5LjNjMTAuNywwLDE5LjMsOC43LDE5LjMsMTkuMwoJCQlDMTU4LjYsMzUxLjUsMTUwLDM2MC4xLDEzOS4zLDM2MC4xeiIvPgoJCTxwYXRoIGZpbGw9IiNENEFGMzciIGQ9Ik0yNDksMzE3LjNjLTEyLjgsMC0yMi4xLDEwLjMtMjMuMSwyMy4xVjQwNmg0Ni4ydi02NS42QzI3Mi4xLDMyNy43LDI2MS44LDMxNy4zLDI0OSwzMTcuM3ogTTI0OS40LDM2MC4xCgkJCWMtMTAuNywwLTE5LjMtOC42LTE5LjMtMTkuM2MwLTEwLjcsOC42LTE5LjMsMTkuMy0xOS4zYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjNDMjY4LjcsMzUxLjUsMjYwLjEsMzYwLjEsMjQ5LjQsMzYwLjF6Ii8+CgkJPHBhdGggZmlsbD0iI0Q0QUYzNyIgZD0iTTM1OS45LDMxNy4zYy0xMi44LDAtMjIuMSwxMC4zLTIzLjEsMjMuMVY0MDZIMzgzdi02NS42QzM4MywzMjcuNywzNzIuNywzMTcuMywzNTkuOSwzMTcuM3ogTTM2MCwzNjAuMQoJCQljLTEwLjcsMC0xOS4zLTguNi0xOS4zLTE5LjNjMC0xMC43LDguNi0xOS4zLDE5LjMtMTkuM2MxMC43LDAsMTkuMyw4LjcsMTkuMywxOS4zQzM3OS4zLDM1MS41LDM3MC43LDM2MC4xLDM2MCwzNjAuMXoiLz4KCQk8cGF0aCBmaWxsPSIjRDRBRjM3IiBkPSJNNDU4LDMxNy42Yy0xMywwLTIzLjYsMTAuNi0yMy42LDIzLjZjMCwwLDAsMC4xLDAsMC4xaDBWNDA2SDQ2OWM0LjMsMCw4LjQtMSwxMi42LTIuN3YtNjAuNwoJCQljMC0wLjQsMC0wLjksMC0xLjNDNDgxLjYsMzI4LjEsNDcxLDMxNy42LDQ1OCwzMTcuNnogTTQ1Ny44LDM2MC45Yy0xMC43LDAtMTkuMy04LjYtMTkuMy0xOS4zYzAtMTAuNyw4LjYtMTkuMywxOS4zLTE5LjMKCQkJYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjNDNDc3LjEsMzUyLjIsNDY4LjQsMzYwLjksNDU3LjgsMzYwLjl6Ii8+CgkJPHBhdGggZmlsbD0iI0Q0QUYzNyIgZD0iTTE2LjUsMzQxLjJjMCwwLjQtMC4xLDAuOS0wLjEsMS4zdjYwLjdjNC4xLDEuNyw4LjYsMi43LDEyLjksMi43aDM0LjR2LTY0LjdoMC4zYzAsMCwwLTAuMSwwLTAuMQoJCQljMC0xMy0xMC42LTIzLjYtMjMuNy0yMy42QzI3LjIsMzE3LjYsMTYuNSwzMjguMSwxNi41LDM0MS4yeiBNMjEuMiwzNDEuNmMwLTEwLjcsOC43LTE5LjMsMTkuMy0xOS4zYzEwLjcsMCwxOS4zLDguNywxOS4zLDE5LjMKCQkJYzAsMTAuNy04LjYsMTkuMy0xOS4zLDE5LjNDMjkuOSwzNjAuOSwyMS4yLDM1Mi4yLDIxLjIsMzQxLjZ6Ii8+CgkJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSIxMTUsNTYuNyAxNzMuMSwwIDExNSwwIAkJIi8+CgkJPHBhdGggZmlsbD0iIzI3M0VFMiIgZD0iTTExNC4yLDBIMjUuOUMxMi4xLDIuMSwwLDEzLjMsMCwyNy43djgzLjlMMTE0LjIsMHoiLz4KCQk8cG9seWdvbiBmaWxsPSIjMjczRUUyIiBwb2ludHM9IjE3MywyNy45IDIwMi41LDAgMTczLDAgCQkiLz4KCQkJPHBhdGggZD0iTTM1LjcsMzc2LjRjMC0yLjgsMi4xLTUuMSw1LjUtNS4xYzMuMywwLDUuNSwyLjQsNS41LDUuMXY0LjdjMCwyLjgtMi4yLDUuMS01LjUsNS4xYy0zLjMsMC01LjUtMi40LTUuNS01LjFWMzc2LjR6CgkJCQkgTTQzLjMsMzc2LjRjMC0xLjMtMC44LTIuMy0yLjItMi4zYy0xLjMsMC0yLjEsMS4xLTIuMSwyLjN2NC43YzAsMS4yLDAuOCwyLjMsMi4xLDIuM2MxLjMsMCwyLjItMS4xLDIuMi0yLjNWMzc2LjR6Ii8+CgkJCTxwYXRoIGQ9Ik0xMzYuMiwzNzQuMWMyLjgsMCwzLjQtMC44LDMuNC0yLjVoMi45djE0LjNoLTMuNHYtOS41aC0zVjM3NC4xeiIvPgoJCQk8cGF0aCBkPSJNMjQ4LjYsMzc4LjVjMS43LTEsMy0xLjcsMy0zLjFjMC0xLjEtMC43LTEuNi0xLjYtMS42Yy0xLDAtMS44LDAuNi0xLjgsMi4xaC0zLjNjMC0yLjYsMS44LTQuNiw1LjEtNC42CgkJCQljMi42LDAsNC45LDEuMyw0LjksNC4zYzAsMi40LTIuMywzLjktMy44LDQuN2MtMiwxLjMtMi41LDEuOC0yLjUsMi45aDYuMXYyLjdoLTEwQzI0NC44LDM4MS4yLDI0Ni40LDM3OS45LDI0OC42LDM3OC41eiIvPgoJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSI1NC4xLDI0Mi40IDU0LjEsMjc0LjEgMjIuNCwyNzQuMSAJIi8+CgkJPHBhdGggZD0iTTQ4LjEsMjcwLjlsLTAuNi0xLjdoLTUuMWwtMC42LDEuN2gtMy41bDUuMS0xNC4zaDMuMWw1LjIsMTQuM0g0OC4xeiBNNDUsMjYwLjdsLTEuOCw1LjloMy41TDQ1LDI2MC43eiIvPgoJPHBvbHlnb24gZmlsbD0iIzI3M0VFMiIgcG9pbnRzPSI0NDYuMiwxNjQuNiA0NDYuMiwxMzIuOCA0NzcuOSwxMzIuOCAJIi8+CgkJPHBhdGggZD0iTTQ0OS4xLDEzNS44aDUuOWMzLjksMCw0LjcsMi40LDQuNywzLjljMCwxLjgtMS40LDIuOS0yLjUsMy4yYzAuOSwwLDIuNiwxLjEsMi42LDMuM2MwLDEuNS0wLjgsNC00LjcsNGgtNlYxMzUuOHoKCQkJIE00NTQuNCwxNDEuN2MxLjYsMCwyLTEsMi0xLjdjMC0wLjYtMC4zLTEuNy0yLTEuN2gtMnYzLjRINDU0LjR6IE00NTIuNCwxNDQuMXYzLjVoMi4xYzEuNiwwLDItMSwyLTEuOGMwLTAuNy0wLjQtMS44LTItMS44CgkJCUg0NTIuNHoiLz4KCQk8cGF0aCBkPSJNMzUyLjEsMzgxLjFjMCwxLjYsMC45LDIuNSwyLjIsMi41YzEuMiwwLDEuOS0wLjksMS45LTEuOWMwLTEuMi0wLjYtMi0yLjEtMmgtMS4zdi0yLjZoMS4zYzEuNSwwLDEuOS0wLjcsMS45LTEuOAoJCQljMC0xLjEtMC43LTEuNi0xLjYtMS42Yy0xLjQsMC0xLjgsMC44LTEuOCwyLjFoLTMuM2MwLTIuNCwxLjUtNC42LDUuMS00LjZjMi42LDAsNSwxLjMsNSw0YzAsMS42LTEsMi44LTIuMSwzLjIKCQkJYzEuMywwLjUsMi4zLDEuNiwyLjMsMy41YzAsMi43LTIuNCw0LjMtNS4yLDQuM2MtMy41LDAtNS41LTIuMS01LjUtNS4xSDM1Mi4xeiIvPgoJCTxwYXRoIGQ9Ik0zNjguNSwzODUuOWgtMy4xbC01LjEtMTQuM2gzLjVsMy4xLDEwLjFsMy4xLTEwLjFoMy42TDM2OC41LDM4NS45eiIvPgoJCQk8cGF0aCBkPSJNNDQ0LjQsMzc4LjNoNy40djIuNWgtMS41Yy0wLjYsMy4zLTMsNS41LTcuMSw1LjVjLTQuOCwwLTcuNS0zLjUtNy41LTcuNWMwLTMuOSwyLjgtNy41LDcuNS03LjVjMy44LDAsNi40LDIuMyw2LjYsNQoJCQkJaC0zLjVjLTAuMi0xLjEtMS40LTIuMi0zLjEtMi4yYy0yLjcsMC00LjEsMi4zLTQuMSw0LjdjMCwyLjUsMS40LDQuNyw0LjQsNC43YzIsMCwzLjItMS4yLDMuNC0yLjdoLTIuNVYzNzguM3oiLz4KCQkJPHBhdGggZD0iTTQ2MS40LDM4MC45di05LjNoMy4zdjE0LjNoLTMuNWwtNS4yLTkuMnY5LjJoLTMuM3YtMTQuM2gzLjVMNDYxLjQsMzgwLjl6Ii8+CgkJCTxwYXRoIGQ9Ik00NzIuNywzNzEuNmM0LjgsMCw3LjUsMy41LDcuNSw3LjJzLTIuNyw3LjItNy41LDcuMmgtNS4zdi0xNC4zSDQ3Mi43eiBNNDcwLjgsMzc0LjR2OC42aDEuOGMyLjcsMCw0LjItMi4xLDQuMi00LjMKCQkJCXMtMS42LTQuMy00LjItNC4zSDQ3MC44eiIvPgoJPHBhdGggZmlsbD0iIzI3M0VFMiIgZD0iTTIzMC42LDY5LjdjLTIuOSwwLTUuMywyLjQtNS4zLDUuM2MwLDIuOSwyLjQsNS4zLDUuMyw1LjNjMi45LDAsNS4zLTIuNCw1LjMtNS4zCgkJQzIzNS45LDcyLjEsMjMzLjUsNjkuNywyMzAuNiw2OS43Ii8+Cgk8cGF0aCBmaWxsPSIjMjczRUUyIiBkPSJNMjY5LjksNTAuMkwyNjkuOSw1MC4ybC0zOS41LDB2MGMtMTQuMSwwLjEtMjQuNiwxMC43LTI0LjYsMjQuOGMwLDEzLjksMTAuNCwyNC40LDI0LjMsMjQuN3YwaDM5LjYKCQljMTQuMiwwLDI0LjgtMTAuNiwyNC44LTI0LjdDMjk0LjUsNjEsMjg0LDUwLjMsMjY5LjksNTAuMiBNMjY5LjcsODkuMkwyNjkuNyw4OS4ybC0zOS4zLDBjLTcuNy0wLjEtMTQtNi40LTE0LTE0LjIKCQljMC03LjgsNi40LTE0LjIsMTQuMi0xNC4yaDM5LjFjNy44LDAsMTQuMiw2LjQsMTQuMiwxNC4yQzI4My45LDgyLjksMjc3LjUsODkuMiwyNjkuNyw4OS4yIi8+Cgk8cGF0aCBmaWxsPSIjMjczRUUyIiBkPSJNMjY5LjcsODAuM2MyLjksMCw1LjMtMi40LDUuMy01LjNjMC0yLjktMi40LTUuMy01LjMtNS4zYy0yLjksMC01LjMsMi40LTUuMyw1LjMKCQlDMjY0LjQsNzcuOSwyNjYuOCw4MC4zLDI2OS43LDgwLjMiLz4KCTxwYXRoIGZpbGw9IiM5Nzk3OTciIGQ9Ik00NzQuMywyMzIuNmgtNTYuMmMtMC41LDAtMS0wLjQtMS0xdi01Ni4yYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yCgkJQzQ3NS4zLDIzMi4yLDQ3NC44LDIzMi42LDQ3NC4zLDIzMi42Ii8+Cgk8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMTAyMDIiIHN0cm9rZS13aWR0aD0iMC4yMDU3IiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ik00NzQuMywyMzIuNmgtNTYuMmMtMC41LDAtMS0wLjQtMS0xdi01Ni4yCgkJYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yQzQ3NS4zLDIzMi4yLDQ3NC44LDIzMi42LDQ3NC4zLDIzMi42eiIvPgoJPHBhdGggZD0iTTQ2MS45LDIwMy41YzAsOC43LTcsMTUuNy0xNS43LDE1LjdjLTguNywwLTE1LjctNy0xNS43LTE1LjdjMC04LjcsNy0xNS43LDE1LjctMTUuN0M0NTQuOSwxODcuOCw0NjEuOSwxOTQuOSw0NjEuOSwyMDMuNQoJCSIvPgoJPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuMTAyOCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNNDYxLjksMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuNwoJCWMtOC43LDAtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43QzQ1NC45LDE4Ny44LDQ2MS45LDE5NC45LDQ2MS45LDIwMy41eiIvPgoJPHBhdGggZmlsbD0iIzk3OTc5NyIgZD0iTTgyLjEsMjMyLjZIMjUuOWMtMC41LDAtMS0wLjQtMS0xdi01Ni4yYzAtMC41LDAuNC0xLDEtMWg1Ni4yYzAuNSwwLDEsMC40LDEsMXY1Ni4yCgkJQzgzLDIzMi4yLDgyLjYsMjMyLjYsODIuMSwyMzIuNiIvPgoJPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDEwMjAyIiBzdHJva2Utd2lkdGg9IjAuMjA1NyIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSJNODIuMSwyMzIuNkgyNS45Yy0wLjUsMC0xLTAuNC0xLTF2LTU2LjIKCQljMC0wLjUsMC40LTEsMS0xaDU2LjJjMC41LDAsMSwwLjQsMSwxdjU2LjJDODMsMjMyLjIsODIuNiwyMzIuNiw4Mi4xLDIzMi42eiIvPgoJPHBhdGggZD0iTTY5LjcsMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuN3MtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43UzY5LjcsMTk0LjksNjkuNywyMDMuNSIvPgoJPHBhdGggZmlsbD0iI0Y5RjlGOSIgZD0iTTMzMy44LDMxMC4zSDE2NS45Yy04LjMsMC0xNS02LjctMTUtMTVWMTI3LjVjMC04LjMsNi43LTE1LDE1LTE1aDE2Ny44YzguMywwLDE1LDYuNywxNSwxNXYxNjcuOAoJCUMzNDguOCwzMDMuNiwzNDIuMSwzMTAuMywzMzMuOCwzMTAuM3oiLz4KCTxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjEwMjgiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iTTY5LjcsMjAzLjVjMCw4LjctNywxNS43LTE1LjcsMTUuNwoJCXMtMTUuNy03LTE1LjctMTUuN2MwLTguNyw3LTE1LjcsMTUuNy0xNS43UzY5LjcsMTk0LjksNjkuNywyMDMuNXoiLz4KCQk8L2c+Cjwvc3ZnPg==";
   transient = true;
+}
+#IP7MQddaWIMSii2f
+var logger : App_Logger {
+  // {shim:}
+  transient = true;
+}
+#z4JpVqUVYFEt242M
+var event_queues : String_Map {
+  // {shim:}
+  transient = true;
+}
+#BqrPmRC6jDYCukGD
+action first_event(#D42Ig553PhKq4i1h name: String) returns(#LvCIVEn5SGoFsUQw r: * Event_Bus) {
+  #S54lpFtjKjUHFKzi // {shim:}
+  #RZNIuj3lqoN3XBHs $j := 0;
+  #xl2YfZUIVs2bxDTW $n := records→Event_Bus_table→count;
+  #XSmtWmzT9PIeyS4f while $j < $n do {
+    #xyeEq0ZyXsc8jJee $ev := records→Event_Bus_table→row_at($j);
+    #YLmFnqeqCx4SCqaW if $ev→name→equals($name) then {
+      #BfAUYnBpcCUv9d6a `return` $ev;
+    }
+    #Q1dlEH79JUnTh4LX $j := $j + 1;
+  }
+  #wIXRC18Oi3Crpzb5 `return` records→Event_Bus_table→invalid;
+  meta private;
+  meta sync;
+}
+#shg2hAnCU7F4s74Y
+action test_play_note() {
+  #xzttSnRTTwvwFA7J // {shim:}
+  #x4AIYBST31am9VdY code→ring(440);
+  #THJySqP27cAgQsaj code→pause(1000);
+  #TblGf0VF1CPJ6kMi code→ring(540);
+  #pJWEI0OhM2WjvsmY code→pause(1000);
+  #aRlrDs9lN5SjbIzI code→ring(0);
+  #rTSs47awcQhuxF68 code→pause(1000);
+  #izbzXfqhmfDGfk1T code→ring(440);
+  meta private;
+  meta test;
+}
+#xSM8dUbL7z4962Uq
+action ring(#x6LSvAzKrDJ17xu5 frequency: Number) {
+  #xPhZkakRDj6rdLie // Plays a music tone through pin ``P0``.
+  #Io3qQ3JyDbVd2NVV // {help:functions/ring}
+  #Tt9V48fB99uH7oPY // {namespace:music}
+  #YGzmuem9F35GsbhE // {weight:80}
+  #tXZFp05e4tJHLACS // {hints:frequency:440}
+  #N722EwENmgCNUdCs code→analog_set_pitch_pin("P0");
+  #nW42CNnggdII8dc4 code→analog_pitch($frequency, 0);
 }

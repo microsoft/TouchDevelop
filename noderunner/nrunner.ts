@@ -849,33 +849,21 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
         break;
 
     case "package": (() => {
-        var user = ""
-        if (opts.token) {
-            var jwt = decodeJWT(opts.token, "Export your scripts")
-            if (jwt.tdUser)
-                user = "/" + encodeURIComponent(jwt.tdUser)
-            else {
-                ar.ok({ error: jwt.error || "bad token" })
-                return
+            var user = ""
+            if (opts.token) {
+                var jwt = decodeJWT(opts.token, "Export your scripts")
+                if (jwt.tdUser)
+                    user = "/" + encodeURIComponent(jwt.tdUser)
+                else {
+                    ar.ok({ error: jwt.error || "bad token" })
+                    return
+                }
             }
-        }
-        TDev.Util.httpGetJsonAsync(apiEndpoint + encodeURIComponent(r.id) + "/canexportapp" + user + accessToken)
-            .then(v => {
-                if (v.canExport)
-                    return TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
-                        relId: relId,
-                        scriptId: r.id,
-                        runtimeFlags: opts.flags,
-                    })
-                else
-                    return TDev.Promise.as({
-                        error: "you cannot export this script: " + v.reason
-                    })
-            }, err => {
-                return { error: "cannot determine if you can export this script" }
-            })
-            .then(ins => ar.ok(ins))
-            .done()
+            TDev.AST.Apps.getDeploymentInstructionsAsync(TDev.Script, {
+                relId: relId,
+                scriptId: r.id,
+                runtimeFlags: opts.flags,
+            }).done(ins => ar.ok(ins))
         })();
         break;
 
@@ -1946,7 +1934,7 @@ function compilerTest() {
     console.log("COMPILER TEST");
     var tests = {
         bqutuo: {}, // pac man runaway
-        hixlrc: {}, // two-player pong (reversed)
+        htdcbb: {}, // two-player pong (reversed and fixed)
         rwadai: { skipBitVm: true }, // clock demo
         xhfhgq: {}, // bitvm test1
     };
@@ -1986,10 +1974,11 @@ function compilerTest() {
         }).then(jsons => {
             jsons.forEach(json => {
                 if (!json)
-                    throw new Error(logMsg("no response from ARM cloud"));
+                    console.log(logMsg("no response from ARM cloud"));
                 if (!json.success) {
                     console.log(TDev.Embedded.makeOutMbedErrorMsg(json));
-                    throw new Error(logMsg("compilation failure"));
+                    console.log(logMsg("compilation failure"));
+                    process.exit(1);
                 }
             });
             console.log(logMsg("cpp → hex (arm cloud) ×"+nruns+" ✓"));

@@ -21,12 +21,16 @@
     <div id="main" class="vbox">
       <div id="toolbox" class="hbox">
         <div id="commands" class="hbox">
-          <a href="#" class="roundbutton" id="command-quit">
-            <div class="roundsymbol"><i class="fa fa-arrow-left"></i></div>
+          <a href="#" class="roundbutton" id="command-quit">            
+            <div class="roundsymbol">
+              <svg class="svg svg-icon-back" viewBox="0 0 480 480" preserveAspectRatio="xMinYMin" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-label="back,currentColor"><path fill="currentColor" d="M 272,137L 213,137L 112,238L 213,340L 272,340L 196,264L 365,264L 365,213L 196,213L 272,137 Z"></path></svg>              
+              </div>
             <div class="roundlabel">my scripts</div>
           </a>
           <a href="#" class="roundbutton" id="command-run">
-            <div class="roundsymbol"><i class="fa fa-play"></i></div>
+            <div class="roundsymbol">
+              <svg class="svg svg-icon-play" viewBox="0 0 480 480" preserveAspectRatio="xMinYMin" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-label="play,currentColor"><path fill="currentColor" transform="scale(7.5,7.5)" d="M21,48l26-16L21,16V48z"></path></svg>              
+            </div>
             <div class="roundlabel">run</div>
           </a>
           <a href="#" class="roundbutton" id="command-compile">
@@ -57,7 +61,9 @@
             <div class="roundlabel">convert</div>
           </a>
           <a href="https://live.microbit.co.uk/blocks/contents" target="_blank" class="roundbutton" id="command-help">
-            <div class="roundsymbol"><i class="fa fa-question"></i></div>
+            <div class="roundsymbol">
+               <svg class="svg svg-icon-fa-question" viewBox="0 0 480 480" preserveAspectRatio="xMinYMin" xmlns="http://www.w3.org/2000/svg" role="presentation" aria-label="fa-question,currentColor"><path fill="currentColor" transform="scale(0.18,-0.18) translate(800,-2094)" d="M704 280v-240q0 -16 -12 -28t-28 -12h-240q-16 0 -28 12t-12 28v240q0 16 12 28t28 12h240q16 0 28 -12t12 -28zM1020 880q0 -54 -15.5 -101t-35 -76.5t-55 -59.5t-57.5 -43.5t-61 -35.5q-41 -23 -68.5 -65t-27.5 -67q0 -17 -12 -32.5t-28 -15.5h-240q-15 0 -25.5 18.5 t-10.5 37.5v45q0 83 65 156.5t143 108.5q59 27 84 56t25 76q0 42 -46.5 74t-107.5 32q-65 0 -108 -29q-35 -25 -107 -115q-13 -16 -31 -16q-12 0 -25 8l-164 125q-13 10 -15.5 25t5.5 28q160 266 464 266q80 0 161 -31t146 -83t106 -127.5t41 -158.5z"></path></svg>              
+            </div>
             <div class="roundlabel">help</div>
           </a>
         </div>
@@ -218,13 +224,14 @@
         <block type="device_build_big_image"></block>
       </category>
       <category name="Input">
-        <block type="device_get_button"></block>
         <block type="device_button_event"></block>
         <block type="device_shake_event"></block>
         <block type="device_pin_event"></block>
+        <block type="device_get_button2"></block>
         <block type="device_heading"></block>
         <block type="device_temperature"></block>
         <block type="device_get_acceleration"></block>
+        <block type="device_get_running_time"></block>
       </category>
       <category name="Logic" colour="210">
         <block type="controls_if"></block>
@@ -250,7 +257,7 @@
           </value>
         </block>
       </category>
-      <category name="Maths" colour="230">
+      <category name="Math" colour="230">
         <block type="math_arithmetic"></block>
         <block type="math_op2"></block>
         <block type="math_op3"></block>
@@ -261,6 +268,50 @@
           <field name="limit">4</field>
         </block>
       </category>
+      <category name="Game" colour="235">
+        <block type="game_start_countdown">
+          <value name="duration">
+            <shadow type="math_number">
+              <field name="NUM">10000</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_add_score">
+          <value name="points">
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
+          </value>
+        </block>
+      </category>
+      <category name="Music">
+        <block type="device_play_note">
+          <value name="note">
+            <shadow type="device_note_A"></shadow>
+          </value>
+          <value name="duration">
+            <shadow type="device_duration_1/4">
+            </shadow>
+          </value>
+        </block>
+        <block type="device_ring">
+          <value name="note">
+            <shadow type="device_note_A"></shadow>
+          </value>
+        </block>
+        <block type="device_note_A"></block>
+        <block type="device_note_B"></block>
+        <block type="device_note_C"></block>
+        <block type="device_note_D"></block>
+        <block type="device_note_E"></block>
+        <block type="device_note_F"></block>
+        <block type="device_note_G"></block>
+        <block type="device_duration_1"></block>
+        <block type="device_duration_1/2"></block>
+        <block type="device_duration_1/4"></block>
+        <block type="device_duration_1/8"></block>
+        <block type="device_duration_1/16"></block>
+      </category>      
       <category name="Pins">
           <block type="device_get_digital_pin"></block>
           <block type="device_set_digital_pin">
@@ -282,29 +333,6 @@
       <category name="Variables" colour="330">
         <block type="variables_set"></block>
         <block type="variables_get"></block>
-      </category>
-      <category name="Music">
-        <block type="device_play_note">
-          <value name="note">
-            <shadow type="device_note_A"></shadow>
-          </value>
-          <value name="duration">
-            <shadow type="device_duration_1/4">
-            </shadow>
-          </value>
-        </block>
-        <block type="device_note_A"></block>
-        <block type="device_note_B"></block>
-        <block type="device_note_C"></block>
-        <block type="device_note_D"></block>
-        <block type="device_note_E"></block>
-        <block type="device_note_F"></block>
-        <block type="device_note_G"></block>
-        <block type="device_duration_1"></block>
-        <block type="device_duration_1/2"></block>
-        <block type="device_duration_1/4"></block>
-        <block type="device_duration_1/8"></block>
-        <block type="device_duration_1/16"></block>
       </category>
       <category name="Comments" colour="180">
         <block type="device_comment2"></block>

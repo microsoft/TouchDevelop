@@ -3,7 +3,6 @@ meta name "micro:bit serial";
 meta rootId "J14qS9W69xfJRs1Wg6l4bL8j";
 meta isLibrary "yes";
 meta hasIds "yes";
-meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // A #microbit library to print messages to the serial port.
@@ -16,7 +15,7 @@ action write_line(#viL9JhCNnO3GFckc text: String) {
   meta sync;
 }
 #KayLKTp6ax4o8wIi meta import micro\u003abit {
-  pub "rwqgyd"
+  pub "jnjqgc"
   usage {
     type Image
     action `sync` \_libinit()
@@ -172,6 +171,7 @@ var buffer : String {
 }
 #ObzPYQYVl4tjVK9D
 var logger : App_Logger {
+  // {shim:}
   transient = true;
 }
 #WnPrTNC3u44ZZOn6

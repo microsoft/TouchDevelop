@@ -5525,18 +5525,6 @@ div.validation-error {
   padding-top: 2em;
 }
 
-
-.appStudio .svg {
-  width: 12em;
-  vertical-align: middle;
-  margin-left: 1em;
-}
-
-.appStudioLink img {
-width: 9.5em;
-display: block;
-}
-
 .floatingSmilie {
   float: right;
   font-size: 6em;

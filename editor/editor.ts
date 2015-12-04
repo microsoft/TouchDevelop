@@ -622,6 +622,8 @@ module TDev
         public fixErrorIn(stableName:string, error:string)
         {
             this.hideWallAsync().then(() => {
+                if (!Script || !Script.things) return;
+                
                 var decl = Script.things.filter(t => t.getStableName() == stableName)[0]
                 if (decl) {
                     var loc = new CodeLocation(decl)
@@ -2014,7 +2016,7 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
             if (inBrowser) {
                 var msg = Cloud.isFota()
-                    ? lf("Your .hex should be uploaded will be uploaded onto your BBC micro:bit soon.")
+                    ? lf("Your .hex will be uploaded onto your BBC micro:bit soon.")
                     : lf("Your .hex file is ready. Drag and drop it onto your BBC micro:bit device drive.")
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             } else {
@@ -2077,7 +2079,8 @@ module TDev
                     btn.setFlag("working", false);
                     btn.classList.remove("disabledItem");
                 }
-                this.currentCompilationModalDialog.dismiss();
+                if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
+                    this.currentCompilationModalDialog.dismiss();
                 if (this.stepTutorial)
                     this.stepTutorial.notify("compile");
                 var r = src === this.currentScriptCompiling || src === "";

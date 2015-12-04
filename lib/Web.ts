@@ -256,7 +256,7 @@ module TDev.RT {
 
         //? Gets the type of the network servicing Internet requests (unknown, none, ethernet, wifi, mobile)
         //@ quickAsync returns(string)
-        //@ import("cordova", "org.apache.cordova.network-information")
+        //@ import("cordova", "cordova-plugin-network-information")
         export function connection_type(r: ResumeCtx) { //: string
             var res = 'unknown';
             var connection = (<any>navigator).connection;

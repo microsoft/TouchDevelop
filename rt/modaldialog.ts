@@ -308,6 +308,21 @@ module TDev
             this.add(div("wall-dialog-buttons", [b, btns]))
             return b;
         }
+        
+        static showAsync(msg: any, options: { title?: string; } = {}): Promise {
+            return new Promise(function(onSuccess, onError, onProgress) {
+                var m = new ModalDialog();
+                var ok = true;
+                if (options.title) m.add(div('wall-dialog-header', options.title));
+                if (msg) m.add(div('wall-dialog-body', msg))
+                m.addOk(lf("ok"), () => {
+                    ok = true;
+                    m.dismiss();
+                });
+                m.onDismiss = () => onSuccess(ok);
+                m.show();                
+            })            
+        }
 
         static showText(s:string, title:string = null, msg:string = null, done : () => void = null) : ModalDialog
         {

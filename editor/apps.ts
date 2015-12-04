@@ -1134,8 +1134,6 @@ module TDev.AppExport
     }
 
     export function deployCordova(app: AST.App, baseScriptId: string) {
-        if (Cloud.anonMode(lf("export to cordova app"))) return;
-
         if (!/^http:/.test(baseUrl)) {
             var info = ModalDialog.info(lf("Cordova: need local editor"),
                 lf("To export and build Cordova apps you need to run TouchDevelop from your machine."), "")
@@ -1155,33 +1153,6 @@ module TDev.AppExport
         }
 
         var cordovaOptions = app.editorState.cordova || TDev.AST.Apps.cordovaDefaultOptions();
-        // test if user allowed to export app
-        if (baseScriptId && baseScriptId != "unknown") {
-            if (cordovaOptions.canExport === undefined) {
-                ProgressOverlay.lockAndShowAsync(lf("preparing export (one time setup)"))
-                    .then(() => Cloud.getPublicApiAsync(baseScriptId + "/canexportapp/" + Cloud.getUserId()))
-                    .done((res: JsonCanExportApp) => {
-                        cordovaOptions.canExport = !!res.canExport;
-                        app.editorState.cordova = cordovaOptions;
-                        ProgressOverlay.hide();
-                        deployCordova(app, baseScriptId);
-                    }, e => {
-                        ProgressOverlay.hide();
-                        ModalDialog.info(lf("export to app failed"),
-                            lf("We could not query the status of the script. Are you connected to internet?"))
-                            .add(Editor.mkHelpLink("export to cordova"))
-                    return;
-                    });
-                return;
-            }
-            else if (!cordovaOptions.canExport) {
-                ModalDialog.info(lf("export not allowed by authors"),
-                    lf("We're sorry, one or more authors from the base script have dissallowed the export of this script."))
-                    .add(Editor.mkHelpLink("export to cordova"))
-            return;
-            }
-        }
-
         var v = new TDev.AST.PlatformDetector();
         v.requiredPlatform = PlatformCapability.CordovaApp;
         v.run(app);
@@ -1383,10 +1354,10 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
             return cli(lf("checking cordova..."), "cordova --version", undefined, true);
-        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) 
+        }).then(resp => resp.code == 0 && /5\./.test(resp.stdout) 
             ? Promise.as()
             : cli(lf("installing cordova..."), "npm install -g cordova")
-            .then(() => instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g io-deploy") : Promise.as())
+            .then(() => instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g ios-deploy") : Promise.as())
         ).then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
