@@ -591,6 +591,38 @@ Blockly.Blocks['device_random'] = {
   }
 };
 
+Blockly.Blocks['game_start_countdown'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(230);
+    this.appendValueInput("duration")
+        .setCheck("Number")
+        .appendField("start countdown of ");
+    this.appendDummyInput()
+        .appendField("ms");
+    this.setInputsInline(true);
+    this.setTooltip('Starts a countdown game.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  }
+};
+
+Blockly.Blocks['game_add_score'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(230);
+    this.appendValueInput("points")
+        .setCheck("Number")
+        .appendField("add");
+    this.appendDummyInput()
+        .appendField("points to score");
+    this.setInputsInline(true);
+    this.setTooltip('Add points to the user score.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  }
+};
+
 Blockly.Blocks['controls_simple_for'] = {
   /**
    * Block for 'for' loop.
