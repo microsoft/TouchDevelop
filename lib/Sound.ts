@@ -298,7 +298,7 @@ module TDev.RT {
         //? Plays the sound effect
         //@ cap(musicandsounds) quickAsync
         //@ readsMutable
-        //@ import("cordova", "org.apache.cordova.media")
+        //@ import("cordova", "cordova-plugin-media")
         public play(r : ResumeCtx) : void
         {
             this.playAsync()
@@ -308,7 +308,7 @@ module TDev.RT {
         //? Plays the song with different volume (0 to 1), pitch (-1 to 1) and pan (-1 to 1).
         //@ cap(musicandsounds) quickAsync
         //@ [volume].defl(1)
-        //@ import("cordova", "org.apache.cordova.media")
+        //@ import("cordova", "cordova-plugin-media")
         public play_special(volume:number, pitch:number, pan:number, r : ResumeCtx) : void
         {
             this.set_volume(volume);

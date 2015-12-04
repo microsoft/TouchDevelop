@@ -163,7 +163,7 @@ module TDev.RT {
 
         //? Chooses a picture from the media library
         //@ flow(SourcePicture) returns(Picture) uiAsync
-        //@ import("cordova", "org.apache.cordova.camera")
+        //@ import("cordova", "cordova-plugin-camera")
         export function choose_picture(r: ResumeCtx)
         {
             return choosePictureAsync().done(pic => r.resumeVal(pic));

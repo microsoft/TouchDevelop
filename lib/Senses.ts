@@ -141,7 +141,7 @@ module TDev.RT {
 
         //? Takes a picture and returns it. This picture does not contain the gps location.
         //@ flow(SourceCamera) returns(Picture) uiAsync
-        //@ import("cordova", "org.apache.cordova.camera")
+        //@ import("cordova", "cordova-plugin-camera")
         export function take_camera_picture(r: ResumeCtx) // : Picture
         {
             var cam = (<any>navigator).camera;

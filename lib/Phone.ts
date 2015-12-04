@@ -61,7 +61,7 @@ module TDev.RT {
 
         //? Vibrates the phone for ... seconds (0.02 minimum)
         //@ [seconds].defl(0.1)
-        //@ import("cordova", "org.apache.cordova.vibration")
+        //@ import("cordova", "cordova-plugin-vibration")
         export function vibrate(seconds: number): void {
             vibrateCore(seconds)
         }
