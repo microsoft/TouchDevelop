@@ -764,7 +764,6 @@ Blockly.Blocks['device_ring'] = {
 
 Blockly.pathToMedia = "./media/";
 Blockly.BlockSvg.START_HAT = true;
-Blockly.Block.loops.HUE = 200;
 
 // Here's a helper to override the help URL for a block that's *already defined
 // by Blockly*. For blocks that we define ourselves, just change the call to
