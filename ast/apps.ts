@@ -322,15 +322,18 @@ module TDev.AST.Apps {
             lst.push(addFileAsync("noderuntime.js", "script/"));
 
         // this code path break cordova
-        if (false && options.downloadLocalFilesFrom) {
-            lst.push(addFileAsync("error.html"))
-            lst.push(addFileAsync("browsers.html"))
-        } else {
-            // these 2 files are not stored in cdn, they are rewritten in the cloud
-            [ "error", "browsers"].forEach(n => instructions.files.push({
-                path: options.filePrefix + n + ".html",
-                url: Cloud.getServiceUrl() + "/app/." + n + "?releaseid=" + options.relId
-            }))
+        if (!options.cordova) {
+            
+            if (options.downloadLocalFilesFrom) {
+                lst.push(addFileAsync("error.html"))
+                lst.push(addFileAsync("browsers.html"))
+            } else {
+                // these 2 files are not stored in cdn, they are rewritten in the cloud
+                [ "error", "browsers"].forEach(n => instructions.files.push({
+                    path: options.filePrefix + n + ".html",
+                    url: Cloud.getServiceUrl() + "/app/." + n + "?releaseid=" + options.relId
+                }))
+            }
         }
 
         instructions.meta.isCloud = app.isCloud;

@@ -2393,9 +2393,9 @@ module TDev.AST {
 
         static combineCordovaPlugins(topApp: App): StringMap<string> {
             var plugins: StringMap<string> = {
-                "org.apache.cordova.console": "*",
-                "com.msopentech.websql": "*",
-                "org.apache.cordova.inappbrowser": "*",
+                "cordova-plugin-console": "*",
+                "cordova-plugin-websql": "*",
+                "cordova-plugin-inappbrowser": "*",
             }
             Object.keys(topApp.imports.cordovaPlugins)
                 .filter(k => topApp.imports.cordovaPlugins.hasOwnProperty(k))

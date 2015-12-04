@@ -1134,8 +1134,6 @@ module TDev.AppExport
     }
 
     export function deployCordova(app: AST.App, baseScriptId: string) {
-        if (Cloud.anonMode(lf("export to cordova app"))) return;
-
         if (!/^http:/.test(baseUrl)) {
             var info = ModalDialog.info(lf("Cordova: need local editor"),
                 lf("To export and build Cordova apps you need to run TouchDevelop from your machine."), "")
@@ -1356,10 +1354,10 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
         .then((ins: AST.Apps.DeploymentInstructions) => {
             instructions = ins;
             return cli(lf("checking cordova..."), "cordova --version", undefined, true);
-        }).then(resp => resp.code == 0 && /4\./.test(resp.stdout) 
+        }).then(resp => resp.code == 0 && /5\./.test(resp.stdout) 
             ? Promise.as()
             : cli(lf("installing cordova..."), "npm install -g cordova")
-            .then(() => instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g io-deploy") : Promise.as())
+            .then(() => instructions.cordova.platforms["ios"] ? cli(lf("installing ios-deploy"), "npm install -g ios-deploy") : Promise.as())
         ).then(() => {
             var runNpm = !jimpInstalled;
             jimpInstalled = true;
