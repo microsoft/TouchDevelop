@@ -1849,18 +1849,7 @@
                             this.showSidePane();
                     }
                     
-                    this.moreDiv.setChildren([]);
-                                        
-                    if (/^installed/.test(path)) {
-                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
-                            tick(Ticks.browseCreateCode);
-                            TemplateManager.createScript()
-                        }));
-                        this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
-                            tick(Ticks.browseImportCode);
-                            ArtUtil.importFileDialog();
-                        }));
-                    } 
+                    this.initMoreDiv(path);                                        
 
                     if (/^pointers$/.test(path) && Cloud.hasPermission("global-list")) {
                         this.moreDiv.appendChild(HTML.mkButton(lf("create pointer"), () => {
@@ -1894,7 +1883,7 @@
                         this.moreDiv.appendChild(HTML.mkButton(lf("load more"), () => {
                             this.displayLimit += Host.maxDisplayAtOnce;
                             if (this.displayLimit >= this.topLocations.length && this.moreDiv)
-                                this.moreDiv.setChildren([])
+                                this.initMoreDiv(path);
                             this.syncView(false)
                         }));
                     }
@@ -1917,6 +1906,20 @@
             }
 
             this.showLegalNotice();
+        }
+        
+        private initMoreDiv(path: string) {
+            this.moreDiv.setChildren([]);            
+            if (/^installed/.test(path)) {
+                this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
+                    tick(Ticks.browseCreateCode);
+                    TemplateManager.createScript()
+                }));
+                this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.importEditor).withClick(() => {
+                    tick(Ticks.browseImportCode);
+                    ArtUtil.importFileDialog();
+                }));
+            }
         }
 
         public deletePaneAnimAsync()
