@@ -4657,6 +4657,8 @@ module TDev.AST {
             if (!d)
                 d = p.forwardsTo();
 
+            this.useKind(p.parentKind)
+
             if (d) {
                 this.runOnDecl(d);
             } else {

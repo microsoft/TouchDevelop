@@ -2,11 +2,20 @@
 
 module TDev.AST.Bytecode
 {
-    interface FuncInfo {
+    export interface FuncInfo {
         name: string;
         type: string;
         args: number;
         value: number;
+    }
+
+    export interface ExtensionInfo
+    {
+        enums:StringMap<number>;
+        functions:FuncInfo[];
+        errors:string;
+        sha:string;
+        compileData:string;
     }
 
     var funcInfo:StringMap<FuncInfo>;
@@ -24,48 +33,28 @@ module TDev.AST.Bytecode
         return r
     }
 
-    function fillValues(jsinf:any)
+    function userError(msg:string)
     {
-        funcInfo = {};
-        var funs:FuncInfo[] = jsinf.functions;
-
-        Object.keys(jsinf.enums).forEach(k => {
-            funcInfo[k] = {
-                name: k,
-                type: "E",
-                args: 0,
-                value: jsinf.enums[k]
-            }
-        })
-
-        dirtyLines = 1;
-
-        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
-            var m = /^:10(....)00(.{16})/.exec(hex[i])
-
-            if (!m) continue;
-
-            dirtyLines++;
-
-            var s = hex[i].slice(9)
-            while (s.length >= 8) {
-                var inf = funs.shift()
-                if (!inf) return;
-                funcInfo[inf.name] = inf;
-                inf.value = parseInt(swapBytes(s.slice(0, 8)), 16) & 0xfffffffe
-                s = s.slice(8)
-            }
-        }
-
-        Util.die();
+        var e = new Error(msg);
+        (<any>e).bitvmUserError = true;
+        throw e;
     }
 
-    function setup()
+    export function isSetupFor(extInfo:ExtensionInfo)
     {
-        if (funcInfo) return; // already done
+        return currentSetup == extInfo.sha
+    }
 
-        var inf = (<any>TDev).bytecodeInfo
-        hex = Cloud.isFota() ? inf.fotahex : inf.hex;
+    var currentSetup = null;
+    export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
+    {
+        if (isSetupFor(extInfo))
+            return;
+
+        currentSetup = extInfo.sha;
+
+        var jsinf = bytecodeInfo || (<any>TDev).bytecodeInfo
+        hex = Cloud.isFota() ? jsinf.fotahex : jsinf.hex;
 
         var i = 0;
         var upperAddr = "0000"
@@ -83,7 +72,43 @@ module TDev.AST.Bytecode
         if (!hexStartAddr)
             Util.oops("No hex start")
 
-        fillValues(inf)
+        funcInfo = {};
+        var funs:FuncInfo[] = jsinf.functions.concat(extInfo.functions);
+
+        var addEnum = enums =>
+            Object.keys(enums).forEach(k => {
+                funcInfo[k] = {
+                    name: k,
+                    type: "E",
+                    args: 0,
+                    value: enums[k]
+                }
+            })
+
+        addEnum(extInfo.enums)
+        addEnum(jsinf.enums)
+
+        dirtyLines = 1;
+
+        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
+            var m = /^:10(....)00(.{16})/.exec(hex[i])
+
+            if (!m) continue;
+
+            dirtyLines++;
+
+            var s = hex[i].slice(9)
+            while (s.length >= 8) {
+                var inf = funs.shift()
+                if (!inf) return;
+                funcInfo[inf.name] = inf;
+                inf.value = parseInt(swapBytes(s.slice(0, 8)), 16) & 0xfffffffe
+                Util.assert(!!inf.value)
+                s = s.slice(8)
+            }
+        }
+
+        Util.die();
     }
 
     function isRefKind(k:Kind)
@@ -1077,7 +1102,7 @@ module TDev.AST.Bytecode
                 var mask = this.getMask(args)
                 var msg = "{shim:" + shm + "} from " + a.getName()
                 if (!shm)
-                    Util.oops("called " + msg + " (with empty {shim:}")
+                    userError("called " + msg + " (with empty {shim:}")
 
                 var inf = lookupFunc(shm)
 
@@ -1097,14 +1122,17 @@ module TDev.AST.Bytecode
                     }
                 } else {
                     if (!inf)
-                        Util.oops("no such " + msg)
+                        userError("shim not found: " + msg)
 
                     if (!hasret) {
-                        Util.assert(inf.type == "P", "expecting procedure for " + msg);
+                        if (inf.type != "P")
+                            userError("expecting procedure for " + msg);
                     } else {
-                        Util.assert(inf.type == "F", "expecting function for " + msg);
+                        if (inf.type != "F")
+                            userError("expecting function for " + msg);
                     }
-                    Util.assert(args.length == inf.args, "argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
+                    if (args.length != inf.args)
+                        userError("argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
 
                     this.proc.emitCall(shm, mask)
                 }
@@ -1274,13 +1302,13 @@ module TDev.AST.Bytecode
                     } else {
                         var inf = lookupFunc(l.enumVal)
                         if (!inf)
-                            Util.oops("unhandled enum val: " + l.enumVal)
+                            userError(lf("unhandled enum value: {0}", l.enumVal))
                         if (inf.type == "E")
                             this.proc.emitInt(inf.value)
                         else if (inf.type == "F" && inf.args == 0)
                             this.proc.emitCall(l.enumVal, 0)
                         else
-                            Util.oops("not valid enum: " + l.enumVal)
+                            userError(lf("not valid enum: {0}; is it procedure name?", l.enumVal))
                     }
                 } else if (l.data == "") {
                     this.proc.emitCall("string::mkEmpty", 0);
@@ -1671,7 +1699,7 @@ module TDev.AST.Bytecode
 
         prepApp(a:App)
         {
-            a.allActions().forEach(a => {
+            this.actions(a).forEach(a => {
                 if (!this.shouldCompile(a)) return
                 this.prepAction(a)
             })
@@ -1682,9 +1710,16 @@ module TDev.AST.Bytecode
             this.dump(a.records())
         }
 
+        actions(a:App):Action[]
+        {
+            var res = a.allActions().filter(a => !a.isActionTypeDef());
+            App.orderThings(res)
+            return res;
+        }
+
         compileApp(a:App)
         {
-            this.dump(a.allActions().filter(a => !a.isActionTypeDef()))
+            this.dump(this.actions(a))
         }
 
         visitApp(a:App)
@@ -1746,5 +1781,144 @@ module TDev.AST.Bytecode
         if (!/(^\s)|(:$)/.test(s))
             s = "    " + s
         return s + "\n"
+    }
+
+    function emptyExtInfo()
+    {
+        return <ExtensionInfo> {
+            enums: {},
+            functions: [],
+            errors: "",
+            sha: "",
+            compileData: "",
+        }
+    }
+
+    function setup()
+    {
+        if (currentSetup == null)
+            setupFor(emptyExtInfo(), null)
+    }
+
+    function parseExpr(e:string)
+    {
+        e = e.trim()
+        e = e.replace(/^\(/, "")
+        e = e.replace(/\)$/, "")
+        e = e.trim();
+        if (/^-/.test(e) && parseExpr(e.slice(1)) != null)
+            return -parseExpr(e.slice(1))
+        if (/^0x[0-9a-f]+$/i.exec(e))
+            return parseInt(e.slice(2), 16)
+        if (/^0b[01]+$/i.exec(e))
+            return parseInt(e.slice(2), 2)
+        if (/^0\d+$/i.exec(e))
+            return parseInt(e, 8)
+        if (/^\d+$/i.exec(e))
+            return parseInt(e, 10)
+        return null;
+    }
+
+    export function getExtensionInfo(app:App) : ExtensionInfo
+    {
+        var res = emptyExtInfo();
+        var fileRepl:StringMap<string> = {}
+        var pointersInc = ""
+        var includesInc = ""
+
+        app.librariesAndThis().forEach(l => {
+            var thisErrors = ""
+            var err = (s) => thisErrors += "   " + s + "\n";
+            l.resolved.resources().forEach(r => {
+                if (r.getName() != "glue.cpp") return;
+                var src = r.stringResourceValue()
+                if (src == null) {
+                    err("glue.cpp isn't a string resource")
+                    return
+                }
+                var currNs = ""
+                src.split(/\r?\n/).forEach(ln => {
+                    var m = /^\s*namespace\s+(\w+)/.exec(ln)
+                    if (m) {
+                        if (currNs) err("more than one namespace declaration not supported")
+                        currNs = m[1]
+                        return;
+                    }
+
+                    m = /^\s*GLUE\s+(\w+)([\*\&]*\s+[\*\&]*)(\w+)\s*\(([^\(\)]*)\)\s*(;\s*$|\{|$)/.exec(ln)
+                    if (m) {
+                        if (!currNs) err("missing namespace declaration before GLUE");
+                        var retTp = (m[1] + m[2]).replace(/\s+/g, "")
+                        var funName = m[3]
+                        var args = m[4]
+                        var numArgs = 0
+                        if (args.trim())
+                            numArgs = args.replace(/[^,]/g, "").length + 1;
+                        var fi:FuncInfo = {
+                            name: currNs + "::" + funName,
+                            type: retTp == "void" ? "P" : "F",
+                            args: numArgs,
+                            value: null
+                        }
+                        res.functions.push(fi)
+                        pointersInc += "(uint32_t)(void*)::" + fi.name + ",\n"
+                        return;
+                    }
+
+                    if (/^\s*GLUE\s+/.test(ln)) {
+                        err("invalid GLUE line: " + ln)
+                        return;
+                    }
+
+                    ln = ln.replace(/\/\/.*/, "")
+                    var isEnum = false
+                    m = /^\s*#define\s+(\w+)\s+(.*)/.exec(ln)
+                    if (!m) {
+                        m = /^\s*(\w+)\s*=\s*(.*)/.exec(ln)
+                        isEnum = true
+                    }
+
+                    if (m) {
+                        var num = m[2]
+                        num = num.replace(/\/\/.*/, "")
+                        num = num.replace(/\/\*.*/, "")
+                        num = num.trim()
+                        if (isEnum)
+                            num = num.replace(/,$/, "")
+                        var val = parseExpr(num)
+                        var nm = m[1]
+                        if (isEnum)
+                            nm = currNs + "::" + nm
+                        console.log(nm, num, val)
+                        if (val != null) {
+                            res.enums[nm] = val
+                            return;
+                        }
+                    }
+                })
+                if (!currNs)
+                    err("missing namespace declaration")
+                includesInc += "#include \"" + currNs + ".cpp\"\n"
+                fileRepl["/generated/" + currNs + ".cpp"] = src
+            })
+            if (thisErrors) {
+                res.errors += lf("Library {0}:\n", l.getName()) + thisErrors
+            }
+        })
+
+        if (res.errors || !includesInc)
+            return res;
+
+        fileRepl["/generated/extpointers.inc"] = pointersInc
+        fileRepl["/generated/extensions.inc"] = includesInc
+        var creq = {
+            config: "ws",
+            tag: Cloud.microbitGitTag,
+            replaceFiles: fileRepl
+        }
+        var reqData = Util.toUTF8(JSON.stringify(creq))
+        res.sha = Random.sha256buffer(Util.stringToUint8Array(reqData))
+        res.compileData = Util.base64Encode(reqData)
+        return res;
     }
 }
