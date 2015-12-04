@@ -622,6 +622,8 @@ module TDev
         public fixErrorIn(stableName:string, error:string)
         {
             this.hideWallAsync().then(() => {
+                if (!Script || !Script.things) return;
+                
                 var decl = Script.things.filter(t => t.getStableName() == stableName)[0]
                 if (decl) {
                     var loc = new CodeLocation(decl)
