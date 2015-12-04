@@ -89,6 +89,14 @@ module TDev.Hex
                 return lzmaCompressAsync(meta + text)
                     .then(cbuf => [JSON.stringify(newMeta), cbuf])
             })
+            .then(r => {
+                var saveDone = Util.now()
+                times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
+                return r;
+            })
+
+
+        var extensionStart = Util.now();
 
         var extInfo = AST.Bytecode.getExtensionInfo(app);
         if (extInfo.errors) {
@@ -101,6 +109,8 @@ module TDev.Hex
             AST.Bytecode.setupFor(extInfo, meta)
 
             var realCompileStartTime = Util.now();
+            times += Util.fmt("; glue.cpp extesion handling {0}ms\n", realCompileStartTime - extensionStart);
+
             var c = new AST.Bytecode.Compiler(app)
             try {
                 c.run()
@@ -121,11 +131,9 @@ module TDev.Hex
             times += Util.fmt("; to assembly {0}ms\n", compileStop - realCompileStartTime);
 
             st.then(r => {
-                var saveDone = Util.now()
-                times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
-
+                var asmStart = Util.now();
                 var res = c.serialize(!firstTime, r[0], r[1])
-                times += Util.fmt("; assemble time {0}ms\n", Util.now() - saveDone);
+                times += Util.fmt("; assemble time {0}ms\n", Util.now() - asmStart);
 
                 if (showSource)
                     ModalDialog.showText(times + res.csource)
