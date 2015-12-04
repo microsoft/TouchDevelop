@@ -17,7 +17,8 @@ module TDev.RT {
         //@ [gain].defl(1) [frequency].defl(440)
         export function tone(frequency: number, gain: number) {
             if (Math_.is_nan(frequency) || Math_.is_nan(gain)) return;
-            AudioContextManager.tone(frequency, gain);
+            if (frequency <= 0) AudioContextManager.stop();
+            else AudioContextManager.tone(frequency, gain);
         }
         
         //? Plays a monotone note
@@ -25,13 +26,16 @@ module TDev.RT {
         export function play_note(frequency: number, gain: number, seconds: number, r: ResumeCtx) {    
             if (Math_.is_nan(frequency) || Math_.is_nan(gain) || Math_.is_nan(seconds) || seconds <= 0) return;
             
-            AudioContextManager.tone(frequency, gain);
-            Util.setTimeout(seconds * 1000, () => {
-                AudioContextManager.tone(frequency, 0);
-                Util.setTimeout(40, () => {
-                    r.resume();                    
+            if (frequency <= 0) AudioContextManager.stop();
+            else {
+                AudioContextManager.tone(frequency, gain);
+                Util.setTimeout(seconds * 1000, () => {
+                    AudioContextManager.tone(frequency, 0);
+                    Util.setTimeout(40, () => {
+                        r.resume();
+                    })
                 })
-            })
+            }    
         }
 
         //? Creates a new picture of the given size

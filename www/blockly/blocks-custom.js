@@ -704,6 +704,21 @@ Blockly.Blocks['device_play_note'] = {
   }
 };
 
+Blockly.Blocks['device_ring'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/ring');
+    this.setColour(160);
+    this.appendDummyInput()
+        .appendField("ring");
+    this.appendValueInput("note")
+        .setCheck("Number");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Rings a given note on P0. You can also provide a specific frequency.');
+  }
+};
+
 Blockly.pathToMedia = "./media/";
 Blockly.BlockSvg.START_HAT = true;
 

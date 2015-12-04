@@ -13,7 +13,7 @@ action \_libinit() {
   #oCEOjqaW4CH7lS4r // Initialize the library
   #aCYMP4THhnQkBd4N // {shim:}
   #x3z5eK4ybVcTCWJh if data→board→is_invalid then {
-    #diswbwoJ0rRtyUbA data→logger := app→create_logger("simu");
+    #diswbwoJ0rRtyUbA data→logger := app→create_logger("simulator");
     #YKJMortE5mXaazK7 data→event_queues := collections→create_string_map;
     #JjsD2sJPrJ6vUU5w data→counters := web→create_json_builder;
     #dSJI8h1ZUeMsbz21 data→compass_heading_value := invalid→number;
@@ -2118,12 +2118,12 @@ action analog_pitch(#xicUA6rVANK5Hpya frequency: Number, #EOcY1jATp3Ldw16o ms: N
     #bqUsIek5pKDTe6Pe code→warning("pitch pin not set");
     #ifW5htAtZseohisz `return` ;
   }
-  #wunHmKjgrpZ9byII if $frequency < 0 then {
-    #Ml7QifWVhfftWKcq code→warning("frequency is too low");
+  #wunHmKjgrpZ9byII if $frequency ≤ 0 then {
+    #xXcOYe7q4TdBfOsz media→tone(0, 1);
     #H9Y66i52F23oOeSD `return` ;
   }
   #qvLwajJDb3fREXyj if $ms ≤ 0 then {
-    #c1DrtuRyJPSPijM8 code→warning("ms should be positive");
+    #xHlePNztv5JpESZp media→tone($frequency, 1);
   }
   else {
     #xbFhJ20GSASivmak $secs := $ms / 1000;
@@ -2515,13 +2515,23 @@ action first_event(#D42Ig553PhKq4i1h name: String) returns(#LvCIVEn5SGoFsUQw r: 
 #shg2hAnCU7F4s74Y
 action test_play_note() {
   #xzttSnRTTwvwFA7J // {shim:}
-  #x4AIYBST31am9VdY code→play_note(440, 0);
+  #x4AIYBST31am9VdY code→ring(440);
   #THJySqP27cAgQsaj code→pause(1000);
-  #TblGf0VF1CPJ6kMi code→play_note(540, 1000);
+  #TblGf0VF1CPJ6kMi code→ring(540);
   #pJWEI0OhM2WjvsmY code→pause(1000);
-  #aRlrDs9lN5SjbIzI code→play_note(0, 0);
+  #aRlrDs9lN5SjbIzI code→ring(0);
   #rTSs47awcQhuxF68 code→pause(1000);
-  #izbzXfqhmfDGfk1T code→play_note(440, 0);
+  #izbzXfqhmfDGfk1T code→ring(440);
   meta private;
   meta test;
+}
+#xSM8dUbL7z4962Uq
+action ring(#x6LSvAzKrDJ17xu5 frequency: Number) {
+  #xPhZkakRDj6rdLie // Plays a music tone through pin ``P0``.
+  #Io3qQ3JyDbVd2NVV // {help:functions/ring}
+  #Tt9V48fB99uH7oPY // {namespace:music}
+  #YGzmuem9F35GsbhE // {weight:80}
+  #tXZFp05e4tJHLACS // {hints:frequency:440}
+  #N722EwENmgCNUdCs code→analog_set_pitch_pin("P0");
+  #nW42CNnggdII8dc4 code→analog_pitch($frequency, 0);
 }
