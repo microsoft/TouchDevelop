@@ -562,7 +562,7 @@ action on_button_pressed(#M03fUuuX2m9eRu7n name: String, #LzMsXwEMSCmDzfWI body:
   #xOIGjOLy2Zmt99MW code→clear_button_handler($name);
   #F5Y2ciTtYo87uZSG $ev := $btn→on_touch_down($touch_up);
   #j0K6jsuWQ4V0EcaI where touch_up(x: Number, y: Number) {
-    #zvnW22u4MgaK24ge code→queue_event_bus($body, $evid);
+    #zvnW22u4MgaK24ge code→queue_event($body, $evid);
   }
   #hijH5eY42toXLOFF code→store_button_handler($name, $ev);
   meta sync;
@@ -1638,7 +1638,7 @@ action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Ac
   #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
   #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
   #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
-    #NbkK6P2y62Y9tOIt code→queue_event_bus($body, $evid);
+    #NbkK6P2y62Y9tOIt code→queue_event($body, $evid);
   }
   meta sync;
 }
@@ -2448,6 +2448,7 @@ table Event_Bus {
 action event_bus_worker(#VnWE2Q9sB2A5uIXD name: String) {
   #xDyM0UomTSCQXKSV // {shim:}
   #HakK0IQSqWKY8zju while true do {
+    #B2MyaPSqynIjfXO5 code→pause(1);
     #Zg9hZK25Zv1Ub2Ym $ev := code→first_event($name);
     #lN4KZZuuN9p2paSM if `not` $ev→is_invalid then {
       #qUZz8iwjSjiyyavq $ev→fn→run;
@@ -2460,8 +2461,10 @@ action event_bus_worker(#VnWE2Q9sB2A5uIXD name: String) {
   meta private;
 }
 #uBLXg1puXSO4QzoW
-action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
-  #chlGhAEHEEsL01Wv // {shim:}
+action queue_event(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
+  #TvMY9sg6cL0LP4R4 // Queues an event to be executed in its own queue. **simulator only**.
+  #G4HX55fpvnZloONU // {namespace:simulator}
+  #x6pUJ4oEgynKekYO // {shim:TD_NOOP}
   #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
   #xv0tUVTZQbNE3PW4 if $c < 10 then {
     #mbqwhgLr24hPftS9 $ev := records→Event_Bus_table→add_row;
@@ -2477,7 +2480,6 @@ action queue_event_bus(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: S
   else {
     #SzvR3GyWF2k4aEW8 data→logger→debug("skipped event " ∥ $name ∥ ", bus full");
   }
-  meta private;
   meta sync;
 }
 #HHvqKQqbQ5Uea74Z
