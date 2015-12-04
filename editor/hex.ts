@@ -2,6 +2,56 @@
 
 module TDev.Hex
 {
+    var getCacheTableAsync = () => Storage.getTableAsync("ArtCache");
+    var maxItems = 5 
+
+    function setValueAsync(t:Storage.Table, k:string, v:string)
+    {
+        var st = {}
+        st[k] = v
+        return t.setItemsAsync(st)
+    }
+
+    function storeHexInfoAsync(sha:string, entry:string)
+    {
+        var key = "hex-" + sha
+        return getCacheTableAsync()
+        .then((table:Storage.Table) => {
+            var setPr = setValueAsync(table, key, entry)
+            return table.getValueAsync("hex:keys")
+            .then(currKeys => {
+                if (!currKeys) currKeys = "[]"
+                var lst = JSON.parse(currKeys)
+                lst.push(key)
+                if (lst.length > maxItems) {
+                    lst = lst.slice(-maxItems)
+                    setPr = setPr
+                        .then(() => table.getKeysAsync())
+                        .then((keys:string[]) => {
+                            var del = {}
+                            keys.forEach(k => {
+                                if (/^hex-/.test(k) && lst.indexOf(k) == -1) {
+                                    Util.log("delete " + k)
+                                    del[k] = null;
+                                }
+                            })
+                            return table.setItemsAsync(del)
+                        })
+                }
+                return setPr
+                    .then(() => setValueAsync(table, "hex:keys", JSON.stringify(lst)))
+            })
+        })
+    }
+
+    function loadHexInfoAsync(sha:string)
+    {
+        var key = "hex-" + sha
+        return getCacheTableAsync()
+        .then((table:Storage.Table) => table.getValueAsync(key))
+    }
+
+
     function downloadHexInfoAsync(extInfo:AST.Bytecode.ExtensionInfo)
     {
         var hexurl = Cloud.config.primaryCdnUrl + "/compile/" + extInfo.sha
@@ -39,7 +89,7 @@ module TDev.Hex
 
         Util.log("get hex info: " + extInfo.sha)
 
-        return World.getHexInfoAsync("C" + extInfo.sha)
+        return loadHexInfoAsync(extInfo.sha)
             .then(res => {
                 if (res) {
                     Util.log("get from world: " + res.length)
@@ -54,7 +104,7 @@ module TDev.Hex
                             meta.hex = compressHex(meta.hex)
                             var store = JSON.stringify(meta)
                             meta.hex = origHex
-                            return World.setHexInfoAsync("C" + extInfo.sha, store)
+                            return storeHexInfoAsync(extInfo.sha, store)
                                     .then(() => meta)
                         })
             })
