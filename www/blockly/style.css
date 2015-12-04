@@ -237,8 +237,12 @@ a.command:hover {
 /* Very low-height displays: hide the icons, just keep the text (e.g. "run").
  * Hide script name, flatten icons. */
 @media (max-height: 600px) {
-  .roundsymbol, #script-description, .svg-wrapper {
+  #script-description {
     display: none !important;
+  }
+  
+  .roundbutton > .roundlabel {
+    display: none !important;    
   }
 
   #script-icons {
