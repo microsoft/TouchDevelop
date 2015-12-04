@@ -33,6 +33,13 @@ module TDev.AST.Bytecode
         return r
     }
 
+    function userError(msg:string)
+    {
+        var e = new Error(msg);
+        (<any>e).bitvmUserError = true;
+        throw e;
+    }
+
     export function isSetupFor(extInfo:ExtensionInfo)
     {
         return currentSetup == extInfo.sha
@@ -1095,7 +1102,7 @@ module TDev.AST.Bytecode
                 var mask = this.getMask(args)
                 var msg = "{shim:" + shm + "} from " + a.getName()
                 if (!shm)
-                    Util.oops("called " + msg + " (with empty {shim:}")
+                    userError("called " + msg + " (with empty {shim:}")
 
                 var inf = lookupFunc(shm)
 
@@ -1115,14 +1122,17 @@ module TDev.AST.Bytecode
                     }
                 } else {
                     if (!inf)
-                        Util.oops("no such " + msg)
+                        userError("shim not found: " + msg)
 
                     if (!hasret) {
-                        Util.assert(inf.type == "P", "expecting procedure for " + msg);
+                        if (inf.type != "P")
+                            userError("expecting procedure for " + msg);
                     } else {
-                        Util.assert(inf.type == "F", "expecting function for " + msg);
+                        if (inf.type != "F")
+                            userError("expecting function for " + msg);
                     }
-                    Util.assert(args.length == inf.args, "argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
+                    if (args.length != inf.args)
+                        userError("argument number mismatch: " + args.length + " vs " + inf.args + " in " + msg)
 
                     this.proc.emitCall(shm, mask)
                 }

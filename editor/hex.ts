@@ -115,14 +115,21 @@ module TDev.Hex
             try {
                 c.run()
             } catch (e) {
-                if (app != Script)
-                    // Script is automatically attached
-                    e.bugAttachments = [app.serialize()]
-                Util.reportError("bitvm compile", e, false);
-                if (dbg)
-                    ModalDialog.showText(e.stack)
-                else
-                    HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
+                if (e.bitvmUserError) {
+                    ModalDialog.info(e.message,
+                        lf("If you're using any special library, please contact the author. Otherwise contact BBC micro:bit support."))
+                } else {
+                    if (app != Script)
+                        // Script is automatically attached
+                        e.bugAttachments = [app.serialize()]
+                    Util.reportError("bitvm compile", e, false);
+
+                    if (dbg)
+                        ModalDialog.showText(e.stack)
+                    else
+                        HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
+                }
+
                 return
             }
 
