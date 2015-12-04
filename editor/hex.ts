@@ -39,24 +39,23 @@ module TDev.Hex
 
         Util.log("get hex info: " + extInfo.sha)
 
-        return World.getHexInfoAsync(extInfo.sha)
+        return World.getHexInfoAsync("C" + extInfo.sha)
             .then(res => {
-                Util.log("get from world: " + extInfo.sha)
-                if (res)
-                    return lzmaDecompressAsync(Util.stringToUint8Array(atob(res)))
-                        .then(str => {
-                            Util.log("decompressed: " + extInfo.sha)
-                            return JSON.parse(str)
-                        })
+                if (res) {
+                    Util.log("get from world: " + res.length)
+                    var meta = JSON.parse(res)
+                    meta.hex = decompressHex(meta.hex)
+                    return Promise.as(meta)
+                }
                 else
                     return downloadHexInfoAsync(extInfo)
                         .then(meta => {
-                            return lzmaCompressAsync(JSON.stringify(meta))
-                            .then(buf => {
-                                var b64 = btoa(Util.uint8ArrayToString(buf))
-                                return World.setHexInfoAsync(extInfo.sha, b64)
+                            var origHex = meta.hex
+                            meta.hex = compressHex(meta.hex)
+                            var store = JSON.stringify(meta)
+                            meta.hex = origHex
+                            return World.setHexInfoAsync("C" + extInfo.sha, store)
                                     .then(() => meta)
-                            })
                         })
             })
     }
@@ -151,5 +150,114 @@ module TDev.Hex
                     HTML.showErrorNotification(lf("Oops, something happened! If this keeps happening, contact BBC micro:bit support."))
             })
         })
+    }
+
+    function decompressHex(hex:string[])
+    {
+        var outp:string[] = []
+
+        for (var i = 0; i < hex.length; i++) {
+            var m = /^([@!])(....)$/.exec(hex[i])
+            if (!m) {
+                outp.push(hex[i])
+                continue;
+            }
+
+            var addr = parseInt(m[2], 16)
+            var nxt = hex[++i]
+            var buf = ""
+
+            if (m[1] == "@") {
+                buf = ""
+                var cnt = parseInt(nxt, 16)
+                while (cnt-- > 0) {
+                    buf += "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+                }
+            } else {
+                buf = atob(nxt)
+            }
+
+            Util.assert(buf.length > 0)
+            Util.assert(buf.length % 16 == 0)
+
+            for (var j = 0; j < buf.length; ) {
+                var bytes = [0x10, (addr >> 8) & 0xff, addr & 0xff, 0]
+                addr += 16;
+                for (var k = 0; k < 16; ++k) {
+                    bytes.push(buf.charCodeAt(j++))
+                }
+
+                var chk = 0
+                for (var k = 0; k < bytes.length; ++k)
+                    chk += bytes[k]
+                bytes.push((-chk) & 0xff)
+
+                var r = ":"
+                for (var k = 0; k < bytes.length; ++k) {
+                    var b = bytes[k] & 0xff
+                    if (b <= 0xf)
+                        r += "0"
+                    r += b.toString(16)
+                }
+                outp.push(r.toUpperCase())
+            }
+        }
+
+        return outp
+    }
+
+    function compressHex(hex:string[])
+    {
+        var outp:string[] = []
+
+        for (var i = 0; i < hex.length; i += j) {
+            var addr = -1;
+            var outln = ""
+            var j = 0;
+            var zeroMode = false;
+
+            while (j < 500) {
+                var m = /^:10(....)00(.{32})(..)$/.exec(hex[i + j])
+                if (!m)
+                    break;
+
+                var h = m[2]
+                var isZero = /^0+$/.test(h)
+                var newaddr = parseInt(m[1], 16)
+                if (addr == -1) {
+                    zeroMode = isZero;
+                    outp.push((zeroMode ? "@" : "!") + m[1])
+                    addr = newaddr - 16;
+                } else {
+                    if (isZero != zeroMode)
+                        break;
+
+                    if (addr + 16 != newaddr)
+                        break;
+                }
+
+                if (!zeroMode)
+                    outln += h;
+
+                addr = newaddr;
+                j++;
+            }
+
+            if (j == 0) {
+                outp.push(hex[i])
+                j = 1;
+            } else {
+                if (zeroMode) {
+                    outp.push(j.toString(16))
+                } else {
+                    var bin = ""
+                    for (var k = 0; k < outln.length; k += 2)
+                        bin += String.fromCharCode(parseInt(outln.slice(k, k + 2), 16))
+                    outp.push(btoa(bin))
+                }
+            }
+        }
+
+        return outp;
     }
 }
