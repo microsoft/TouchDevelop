@@ -1302,13 +1302,13 @@ module TDev.AST.Bytecode
                     } else {
                         var inf = lookupFunc(l.enumVal)
                         if (!inf)
-                            Util.oops("unhandled enum val: " + l.enumVal)
+                            userError(lf("unhandled enum value: {0}", l.enumVal))
                         if (inf.type == "E")
                             this.proc.emitInt(inf.value)
                         else if (inf.type == "F" && inf.args == 0)
                             this.proc.emitCall(l.enumVal, 0)
                         else
-                            Util.oops("not valid enum: " + l.enumVal)
+                            userError(lf("not valid enum: {0}; is it procedure name?", l.enumVal))
                     }
                 } else if (l.data == "") {
                     this.proc.emitCall("string::mkEmpty", 0);
@@ -1800,6 +1800,25 @@ module TDev.AST.Bytecode
             setupFor(emptyExtInfo(), null)
     }
 
+    function parseExpr(e:string)
+    {
+        e = e.trim()
+        e = e.replace(/^\(/, "")
+        e = e.replace(/\)$/, "")
+        e = e.trim();
+        if (/^-/.test(e) && parseExpr(e.slice(1)) != null)
+            return -parseExpr(e.slice(1))
+        if (/^0x[0-9a-f]+$/i.exec(e))
+            return parseInt(e.slice(2), 16)
+        if (/^0b[01]+$/i.exec(e))
+            return parseInt(e.slice(2), 2)
+        if (/^0\d+$/i.exec(e))
+            return parseInt(e, 8)
+        if (/^\d+$/i.exec(e))
+            return parseInt(e, 10)
+        return null;
+    }
+
     export function getExtensionInfo(app:App) : ExtensionInfo
     {
         var res = emptyExtInfo();
@@ -1852,10 +1871,29 @@ module TDev.AST.Bytecode
                     }
 
                     ln = ln.replace(/\/\/.*/, "")
-                    m = /^\s*#define\s+(\w+)\s+(\d+)\s*$/.exec(ln)
+                    var isEnum = false
+                    m = /^\s*#define\s+(\w+)\s+(.*)/.exec(ln)
+                    if (!m) {
+                        m = /^\s*(\w+)\s*=\s*(.*)/.exec(ln)
+                        isEnum = true
+                    }
+
                     if (m) {
-                        res.enums[m[1]] = parseInt(m[2])
-                        return;
+                        var num = m[2]
+                        num = num.replace(/\/\/.*/, "")
+                        num = num.replace(/\/\*.*/, "")
+                        num = num.trim()
+                        if (isEnum)
+                            num = num.replace(/,$/, "")
+                        var val = parseExpr(num)
+                        var nm = m[1]
+                        if (isEnum)
+                            nm = currNs + "::" + nm
+                        console.log(nm, num, val)
+                        if (val != null) {
+                            res.enums[nm] = val
+                            return;
+                        }
                     }
                 })
                 if (!currNs)
