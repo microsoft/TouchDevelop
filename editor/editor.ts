@@ -883,6 +883,7 @@ module TDev
         private scriptCompiled = false;
         private tutorialId: string;
         private hadSplit = false;
+        public temporarySettings: StringMap<string> = {};
 
         public auxRenderer = new Renderer();
         public intelliProfile:AST.IntelliProfile = null;
