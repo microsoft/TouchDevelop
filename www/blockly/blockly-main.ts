@@ -358,7 +358,7 @@ module TDev {
     // be fired immediately after the current function is done. To make sure our change handler
     // does not receive that initial event, we schedule it for slightly later.
     window.setTimeout(() => {
-      Blockly.addChangeListener(() => {
+      Blockly.mainWorkspace.addChangeListener(() => {
         markLocalChanges();
       });
     }, 1);

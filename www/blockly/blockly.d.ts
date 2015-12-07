@@ -54,6 +54,8 @@ declare module Blockly {
         dispose(): void;
         getTopBlocks(ordered: boolean): Block[];
         getAllBlocks(): Block[];
+        addChangeListener(f: () => void): callbackHandler;
+        removeChangeListener(h: callbackHandler): void;
     }
 
     module Xml {
@@ -86,8 +88,6 @@ declare module Blockly {
     interface callbackHandler {}
 
     function inject(elt: Element, options?: Options): void;
-    function addChangeListener(f: () => void): callbackHandler;
-    function removeChangeListener(h: callbackHandler): void;
 
     var mainWorkspace: Workspace;
 }
