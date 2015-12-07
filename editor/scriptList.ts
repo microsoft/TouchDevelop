@@ -3312,6 +3312,11 @@
             });
         }
 
+        public showSelf()
+        {
+            this.parentBrowser.loadDetails(this)
+        }
+
         public mkSmallBoxNoClick():HTMLElement
         {
             return this.mkBoxCore(false);
@@ -6665,6 +6670,12 @@
                         cont.push(div("sdNumber", " ★"))
                         nameBlock.setChildren([promo.name])
                     }
+                }
+
+                if (big && Cloud.hasPermission("root-ptr") && this.jsonScript.lastpointer) {
+                    cont.push(div("sdNumber",
+                        HTML.mkLinkButton("pointer", () => 
+                        this.browser().getAnyInfoByEtag({ id: this.jsonScript.lastpointer, kind: "pointer", ETag: "" }).showSelf())))
                 }
 
                 numbers.setChildren(cont);
@@ -10876,6 +10887,13 @@
             this.publicId = id;
         }
 
+        public mkTabsCore(): BrowserTab[]{
+            return [
+                this, 
+                Cloud.hasPermission("root-ptr") ? new PointerHistoryTab(this) : null
+            ];
+        }
+
         public withUpdate(elt:HTMLElement, update:(data:any)=>void)
         {
             return super.withUpdate(elt, d => {
@@ -10974,5 +10992,76 @@
             });
         }
     }
+
+    export class PointerHistoryTab
+        extends ListTab
+    {
+        constructor(par:BrowserPage) {
+            super(par, "/history")
+        }
+        public getId() { return "ptrhistory"; }
+        public getName() { return lf("history"); }
+
+        public bgIcon() { return "svg:undo"; }
+        public noneText() { return lf("nothing"); }
+        public hideOnEmpty() { return false }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            var ptr = <JsonPointer>cc;
+
+            var icon = div("sdIcon", HTML.mkImg("svg:undo,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner")
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var ptr0 = TheApiCacheMgr.getCached(this.parent.publicId) || {}
+
+            var getScriptInfo = (id:string) =>
+                <ScriptInfo>this.browser().getAnyInfoByEtag({ id: id, kind: "script", ETag: "" });
+
+            var showDiff = () => {
+                getScriptInfo(ptr0.scriptid).diffToId(ptr.scriptid)
+            }
+
+            var showChanges = () => {
+                getScriptInfo(ptr.scriptid).diffToId(ptr.oldscriptid)
+            }
+
+            var btns = div("sdBaseCorner",
+                    ptr.scriptid && ptr0.scriptid ? div(null, HTML.mkButton(lf("diff to curr"), showDiff)) : null,
+                    ptr.scriptid && ptr.oldscriptid ? div(null, HTML.mkButton(lf("changes"), showChanges)) : null
+            )
+            
+            var res = div("sdHeaderOuter",
+                            div("sdHeader", icon,
+                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers)),
+                            btns)
+
+            nameBlock.setChildren([ ptr.id.replace(/.*@/, "") ])
+            author.setChildren([ptr.username])
+
+            if (ptr.scriptid) {
+                addInfoInner.setChildren(["/" + ptr.scriptid + ", " + Util.timeSince(ptr.time)]);
+            }
+            else {
+                addInfoInner.setChildren(["-> " + ptr.redirect + ", " + Util.timeSince(ptr.time)]);
+            }
+
+            return res.withClick(() => {
+                if (ptr.scriptid)
+                    this.browser().loadDetails(getScriptInfo(ptr.scriptid))
+                else
+                    HTML.wrong(res)
+            })
+        }
+    }
+ 
 
 }
