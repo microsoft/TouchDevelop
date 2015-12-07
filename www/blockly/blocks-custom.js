@@ -634,6 +634,19 @@ Blockly.Blocks['game_add_score'] = {
   }
 };
 
+Blockly.Blocks['game_game_over'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(blockColors.game);
+    this.appendDummyInput()
+        .appendField("game over");
+    this.setInputsInline(true);
+    this.setTooltip('Ends the game.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(false);
+  }
+};
+
 Blockly.Blocks['controls_simple_for'] = {
   /**
    * Block for 'for' loop.

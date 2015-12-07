@@ -1330,6 +1330,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     namespace: "game",
     f: "add score",
     args: ["points"]
+  },
+  game_game_over: {
+    namespace: "game",
+    f: "game over",
+    args: []
   }
 }
 
