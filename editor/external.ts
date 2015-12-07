@@ -85,7 +85,7 @@ module TDev {
           order: 1,
         }, {
           company: "Code Kingdoms",
-          name: "CK JavaScript",
+          name: "JavaScript",
           description: "Code JavaScript with the CK editor",
           id: 'codekingdoms',
           origin: ckOrigin,
