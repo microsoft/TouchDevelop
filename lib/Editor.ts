@@ -129,18 +129,6 @@ module TDev.RT {
                     err => r.resumeVal(JsonObject.wrap({ error: err.message || "an error occured" }))
                 );
         }
-        
-        //? Retreives an in-memory editor setting
-        public temporary_setting(key: string) : string {
-            var ed = (<any>TDev).TheEditor
-            return ed ? ed.temporarySettings[key] : undefined;
-        }
-        
-        //? Sets an in-memory editor setting. The setting is stored until the page is refreshed
-        public set_temporary_setting(key: string, value: string) {            
-            var ed = (<any>TDev).TheEditor
-            if (ed) ed.temporarySettings[key] = value;
-        }        
     }
 
     export interface AstAnnotationOp {

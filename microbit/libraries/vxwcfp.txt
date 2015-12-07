@@ -2260,21 +2260,14 @@ action set_theme(#cJ3VYThrkFH2nnon name: String) {
   #x5CwjchVbMRh3uoA // {shim:}
   #f2xg2qfKJ7v1Lq5x if $name→is_empty then {
     #SLALoF6RT42i7Ejp // fetch theme from settings
-    #EIOzSkMZfF6l4seA $default_theme := "";
-    #VcYLOfkEm0djDFri $editor := app→editor;
-    #xwWysIAEYBf7i4gW if `not` $editor→is_invalid then {
-      #l3lhYG6Iq5hifmUk $default_theme := $editor→temporary_setting("bbc micro:bit theme");
-    }
-    #oRXOzXbDRXi4K94N if $default_theme→is_invalid `or` $default_theme→is_empty then {
+    #l3lhYG6Iq5hifmUk $default_theme := app→env→temporary_setting("bbc micro:bit theme");
+    #xwWysIAEYBf7i4gW if $default_theme→is_invalid then {
       #H4LeHpMBwx4OkSKf $default_theme := "red";
     }
     #uH4b8fL22EjTKz0h $name := $default_theme;
   }
   #e4B1ZURot54YEGiY data→current_theme := $name;
-  #EuLvbKKOqok5a2li $editor := app→editor;
-  #xqnn4mUUU0HArUMX if `not` $editor→is_invalid then {
-    #e4Zsrvf4HUVvvwhd $editor→set_temporary_setting("bbc micro:bit theme", $name);
-  }
+  #e4Zsrvf4HUVvvwhd app→env→set_temporary_setting("bbc micro:bit theme", $name);
   #p5briRb9oTIasn8h data→led_off_color := colors→transparent;
   #a2k5eTy9hRQcxe46 data→board_color := colors→from_rgb(0.85, 0.95, 0.85);
   #qyDWsRI4ytHtFd8g $leds_background := colors→black;

@@ -883,7 +883,6 @@ module TDev
         private scriptCompiled = false;
         private tutorialId: string;
         private hadSplit = false;
-        public temporarySettings: StringMap<string> = {};
 
         public auxRenderer = new Renderer();
         public intelliProfile:AST.IntelliProfile = null;
@@ -2171,8 +2170,9 @@ module TDev
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:bitcompile,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
                         var me = <MouseEvent>e;
-                        var forceCpp = me.ctrlKey && me.altKey;
-                        var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || /dbgcpp=1/i.test(document.location.href);
+                        var dbgCpp = /dbgcpp=1/i.test(document.location.href);
+                        var forceCpp = (me.ctrlKey && me.altKey) || dbgCpp;
+                        var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || dbgCpp;
 
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
