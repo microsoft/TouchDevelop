@@ -5,6 +5,7 @@ meta color "#ff008000";
 meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -1635,11 +1636,13 @@ action on_pin_pressed(#xSs4Svf30EPMhoVj name: String, #BxKLhpiGqRcDwB1h body: Ac
   #xZ0ArWZwbu4SBuBn // {shim:micro_bit::onPinPressed}
   #jDgDoJLo4kvbVPvk $evid := "on pin pressed " ∥ $name;
   #nPpJQoCs8nAIigcE code→notify_event_registration($evid);
+  #AC4jsXJ71LfQp2kk code→clear_pin_handler($name);
   #h5fUFp7OQ9fEwJRv $btn := code→pin_by_name($name);
-  #GXVoxvPhWYd2tdDp $btn→on_touch_down($touch_down);
-  #TDcZdyD22Igf3vMo where touch_down(x: Number, y: Number) {
+  #g7K6590eu6r59eIv $ev := $btn→on_touch_up($touch_up);
+  #xSk8PXoFQvpiueOt where touch_up(x: Number, y: Number) {
     #NbkK6P2y62Y9tOIt code→queue_event($body, $evid);
   }
+  #P1GQOzd8c8e0hPJt code→store_pin_handler($name, $ev);
   meta sync;
 }
 #pqc71fRJDE9AyREy
@@ -2549,4 +2552,71 @@ action ring(#x6LSvAzKrDJ17xu5 frequency: Number) {
   #tXZFp05e4tJHLACS // {hints:frequency:440}
   #N722EwENmgCNUdCs code→analog_set_pitch_pin("P0");
   #nW42CNnggdII8dc4 code→analog_pitch($frequency, 0);
+}
+#zeiPSQvHNIer2uac
+action test_warning() {
+  #SSMfX6t5fWn7h04x // {shim:}
+  #rGaI9w2nf60bKxEH code→\_libinit;
+  #mTHHt30PoPagapRP code→forever;
+  #xJiPHVjqVziSJqle where `implicit` \_body\_() {
+    #UcbyY25lqLaSlf0N code→on_pin_pressed("P2");
+    #mSBzWIUK9D6gMShm where `implicit` \_body\_() {
+      #g6O52rAigBwHjrn4 code→show_string("sw", 150);
+      #cv1jrjdAaBfrfJVt code→pause(500);
+    }
+  }
+  meta private;
+  meta test;
+}
+#tHOUdkl60T7Q7Doi
+action store_pin_handler(#foZZksEULlhDtfjB name: String, #xocE8Y4sHKsI4ZmX ev: Event_Binding) {
+  #sb2HOtfOByaJVTUA // {shim:}
+  #xjhOTngE9qyaAYrE $name := $name→trim(" \t")→to_lower_case;
+  #aboKExhvnNmkj2pM if $name→equals("p0") then {
+    #fp2oW4xMNIzM14oj data→p0_handler := $ev;
+  }
+  else { #t9YxAAvsTwP7gRjc if $name→equals("p1") then {
+    #iEpu6Gr4k7YxwZyZ data→p1_handler := $ev;
+  }
+  else { #y4mYXzm4vv0qIW7V if $name→equals("p2") then {
+    #g4ZFv85AuknPhpvC data→p2_handler := $ev;
+  }
+  else { } } } 
+  meta private;
+  meta sync;
+}
+#tnIOjiWz0KJW0Jw4
+var p0_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#wHKaWOUBRGyTzDER
+var p1_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#P545BoMFP6juxgJ8
+var p2_handler : Event_Binding {
+  // {shim:}
+  transient = true;
+}
+#FUIrUzLVkX1B0F8a
+action clear_pin_handler(#RSL4xscVGqj094dJ name: String) {
+  #C4gtDdQMQ8juyxA6 // {shim:}
+  #kfqPf0I2193RDPpB $name := $name→trim(" \t")→to_lower_case;
+  #xIRL2SG5Y3slm0gb if $name→equals("p0") `and` `not` data→p0_handler→is_invalid then {
+    #Z3z522H4zGPvuo6V data→p0_handler→delete;
+    #R4urnW9bw1szDdEg data→p0_handler→\u25c8clear;
+  }
+  else { #oGnSVGLrssTCQmWp if $name→equals("p1") `and` `not` data→p1_handler→is_invalid then {
+    #hXmS2sdX47s6nMDd data→p1_handler→delete;
+    #ssTjCqfie22HWaLa data→p1_handler→\u25c8clear;
+  }
+  else { #d2xeKSkVSETaiyf1 if $name→equals("p2") `and` `not` data→p2_handler→is_invalid then {
+    #XOFHbVTvwysTjcM0 data→p2_handler→delete;
+    #TgkAqrWwi7OEyrkK data→p2_handler→\u25c8clear;
+  }
+  else { } } } 
+  meta private;
+  meta sync;
 }
