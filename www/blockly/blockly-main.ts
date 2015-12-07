@@ -136,7 +136,7 @@ module TDev {
 
         if (message.changed) {
           statusMsg("changes detected, running...", message.status);
-          doRun();
+          doRun(true);
         }        
         break;
     }
@@ -554,7 +554,7 @@ module TDev {
     });
   }
   
-  function doRun() {
+  function doRun(auto : boolean) {
     var ast = compileOrError(false, "#errorsRun");
     if (!ast)
       return;
@@ -562,6 +562,7 @@ module TDev {
       type: External.MessageType.Run,
       ast: <any>ast,
       libs: libs,
+      onlyIfSplit: auto
     });
   }
 
@@ -584,7 +585,7 @@ module TDev {
       doGraduate("#errorsGraduate");
       e.stopPropagation();
     });
-    $("#command-run").click(() => doRun());
+    $("#command-run").click(() => doRun(false));
   }
 }
 
