@@ -722,14 +722,14 @@ function infer(e: Environment, w: B.Workspace) {
 
         default:
           if (b.type in stdCallTable) {
-            stdCallTable[b.type].args.forEach((p: string) => {
-              if (!b.getFieldValue(p)) {
-                var i = b.inputList.filter((i: B.Input) => i.name == p)[0];
+            stdCallTable[b.type].args.forEach((p: StdArg) => {
+              if (p.field && !b.getFieldValue(p.field)) {
+                var i = b.inputList.filter((i: B.Input) => i.name == p.field)[0];
                 // This will throw if someone modified blocks-custom.js and forgot to add
                 // [setCheck]s in the block definition. This is intentional and MUST be
                 // fixed.
                 var t = toType(i.connection.check_[0]);
-                unionParam(e, b, p, ground(t));
+                unionParam(e, b, p.field, ground(t));
               }
             });
             return compileStdCall(e, b, stdCallTable[b.type]);
@@ -1114,12 +1114,15 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
 }
 
 function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
-  var args = func.args.map((p: string) => {
-    var f = b.getFieldValue(p);
+  var args = func.args.map((p: StdArg) => {
+    var lit : any = p.literal;
+    if (lit)
+      return lit instanceof String ? H.mkStringLiteral(<string>lit) : H.mkNumberLiteral(<number>lit);
+    var f = b.getFieldValue(p.field);
     if (f)
       return H.mkStringLiteral(f);
     else
-      return compileExpression(e, b.getInputTargetBlock(p))
+      return compileExpression(e, b.getInputTargetBlock(p.field))
   });
   if (func.isExtensionMethod) {
     return H.extensionCall(func.f, args);
@@ -1179,20 +1182,29 @@ function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: st
   return H.namespaceCall(n, f, [<J.JExpr> H.mkStringLiteral(state)].concat(args));
 }
 
+// A standard function argument may be a field name (see below)
+// or a string|number literal.
+// The literal is used to hide argument in blocks
+// that are available in TD.
+interface StdArg {
+  field?: string;
+  literal?: string | number;
+}
+
 // A description of each function from the "device library". Types are fetched
 // from the Blockly blocks definition.
 // - the key is the name of the Blockly.Block that we compile into a device call;
 // - [f] is the TouchDevelop function name we compile to
 // - [args] is a list of names; the name is taken to be either the name of a
 //   Blockly field value or, if not found, the name of a Blockly input block; if a
-//   field value is found, then this generates a string expression
+//   field value is found, then this generates a string expression. If argument is a literal, simply emits the literal.
 // - [isExtensionMethod] is a flag so that instead of generating a TouchDevelop
 //   call like [f(x, y...)], we generate the more "natural" [x → f (y...)]
 // - [namespace] is also an optional flag to generate a "namespace" call, that
 //   is, "basic -> show image" instead of "micro:bit -> show image".
 interface StdFunc {
   f: string;
-  args: string[];
+  args: StdArg[];
   isExtensionMethod?: boolean
   namespace?: string;
 }
@@ -1206,36 +1218,36 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   device_show_number: {
     namespace: "basic",
     f: "show number",
-    args: [ "number", "pausetime" ]
+    args: [{ field: "number" }, { literal: 150 } ]
   },
   device_show_letter: {
     f: "show letter",
-    args: [ "letter" ]
+    args: [{ field: "letter" } ]
   },
   device_pause: {
     namespace: "basic",
     f: "pause",
-    args: [ "pause" ]
+    args: [{ field: "pause" } ]
   },
   device_print_message: {
     namespace: "basic",
     f: "show string",
-    args: [ "message", "pausetime" ]
+    args: [{ field: "message" }, {literal:150} ]
   },
   device_plot: {
     namespace: "led",
     f: "plot",
-    args: [ "x", "y" ]
+    args: [{ field: "x" }, { field: "y" } ]
   },
   device_unplot: {
     namespace: "led",
     f: "unplot",
-    args: [ "x", "y" ]
+    args: [{ field: "x" }, { field: "y" } ]
   },
   device_point: {
     namespace: "led",
     f: "point",
-    args: [ "x", "y" ]
+    args: [{ field: "x" }, { field: "y" } ]
   },
   device_temperature: {
     namespace: "input",
@@ -1249,32 +1261,32 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_make_StringImage: {
     f: "create image from string",
-    args: [ "NAME" ]
+    args: [{ field: "NAME" } ]
   },
   device_scroll_image: {
     f: "scroll image",
-    args: [ "sprite", "frame offset", "delay" ],
+    args: [{ field: "sprite" }, { field: "frame offset" }, { field: "delay" } ],
     isExtensionMethod: true
   },
   device_show_image_offset: {
     f: "show image",
-    args: [ "sprite", "offset" ],
+    args: [{ field: "sprite" }, { field: "offset" } ],
     isExtensionMethod: true
   },
   device_get_button: {
     namespace: "input",
     f: "button is pressed",
-    args: [ "NAME" ]
+    args: [{ field: "NAME" } ]
   },
   device_get_button2: {
     namespace: "input",
     f: "button is pressed",
-    args: [ "NAME" ]
+    args: [{ field: "NAME" } ]
   },
   device_get_acceleration: {
     namespace: "input",
     f: "acceleration",
-    args: [ "NAME" ]
+    args: [{ field: "NAME" } ]
   },
   device_get_running_time: {
     namespace: "input",
@@ -1284,22 +1296,22 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   device_get_digital_pin: {
     namespace: "pins",
     f: "digital read pin",
-    args: [ "name" ]
+    args: [{ field: "name" } ]
   },
   device_set_digital_pin: {
     namespace: "pins",
     f: "digital write pin",
-    args: [ "name", "value" ]
+    args: [{ field: "name" }, { field: "value" } ]
   },
   device_get_analog_pin: {
     namespace: "pins",
     f: "analog read pin",
-    args: [ "name" ]
+    args: [{ field: "name" } ]
   },
   device_set_analog_pin: {
     namespace: "pins",
     f: "analog write pin",
-    args: [ "name", "value" ]
+    args: [{ field: "name" }, { field: "value" } ]
   },
   device_get_brightness: {
     namespace: "led",
@@ -1309,27 +1321,27 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   device_set_brightness: {
     namespace: "led",
     f: "set brightness",
-    args: [ "value" ]
+    args: [{ field: "value" } ]
   },
   device_play_note: {
     namespace: "music",
     f: "play note",
-    args: [ "note", "duration" ]
+    args: [{ field: "note" }, { field: "duration" } ]
   },
   device_ring: {
     namespace: "music",
     f: "ring",
-    args: [ "note" ]
+    args: [{ field: "note" } ]
   },
   game_start_countdown: {
     namespace: "game",
     f: "start countdown",
-    args: ["duration"]
+    args: [{ field: "duration" }]
   },
   game_add_score: {
     namespace: "game",
     f: "add score",
-    args: ["points"]
+    args: [{ field: "points" }]
   },
   game_game_over: {
     namespace: "game",

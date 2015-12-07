@@ -50,10 +50,6 @@ Blockly.Blocks['device_print_message'] = {
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("string");
-    this.appendValueInput("pausetime")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("with interval (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Shows the specified string and scrolls it if necessary.');
@@ -70,11 +66,7 @@ Blockly.Blocks['device_show_number'] = {
         .appendField("show number");
     this.appendValueInput("number")
         .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.appendValueInput("pausetime")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("with interval (ms)");
+        .setAlign(Blockly.ALIGN_RIGHT);    
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
