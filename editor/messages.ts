@@ -42,6 +42,7 @@ module TDev {
             type: MessageType; // == MessageType.SaveAck
             where: SaveLocation;
             status: Status;
+            changed?: boolean; // true if changes were detected w.r.t. to previous version
             error?: string; // non-null iff status == Error
             newBaseSnapshot?: string; // non-null iff status == Ok && where == Cloud
             cloudIsInSync?: boolean; // non-null iff status == Ok && where == Cloud

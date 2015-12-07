@@ -120,9 +120,9 @@ module TDev {
         break;
       case External.Status.Ok:
         if (message.where == External.SaveLocation.Cloud) {
-          statusMsg(prefix(message.where)+" successfully saved version (cloud in sync? "+
-            message.cloudIsInSync +", "+
-            "from "+currentVersion+" to "+message.newBaseSnapshot+")",
+          statusMsg(prefix(message.where) + " successfully saved version (cloud in sync? " +
+            message.cloudIsInSync + ", " +
+            "from " + currentVersion + " to " + message.newBaseSnapshot + ")",
             message.status);
           currentVersion = message.newBaseSnapshot;
           if (message.cloudIsInSync)
@@ -131,8 +131,13 @@ module TDev {
             statusIcon("exclamation-triangle");
         } else {
           statusIcon("floppy-o");
-          statusMsg(prefix(message.where)+" successfully saved", message.status);
+          statusMsg(prefix(message.where) + " successfully saved", message.status);
         }
+
+        if (message.changed) {
+          statusMsg("changes detected, running...", message.status);
+          doRun();
+        }        
         break;
     }
   }
@@ -548,6 +553,17 @@ module TDev {
       libs: libs,
     });
   }
+  
+  function doRun() {
+    var ast = compileOrError(false, "#errorsRun");
+    if (!ast)
+      return;
+    post(<External.Message_Run>{
+      type: External.MessageType.Run,
+      ast: <any>ast,
+      libs: libs,
+    });
+  }
 
   function setupButtons() {
     $("#command-quit").click(() => {
@@ -568,16 +584,7 @@ module TDev {
       doGraduate("#errorsGraduate");
       e.stopPropagation();
     });
-    $("#command-run").click(() => {
-      var ast = compileOrError(false, "#errorsRun");
-      if (!ast)
-        return;
-      post(<External.Message_Run> {
-        type: External.MessageType.Run,
-        ast: <any> ast,
-        libs: libs,
-      });
-    });
+    $("#command-run").click(() => doRun());
   }
 }
 

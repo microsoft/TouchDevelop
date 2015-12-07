@@ -402,6 +402,7 @@ module TDev {
 
               // don't update if no changes
               var backgroundUpdate = installedState == JSON.stringify([header, scriptText, editorState]);
+              var hasChanges = !backgroundUpdate;
               
               // Writes into local storage. Also clears the scriptVersionInCloud
               // field (fifth argument).
@@ -411,6 +412,7 @@ module TDev {
                   type: MessageType.SaveAck,
                   where: SaveLocation.Local,
                   status: Status.Ok,
+                  changed: hasChanges
                 });
               });
 
