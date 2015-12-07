@@ -701,7 +701,7 @@ Blockly.Blocks['controls_simple_for'] = {
   }
 };
 
-["A", "B", "C", "D", "E", "F", "G"].forEach(function (x) {
+["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"].forEach(function (x) {
     Blockly.Blocks['device_note_'+x] = {
         init: function () {
             this.setHelpUrl('https://www.microbit.co.uk/functions/note');
