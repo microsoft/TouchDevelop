@@ -1682,6 +1682,7 @@ action remote_control(#YHC4x4CkZEExgxbM @event: String) {
   #vahTcTSxkwyaQDVT // {help:functions/events}
   #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
   #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
+  #dZcr8rQkL9cXHWOt code→show_event_notification("remote control", $@event);
   meta sync;
 }
 #xfEzD2r0WjZppPTL
@@ -1689,20 +1690,56 @@ action test_events() {
   #xM2V2HK64vD5CCP6 // {shim:}
   #SF8Y7AzLVf79J9Hv code→\_libinit;
   #xYsvR3f5jJsVfu8P code→remote_control("play");
+  #VXZ2fZLriKdH5o25 code→pause(500);
   #VHKRZyj11yrItaeA code→remote_control("pause");
+  #iuTCLYFn24YBEBAV code→pause(500);
   #NFjU8XLb5qH4qi0s code→remote_control("stop");
+  #oizDycRjQI2sU0fO code→pause(500);
   #x6tXtLrOjbyLj71J code→remote_control("next track");
+  #AaGU8mHo0WmDNVGm code→pause(500);
   #x9ptNjJbOEhQzr2G code→remote_control("previous track");
+  #hM89M5NlZSA5aZes code→pause(500);
   #m2qkS2n4QlIgr8rU code→remote_control("forward");
+  #gH1nNlcw62Yd6tF5 code→pause(500);
   #YC9iNYuSkosLnOiS code→remote_control("rewind");
+  #xmbSINcx1jnrao3s code→pause(500);
   #S4fvdbVeCn1mU7N5 code→remote_control("volume up");
+  #xpPB2ugK28IXwA4W code→pause(500);
   #c6mF6g3EZsN9kyMH code→remote_control("volume down");
+  #yr5uOJyqn6aV8Ge0 code→pause(500);
   #yb0esPi6Iy51trEl code→camera("launch photo mode");
+  #NzJXZ4xVLRd4Ejyg code→pause(500);
   #hCY4GTQ592HR6MDS code→camera("launch video mode");
+  #w00LIesoogGZI3SX code→pause(500);
   #q7dc4Ems5bX8bUjw code→camera("start video capture");
+  #w1XPyVxyf4I43cxv code→pause(500);
   #Ig5RtNNeoA2RR4Vp code→camera("stop video capture");
+  #VTD5jpdXtP0RSz4w code→pause(500);
   #xbMlLP406gUHPHdg code→camera("stop photo mode");
+  #x7UpsxVmiuAKf2O2 code→pause(500);
   #mji2VTG8pklTAlZT code→camera("stop video mode");
+  #xzqQy9QuYzBSFcU4 code→pause(500);
+  #osyLpvx7y5Rqez47 code→alert("display toast");
+  #xgMtYE2VyuuK0SUh code→pause(500);
+  #vplr1SUmLrtoEKw1 code→alert("alarm 1");
+  #mLMYnQoFZOYU4bBv code→pause(500);
+  #Ti16hcwPzBwmNNj8 code→alert("alarm 2");
+  #nrJs9EsvqT9kFj7T code→pause(500);
+  #abtVG7M5AmVIebxk code→alert("alarm 3");
+  #CuUOhQyH7q1POsMW code→pause(500);
+  #wM3rylf47Mzw2D1I code→alert("alarm 4");
+  #hpxVivTxxOSR8Pqr code→pause(500);
+  #c15239nr9VsPiIo9 code→alert("alarm 5");
+  #rS2fSXiqIn63Nape code→pause(500);
+  #AXiIgG5uqhZfftXK code→alert("alarm 6");
+  #dnOMZGp6VT48T3g9 code→pause(500);
+  #lQfV8k1SdXdWnQyy code→alert("find my phone");
+  #u4p6kOo9s73HoGoD code→pause(500);
+  #r4nWD2K8jmaMjfI0 code→alert("play ringtone");
+  #KzEts7e3LbwEb2bL code→pause(500);
+  #Llmpr8UCY4YttCbj code→alert("play sound");
+  #TKfJJ60q6Z52Y2Zs code→pause(500);
+  #NmGpttcHIFb2l2NP code→alert("vibrate");
   meta private;
   meta test;
 }
@@ -1714,6 +1751,7 @@ action camera(#p3kEX3EqeufdJmG1 @event: String) {
   #eeF0Fl9hopb7V9WB // {help:functions/events}
   #Iqur1M60Xd5273Xa // {shim:micro_bit::events::camera}
   #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
+  #yDtIYowWcPuh4mNt code→show_event_notification("camera", $@event);
   meta sync;
 }
 #CjI3CHq22D9YwGsN
@@ -1734,6 +1772,7 @@ action alert(#pHqCn0ZWIdyNQSVu @event: String) {
   #ZCcDnTF7ZiSNaNNA // {help:functions/events}
   #oq6L8Lgvq4qKxsZb // {shim:micro_bit::events::alert}
   #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,alarm 1=MES_ALERT_EVT_ALARM1,alarm 2=MES_ALERT_EVT_ALARM2,alarm 3=MES_ALERT_EVT_ALARM3,alarm 4=MES_ALERT_EVT_ALARM4,alarm 5=MES_ALERT_EVT_ALARM5,alarm 6=MES_ALERT_EVT_ALARM6}
+  #feboFmM8Q6SZnWuH code→show_event_notification("alert", $@event);
   meta sync;
 }
 #DFpXK66KYosuH2qD
@@ -2610,6 +2649,24 @@ action clear_pin_handler(#RSL4xscVGqj094dJ name: String) {
     #TgkAqrWwi7OEyrkK data→p2_handler→\u25c8clear;
   }
   else { } } } 
+  meta private;
+  meta sync;
+}
+#jIsIcIMs28T2k3d1
+action show_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K3d msg: String) {
+  #xw5ZOUW8EPnesEjC // {shim:}
+  #xBsth8WKFROreEm2 code→\_libinit;
+  #ONnRJZP4a5MRHgD4 code→warning("pair a device with the BBC app to use this event");
+  #xGdYFwSAjkS6aGY3 $sprite := data→board→create_text(100, 40, 28, $family→concat("\n")→concat($msg));
+  #x4iM24484ozaNTeT $sprite→fit_text;
+  #xFqNWnjtZC3yheXG $sprite→set_shadow(20, colors→gray, 5, 5);
+  #QtVpY5jaqI0b24vT $sprite→speed_y := - 50;
+  #tDWv6PeAjgT9jDRp $sprite→acceleration_y := - 100;
+  #IeqEh6CZBPBArsjt $anim := $sprite→create_animation;
+  #G4m04OrWzinA52eZ $anim→fade_in(0.5, "cubic");
+  #DfAyWezJ686P96Mc $anim→sleep(0.5);
+  #I7N2JTZXffLH62QE $anim→puff_out(0.5, "cubic", 1.5);
+  #CS4koD4KOBTpR4d2 $anim→delete;
   meta private;
   meta sync;
 }
