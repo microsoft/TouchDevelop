@@ -827,7 +827,7 @@
                 if (!cont && terms.length == 1) {
                     if (/^\/?[a-zA-Z\-]+$/i.test(terms[0])) {
                         TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
-                            if (version != this.searchVersion) return;
+                            if (!e || version != this.searchVersion) return;
                             var inf = this.getAnyInfoByPub(e, "");
                             if (inf) {
                                 direct.setChildren([addEntry(inf)])
@@ -2710,6 +2710,7 @@
             } else {
                 if (Cloud.hasAccessToken())
                     this.getAnd("me/reviewed/" + id, (d) => {
+                        if (!d) return; // deleted
                         res = d.id;
                         if (late && changedMyMind) {
                             changedMyMind(res);
@@ -3836,7 +3837,7 @@
                 lf("This tab contains additional information about this script"),
                 ScreenShotTab,
                 ScriptHeartsTab,
-                Cloud.lite ? ChannelListTab : null,
+                ChannelListTab,
                 TagsTab,
                 ArtTab,
                 ConsumersTab,
@@ -3938,7 +3939,8 @@
                         var loadMore = (cont: string) => {
                             var dd = div(null, HTML.mkButton(lf("load more"),() => {
                                 dd.setChildren(lf("loading..."))
-                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
+                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont, (lst: JsonList) => {
+                                    if (!lst) lst = { items: [], etags: undefined, continuation: undefined };
                                     dd.setChildren(lst.items.map(j => this.tabBox(j)))
                                     if (lst.continuation)
                                         dd.appendChild(loadMore(lst.continuation))
@@ -3949,7 +3951,7 @@
 
                         TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
                             d.className = ""
-                            if (lst.items.length > 0) {
+                            if (lst && lst.items.length > 0) {
                                 var ch = lst.items.map(j => this.tabBox(j))
                                 //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
                                 if (lst.continuation)
@@ -4280,8 +4282,8 @@
             elt.setChildren([lf("loading replies...")]);
             var count = this.nestedCommentsCount(cont);
             TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
+                if (!lst || !lst.items) lst = { items: [], etags: undefined, continuation: undefined };
                 var items = <JsonComment[]>lst.items;
-                if (!items) return; // comment did not load
                 if (!cont && items.length > count) // first load
                 {
                     var boxes = items.slice(0, count).map((cmt) => this.commentBox(cmt));
@@ -4331,7 +4333,7 @@
 
                 if (!this.seenComments.hasOwnProperty(c.publicationid)) {
                     this.seenComments[c.publicationid] = 1;
-                    TheApiCacheMgr.getAnd(c.publicationid, (pc:JsonComment) => {
+                    TheApiCacheMgr.getAnd(c.publicationid, (pc: JsonComment) => {
                         r.setChildren([this.commentBox(pc, true)]);
                     });
                 }
@@ -4357,6 +4359,8 @@
 
         public commentBox(c:JsonComment, includePosting = false) : HTMLElement
         {
+            if (!c) return undefined; // deleted comment
+            
             var uid = this.browser().getCreatorInfo(c);
             var nestedComments = div(null);
             var nestedPubs = div(null);
@@ -9862,6 +9866,7 @@
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
                     TheApiCacheMgr.getAnd(id, (s:JsonScript) => {
+                        if (!s) return; //deleted
                         var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
                         ctnSpan.innerText = n + "";
                     })
@@ -10669,7 +10674,8 @@
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 lbtn.setChildren([btn.withClick(f)]);
                 if (showCount)
-                    TheApiCacheMgr.getAnd(id,(s: JsonChannel) => {
+                    TheApiCacheMgr.getAnd(id, (s: JsonChannel) => {
+                        if (!s) return; // deleted
                         var n = s.positivereviews;
                         ctnSpan.innerText = n + "";
                     })
