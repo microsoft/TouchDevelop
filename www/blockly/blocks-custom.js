@@ -529,8 +529,8 @@ Blockly.Blocks['device_comment2'] = {
     this.setHelpUrl('https://www.microbit.co.uk/td/comment');
     this.setColour(blockColors.comments);
     this.appendDummyInput()
-        .appendField("note:")
-        .appendField(new Blockly.FieldTextInput("this code does ..."), "comment");
+        .appendField("comment:")
+        .appendField(new Blockly.FieldTextInput("..."), "comment");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Comment a piece of code. Comment is preserved when converting.');
