@@ -6538,6 +6538,7 @@
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
+                if (deleted) author.setChildren([]);
 
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
