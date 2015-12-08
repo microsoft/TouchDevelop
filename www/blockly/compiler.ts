@@ -902,7 +902,7 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
 
   // Tricks for musical notes...
   if (b.type.match(/^device_note_/))
-    return compileNote(e, b);
+    return compileNote(e, b); // legacy
   if (b.type.match(/^device_duration_/))
     return compileDuration(e, b);
 
@@ -1342,6 +1342,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     namespace: "game",
     f: "start countdown",
     args: [{ field: "duration" }]
+  },
+  game_score: {
+    namespace: "game",
+    f: "score",
+    args: []
   },
   game_add_score: {
     namespace: "game",

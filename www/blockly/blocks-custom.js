@@ -666,6 +666,18 @@ Blockly.Blocks['game_start_countdown'] = {
   }
 };
 
+Blockly.Blocks['game_score'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(blockColors.game);
+    this.appendDummyInput()
+        .appendField("score");
+    this.setInputsInline(true);
+    this.setTooltip('Gets the current score.');
+    this.setOutput(true, 'Number');
+  }
+};
+
 Blockly.Blocks['game_add_score'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
