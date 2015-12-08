@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // A #microbit game library.
 #FICjbNZc86cUSakA meta import micro\u003abit {
-  pub "flzcsl"
+  pub "vsuixj"
   usage {
     type Image
     action `sync` \_libinit()
@@ -203,11 +203,8 @@ action game_over() {
       }
       #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);
       #XKk2kW9RyjOsqmB1 for 0 ≤ j < 3 do {
-        #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string("GAME OVER", 100);
-        #LRSaxuwOwx5Pikaa basic[lib micro\u003abit] →pause(700);
-        #TjtyTi54gvNJonBL basic[lib micro\u003abit] →show_string(" SCORE ", 100);
-        #tb12845VmRSlsYUc basic[lib micro\u003abit] →show_number(data→\_score, 150);
-        #x4rEDnGkUJtAWTaO basic[lib micro\u003abit] →pause(1200);
+        #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string(" GAME OVER ", 100);
+        #PZAWQZkkKMCO3f8F code→show_score;
       }
     }
   }
@@ -360,4 +357,15 @@ action is_running() returns(#cw0Wu3beI6dUUnNH running: Boolean) {
   #HCRfiRSgAkdGdCW0 // {help:td/game-library}
   #D70pd8XtiL4KQjAN `return` `not` data→\_is_game_over;
   meta sync;
+}
+#HyuErwY6aQym2GfB
+action show_score() {
+  #kg8B9WUteEZeeAjj // Displays the score on the screen.
+  #H8sRcoDkF2w8hCPt // {namespace:game}
+  #GhugUWVAz1SpufdN // {help:td/game-library}
+  #b4aCyOUHZ2tbnTQS // {weight:60}
+  #ZHOR0vX2feQxQuYO code→init;
+  #vgr9oxsK2Bw4HRY3 basic[lib micro\u003abit] →show_string(" SCORE ", 100);
+  #kBGIK1yQHgc1Qva4 basic[lib micro\u003abit] →show_number(data→\_score, 150);
+  #oKd4MsDD4AJGSbZN basic[lib micro\u003abit] →show_string(" ", 150);
 }

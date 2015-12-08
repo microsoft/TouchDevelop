@@ -1679,7 +1679,7 @@ action remote_control(#YHC4x4CkZEExgxbM @event: String) {
   #x1PrhNFlEq2OGzf4 // Sends a ``remote control`` command to the parent device.
   #rbUtYPflzpn05UMQ // {namespace:events}
   #gYfUlslCDE6vhjL6 // {weight:20}
-  #vahTcTSxkwyaQDVT // {help:functions/events}
+  #vahTcTSxkwyaQDVT // {help:td/events}
   #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
   #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
   #dZcr8rQkL9cXHWOt code→show_event_notification("remote control", $@event);
@@ -1748,20 +1748,21 @@ action camera(#p3kEX3EqeufdJmG1 @event: String) {
   #wY3y0ASAfRrgGtG2 // Sends a ``camera`` command to the parent device.
   #T9jxpLbgaFQwkQy8 // {namespace:events}
   #w2wLNoci3MafdcN6 // {weight:19}
-  #eeF0Fl9hopb7V9WB // {help:functions/events}
+  #eeF0Fl9hopb7V9WB // {help:td/events}
   #Iqur1M60Xd5273Xa // {shim:micro_bit::events::camera}
   #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
   #yDtIYowWcPuh4mNt code→show_event_notification("camera", $@event);
   meta sync;
 }
 #CjI3CHq22D9YwGsN
-action audio_recorder(#WUexw2vVrC2OMEa2 @event: String) {
-  #xC6rDXBdCS9ZzGrs // Sends an ``audio recorder`` command to the parent device.
+action microphone(#WUexw2vVrC2OMEa2 @event: String) {
+  #xC6rDXBdCS9ZzGrs // Sends an ``microphone`` command to the parent device.
   #M5eNr22OwVuxNpiN // {namespace:events}
   #Iq35kOhdrf12OXdN // {weight:18}
-  #YWbPzKlWzlZ7fXwv // {help:functions/events}
+  #YWbPzKlWzlZ7fXwv // {help:td/events}
   #gf80RSjq2euipiOS // {shim:micro_bit::events::audio_recorder}
   #QKzBOXeC241gkrof // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
+  #E8b0BafTGID7UDpl code→show_event_notification("microphone", $@event);
   meta sync;
 }
 #CzqRWuR2SyiUNdAg
@@ -1769,7 +1770,7 @@ action alert(#pHqCn0ZWIdyNQSVu @event: String) {
   #vUmqTLUCj4fjFygl // Sends an ``alert`` command to the parent device.
   #etLJqyeZ8q3eRTtj // {namespace:events}
   #gv2Lztj0odNeIJvt // {weight:18}
-  #ZCcDnTF7ZiSNaNNA // {help:functions/events}
+  #ZCcDnTF7ZiSNaNNA // {help:td/events}
   #oq6L8Lgvq4qKxsZb // {shim:micro_bit::events::alert}
   #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,alarm 1=MES_ALERT_EVT_ALARM1,alarm 2=MES_ALERT_EVT_ALARM2,alarm 3=MES_ALERT_EVT_ALARM3,alarm 4=MES_ALERT_EVT_ALARM4,alarm 5=MES_ALERT_EVT_ALARM5,alarm 6=MES_ALERT_EVT_ALARM6}
   #feboFmM8Q6SZnWuH code→show_event_notification("alert", $@event);
