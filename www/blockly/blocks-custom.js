@@ -27,6 +27,62 @@ var digitalPinsDropdown = [
   ["P2", "P2"],
 ];
 
+var notes = {
+    "C": 262,
+    "C#": 277,
+    "D": 294,
+    "D#": 311,
+    "E": 330,
+    "F": 349,
+    "F#": 370,
+    "G": 392,
+    "G#": 415,
+    "A": 440,
+    "A#": 466,
+    "B": 494,
+
+    "C3": 131,
+    "C#3": 139,
+    "D3": 147,
+    "D#3": 156,
+    "E3": 165,
+    "F3": 175,
+    "F#3": 185,
+    "G3": 196,
+    "G#3": 208,
+    "A3": 220,
+    "A#3": 233,
+    "B3": 247,
+
+    "C4": 262,
+    "C#4": 277,
+    "D4": 294,
+    "D#4": 311,
+    "E4": 330,
+    "F4": 349,
+    "F#4": 370,
+    "G4": 392,
+    "G#4": 415,
+    "A4": 440,
+    "A#4": 466,
+    "B4": 494,
+
+    "C5": 523,
+    "C#5": 555,
+    "D5": 587,
+    "D#5": 622,
+    "E5": 659,
+    "F5": 698,
+    "F#5": 740,
+    "G5": 784,
+    "G#5": 831,
+    "A5": 880,
+    "A#5": 932,
+    "B5": 989
+};
+
+var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
+
 var blockColors = {
     basic: 190,
     led: 300,
@@ -705,6 +761,19 @@ Blockly.Blocks['controls_simple_for'] = {
     }
   }
 };
+
+Blockly.Blocks['device_note'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/note');
+    this.setColour(blockColors.music);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(notesDropdown), "note");
+    this.setInputsInline(true);
+    this.setOutput(true, "Number");
+    this.setTooltip('Gets the frequency of a note.');
+  }
+};
+
 
 ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"].forEach(function (x) {
     Blockly.Blocks['device_note_'+x] = {

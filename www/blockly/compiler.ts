@@ -1333,6 +1333,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "ring",
     args: [{ field: "note" } ]
   },
+  device_note: {
+    namespace: "music",
+    f: "note",
+    args: [{ field: "note" } ]
+  },
   game_start_countdown: {
     namespace: "game",
     f: "start countdown",
