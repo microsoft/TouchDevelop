@@ -112,6 +112,7 @@ textarea {
 
 .logView .logMsg {
     white-space:pre-wrap;
+    font-size: 0.85em;
 }
 
 .logView .logMsg:hover {

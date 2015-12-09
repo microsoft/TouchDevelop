@@ -111,11 +111,6 @@
               <field name="NUM">2</field>
             </shadow>
           </value>
-          <value name="pausetime">
-            <shadow type="math_number">
-              <field name="NUM">150</field>
-            </shadow>
-          </value>
         </block>
         <block type="device_show_leds">
         </block>
@@ -123,11 +118,6 @@
           <value name="message">
             <shadow type="text">
               <field name="TEXT">Hello!</field>
-            </shadow>
-          </value>
-          <value name="pausetime">
-            <shadow type="math_number">
-              <field name="NUM">150</field>
             </shadow>
           </value>
         </block>
@@ -258,13 +248,6 @@
         </block>
       </category>
       <category name="Game" colour="176">
-        <block type="game_start_countdown">
-          <value name="duration">
-            <shadow type="math_number">
-              <field name="NUM">10000</field>
-            </shadow>
-          </value>
-        </block>
         <block type="game_add_score">
           <value name="points">
             <shadow type="math_number">
@@ -272,11 +255,20 @@
             </shadow>
           </value>
         </block>
+        <block type="game_score"></block>
+        <block type="game_start_countdown">
+          <value name="duration">
+            <shadow type="math_number">
+              <field name="NUM">10000</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_game_over"></block>
       </category>
       <category name="Music" colour="52">
         <block type="device_play_note">
           <value name="note">
-            <shadow type="device_note_A"></shadow>
+            <shadow type="device_note"></shadow>
           </value>
           <value name="duration">
             <shadow type="device_duration_1/4">
@@ -285,16 +277,9 @@
         </block>
         <block type="device_ring">
           <value name="note">
-            <shadow type="device_note_A"></shadow>
+            <shadow type="device_note"></shadow>
           </value>
         </block>
-        <block type="device_note_A"></block>
-        <block type="device_note_B"></block>
-        <block type="device_note_C"></block>
-        <block type="device_note_D"></block>
-        <block type="device_note_E"></block>
-        <block type="device_note_F"></block>
-        <block type="device_note_G"></block>
         <block type="device_duration_1"></block>
         <block type="device_duration_1/2"></block>
         <block type="device_duration_1/4"></block>
@@ -318,12 +303,19 @@
               </shadow>
             </value>
           </block>
+          <block type="device_set_analog_period">
+            <value name="micros">
+              <shadow type="math_number">
+                <field name="NUM">20000</field>
+              </shadow>
+            </value>
+          </block>
       </category>
       <category name="Variables" colour="330">
         <block type="variables_set"></block>
         <block type="variables_get"></block>
       </category>
-      <category name="Notes" colour="156">
+      <category name="Comments" colour="156">
         <block type="device_comment2"></block>
       </category>
     </xml>

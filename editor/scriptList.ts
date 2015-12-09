@@ -827,7 +827,7 @@
                 if (!cont && terms.length == 1) {
                     if (/^\/?[a-zA-Z\-]+$/i.test(terms[0])) {
                         TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
-                            if (version != this.searchVersion) return;
+                            if (!e || version != this.searchVersion) return;
                             var inf = this.getAnyInfoByPub(e, "");
                             if (inf) {
                                 direct.setChildren([addEntry(inf)])
@@ -973,7 +973,7 @@
                         div("text", lf("BBC micro:bit runtime by")),
                         div("img", HTML.mkA("", "http://www.lancaster.ac.uk/", "_blank", HTML.mkImg(Cloud.artUrl("fcyoveaf"), null, lf("University of Lancaster logo")))))
                     , div("powered-by",
-                        div("text", lf("Compiler services by")),
+                        div("text", lf("Technology services by")),
                         div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah"), null, lf("ARM logo")))))
                     ];
             }
@@ -2710,6 +2710,7 @@
             } else {
                 if (Cloud.hasAccessToken())
                     this.getAnd("me/reviewed/" + id, (d) => {
+                        if (!d) return; // deleted
                         res = d.id;
                         if (late && changedMyMind) {
                             changedMyMind(res);
@@ -3312,6 +3313,11 @@
             });
         }
 
+        public showSelf()
+        {
+            this.parentBrowser.loadDetails(this)
+        }
+
         public mkSmallBoxNoClick():HTMLElement
         {
             return this.mkBoxCore(false);
@@ -3836,7 +3842,7 @@
                 lf("This tab contains additional information about this script"),
                 ScreenShotTab,
                 ScriptHeartsTab,
-                Cloud.lite ? ChannelListTab : null,
+                ChannelListTab,
                 TagsTab,
                 ArtTab,
                 ConsumersTab,
@@ -3938,7 +3944,8 @@
                         var loadMore = (cont: string) => {
                             var dd = div(null, HTML.mkButton(lf("load more"),() => {
                                 dd.setChildren(lf("loading..."))
-                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont,(lst: JsonList) => {
+                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont, (lst: JsonList) => {
+                                    if (!lst) lst = { items: [], etags: undefined, continuation: undefined };
                                     dd.setChildren(lst.items.map(j => this.tabBox(j)))
                                     if (lst.continuation)
                                         dd.appendChild(loadMore(lst.continuation))
@@ -3949,7 +3956,7 @@
 
                         TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
                             d.className = ""
-                            if (lst.items.length > 0) {
+                            if (lst && lst.items.length > 0) {
                                 var ch = lst.items.map(j => this.tabBox(j))
                                 //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
                                 if (lst.continuation)
@@ -4280,8 +4287,8 @@
             elt.setChildren([lf("loading replies...")]);
             var count = this.nestedCommentsCount(cont);
             TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
+                if (!lst || !lst.items) lst = { items: [], etags: undefined, continuation: undefined };
                 var items = <JsonComment[]>lst.items;
-                if (!items) return; // comment did not load
                 if (!cont && items.length > count) // first load
                 {
                     var boxes = items.slice(0, count).map((cmt) => this.commentBox(cmt));
@@ -4331,7 +4338,7 @@
 
                 if (!this.seenComments.hasOwnProperty(c.publicationid)) {
                     this.seenComments[c.publicationid] = 1;
-                    TheApiCacheMgr.getAnd(c.publicationid, (pc:JsonComment) => {
+                    TheApiCacheMgr.getAnd(c.publicationid, (pc: JsonComment) => {
                         r.setChildren([this.commentBox(pc, true)]);
                     });
                 }
@@ -4357,6 +4364,8 @@
 
         public commentBox(c:JsonComment, includePosting = false) : HTMLElement
         {
+            if (!c) return undefined; // deleted comment
+            
             var uid = this.browser().getCreatorInfo(c);
             var nestedComments = div(null);
             var nestedPubs = div(null);
@@ -6529,6 +6538,7 @@
                 dirAuto(nameBlock);
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
+                if (deleted) author.setChildren([]);
 
                 var time = 0;
                 if (this.jsonScript) time = this.jsonScript.time;
@@ -6665,6 +6675,12 @@
                         cont.push(div("sdNumber", " ★"))
                         nameBlock.setChildren([promo.name])
                     }
+                }
+
+                if (big && Cloud.hasPermission("root-ptr") && this.jsonScript.lastpointer) {
+                    cont.push(div("sdNumber",
+                        HTML.mkLinkButton("pointer", () => 
+                        this.browser().getAnyInfoByEtag({ id: this.jsonScript.lastpointer, kind: "pointer", ETag: "" }).showSelf())))
                 }
 
                 numbers.setChildren(cont);
@@ -9862,6 +9878,7 @@
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
                     TheApiCacheMgr.getAnd(id, (s:JsonScript) => {
+                        if (!s) return; //deleted
                         var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
                         ctnSpan.innerText = n + "";
                     })
@@ -10669,7 +10686,8 @@
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 lbtn.setChildren([btn.withClick(f)]);
                 if (showCount)
-                    TheApiCacheMgr.getAnd(id,(s: JsonChannel) => {
+                    TheApiCacheMgr.getAnd(id, (s: JsonChannel) => {
+                        if (!s) return; // deleted
                         var n = s.positivereviews;
                         ctnSpan.innerText = n + "";
                     })
@@ -10876,6 +10894,13 @@
             this.publicId = id;
         }
 
+        public mkTabsCore(): BrowserTab[]{
+            return [
+                this, 
+                Cloud.hasPermission("root-ptr") ? new PointerHistoryTab(this) : null
+            ];
+        }
+
         public withUpdate(elt:HTMLElement, update:(data:any)=>void)
         {
             return super.withUpdate(elt, d => {
@@ -10974,5 +10999,76 @@
             });
         }
     }
+
+    export class PointerHistoryTab
+        extends ListTab
+    {
+        constructor(par:BrowserPage) {
+            super(par, "/history")
+        }
+        public getId() { return "ptrhistory"; }
+        public getName() { return lf("history"); }
+
+        public bgIcon() { return "svg:undo"; }
+        public noneText() { return lf("nothing"); }
+        public hideOnEmpty() { return false }
+
+        public tabBox(cc:JsonIdObject):HTMLElement
+        {
+            var ptr = <JsonPointer>cc;
+
+            var icon = div("sdIcon", HTML.mkImg("svg:undo,white"));
+            icon.style.background = "#1731B8";
+            var nameBlock = div("sdName");
+            var hd = div("sdNameBlock", nameBlock);
+
+            var numbers = div("sdNumbers");
+            var author = div("sdAuthorInner");
+
+            var addInfoInner = div("sdAddInfoInner")
+            var pubId = div("sdAddInfoOuter", addInfoInner);
+
+            var ptr0 = TheApiCacheMgr.getCached(this.parent.publicId) || {}
+
+            var getScriptInfo = (id:string) =>
+                <ScriptInfo>this.browser().getAnyInfoByEtag({ id: id, kind: "script", ETag: "" });
+
+            var showDiff = () => {
+                getScriptInfo(ptr0.scriptid).diffToId(ptr.scriptid)
+            }
+
+            var showChanges = () => {
+                getScriptInfo(ptr.scriptid).diffToId(ptr.oldscriptid)
+            }
+
+            var btns = div("sdBaseCorner",
+                    ptr.scriptid && ptr0.scriptid ? div(null, HTML.mkButton(lf("diff to curr"), showDiff)) : null,
+                    ptr.scriptid && ptr.oldscriptid ? div(null, HTML.mkButton(lf("changes"), showChanges)) : null
+            )
+            
+            var res = div("sdHeaderOuter",
+                            div("sdHeader", icon,
+                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers)),
+                            btns)
+
+            nameBlock.setChildren([ ptr.id.replace(/.*@/, "") ])
+            author.setChildren([ptr.username])
+
+            if (ptr.scriptid) {
+                addInfoInner.setChildren(["/" + ptr.scriptid + ", " + Util.timeSince(ptr.time)]);
+            }
+            else {
+                addInfoInner.setChildren(["-> " + ptr.redirect + ", " + Util.timeSince(ptr.time)]);
+            }
+
+            return res.withClick(() => {
+                if (ptr.scriptid)
+                    this.browser().loadDetails(getScriptInfo(ptr.scriptid))
+                else
+                    HTML.wrong(res)
+            })
+        }
+    }
+ 
 
 }

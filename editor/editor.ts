@@ -2170,8 +2170,9 @@ module TDev
                 children.push(compileBtn = Editor.mkTopMenuItem("svg:bitcompile,currentColor", str, Ticks.codeCompile, "Ctrl-Alt-M",
                     (e: Event) => {
                         var me = <MouseEvent>e;
-                        var forceCpp = me.ctrlKey && me.altKey;
-                        var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || /dbgcpp=1/i.test(document.location.href);
+                        var dbgCpp = /dbgcpp=1/i.test(document.location.href);
+                        var forceCpp = (me.ctrlKey && me.altKey) || dbgCpp;
+                        var debug = (<MouseEvent> e).ctrlKey || (<MouseEvent> e).metaKey || dbgCpp;
 
                         if (!debug && SizeMgr.splitScreen)
                             this.runMainAction();
@@ -3419,6 +3420,7 @@ module TDev
             el.classList.add('teamHead');
             el.addEventListener("click", () => {
                 Browser.TheApiCacheMgr.getAnd(aUserId, (j: JsonUser) => {
+                    if (!j) return; // deleted user
                     var participant = Collab.getLastActivity(aUserId);
                     // User's still there, but has no recent activity.
                     if (!participant)
@@ -3676,6 +3678,8 @@ module TDev
                     users.appendChild(theUser.node);
 
                     Browser.TheApiCacheMgr.getAnd(aUserId, (j: JsonUser) => {
+                        if (!j) return; // deleted user
+                        
                         var icon = this.mkIconUrl(aUserId, j);
                         this.webNotification(lf("{0} joined {1}", j.name, Script.getName()), "join", icon);
                     });
@@ -3757,6 +3761,7 @@ module TDev
                         var theUser = newMsgSequence[i].user;
                         if (theUser != Cloud.getUserId())
                             Browser.TheApiCacheMgr.getAnd(theUser, (j: JsonUser) => {
+                                if (!j) return;
                                 var icon = this.mkIconUrl(theUser, j);
                                 this.webNotification(lf("New message from {0} in {1}", j.name, Script.getName()), "message", icon);
                             });
@@ -5547,7 +5552,8 @@ module TDev
             var num = 0;
             Script.libraries().forEach((l) => {
                 if (l.isPublished() && !ScriptCache.forcedUpdate(l.getId()))
-                    Browser.TheApiCacheMgr.getAnd(l.getId(), (j:JsonScript) => {
+                    Browser.TheApiCacheMgr.getAnd(l.getId(), (j: JsonScript) => {
+                        if (!j) return; // deleted script
                         var upd = null;
                         if (j.updateid && j.updateid != j.id && j.updatetime > j.time) upd = j.updateid;
                         if (upd) {

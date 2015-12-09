@@ -120,9 +120,9 @@ module TDev {
         break;
       case External.Status.Ok:
         if (message.where == External.SaveLocation.Cloud) {
-          statusMsg(prefix(message.where)+" successfully saved version (cloud in sync? "+
-            message.cloudIsInSync +", "+
-            "from "+currentVersion+" to "+message.newBaseSnapshot+")",
+          statusMsg(prefix(message.where) + " successfully saved version (cloud in sync? " +
+            message.cloudIsInSync + ", " +
+            "from " + currentVersion + " to " + message.newBaseSnapshot + ")",
             message.status);
           currentVersion = message.newBaseSnapshot;
           if (message.cloudIsInSync)
@@ -131,8 +131,13 @@ module TDev {
             statusIcon("exclamation-triangle");
         } else {
           statusIcon("floppy-o");
-          statusMsg(prefix(message.where)+" successfully saved", message.status);
+          statusMsg(prefix(message.where) + " successfully saved", message.status);
         }
+
+        if (message.changed) {
+          statusMsg("changes detected, running...", message.status);
+          doRun(true);
+        }        
         break;
     }
   }
@@ -358,7 +363,7 @@ module TDev {
     // be fired immediately after the current function is done. To make sure our change handler
     // does not receive that initial event, we schedule it for slightly later.
     window.setTimeout(() => {
-      Blockly.addChangeListener(() => {
+      Blockly.mainWorkspace.addChangeListener(() => {
         markLocalChanges();
       });
     }, 1);
@@ -548,6 +553,18 @@ module TDev {
       libs: libs,
     });
   }
+  
+  function doRun(auto : boolean) {
+    var ast = compileOrError(false, "#errorsRun");
+    if (!ast)
+      return;
+    post(<External.Message_Run>{
+      type: External.MessageType.Run,
+      ast: <any>ast,
+      libs: libs,
+      onlyIfSplit: auto
+    });
+  }
 
   function setupButtons() {
     $("#command-quit").click(() => {
@@ -568,16 +585,7 @@ module TDev {
       doGraduate("#errorsGraduate");
       e.stopPropagation();
     });
-    $("#command-run").click(() => {
-      var ast = compileOrError(false, "#errorsRun");
-      if (!ast)
-        return;
-      post(<External.Message_Run> {
-        type: External.MessageType.Run,
-        ast: <any> ast,
-        libs: libs,
-      });
-    });
+    $("#command-run").click(() => doRun(false));
   }
 }
 

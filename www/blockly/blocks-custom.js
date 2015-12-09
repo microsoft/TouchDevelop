@@ -27,6 +27,23 @@ var digitalPinsDropdown = [
   ["P2", "P2"],
 ];
 
+var notes = {
+    "C": 262,
+    "C#": 277,
+    "D": 294,
+    "D#": 311,
+    "E": 330,
+    "F": 349,
+    "F#": 370,
+    "G": 392,
+    "G#": 415,
+    "A": 440,
+    "A#": 466,
+    "B": 494,
+};
+
+var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
+
 var blockColors = {
     basic: 190,
     led: 300,
@@ -50,10 +67,6 @@ Blockly.Blocks['device_print_message'] = {
         .setCheck("String")
         .setAlign(Blockly.ALIGN_RIGHT)
         .appendField("string");
-    this.appendValueInput("pausetime")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("with interval (ms)");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Shows the specified string and scrolls it if necessary.');
@@ -70,11 +83,7 @@ Blockly.Blocks['device_show_number'] = {
         .appendField("show number");
     this.appendValueInput("number")
         .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT);
-    this.appendValueInput("pausetime")
-        .setCheck("Number")
-        .setAlign(Blockly.ALIGN_RIGHT)
-        .appendField("with interval (ms)");
+        .setAlign(Blockly.ALIGN_RIGHT);    
     this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
@@ -226,6 +235,24 @@ Blockly.Blocks['device_set_analog_pin'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);
         this.setTooltip('Set an analog value on a pin (between 0 and 1024).');
+    }
+};
+
+Blockly.Blocks['device_set_analog_period'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/analog-set-period');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("analog set period");
+        this.appendValueInput("micros")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("(micros) to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "pin");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Configures the PWM in micro-seconds.');
     }
 };
 
@@ -520,8 +547,8 @@ Blockly.Blocks['device_comment2'] = {
     this.setHelpUrl('https://www.microbit.co.uk/td/comment');
     this.setColour(blockColors.comments);
     this.appendDummyInput()
-        .appendField("note:")
-        .appendField(new Blockly.FieldTextInput("this code does ..."), "comment");
+        .appendField("comment:")
+        .appendField(new Blockly.FieldTextInput("..."), "comment");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Comment a piece of code. Comment is preserved when converting.');
@@ -618,6 +645,18 @@ Blockly.Blocks['game_start_countdown'] = {
   }
 };
 
+Blockly.Blocks['game_score'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(blockColors.game);
+    this.appendDummyInput()
+        .appendField("score");
+    this.setInputsInline(true);
+    this.setTooltip('Gets the current score.');
+    this.setOutput(true, 'Number');
+  }
+};
+
 Blockly.Blocks['game_add_score'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
@@ -631,6 +670,19 @@ Blockly.Blocks['game_add_score'] = {
     this.setTooltip('Add points to the user score.');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
+  }
+};
+
+Blockly.Blocks['game_game_over'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setColour(blockColors.game);
+    this.appendDummyInput()
+        .appendField("game over");
+    this.setInputsInline(true);
+    this.setTooltip('Ends the game.');
+    this.setPreviousStatement(true);
+    this.setNextStatement(false);
   }
 };
 
@@ -701,7 +753,20 @@ Blockly.Blocks['controls_simple_for'] = {
   }
 };
 
-["A", "B", "C", "D", "E", "F", "G"].forEach(function (x) {
+Blockly.Blocks['device_note'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/note');
+    this.setColour(blockColors.music);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(notesDropdown), "note");
+    this.setInputsInline(true);
+    this.setOutput(true, "Number");
+    this.setTooltip('Gets the frequency of a note.');
+  }
+};
+
+
+["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"].forEach(function (x) {
     Blockly.Blocks['device_note_'+x] = {
         init: function () {
             this.setHelpUrl('https://www.microbit.co.uk/functions/note');

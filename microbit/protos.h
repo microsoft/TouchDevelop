@@ -2,6 +2,7 @@ bool           action::is_invalid            (Action a);                        
 Action         action::mk                    (int reflen, int totallen, int startptr); // F3 bvm
 void           action::run                   (Action a);                             // P1 bvm
 int            bits::and_uint32              (int x, int y);                         // F2
+RefBuffer*     bits::create_buffer           (int size);                             // F1 over
 int            bits::or_uint32               (int x, int y);                         // F2
 int            bits::rotate_left_uint32      (int x, int y);                         // F2
 int            bits::rotate_right_uint32     (int x, int y);                         // F2
@@ -23,6 +24,7 @@ uint32_t       bitvm::ldglb                  (int idx);                         
 uint32_t       bitvm::ldglbRef               (int idx);                              // F1
 uint32_t       bitvm::ldloc                  (RefLocal *r);                          // F1
 uint32_t       bitvm::ldlocRef               (RefRefLocal *r);                       // F1
+StringData*    bitvm::mkStringData           (uint32_t len);                         // F1
 RefLocal*      bitvm::mkloc                  ();                                     // F0
 RefRefLocal*   bitvm::mklocRef               ();                                     // F0
 RefAction*     bitvm::stclo                  (RefAction *a, int idx, uint32_t v);    // F3
@@ -38,6 +40,14 @@ bool           boolean::equals               (bool x, bool y);                  
 bool           boolean::not_                 (bool x);                               // F1
 bool           boolean::or_                  (bool x, bool y);                       // F2
 StringData*    boolean::to_string            (int v);                                // F1 over
+void           buffer::add                   (RefBuffer *c, uint32_t x);             // P2 bvm
+uint32_t       buffer::at                    (RefBuffer *c, int x);                  // F2 bvm
+int            buffer::count                 (RefBuffer *c);                         // F1 bvm
+char*          buffer::cptr                  (RefBuffer *c);                         // F1 bvm
+void           buffer::fill                  (RefBuffer *c, int v);                  // P2 bvm
+void           buffer::fill_random           (RefBuffer *c);                         // P1 bvm
+RefBuffer*     buffer::mk                    (uint32_t size);                        // F1 bvm
+void           buffer::set                   (RefBuffer *c, int x, uint32_t y);      // P3 bvm
 void           collection::add               (RefCollection *c, uint32_t x);         // P2 bvm
 uint32_t       collection::at                (RefCollection *c, int x);              // F2 bvm
 int            collection::count             (RefCollection *c);                     // F1 bvm
@@ -90,7 +100,9 @@ int            micro_bit::getCurrentTime     ();                                
 int            micro_bit::getImageHeight     (ImageData *i);                         // F1 over
 int            micro_bit::getImagePixel      (ImageData *i, int x, int y);           // F3 over
 int            micro_bit::getImageWidth      (ImageData *i);                         // F1 over
-int            micro_bit::i2cReadRaw         (int address, const char *data, int length, int repeated); // F4 over
+void           micro_bit::i2cReadBuffer      (int address, RefBuffer *buf);          // P2 over
+int            micro_bit::i2cReadRaw         (int address, char *data, int length, int repeated); // F4 over
+void           micro_bit::i2cWriteBuffer     (int address, RefBuffer *buf);          // P2 over
 int            micro_bit::i2cWriteRaw        (int address, const char *data, int length, int repeated); // F4 over
 int            micro_bit::i2c_read           (int addr);                             // F1
 void           micro_bit::i2c_write          (int addr, char c);                     // P2

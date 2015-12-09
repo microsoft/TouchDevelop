@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // A #microbit game library.
 #FICjbNZc86cUSakA meta import micro\u003abit {
-  pub "lqzmez"
+  pub "vsuixj"
   usage {
     type Image
     action `sync` \_libinit()
@@ -60,6 +60,11 @@ meta parentIds "";
     action `sync` note(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring(frequency: Number)
   }
 }
 #GSTBzUmgzKqh572M
@@ -174,38 +179,35 @@ var \_end_time : Number {
 }
 #qsSRH3fC1L812M5G
 action game_over() {
-  #zL9SS6wzl1a4SmPu // Displays a game over animation if the life is over or countdown is expired.
+  #zL9SS6wzl1a4SmPu // Displays a game over animation.
+  #xEMronZSgyqejFrR // {namespace:game}
+  #iSDqv1rmu8dvkXDc // {weight:10}
+  #zVP4yHOI14OXGY5q // {help:td/game-library}
   #Kx2cMn3rxMJadRgc if `not` data→\_is_game_over then {
     #xNEpLy8Dw9bOe19L data→\_is_game_over := true;
     #PHqtjWicyXXr3VHk code→unplug_events;
-    #cpPtkWuZoRAKW9xJ $resetable := false;
+    #x94kxchhqKJiA22G input[lib micro\u003abit] →on_button_pressed("A");
+    #xCpZ6qifR0CrrqXm where `implicit` \_body\_() {
+      #Oze01ntfn9Xo3flD control[lib micro\u003abit] →reset;
+    }
+    #EzciDuGrtZGyRJ62 input[lib micro\u003abit] →on_button_pressed("B");
+    #jWfygM4gkxQQ0I07 where `implicit` \_body\_() {
+      #sAe3HG2sx4FrC7ZB control[lib micro\u003abit] →reset;
+    }
     #XkFnkf3J2op1RUmQ led[lib micro\u003abit] →set_brightness(255);
     #DQ2Ufby7NHShBjEc while true do {
       #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
         #qN0fKrhol7iI1zpn basic[lib micro\u003abit] →clear_screen;
-        #puFgaW4Ecm7oLMUb basic[lib micro\u003abit] →pause(150);
-        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →show_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1", 400);
+        #puFgaW4Ecm7oLMUb basic[lib micro\u003abit] →pause(100);
+        #xxi2pN9JNMVicahP basic[lib micro\u003abit] →show_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1", 300);
       }
       #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);
-      #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string("GAME OVER", 100);
-      #LRSaxuwOwx5Pikaa basic[lib micro\u003abit] →pause(700);
-      #tb12845VmRSlsYUc basic[lib micro\u003abit] →show_number(data→\_score, 100);
-      #x4rEDnGkUJtAWTaO basic[lib micro\u003abit] →pause(1200);
-      #yLXE2y2NZSOZ4hkU if `not` $resetable then {
-        #dnWQBAxjz4gBfilO $resetable := true;
-        #DCGW4inW2417ZeGs input[lib micro\u003abit] →on_button_pressed("B");
-        #jlvkfCXJKYj1Uy2m where `implicit` \_body\_() {
-          #I1TCauF6Nju3OJLl control[lib micro\u003abit] →reset;
-        }
-        #JpUpYdS8VxtUCBhc input[lib micro\u003abit] →on_button_pressed("A");
-        #vKAd2LoMcHflYCrz where `implicit` \_body\_() {
-          #xtgCqbDV0YAeMKyS control[lib micro\u003abit] →reset;
-        }
-        #dnNXBzVzYDagXXZk basic[lib micro\u003abit] →show_string("PRESS A OR B TO RESTART", 100);
+      #XKk2kW9RyjOsqmB1 for 0 ≤ j < 3 do {
+        #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string(" GAME OVER ", 100);
+        #PZAWQZkkKMCO3f8F code→show_score;
       }
     }
   }
-  meta private;
 }
 #PdPR9cpJ2YKm2EYO
 action current_time() returns(#fsGwyKm0OLECbz4I ms: Number) {
@@ -355,4 +357,15 @@ action is_running() returns(#cw0Wu3beI6dUUnNH running: Boolean) {
   #HCRfiRSgAkdGdCW0 // {help:td/game-library}
   #D70pd8XtiL4KQjAN `return` `not` data→\_is_game_over;
   meta sync;
+}
+#HyuErwY6aQym2GfB
+action show_score() {
+  #kg8B9WUteEZeeAjj // Displays the score on the screen.
+  #H8sRcoDkF2w8hCPt // {namespace:game}
+  #GhugUWVAz1SpufdN // {help:td/game-library}
+  #b4aCyOUHZ2tbnTQS // {weight:60}
+  #ZHOR0vX2feQxQuYO code→init;
+  #vgr9oxsK2Bw4HRY3 basic[lib micro\u003abit] →show_string(" SCORE ", 100);
+  #kBGIK1yQHgc1Qva4 basic[lib micro\u003abit] →show_number(data→\_score, 150);
+  #oKd4MsDD4AJGSbZN basic[lib micro\u003abit] →show_string(" ", 150);
 }

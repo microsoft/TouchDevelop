@@ -193,6 +193,7 @@ module TDev {
         unmoderated?: boolean;
         noexternallinks?:boolean;
         promo?:any;
+        lastpointer?:string;
     }
 
     export interface JsonHistoryItem
@@ -241,6 +242,13 @@ module TDev {
         artid: string; // where is it pointing to
         redirect: string; // full URL or /something/on/the/same/host
         description: string; // set to script title from the client
+        htmlartid:string;
+
+        scriptname: string;
+        scriptdescription: string;
+        breadcrumbtitle: string;
+        parentpath: string;
+        oldscriptid?:string;
     }
 
 

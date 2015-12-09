@@ -492,6 +492,20 @@ module TDev.RT {
     //? Various properties of application environment
     export class AppEnv
     {
+        private temporarySettings: TDev.StringMap<string> = {};
+        
+        //? Retreives an in-memory editor setting
+        //@ flow(SourceWeb)
+        public temporary_setting(key: string) : string {
+            return this.temporarySettings[key];
+        }
+        
+        //? Sets an in-memory editor setting. The setting is stored until the page is refreshed
+        //@ flow(SinkWeb)
+        public set_temporary_setting(key: string, value: string) {            
+            this.temporarySettings[key] = value;
+        }        
+        
         //? Get the browser name and version
         public user_agent() : string
         {
@@ -890,7 +904,7 @@ module TDev.RT {
             if (r) return r.response()
             return undefined
         }
-
+        
         //? Get the Editor interface
         //@ betaOnly
         export function editor(s:IStackFrame) : Editor
