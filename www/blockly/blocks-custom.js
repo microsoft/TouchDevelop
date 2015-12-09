@@ -238,6 +238,24 @@ Blockly.Blocks['device_set_analog_pin'] = {
     }
 };
 
+Blockly.Blocks['device_set_analog_period'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/analog-set-period');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("analog set period");
+        this.appendValueInput("micros")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("(micros) to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "pin");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Configures the PWM in micro-seconds.');
+    }
+};
+
 Blockly.Blocks['device_get_brightness'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/brightness');

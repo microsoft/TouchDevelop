@@ -1313,6 +1313,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "analog write pin",
     args: [{ field: "name" }, { field: "value" } ]
   },
+  device_set_analog_period: {
+    namespace: "pins",
+    f: "analog set period",
+    args: [{ field: "pin" } , { field: "micros" }]
+  },
   device_get_brightness: {
     namespace: "led",
     f: "brightness",
