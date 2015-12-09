@@ -109,7 +109,7 @@ module TDev.AST.Thumb
                                 if (ln.bin.finalEmit)
                                     return emitErr("unknown label", actual)
                                 else
-                                    v = 42
+                                    v = 8; // needs to be divisible by 4 etc
                             }
                         }
                     } else {
