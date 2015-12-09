@@ -1637,6 +1637,7 @@ module TDev.AST.Bytecode
                 this.proc.label = shimname
 
                 this.proc.emit(".section code");
+                this.proc.emit(".balign 4");
                 this.proc.emitLbl(this.proc.label);
                 this.proc.emit("@scope user" + p.seqNo)
                 this.proc.emit("@stackmark func");
