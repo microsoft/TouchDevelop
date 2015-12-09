@@ -7001,13 +7001,18 @@
         }
         
         public saveAsync(): Promise {
+
+            if (true|| Browser.isMobileSafari || Browser.isMobileSafariOld)
+                return ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."), { cancel: true })
+                    .then(ok => ok ? this.internalSaveAsync() : undefined);
+            else
+                return this.internalSaveAsync();
+        }
+            
+        private internalSaveAsync() : Promise {
             var guid = this.getGuid();
             var json: string;
-            
             var p = Promise.as();
-            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
-                p = p.then(() => ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app.")));
-
             return p.then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
                 .then(r => {
                     var text = <string>r[0];
