@@ -334,7 +334,7 @@ module TDev.Cloud {
         return div("wall-dialog-body", div("smallText",
                 lf("Publishing is subject to our "),
                 link(lf("terms of use"), "/terms-of-use"),
-                lf(". Please read our information about "), link(lf("privacy and cookies"), "/privacy"), "."))
+                lf(". Please read our "), link(lf("privacy policy"), "/privacy"), "."))
     }
 
     export var authenticateAsync = (activity:string, redirect = false, dontRedirect = false): Promise =>
