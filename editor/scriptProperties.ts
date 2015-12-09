@@ -249,7 +249,7 @@ module TDev
             var btns: HTMLElement[] = Object.keys(additionalActions).map(k => HTML.mkButton(k, additionalActions[k]))
 
             if (hd && hd.editor) {
-                m.add(div("", text(lf("We can only show differences between two TouchDevelop scripts."))));
+                m.add(div("", text(lf("We can only show differences between two Touch Develop scripts."))));
                 m.add(div("diffButtons", btns))
             } else {
                 var prog = HTML.mkProgressBar()
@@ -854,7 +854,7 @@ module TDev
 
         private deleteScript()
         {
-            ModalDialog.ask("are you sure you want to uninstall this script?", "uninstall",
+            ModalDialog.ask(lf("are you sure you want to uninstall this script?"), lf("uninstall"),
                 () => {
                     TheEditor.uninstallCurrentScriptAsync().done();
                 });
@@ -865,7 +865,7 @@ module TDev
                 () => {
                     TheEditor.currentRt.datas = {};
                     TheEditor.currentRt.sessions.deleteAllLocalDataAsync(Script.localGuid).done(() => {
-                        HTML.showProgressNotification(lf("puff! gone."));
+                        HTML.showProgressNotification(lf("poof! gone."));
                     });
                 });
         }

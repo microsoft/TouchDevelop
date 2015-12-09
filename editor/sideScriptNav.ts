@@ -490,7 +490,7 @@ module TDev
                     createOne: () => [
                         { decl: this.editor.freshPictureResource(), displayName: lf("picture resource"), tick: Ticks.sideAddResource, description: lf("A picture") },
                         { decl: this.editor.freshSoundResource(), displayName: lf("sound resource"), tick: Ticks.sideAddResource, description: lf("A sound") },
-                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: AST.blockMode || AST.legacyMode, displayName: lf("string resource"), tick: Ticks.sideAddResource, description: lf("Embeded text or downloaded from the web") },
+                        { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: AST.blockMode || AST.legacyMode, displayName: lf("string resource"), tick: Ticks.sideAddResource, description: lf("Embedded text or downloaded from the web") },
                         Cloud.lite ? { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: lf("document resource"), tick: Ticks.sideAddResource, description: lf("A document") } : undefined,
                         { decl: this.editor.freshArtResource("Json Object", "json"), initiallyHidden: true, displayName: lf("JSON resource"), tick: Ticks.sideAddResource, description: lf("JSON data") },
                         { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: lf("color resource"), tick: Ticks.sideAddResource, description: lf("A color constant") },

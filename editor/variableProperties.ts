@@ -345,7 +345,7 @@ module TDev
             this.img.onerror = () => {
                 this.progressBar.stop();
                 if (this.url.value)
-                    this.imgInfo.setChildren([lf("Ooops, there was an error loading the picture.")]);
+                    this.imgInfo.setChildren([lf("Oops, there was an error loading the picture.")]);
                 else
                     this.imgInfo.setChildren([lf("no picture loaded yet")]);
             };
@@ -389,7 +389,7 @@ module TDev
         private searchOnlineButton: HTMLElement;
         constructor() {
             super()
-            this.url = HTML.mkTextInput("text", "The document url");
+            this.url = HTML.mkTextInput("text", lf("The document url"));
             this.url.readOnly = true;
             this.uploadButton = HTML.mkButton(lf("upload"),() => {
                 this.uploadHandler();
@@ -789,7 +789,7 @@ module TDev
                         }
                         return World.installFromSaveAsync(script.header, script.source)
                             .then(h => h.guid, e => {
-                                HTML.showErrorNotification("Sorry, this script file is invalid.");
+                                HTML.showErrorNotification(lf("Sorry, this script file is invalid."));
                                 return undefined;
                             })
                     })

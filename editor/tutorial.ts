@@ -198,7 +198,7 @@ module TDev
                         op.addButton = Ticks.sideAddVariable
                         op.label = lf("we need to a new variable")
                     } else {
-                        Util.oops("declaration type not supported in tutorial")
+                        Util.oops(lf("declaration type not supported in tutorial"))
                     }
                 }
                 return op;
