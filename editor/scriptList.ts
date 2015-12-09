@@ -973,7 +973,7 @@
                         div("text", lf("BBC micro:bit runtime by")),
                         div("img", HTML.mkA("", "http://www.lancaster.ac.uk/", "_blank", HTML.mkImg(Cloud.artUrl("fcyoveaf"), null, lf("University of Lancaster logo")))))
                     , div("powered-by",
-                        div("text", lf("Compiler services by")),
+                        div("text", lf("Technology services by")),
                         div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah"), null, lf("ARM logo")))))
                     ];
             }
