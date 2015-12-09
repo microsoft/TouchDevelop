@@ -140,7 +140,7 @@ module TDev
             this.searchDiv.withClick(() => {});
             if (TheEditor.autoHide()) {
                 this.searchDiv.appendChild(
-                    TheEditor.mkTabMenuItem("svg:search,currentColor", "all APIs", null, Ticks.calcBtnApiSearch, () => {
+                    TheEditor.mkTabMenuItem("svg:search,currentColor", lf("all APIs"), null, Ticks.calcBtnApiSearch, () => {
                         if (TheEditor.sidePaneVisible())
                             this.cancel();
                         else

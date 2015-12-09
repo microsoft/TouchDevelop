@@ -347,8 +347,8 @@
 
             var d = new ModalDialog();
             var noticeHTML = Runtime.legalNoticeHeader ||
-                (lf("<h3>welcome to TouchDevelop</h3>") +
-                lf("<p>TouchDevelop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
+                (lf("<h3>welcome to Touch Develop</h3>") +
+                lf("<p>Touch Develop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
                 lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
             d.addHTML(noticeHTML);
 
@@ -394,7 +394,7 @@
             if (ed) {
                 TheEditor.restore();
             } else {
-                Util.check(!Cloud.isRestricted(), "trying to naviate to hub");
+                Util.check(!Cloud.isRestricted(), "trying to navigate to hub");
                 TheHub.showSections();
             }
         }
@@ -776,7 +776,7 @@
             }
             if (this.apiPath == "showcase-mgmt") {
                 var showDiv = div(null, HTML.mkButton(lf("publish showcase"), () => {
-                    showDiv.setChildren("working on it...")
+                    showDiv.setChildren(lf("working on it..."))
                     Showcase.snapshotAsync().done(msg => {
                         showDiv.setChildren(msg)
                     })
@@ -1054,21 +1054,21 @@
                             }
                             else {
                                 if (Math.floor(Math.abs(seconds)) > 60 * 60) {
-                                    delta += Math.floor(Math.abs(seconds) / 60 / 60) + " hours ";
+                                    delta += Math.floor(Math.abs(seconds) / 60 / 60) + lf(" hours ");
                                     seconds %= 60 * 60;
                                 }
                                 if (Math.floor(Math.abs(seconds)) > 60) {
-                                    delta += Math.floor(Math.abs(seconds) / 60) + " minutes ";
+                                    delta += Math.floor(Math.abs(seconds) / 60) + lf(" minutes ");
                                     seconds %= 60;
                                 }
                                 if (Math.floor(Math.abs(seconds)) > 0) {
-                                    delta += Math.floor(Math.abs(seconds)) + " seconds ";
+                                    delta += Math.floor(Math.abs(seconds)) + lf(" seconds ");
                                 }
                                 if (seconds < 0)
-                                    delta += " forward";
+                                    delta += lf(" forward");
                                 else//
-                                    delta += " backward";
-                                msg = "Adjust it " + delta + ".";
+                                    delta += lf(" backward");
+                                msg = lf("Adjust it {0}.", delta);
                             }
                             Ticker.tick(Ticks.hubWrongTime);
                             HTML.showWarningNotification(lf("cannot sync! fix the time on your device"), { details: msg });
@@ -1084,12 +1084,12 @@
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
                                 div("wall-dialog-body",
-                                    Util.fmt("Run the beta version of TouchDevelop {0}.",
+                                    Util.fmt("Run the beta version of Touch Develop {0}.",
                                         Browser.isWP8app ? "cloud services" : "web app")),
-                                div("wall-dialog-body", lf("See upcoming features first, and help us debugging.")),
+                                div("wall-dialog-body", lf("See upcoming features first, and help us debug.")),
                                 div("wall-dialog-body", lf("You can always go back to the regular version (from 'Settings' in the hub).")),
                                 Browser.isWP8app ? null :
-                                div("wall-dialog-body", HTML.mkCheckBox("from now on always use beta", Editor.setAlwaysBeta, Editor.isAlwaysBeta())),
+                                div("wall-dialog-body", HTML.mkCheckBox(lf("from now on always use beta"), Editor.setAlwaysBeta, Editor.isAlwaysBeta())),
                                 div("wall-dialog-buttons",
                                     HTML.mkButton(lf("try out beta"), () => {
                                         Cloud.postAskBetaAsync(true)
@@ -10330,7 +10330,7 @@
                             HTML.showWarningNotification("missing {template:empty} in the tutorial")
                         text.done((t) => {
                             if (!t) {
-                                ModalDialog.info("template missing", "the script template /" + m[1] + " couldn't be retrived");
+                                ModalDialog.info("template missing", "the script template /" + m[1] + " couldn't be retrieved");
                                 return;
                             }
 
