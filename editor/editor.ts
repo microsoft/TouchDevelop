@@ -1282,23 +1282,6 @@ module TDev
 
         public syncDone() {
             Ticker.dbg("syncDone");
-            if (Cloud.lite) return
-            ProgressOverlay.lock.done(() => {
-                this.getDepsVersionsAsync().done((ver) => {
-                    if (!Script) return;
-                    if (!Util.jsonEq(ver, this.scriptVersions)) {
-                        var script = this.serializeScript();
-                        if (this.scriptForCloud !== script || this.serializeState() != this.editorStateForCloud) {
-                            // ignore this message while running a tutorial
-                            if (!TheEditor || !TheEditor.stepTutorial)
-                                HTML.showErrorNotification("local edits have overridden changes from the cloud; use version history to recover")
-                            this.saveStateAsync().done();
-                        } else {
-                            this.reload();
-                        }
-                    }
-                })
-            })
         }
 
         public applySizes() {
@@ -2672,7 +2655,7 @@ module TDev
                         }
                         localStorage.removeItem("editorScriptToSaveDirty");
 
-                        if (syncOnFail && Cloud.lite && response.numErrors && !World.syncIsActive()) {
+                        if (syncOnFail && response.numErrors && !World.syncIsActive()) {
                             Util.log("save failed; triggering sync")
                             World.syncAsync().done()
                         }

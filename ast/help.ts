@@ -83,7 +83,6 @@ module TDev {
         // if sound
         wavurl: string;
         aacurl: string;
-        // cloud.lite
         bloburl?: string;
         arttype?: string;
     }
@@ -476,19 +475,10 @@ module TDev {
                 return links;
             },
             idToUrl: id => "https://vimeo.com/" + id,
-            idToHTMLAsync: (id:string) : Promise => {
-                if (Cloud.lite)
-                    return Promise.as(HTML.mkLazyVideoPlayer(
-                        Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), id),
-                        "https://player.vimeo.com/video/" + id))
-                var url = 'https://vimeo.com/' + id;
-                var p = oembedCache[url] ? Promise.as(oembedCache[url])
-                    : Util.httpGetJsonAsync("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/" + id)
-                        .then(oembed => {
-                        oembedCache[url] = oembed;
-                        return oembed;
-                        });
-                return p.then((oe: HTML.OEmbed) => HTML.mkLazyVideoPlayer(oe.thumbnail_url, "https://player.vimeo.com/video/" + id));
+            idToHTMLAsync: (id: string): Promise => {
+                return Promise.as(HTML.mkLazyVideoPlayer(
+                    Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), id),
+                    "https://player.vimeo.com/video/" + id))
             },
         }, {
             id: "instagram",
@@ -573,7 +563,7 @@ module TDev {
         public useSVG = true;
         public useExternalLinks = false;
         public blockExternalLinks:boolean = undefined;
-        public pointerHelp = Cloud.lite;
+        public pointerHelp = true;
         public allowLinks = true;
         public allowImages = true;
         public allowVideos = true;
@@ -1025,7 +1015,7 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
                         );
                 }
-            } else if (Cloud.lite && macro == "videoptr") {
+            } else if (macro == "videoptr") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
@@ -1059,7 +1049,7 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', arg))
                         );
                 }
-            } else if (Cloud.lite && macro == "vimeo") {
+            } else if (macro == "vimeo") {
                 if (!this.allowVideos) return "";
                 if (Cloud.isRestricted())
                     return MdComments.error("vimeo not allowed");
@@ -2470,44 +2460,6 @@ module TDev {
                 return HelpTopic.topicByScriptId[id]
         }
 
-        /*
-        public genScript()
-        {
-            if (!this.apiKind || this.apiProperty || this.json.id)
-                return Promise.as();
-            var app = AST.Parser.parseScript('meta version "v2.2,js,ctx";\naction main() {}')
-            app.setName(this.json.name)
-            app.comment = this.json.description + " #docs"
-            var b = app.actions()[0].body
-            var cmt = t => {
-                var c = new AST.Comment()
-                c.text = t
-                return <AST.Stmt> c
-            }
-            b.setChildren([
-                cmt("{topic:/docs/" + this.id + "}"),
-                cmt("{parenttopic:/docs/api}"),
-                cmt(this.json.description),
-                cmt("{api:" + this.id + "}")
-            ])
-            new AST.InitIdVisitor(true).dispatch(app);
-            return Cloud.getPrivateApiAsync("ptr-docs-" + this.id)
-                .then(() => {},
-                      e => Cloud.postPrivateApiAsync("scripts", {
-                            name: app.getName(),
-                            description: app.getDescription(),
-                            ishidden: true,
-                            text: app.serialize()
-                        }).then(resp =>
-                            Cloud.postPrivateApiAsync("pointers", { 
-                                path: "/docs/" + this.id,
-                                scriptid: resp.id,
-                                description: app.getName()
-                        }))
-                        .then(() => {}, 
-                              e => Cloud.handlePostingError(e, "pub")))
-        }
-        */
     }
 
     TDev.api.addHelpTopics = HelpTopic.addMany;

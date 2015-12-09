@@ -59,7 +59,7 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     ifConditionDefault: "true",
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptEmail: true,
                 }
             },
@@ -136,7 +136,7 @@ module TDev.Browser {
                     hubTopAndNew: true,
                     hubScriptUpdates: true,
                     hubUsers: true,
-                    hubChannels: Cloud.lite,
+                    hubChannels: true,
                     notifyAppReloaded: true,
                     startTutorialButton: true,
                     publicationComments: true,
@@ -144,7 +144,7 @@ module TDev.Browser {
                     searchHelp: true,
                     outAssign: true,
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
@@ -273,13 +273,13 @@ module TDev.Browser {
                     hubScriptUpdates: true,
                     hubUsers: true,
                     hubMyArt: true,
-                    hubChannels: Cloud.lite,
+                    hubChannels: true,
                     publicationComments: true,
                     translateComments: true,
                     searchHelp: true,
                     outAssign: true,
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
@@ -358,7 +358,7 @@ module TDev.Browser {
                         forConditionDefault: "5",
                         ifConditionDefault: "true",
 
-                        scriptSocialLinks: Cloud.lite,
+                        scriptSocialLinks: true,
                     }
                 }
             },
@@ -2565,17 +2565,8 @@ module TDev.Browser {
         }
 
         static askToEnableNotifications(finish: () => void = undefined) {
-            if (!Cloud.lite &&
-                !ModalDialog.currentIsVisible() && // don't show dialog on top of other dialog
-                !TheEditor.stepTutorial && // don't show dialog during tutorials
-                (Runtime.offerNotifications() && World._askToEnableNotifications ||
-                 (World._askEmail || World._askToEnableEmailNewsletter || World._askToEnableEmailNotifications)))
-            {
-                Hub.accountSettings(true, finish);
-            }
-            else if (finish !== undefined) {
+            if (finish)
                 finish();
-            }
         }
 
         static accountSettings(notificationsOnly: boolean = false, finish: () => void = undefined) {

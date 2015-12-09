@@ -875,7 +875,7 @@ module TDev
                                     TheEditor.addNode(n);
                                 }
                             });
-                        } else if (Cloud.lite && isDoc) {
+                        } else if (isDoc) {
                             ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
@@ -990,9 +990,9 @@ module TDev
         }
 
         export function uploadDocumentDialogAsync(input?: TDev.HTML.IInputElement, initialName?: string): Promise {
-            if (!Cloud.lite || Cloud.anonMode(lf("uploading documents"))) {
+            if (Cloud.anonMode(lf("uploading documents")))
                 return Promise.as();
-            }
+
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 var art: JsonArt = null;

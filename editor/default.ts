@@ -3,7 +3,7 @@ module TDev
 {
     function fetchConfigAsync()
     {
-        if (Cloud.lite && !Cloud.config.liteVersion) {
+        if (!Cloud.config.liteVersion) {
             var storeCfg = r => Object.keys(r).forEach(k => Cloud.config[k] = r[k]);
             var p = Cloud.getPublicApiAsync("clientconfig")
                 .then(r => {

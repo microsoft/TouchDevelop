@@ -873,28 +873,18 @@ module TDev {
             }
 
             try {
-                if (Cloud.lite || ctx == "custom") {
-                    r.logMessages = Util.getLogMsgs();
-                    r.logMessages.reverse()
-                    var maxSize = 100000
-                    var maxIter = 20
-                    while (JSON.stringify(r.logMessages).length > maxSize) {
-                        r.logMessages = r.logMessages.slice(0, Math.floor(r.logMessages.length / 2))
-                        if (maxIter-- < 0) {
-                            r.logMessages = []
-                            break
-                        }
+                r.logMessages = Util.getLogMsgs();
+                r.logMessages.reverse()
+                var maxSize = 100000
+                var maxIter = 20
+                while (JSON.stringify(r.logMessages).length > maxSize) {
+                    r.logMessages = r.logMessages.slice(0, Math.floor(r.logMessages.length / 2))
+                    if (maxIter-- < 0) {
+                        r.logMessages = []
+                        break
                     }
-                    r.eventTrace = ""
-                } else {
-                    r.eventTrace = getRecentEvents().map((e) => {
-                        var s = 1000000000 + (r.timestamp - e.timestamp) + "";
-                        s = s.slice(-9);
-                        return s.slice(0, 6) + "." + s.slice(6, 9) + ": " + tickName(e.event) + (e.arg ? "|" + e.arg : "");
-                    }).join("\n")
-                    if (!r.eventTrace)
-                        r.eventTrace = Util.getLogMsgs().map(m => m.elapsed + ": " + m.msg).join("\n");
                 }
+                r.eventTrace = ""
             } catch (e) {
                 debugger;
             }
