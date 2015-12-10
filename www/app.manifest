@@ -2,7 +2,7 @@ CACHE MANIFEST
 
 CACHE:
 ./main.js
-./tdlibraries.ts
+./tdlibraries.js
 ./browser.js
 ./default.css
 ./editor.css
