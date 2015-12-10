@@ -3547,12 +3547,11 @@ function fetchlibraries(args) {
         , 'xczaux' // blocks new
         , 'dceiba' // blocks blink
         , 'pwjcnz' // flashing heart tutorial
-    ], "microbit/libraries", () => {        
-        fetchLibs({ liteUrl: "https://www.touchdevelop.com/", key: "" }, [
+    ], "microbit/libraries", () => concatlibs());
+    fetchLibs({ liteUrl: "https://www.touchdevelop.com/", key: "" }, [
         'angli' // game
-        ].concat(templates.map(t => t.scriptid)), "libraries", () => {
-            concatlibs();
-        });
+    ].concat(templates.map(t => t.scriptid)), "libraries", () => {
+        concattdlibs();
     });
 }
 
@@ -3842,11 +3841,6 @@ function litepost(args:string[])
 }
 
 function concatlibs() {
-    concatMicrobitLibs();
-    concatTDlibs();
-}
-
-function concatMicrobitLibs() {
     var meta = JSON.parse(fs.readFileSync("microbit/libraries/meta.json", "utf8"))
     meta.text = {}
     meta.ids.forEach(id =>
@@ -3860,7 +3854,7 @@ function concatMicrobitLibs() {
     fs.writeFileSync("build/libraries.js", txt)
 }
 
-function concatTDlibs() {
+function concattdlibs() {
     var meta = JSON.parse(fs.readFileSync("libraries/meta.json", "utf8"))
     meta.text = {}
     meta.ids.forEach(id =>
@@ -3929,6 +3923,7 @@ var cmds = {
     "tdupload": { f:tdupload, a:'KEY LABEL FILE...', h:'upload a release'},
     "fetchlibraries": { f:fetchlibraries, a:'', h:'get latest versions of libraries'},
     "concatlibs": { f:concatlibs, a:'', h:'generate build/libraries.js'},
+    "concattdlibs": { f:concattdlibs, a:'', h:'generate build/tdlibraries.js'},
     "uploadfile": { f:uploadfile, a:'KEY FILE...', h:'upload a file'},
     "uploadwf": { f:uploadwf, a:'PATH FILE [LABEL]', h:'upload a webfile'},
     "dlpubs": { f:dlpubs, a:'FILE...', h:'download based on tdpublogger output'},

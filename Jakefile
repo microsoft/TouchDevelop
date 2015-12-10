@@ -250,6 +250,13 @@ file('build/libraries.js', expand([
   runAndComplete(['node build/client concatlibs'], this);
 })
 
+file('build/tdlibraries.js', expand([
+  "build/client.js",
+  "libraries"]
+), { async:true }, function () {
+  runAndComplete(['node build/client concattdlibs'], this);
+})
+
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
 // previously, as there are ordering issues with initialization of global variables
