@@ -61,6 +61,7 @@ module TDev.Browser {
 
                     scriptSocialLinks: true,
                     scriptEmail: true,
+                    scriptAddToChannel:true,
                 }
             },
             'classic': {
@@ -148,6 +149,7 @@ module TDev.Browser {
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             },
             'pro': {
@@ -283,6 +285,7 @@ module TDev.Browser {
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             }
         }

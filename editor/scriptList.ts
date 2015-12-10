@@ -10428,6 +10428,15 @@
                     Util.reportError("showcase", err, false);
                 })
         }
+        
+        export function exportToChannel(cid:string) {
+            getShowcaseIds(ids => {
+                ids.reverse();
+                Promise.sequentialMap(ids, (id) => {
+                    return Cloud.postPrivateApiAsync(id + "/channels/" + cid, {});
+                }).done(() => HTML.showProgressNotification("done!"));
+            })
+        }
 
         export function getListAsync(days:number)
         {
@@ -10773,15 +10782,7 @@
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
 
                 if (this.isMine()) {
-                    btn.appendChild(HTML.mkButton(lf("add script"),() => {
-                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, 
-                            header: lf("add a script to your list"), 
-                            searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
-                            if (info) this.addScriptAsync(info).done(() => {
-                                this.browser().loadDetails(this);
-                            });
-                        });
-                    }));
+                    btn.setChildren([]);
                     btn.appendChild(HTML.mkButton(lf("delete channel"),() => {
                         ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"),() => {
                             HTML.showProgressNotification(lf("deleting channel..."));
@@ -10812,7 +10813,8 @@
             });
         }
 
-        public addScriptAsync(si: ScriptInfo) : Promise {
+        public addScriptAsync(si: ScriptInfo): Promise {
+            if (!si) return Promise.as();
             return Cloud.postPrivateApiAsync(si.publicId + "/channels/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();
