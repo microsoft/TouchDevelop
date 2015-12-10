@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // A #microbit game library.
 #FICjbNZc86cUSakA meta import micro\u003abit {
-  pub "vsuixj"
+  pub "rbgelh"
   usage {
     type Image
     action `sync` \_libinit()
@@ -45,7 +45,7 @@ meta parentIds "";
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` remote_control(@event: String)
     action `sync` camera(@event: String)
-    action `sync` audio_recorder(@event: String)
+    action `sync` microphone(@event: String)
     action `sync` alert(@event: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
@@ -138,6 +138,11 @@ action add_score(#upNGyw2apMaUcvQC points: Number) {
   #zuiUmYhuZxbAIleZ // {help:td/game-library}
   #x7PPOGU8dlENtc4w code→init;
   #kQUTLhhhFULjGZ4O code→set_score(data→\_score + $points);
+  #vZtX1RcjDdWohAtr control[lib micro\u003abit] →in_background;
+  #xTmfOuxYEEZU8RZo where `implicit` \_body\_() {
+    #EmMB4oUWOSOSrs2Q led[lib micro\u003abit] →stop_animation;
+    #TpoevJbyuENBzDRz basic[lib micro\u003abit] →show_animation("0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0", 60);
+  }
   meta sync;
 }
 #ROPTygCiIFymgxcF
@@ -159,6 +164,7 @@ action start_countdown(#k15bqhzwFzH4Y3yU ms: Number) {
   #XhFLKLF40CAqHQDO // {help:td/game-library}
   #sx4X6t87BpsDX2Rt code→init;
   #aKdshGPo1iqAXgyG if code→check_start then {
+    #YA72wUp4JSnzvoSL basic[lib micro\u003abit] →show_animation("1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0\n0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0\n1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0\n0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0\n1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0", 400);
     #A7XSXMDEmg5AdGAY data→\_countdown_pause := math→max(500, $ms);
     #FnAKYESYclPZ0cIR data→\_start_time := - 1;
     #v7EAWZzZFfFzIfTV data→\_end_time := input[lib micro\u003abit] →running_time + data→\_countdown_pause;
@@ -186,14 +192,7 @@ action game_over() {
   #Kx2cMn3rxMJadRgc if `not` data→\_is_game_over then {
     #xNEpLy8Dw9bOe19L data→\_is_game_over := true;
     #PHqtjWicyXXr3VHk code→unplug_events;
-    #x94kxchhqKJiA22G input[lib micro\u003abit] →on_button_pressed("A");
-    #xCpZ6qifR0CrrqXm where `implicit` \_body\_() {
-      #Oze01ntfn9Xo3flD control[lib micro\u003abit] →reset;
-    }
-    #EzciDuGrtZGyRJ62 input[lib micro\u003abit] →on_button_pressed("B");
-    #jWfygM4gkxQQ0I07 where `implicit` \_body\_() {
-      #sAe3HG2sx4FrC7ZB control[lib micro\u003abit] →reset;
-    }
+    #Guoq4pVnwlRVXTiW led[lib micro\u003abit] →stop_animation;
     #XkFnkf3J2op1RUmQ led[lib micro\u003abit] →set_brightness(255);
     #DQ2Ufby7NHShBjEc while true do {
       #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
@@ -281,6 +280,7 @@ action test_countdown() {
   #kCedIlBZ3zmvWtbH code→start_countdown(10000);
   #dQ94gDwnV0JrWJ2x code→start_countdown(10000);
   #L8tu7FS9v4O757r0 code→start_stopwatch;
+  meta private;
   meta test;
 }
 #xtK4SuOp3S4NKf12
@@ -310,6 +310,7 @@ action test_countdown_current_time() {
   #xHQD2251jM3XG2fp code→start_countdown(10000);
   #xcxMHQHk2BykUG5q basic[lib micro\u003abit] →pause(2000);
   #znGGGrzotJyKqdWr basic[lib micro\u003abit] →show_number(code→current_time, 150);
+  meta private;
   meta test;
 }
 #YlRO2i8CApxNgUmT
@@ -318,6 +319,7 @@ action test_current_time() {
   #nccSpY6Jx5nZuWLN code→start_stopwatch;
   #JfguRXzmxjTW32v8 basic[lib micro\u003abit] →pause(2000);
   #x7knzGldoCwiQPaI basic[lib micro\u003abit] →show_number(code→current_time, 150);
+  meta private;
   meta test;
 }
 #pdSjcArPD4cvm6e6
@@ -368,4 +370,14 @@ action show_score() {
   #vgr9oxsK2Bw4HRY3 basic[lib micro\u003abit] →show_string(" SCORE ", 100);
   #kBGIK1yQHgc1Qva4 basic[lib micro\u003abit] →show_number(data→\_score, 150);
   #oKd4MsDD4AJGSbZN basic[lib micro\u003abit] →show_string(" ", 150);
+}
+#jeyL4tq7ItXRn0Wc
+action test_score() {
+  #hwRjsGVuU3oaoev1 // {shim:}
+  #lWM0K14zhXLm1Jwa code→add_score(1);
+  #xbIjXaeYnn91h0Gd code→add_score(1);
+  #ItJdwS5hlCAd7FSn code→add_score(1);
+  #ZUqE4xmrbyn4GjFZ code→show_score;
+  meta private;
+  meta test;
 }
