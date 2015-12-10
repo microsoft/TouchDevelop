@@ -10482,7 +10482,7 @@
                     icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
-                    icon.style.backgroundSize = 'contain';
+                    icon.style.backgroundSize = 'cover';
                     icon.setChildren([]);
                 }
                 nameBlock.setChildren([this.json.name])
