@@ -10773,15 +10773,7 @@
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
 
                 if (this.isMine()) {
-                    btn.appendChild(HTML.mkButton(lf("add script"),() => {
-                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, 
-                            header: lf("add a script to your list"), 
-                            searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
-                            if (info) this.addScriptAsync(info).done(() => {
-                                this.browser().loadDetails(this);
-                            });
-                        });
-                    }));
+                    btn.setChildren([]);
                     btn.appendChild(HTML.mkButton(lf("delete channel"),() => {
                         ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"),() => {
                             HTML.showProgressNotification(lf("deleting channel..."));
