@@ -1,0 +1,172 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank minecraft pi";
+meta color "#ffffffff";
+meta rootId "UqtPMmqsRpLtBLICK3xNRKmo";
+meta iconArtId "eopyzwpm";
+meta allowExport "yes";
+meta hasIds "yes";
+meta splitScreen "yes";
+meta platform "current";
+meta parentIds "";
+// A empty Minecraft Pi script #minecraft
+#ALKdKR1Vv5Af8ary
+action main() {
+  #psv5rGsmdRE2aFyJ minecraft[lib minecraft_pi] →command("/time set night");
+  #H8A2xEaYfWcaRcnx minecraft[lib minecraft_pi] →forever;
+  #KADEM3wBEa3TZ4S5 where `implicit` \_body\_() {
+    #RHjmHHCG1NEkxwQU pos := minecraft[lib minecraft_pi] →player_→position;
+    #tzHVxYsw9oZ2AuBi pos→fill("flower yellow");
+  }
+}
+#szfANXm2yM2bBx92 meta import minecraft_pi {
+  pub "sakwc"
+  usage {
+    #BVGhpbmca
+    table Block_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xNQF2IfWS5kUTCuC state : Number
+        #xUNtn4WzFNh0J275 wool : String
+      }
+    }
+    #xIIDIryL3GdLzzFH
+    table Connect_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #IhKVKMjdA949jNr3 host : String
+        #PQgsvjixlAlu49Bw port : Number
+        #nlMXsJlluWZB1fNN proxy : String
+      }
+    }
+    type Entity
+    #umgRs0Idq3y9jRyc
+    table Block_Event {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #SCV1txxxrjigP8XC kind : String
+        #UIy6UFvY6WJWDDoA x : Number
+        #wWASeEjKJDoiqrL2 y : Number
+        #MkoIqcTcP3QiIoot z : Number
+        #kYCW4sVB0Q5jQy0Q face : Number
+        #EayHvTpmMjNF3Sfh entity : ♻ minecraft_pi → Entity
+      }
+    }
+    #pqaWOjEWNqEkbxwJ
+    table Position {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #L4NO4JXo2Sev2b1J x : Number
+        #x2UU2Lt4BiV8NNNz y : Number
+        #gw4VDwinZ6yVcwzL z : Number
+      }
+    }
+    #eVDb6TwJ7CKitS8g
+    table Repeat_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #VB0iDf9EazabCCQM delay : Number
+      }
+    }
+
+    action `async` connect(options\u003f: ♻ minecraft_pi → Connect_Options)
+    action `async` fill(@this: ♻ minecraft_pi → Position, name: String, options\u003f: ♻ minecraft_pi → Block_Options) returns(r: ♻ minecraft_pi → Position)
+    action `async` fill_many(@this: ♻ minecraft_pi → Position, corner: ♻ minecraft_pi → Position, name: String, options\u003f: ♻ minecraft_pi → Block_Options) returns(r: ♻ minecraft_pi → Position)
+    action `async` block(@this: ♻ minecraft_pi → Position) returns(name: String)
+    action `async` height(@this: ♻ minecraft_pi → Position) returns(h: Number)
+    action `async` chat(msg: String)
+    action `async` position(entity: ♻ minecraft_pi → Entity) returns(pos: ♻ minecraft_pi → Position)
+    action `async` set_position(entity: ♻ minecraft_pi → Entity, p: ♻ minecraft_pi → Position)
+    action `sync` is_connected() returns(r: Boolean)
+    action `async` player_() returns(p: ♻ minecraft_pi → Entity)
+    action `async` direction(entity: ♻ minecraft_pi → Entity) returns(d: Number)
+    action `async` rotation(entity: ♻ minecraft_pi → Entity) returns(d: Number)
+    action `async` pitch(entity: ♻ minecraft_pi → Entity) returns(d: Number)
+    action `async` player_by_name(name: String) returns(steve: ♻ minecraft_pi → Entity)
+    action `sync` block_names() returns(names: Collection[String])
+    action `async` forever(body: Action, options\u003f: ♻ minecraft_pi → Repeat_Options) returns(t: Timer)
+    action `sync` wool_colors() returns(cs: Collection[Color])
+    action `sync` wool_color(c: Color) returns(name: String)
+    action `async` spawn(@this: ♻ minecraft_pi → Position, kind: String) returns(mob: ♻ minecraft_pi → Entity)
+    action `async` test_spawn()
+    action `async` up(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` down(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` move(@this: ♻ minecraft_pi → Position, x: Number, y: Number, z: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` pos(x: Number, y: Number, z: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` west(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` east(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` north(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` south(@this: ♻ minecraft_pi → Position, value: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` strafe(@this: ♻ minecraft_pi → Position, x: Number, z: Number) returns(r: ♻ minecraft_pi → Position)
+    action `async` ground(@this: ♻ minecraft_pi → Position) returns(r: ♻ minecraft_pi → Position)
+    action `async` build_wall(@this: ♻ minecraft_pi → Position, corner: ♻ minecraft_pi → Position, height: Number, name: String, options\u003f: ♻ minecraft_pi → Block_Options) returns(r: ♻ minecraft_pi → Position)
+    action `async` wire_redstone(@this: ♻ minecraft_pi → Position, corner: ♻ minecraft_pi → Position) returns(r: ♻ minecraft_pi → Position)
+    action `async` fill_redstone(@this: ♻ minecraft_pi → Position, name: String) returns(r: ♻ minecraft_pi → Position)
+    action `async` command(msg: String)
+  }
+  #Me0PRA75FE3bCr4V resolve shell = ♻ shell with {
+  }
+}
+#roUgK2K1uqFWdGUx meta import shell {
+  pub "gzeda"
+  usage {
+    #BdGhpbmca
+    table Exec_Output {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #YaaLgMz45N5ZuAeU success : Boolean
+        #qrwQiGIhHhUhb8AF error : String
+        #ijyQCE4KPQL2ziZD code : Number
+        #wf4AkGfhLyWkyKhQ stdout : String
+        #ZyLfqXXM99R1znCa stderr : String
+      }
+    }
+    #ttC12C2SJrh1ODjl
+    table Serial_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #wXa4BRcG6mdxKU25 delimiter : String
+      }
+    }
+    #Aamro6VY4UQ3IxE3
+    table Exec_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        // Additional environment variables
+        #xhtUoyBrBc8JWpKW env : String_Map
+      }
+    }
+    type Command_Result
+    type Shell_Socket
+
+    action `async` write_file(path: String, content: String) returns(res: ♻ shell → Command_Result)
+    action `sync` mkpath(folder: String, name: String) returns(path: String)
+    action `async` mkdir(path: String) returns(res: ♻ shell → Command_Result)
+    action `async` exec(cmd: String, cwd: String, options\u003f: ♻ shell → Exec_Options) returns(res: ♻ shell → Exec_Output)
+    action `sync` logger() returns(logger: App_Logger)
+    action `async` exec_file(cmd: String, args: Collection[String], cwd: String, options\u003f: ♻ shell → Exec_Options) returns(res: ♻ shell → Exec_Output)
+    action `async` python_env() returns(res: ♻ shell → Command_Result)
+    action `async` tcp_connect(host: String, port: Number) returns(sock: ♻ shell → Shell_Socket)
+    action `async` receive(sock: ♻ shell → Shell_Socket) returns(netdata: String)
+    action `async` send(sock: ♻ shell → Shell_Socket, netdata: String)
+    action `async` close(sock: ♻ shell → Shell_Socket)
+    action `async` serialport_connect(name: String, options\u003f: ♻ shell → Serial_Options) returns(sock: ♻ shell → Shell_Socket)
+    action `async` serial_list() returns(ports: Json_Object)
+    action `async` read_file(path: String) returns(content: String)
+  }
+}

@@ -386,7 +386,6 @@ module TDev {
         hubBeginnersGettingStarted,
         hubCCGA,
         hubChatSearch,
-        hubRateTouchdevelop,
         hubChooseSkill,
         hubDevBootCamp,
         hubDocsApi,

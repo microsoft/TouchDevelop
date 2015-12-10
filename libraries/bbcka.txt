@@ -1,0 +1,12 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank template";
+meta rootId "nf9jkDgBrmuEuR4XHiuQw5WN";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+#main
+action main() {
+  #p4VHSr2PmW50LIWv skip;
+}
+

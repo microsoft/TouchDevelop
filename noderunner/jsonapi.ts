@@ -103,33 +103,6 @@ module TDev {
         iconbackground: string;
     }
 
-    // GET /api/doctopics
-    export interface DocTopicsRequest { }
-    export interface DocTopicsResponse {
-        topics: string[];
-        topicsExt: any[];
-        /*
-    export interface HelpTopicJson
-    {
-        name: string;
-        id: string;
-        rootid?: string;
-        description: string;
-        icon:string;
-        iconbackground:string;
-        iconArtId?:string;
-        userid?:string;
-        time?:number;
-        text: string;
-        priority:number;
-        platforms?:string[];
-        parentTopic?:string;
-        screenshot?:string;
-    }
-
-        */
-    }
-
     // POST /api/stats
     export interface StatsRequest { }
     export interface StatsResponse {

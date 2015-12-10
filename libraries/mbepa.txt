@@ -1,0 +1,114 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank minecraft";
+meta color "#ffffffff";
+meta rootId "UqtPMmqsRpLtBLICK3xNRKmo";
+meta iconArtId "eopyzwpm";
+meta allowExport "yes";
+meta hasIds "yes";
+meta splitScreen "yes";
+meta platform "current";
+meta parentIds "";
+// A empty Minecraft script #minecraft
+#ALKdKR1Vv5Af8ary
+action main() {
+  #rVyMqFQwoFQXI7Th minecraft[lib minecraft] →sunny_day;
+  #H8A2xEaYfWcaRcnx minecraft[lib minecraft] →forever;
+  #KADEM3wBEa3TZ4S5 where `implicit` \_body\_() {
+    #RHjmHHCG1NEkxwQU $pos := minecraft[lib minecraft] →player_→position;
+    #tzHVxYsw9oZ2AuBi $pos→fill("flower yellow");
+  }
+}
+#x20tMpwBUrQba6Ym meta import minecraft {
+  pub "ugswa"
+  usage {
+    #BVGhpbmca
+    table Block_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xNQF2IfWS5kUTCuC state : Number
+        #xUNtn4WzFNh0J275 wool : String
+      }
+    }
+    #umgRs0Idq3y9jRyc
+    table Block_Event {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #SCV1txxxrjigP8XC kind : String
+        #UIy6UFvY6WJWDDoA x : Number
+        #wWASeEjKJDoiqrL2 y : Number
+        #MkoIqcTcP3QiIoot z : Number
+        #kYCW4sVB0Q5jQy0Q face : Number
+        #EayHvTpmMjNF3Sfh entity : ♻ minecraft → Entity
+      }
+    }
+    #pqaWOjEWNqEkbxwJ
+    table Position {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #L4NO4JXo2Sev2b1J x : Number
+        #x2UU2Lt4BiV8NNNz y : Number
+        #gw4VDwinZ6yVcwzL z : Number
+      }
+    }
+    #eVDb6TwJ7CKitS8g
+    table Repeat_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #VB0iDf9EazabCCQM delay : Number
+      }
+    }
+    type Entity
+    type Batch_Command
+    action `async` fill(@this: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` fill_many(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` block(@this: ♻ minecraft → Position) returns(name: String)
+    action `async` height(@this: ♻ minecraft → Position) returns(h: Number)
+    action `async` chat(msg: String)
+    action `async` position(entity: ♻ minecraft → Entity) returns(pos: ♻ minecraft → Position)
+    action `async` set_position(entity: ♻ minecraft → Entity, p: ♻ minecraft → Position)
+    action `async` player_() returns(p: ♻ minecraft → Entity)
+    action `sync` block_names() returns(names: Collection[String])
+    action `async` forever(body: Action, options\u003f: ♻ minecraft → Repeat_Options) returns(t: Timer)
+    action `sync` wool_colors() returns(cs: Collection[Color])
+    action `sync` wool_color(c: Color) returns(name: String)
+    action `async` spawn(@this: ♻ minecraft → Position, kind: String) returns(mob: ♻ minecraft → Entity)
+    action `async` test_spawn()
+    action `async` up(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` down(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` move(@this: ♻ minecraft → Position, x: Number, y: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` pos(x: Number, y: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` west(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` east(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` north(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` south(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` strafe(@this: ♻ minecraft → Position, x: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` ground(@this: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` build_wall(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position, height: Number, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` wire_redstone(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` fill_redstone(@this: ♻ minecraft → Position, name: String) returns(r: ♻ minecraft → Position)
+    action `async` command(msg: String)
+    action `async` sunny_day()
+    action `async` clone(@this: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` set_command(@this: ♻ minecraft → Position, command: String) returns(r: ♻ minecraft → Position)
+    action `async` batch() returns(batch: ♻ minecraft → Batch_Command)
+    action `async` add_fill(@this: ♻ minecraft → Batch_Command, pos: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Batch_Command)
+    action `async` run(@this: ♻ minecraft → Batch_Command)
+    action `async` add_fill_many(batch: ♻ minecraft → Batch_Command, start: ♻ minecraft → Position, corner: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Batch_Command)
+  }
+}
+#b9nBIj3lfVY5gwic meta import minecraft_commands {
+  pub "ycyna"
+  usage {
+    action `async` game_mode(mode: String)
+  }
+  #tWze9kihtvASc70g resolve minecraft = ♻ minecraft with {
+  }
+}

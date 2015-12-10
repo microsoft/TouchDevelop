@@ -1,0 +1,94 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank engduino";
+meta icon "CreditCard";
+meta color "#ff00008b";
+meta rootId "SEYbC35yczei4aI3wm7icdMs";
+meta iconArtId "qmjzqlkc";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// A blank Engduino v3 sketch. #arduino #arduinoSketch #Engduino
+#LnSjoBj2DrSx4mcw
+action setup() {
+  #mQv6HDl3bdDDAJI0 skip;
+  meta private;
+}
+#xq99yDlZpVBNRgrY
+action loop() {
+  #xBK6GndqJnRSJkTx @\u267b→engduino→set_all_LEDs(colors→random);
+  #xtbigB2VPSstxCXs @\u267b→engduino→delay(200);
+  #OSTD49T6WAb9oYz6 @\u267b→engduino→set_all_LEDs(colors→black);
+  #jTiWi7fMT5Y0BSEk @\u267b→engduino→delay(200);
+  meta private;
+}
+#xdB9Cm8GWFKxZGcr
+action variables() {
+  #khP9iYCJxRB2iUZw skip;
+  meta private;
+}
+#Z2bgYR2Rs9Bvcb74
+var screenshot : Picture {
+  is\_resource = true;
+  url = "https://az31353.vo.msecnd.net/pub/qmjzqlkc";
+  transient = true;
+}
+#LrYSVbKx8FjyP2FW meta import engduino {
+  pub "odwke"
+  usage {
+    action `async` set_LED(led_number: Number, color: Color)
+    action `async` millis() returns(ms: Number)
+    action `async` micros() returns(us: Number)
+    action `async` button_pressed() returns(b: Boolean)
+    action `async` button_was_pressed() returns(b: Boolean)
+    action `async` delay(millis: Number)
+    action `async` acceleration() returns(p: Vector3)
+    action `async` temperature() returns(p: Number)
+    action `async` set_all_LEDs(color: Color)
+  }
+  #mAHtFDspzVKM5ZCP resolve arduino = ♻ arduino with {
+  }
+}
+#uvXS88LcuackBUtZ
+action simulate() {
+  #EuO57UhnSOMDRRlU // **Do not edit this action**. This action simulates the Engduino code.
+  #Lo714zCo2ze5KJxO code→setup;
+  #rTWfhzlllMzajBW8 while true do {
+    #xASbcNy6sOwDn24U code→loop;
+  }
+}
+#xEqnQPX6C7o8xLVl meta import arduino {
+  pub "cqfda"
+  usage {
+    action `sync` digital_read(pin: Number) returns(bit: Number)
+    action `sync` digital_write(pin: Number, value: Number)
+    action `sync` analog_read(pin: Number) returns(bit: Number)
+    action `sync` analog_write(pin: Number, value: Number)
+    action `async` pin_mode(pin: Number, mode: Number)
+    action `sync` HIGH() returns(v: Number)
+    action `sync` LOW() returns(v: Number)
+    action `sync` OUTPUT() returns(v: Number)
+    action `sync` INPUT() returns(v: Number)
+    action `async` delay(millis: Number)
+    action `sync` sketch(source: String)
+    action `sync` static_buffer(bytes: String) returns(buf: Buffer)
+    action `sync` INPUT\_PULLUP() returns(v: Number)
+    action `sync` LED\_BUILTIN() returns(r: Number)
+    action `sync` mac(address: String)
+    action `sync` analog_reference(type: Number)
+    action `sync` DEFAULT() returns(r: Number)
+    action `sync` EXTERNAL() returns(r: Number)
+    action `sync` tone(pin: Number, frequency: Number, duration: Number)
+    action `sync` no_tone(pin: Number)
+    action `sync` millis() returns(millis: Number)
+    action `sync` micros() returns(micros: Number)
+    action `sync` pulse_in(pin: Number, value: Number, timeout: Number) returns(micros: Number)
+    action `sync` board(name: String)
+    action `sync` print_value(name: String, value: Number)
+    action `sync` print(text: String)
+    action `sync` println(text: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` constrain(value: Number, a: Number, b: Number) returns(r: Number)
+    action `async` delay_microseconds(micros: Number)
+  }
+}

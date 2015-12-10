@@ -1,0 +1,600 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "game";
+meta icon "controller";
+meta color "#ff9955bb";
+meta rootId "F18otGXDXq4l5kwcjDwwlg1w";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// A library to create games with physics, life, score and leaderboard. #games
+#Ayu95FKZqA9xPdjQXSANLGvP
+action initialize(#Ef1fU1WP2dp5fv5i width: Number, #CIEvqcj84KymuPB3 height: Number) {
+  #bNSXfBcyc1TlFXuk // Call this first with your game board
+  #Clk2zqeLTyzvKFNp $ratio := wall→width / wall→height;
+  #lHC24tGRfxpXZxgk if $width < 0 `and` $height < 0 then {
+    #xZ5BAygKRsMnteqb if $ratio < 1 then {
+      #Ye23loceGoB42QXd $width := 800 * $ratio;
+      #XOxgQshg475aS5Hk $height := 800;
+    }
+    else {
+      #JqNvfilYjyb1v6dO $width := 800;
+      #sEmxz8ZVPjbzQaT5 $height := 800 / $ratio;
+    }
+  }
+  #jhe41v4xeIFpAnXk if $width < $height then {
+    #Qe4DsmxnWXWundDd if $width < 0 then {
+      #mo0yRpxiwtI2oz42 if $ratio < 1 then {
+        #sLJ2pYjNI9NO4jGv $ratio := 1 / $ratio;
+      }
+      #lohlOvEl2FCCHlN8 $width := $height * $ratio;
+    }
+    #xZv5qx7QK0pfbIwx data→\_board := media→create_portrait_board($width, $height);
+  }
+  else {
+    #mbaxWZ8Upqc4dY2m if $height < 0 then {
+      #urxU2iGbiBiGNGbM if $ratio < 1 then {
+        #xzVsM6nAQXKxe7pq $ratio := 1 / $ratio;
+      }
+      #Y2iBY1rS8V2IYESl $height := $width / $ratio;
+    }
+    #IisORl3LBXmnPKgW data→\_board := media→create_landscape_board($width, $height);
+  }
+  #cpH4M20Y66Y5LRJs data→\_score := 0;
+  #ekMv5bgzPxBK4CW4 data→\_life := 3;
+  #jbZnUix7Lx1Q7ZDV data→\_start_time := invalid→datetime;
+  #w1UaCIU8Ev4ebPlb data→\_life_txt := invalid→sprite;
+  #JOr3eMPViQ4dHWhw data→\_score_txt := invalid→sprite;
+  #my4nhbFyphwdVePb data→\_timer_txt := invalid→sprite;
+  #jLtQyZzuywVmboyz data→\_countdown_duration := - 1;
+  #ZZUqmmdXH7QdhMrH data→\_hearts := "---;❤;❤❤;❤❤❤" →split(";");
+  #xKSYee6TFDQOfML9 data→\_score_txt := code→create_text();
+  #Yyg0CzGMYWO9TQ47 data→\_score_txt→set_pos(data→\_board→width - 132, 20);
+  #CtaIZxAjWA3KSV2x data→\_score_txt→set_color(colors→orange);
+  #kTjf5SscJwSXMOxR data→\_life_txt := code→create_text;
+  #lD26N7zVYcw4OA2B data→\_life_txt→set_color(colors→red);
+  #ShXHDkMQszri4hgi data→\_life_txt→set_pos(84, 20);
+  #DF79Mzy4RLJvr5lu data→\_timer_txt := code→create_text;
+  #flUJeGo9oH4ZKL7k data→\_timer_txt→set_pos(data→\_board→width / 2, 20);
+  #nvzUAhKiUrDNx9ua if data→\_board→width < data→\_board→height then {
+    #tprbh6Qbs4RtbWGE data→\_score_txt→set_y(data→\_board→height / 10.5);
+    #vo1skKgdHy2wqGAI $y := data→\_score_txt→y;
+    #xIiwhrp5beNVxp0W data→\_timer_txt→y := data→\_score_txt→y;
+    #xRtkSt16gx2kVUQE data→\_life_txt→set_y($y);
+    #xVMKJwJbqH32RaBs data→\_score_txt→x := data→\_board→width - 64;
+    #sftDMBB4Rc62DLVK data→\_life_txt→x := 64;
+  }
+  #lVFXy8tvC2YO5VaY code→set_score(0);
+  #u1GLYt6g45euiwLd code→set_life(3);
+  meta private;
+}
+#xW5SJ4MKJ44wSSDVuZgZG3iS
+var \_board : Board {
+  transient = true;
+}
+#oKY8zayGQ3QsufrQiKXXS9sh
+action set_score(#xNzj5Tyy4ubd9CTJ value: Number) {
+  #PK9RS22fUTIwMlpW // Sets the current score
+  #jia5eGpMgyK70yu7 data→\_score_txt→text := math→ceiling(data→\_score)→to_string;
+  #xQiqEsIGlVBWEId8 data→\_score := $value;
+  #xolTOrWos40PlDsI if data→\_score < 0 then {
+    #x6X2fk4vDwHtW7kW data→\_score_txt→hide;
+  }
+  else {
+    #jdbScDz352fC51ZD data→\_score_txt→show;
+    #xK4S7FrNcjoVbrXT $anim := data→\_score_txt→create_animation;
+    #xvRwFDBdhXE6rfYC $anim→text(1, "cubic", "inout", math→ceiling(data→\_score)→to_string);
+  }
+  meta sync;
+}
+#l4svuo4DZFDcDqJbGklzHLTi
+action set_life(#Od5XHbEXJ6mWwB8S value: Number) {
+  #jJNGIzmWCGL9Ye5S // Sets the current life points. Set as negative or zero to end the game.
+  #HrH1awtB4sa44j1P data→\_life := math→max(0, $value);
+  #KKSJ0NQA0LL2KCCt if data→\_life ≤ 0 then {
+    #UPv3xvSjaIsOHLKO code→evolve;
+    #O8ZDpX4rPiqIH7PJ code→end;
+  }
+}
+#xR8UEUDLaI6qbCw4GQtfFiwQ
+action start_timer() {
+  #PY2vofNQd2BKaT5s // Starts a stopwatch timer
+  #lh5CUs6TzxANutck data→\_start_time := time→now;
+  #SOklrsSACxtSyTFU data→\_countdown_duration := - 1;
+  meta sync;
+}
+#uCawjS8UtYJd1W4TZkrVvAE7
+action start_countdown_timer(#sXGZbgouHWzZbxDx seconds: Number) {
+  #Y1MYOM224FH40w2J // Starts a countdown timer starting at second.
+  #UNJ3mVD9lmnoyJtS // {hints:seconds:30,15}
+  #xrYxMpoChJ3q8C4C data→\_start_time := time→now;
+  #xpOkBULYOyu5K6ol data→\_countdown_duration := $seconds;
+  meta sync;
+}
+#YXmGOuliQ2RYyUc3NtRv9DNE
+action life() returns(#ngP5T2tPSB4Euoev r: Number) {
+  #xF0BpscALdWMIeMq // Returns the current life points. Negative if not set.
+  #X5WbD4tx2QCjM0xZ $r := data→\_life;
+  meta sync;
+}
+#xubkD4SENn7AllzejMhYSTOV
+var \_life : Number {
+  transient = true;
+}
+#lp3pSLpGr7O3RGbDzuSQiJ5m
+var \_score : Number {
+  transient = true;
+}
+#xleVEbMbZTbU7BJfeUMUPpMk
+action score() returns(#x2cmZgt88Gtfc90g r: Number) {
+  #ZXZChxtbZJ7VM49L // Gets the current score; negative if not set.
+  #eM5HsVUk3W4Wjmar $r := data→\_score;
+  meta sync;
+}
+#TzLNjDeJYpMRpdgNFuqgE2PY
+var \_start_time : DateTime {
+  transient = true;
+}
+#gswamj84uYSwqLED2VvLdKi6
+action evolve() {
+  #V02U4MCe9H2MP9DW if `not` data→\_board→is_invalid then {
+    #xtVboJorI0AoA2Ll data→\_board→evolve;
+    #ZyuqlVaK8jZ4RcTi if data→\_life ≥ 0 then {
+      #Zzh3zjzuxyYn2f3X code→evolve_life;
+    }
+    #fr31zBhiCvv05kR8 if `not` data→\_start_time→is_invalid then {
+      #Im49UQ654OeS2n44 code→evolve_timer;
+    }
+  }
+  meta private;
+}
+#pHEIAaLyqWXgpyUd6dIeYp2X
+var \_life_txt : Sprite {
+  transient = true;
+}
+#UMupj4ChNfQ8E2uvW694p1tX
+action create_text() returns(#HsWcsHa430EovY0o r: Sprite) {
+  #r2pD3YM0AhwqdeoJ $r := data→\_board→create_text(100, 20, 28, "");
+  #DfUPvQHARvqZmkPa $r→set_z_index(1000);
+  #xvp7IxArcVElQk4H $r→set_friction(1);
+  #Sh16Yvgqws3F2ttd $r→set_color(colors→foreground);
+  meta private;
+  meta sync;
+}
+#XjXM7AL67NDGlzsZgg9s44uq
+action evolve_life() {
+  #x69dm0I2qdoTbeEa $l := math→ceiling(data→\_life);
+  #MkDJrwcWdlaEAj5i $s := "❤ " ∥ $l→to_string;
+  #NnjfQ48F1IZTeEU4 if $l < data→\_hearts→count then {
+    #xUcDUL43eSf74Few $s := data→\_hearts→at($l);
+  }
+  #Bv24Vr22toZdfAsj data→\_life_txt→set_text($s);
+  meta private;
+  meta sync;
+}
+#PojbQsm32lz5k054APQR8Jb1
+action evolve_timer() {
+  #tSYdAJQ9rmGX28Ph $elapsed := code→current_time;
+  #zaYbaDOnN52N0y3T data→\_timer_txt→set_text(math→round_with_precision($elapsed, 1)→to_string);
+  #x5HB6TM2gE95ePes if data→\_countdown_duration > 0 `and` $elapsed = 0 then {
+    #M7CIY2SvsjyqZLbG code→end;
+  }
+  meta private;
+}
+#AejJAmPMk38UG2URZk5hXYh6
+var \_score_txt : Sprite {
+  transient = true;
+}
+#x2fjfvNmVawvnAWKndzdfxls
+var \_timer_txt : Sprite {
+  transient = true;
+}
+#x4cIV8c7P0QJsADCfcHm2ApY
+var \_countdown_duration : Number {
+  transient = true;
+}
+#xK9ECxOm926KPUxdhlTtnYMl
+action example() {
+  #akMbxF0YpXNsigw2 // This library lets you build a game with a physics engine, life, score and leaderboard.
+  #EsTTE4EYqiiR5mR9 // Let's start by creating a board which we will use for the demo.
+  #u3XIthRzNcrktgqo $board := code→start;
+  #CB9rVzyFARPTw2L6 // You can use the board as usual.
+  #a0rtwTn2G2kZoHic // * you can force landscape or portrait by using `code->start landscape` or `code->start portrait`.
+  #HiLltZT9c8Ny7H2E // ### create sprites
+  #EP9EIWqKvuc1cX6e // Use ``create sprite`` to create a new moving sprite of width 100.
+  #xyZg3wDu5wWFWdW2 // {hide}
+  #oPJA0VM7q3Dq7ZEE $pic := media→create_picture(480, 800);
+  #iW2dZelc5Tuo2vJY // {/hide}
+  #Ng4pLvKyecQ91WR4 $sprite := code→create_sprite($pic);
+  #x2HgaAq5uHrc3P8X // ### scores
+  #x3VS2BYISO2aappr // Simply call `set score` to display a score on the top right corner of the board. You can use `score` to get back the current value of the score.
+  #pMoWowx4j3FkFkkQ code→set_score(3600);
+  #Nb4rWtolHuG8aQWe // You can also update the current score by using `add score`.
+  #nY0cqPKJNNGoYg2f code→add_score(100);
+  #x42VU0bH4Y18mgZ3 // ### life indicator
+  #LdsjDYMx4YCgdsld // Use the `set life` action to display a life indicator on the top left corner of the board. You can use `life` to get back the current value of the life.
+  #EiPgaOurEAlcymkM code→set_life(1);
+  #g9R26zu52v8nG4Lv // You can also update the current life by using `add life` or `remove life`.
+  #iuvGvo404RGhd1ty code→add_life(1);
+  #x2gRSkPtHp9KAAJY code→remove_life(1);
+  #e9hK3ZG8eO2Uue8K // You can hide the life indicator as well.
+  #s7Ov2CH1qy9FYASs code→set_life_visible(false);
+  #bgcEN9gqslrdaO1M // ### timers and countdowns
+  #xt4bAYcodWe3qqgS // You can also display a timer by calling `start timer`. You can use `current time` to get the seconds elapsed since the start of the timer.
+  #OSsbR8gZWen9tVtk code→start_timer;
+  #dFee6Un3iogCKg9q code→start_countdown_timer(10);
+  #ukkrid8JC6KKttr4 // ### game over
+  #PWb2EFMyS7uuvzFr // Use the `end` to finish the game
+  #d4L7G4RdnmxEcHRl code→end;
+  #rCcoUqTjtzJB1J3X // ### splashing text
+  #YbAUazcKVtV6qku3 // A quick and easy way to display text to the user.
+  #WQDnU04vr3fiktQi code→splash("Get Ready!");
+  #DRe04VIIWS4rwYnQ // ### parralax background
+  #Gi8A6YOMZ7dX42ho // Use ``set background scene`` to create moving backgrounds
+  #S2ZNHTg3eKNYn9DK code→set_background_scene("horizontal", $pic);
+  meta private;
+  meta test;
+}
+#q4EB482ElguyYpuPEwTgQQ4e
+action current_time() returns(#Fh83zvcS14ZK6jNA seconds: Number) {
+  #BFdsvunZH1UbuS9L // Current time in timer
+  #C4ggpXXT0fM11xJ2 $seconds := time→now→subtract(data→\_start_time);
+  #hAkzFccDnEQ4eexF if data→\_countdown_duration > 0 then {
+    #xlavYFgnlGubTeEu $seconds := math→max(0, data→\_countdown_duration - $seconds);
+  }
+  meta sync;
+}
+#emzufgdY6lsG2RaaCYaxwN8m
+var \_hearts : Collection[String] {
+  transient = true;
+}
+#xINhkUFpWzhMPF0ROZX4TSm4
+action add_score(#tAQjhhYZ8ziBD6ez value: Number) {
+  #L8MM1n5h3tJq4MAH // Adds value to the current score. Value can be negative.
+  #ZwhiUoPbRzDmYy7b // {hints:value:1,10,100}
+  #VurwTOF3FLa4ejcU if $value > 0 then {
+    #dvQS5eDbxUvHojRk code→set_score(data→\_score + $value);
+    #sfOOtfKb4Xf1BwcX if $value > 1 then {
+      #l3wCIj7Pgnwwaxa6 $sprite := code→create_text;
+      #SpicJAYTeJmiPCCz $sprite→set_text(math→ceiling($value)→to_string);
+      #jsbm2wkw4a611R5L $sprite→set_pos(data→\_score_txt→x, data→\_score_txt→y);
+      #xoIUTQpKKecgzCBQ $sprite→set_color(data→\_score_txt→color);
+      #A2Yn5zDjzdNo1bNy $anim := $sprite→create_animation;
+      #QTO5DnOJkIqirrb8 $anim→puff_out(0.5, "cubic", 1.5);
+      #A4CmMqj3KJAY3UGU $anim→delete;
+    }
+  }
+  meta sync;
+}
+#l0buJlsN2iCiTbJPwUwTGWmO
+action add_life(#i5ReduzYFUpLFhbF value: Number) {
+  #xFocNGxUz72Py6Dg // Adds the value to the current life. Value can be negative.
+  #JBypj2Ez1thEbbpC // {hints:value:1}
+  #t429gQZTs2Mi64fg code→set_life(data→\_life + $value);
+}
+#ods2ZuwV9xHaiO5pElQlNyaE
+action clear_timer() {
+  #xIt9uxPUZm1DfVjP // Hides the timer.
+  #Ra8ZWiOP7bWzSa21 data→\_start_time := invalid→datetime;
+  #UvLafUxbxNZwvjGp data→\_countdown_duration := - 1;
+  meta sync;
+}
+#qoY1RsaFEb0jJJuZq8SkbAp3
+action remove_life(#R2JXjstC7H6C2I7d value: Number) {
+  #UDbb3xUmllgAFfrm // Removes the value from the current life. Value can be negative.
+  #BOunFP4tltU9M437 // {hints:value:1}
+  #YQ51m4VCvuQWTj3G code→set_life(data→\_life - $value);
+}
+#a14qLDjp7EtajVvdEd1rS18X
+action end() {
+  #Ty1H9yFvz689uQKb // Displays a game over animation and finishes the game.
+  #GEyVdP7gHEhMYuLh if `not` data→\_board→is_invalid then {
+    #PNm4kHsAAvLeTCPN if `not` data→\_end_event→is_invalid then {
+      #OmNZGM9KWiapFko7 data→\_end_event→run;
+      #xKYF8z0LLaVOQks4 code→reset;
+    }
+    else {
+      #oCdsISU82CsuPzFb if data→\_score > 0 then {
+        #ckNPHuv2TzqnX5lX bazaar→post_leaderboard_score(data→\_score);
+      }
+      #WX2o7oS0pkjUgsJI code→game_over;
+      #ovm0Qx6hi7RraNH6 if `not` app→script_id→is_invalid then {
+        #ixtnMJPUsyivodZ2 app→restart("");
+      }
+    }
+  }
+}
+#rUM4WD97vl3DCMmQPvBzb6jc
+action start() returns(#AbFPR1tINAAIzPii board: Board) {
+  #cuJu2Z9VQgHn4Yzb // Creates a new empty game board and shows it on the screen.
+  #itfyVKsFJ72c4STK $board := code→start_with_fixed_size( - 1, - 1);
+}
+#joFUGC04wxnpsBuC02e32Cvy
+action game_over() {
+  #bR2JRRWa79KdtZFj $message := "game over";
+  #M2lvKKOoUSyjBCSv $text := data→\_board→create_text(200, 40, 40, $message);
+  #JMxAY8MaxP9BJkYm $text→set_opacity(0);
+  #G0kMTi3FwR2Te2TL for 0 ≤ i < 720 / 5 do {
+    #x8gGwdunz5TOunUX $text→set_opacity($text→opacity + 0.05);
+    #UZreYUZJfIfRGKib $text→set_color(colors→random);
+    #ceUd1V8yfqAFQqBu $text→set_angle($text→angle + 5);
+    #x92Ig40jCZ7U1SyU data→\_board→update_on_wall;
+    #tZWU4KGKKBKVwDn8 time→sleep(0.02);
+  }
+  #TU2xkLuKEQOh3DbW time→sleep(2);
+  #cMsaragG8BtT1kXr $text→delete;
+  #uRIMBM6HQm2N2Nxd data→\_board→update_on_wall;
+  meta private;
+}
+#Kv3t1TJgZdpYJpx9reGXtTW2
+action reset() {
+  #ypVAHbhYCLxfGrbY // Resets the game engine
+  #xLdUoT2qnoqxmytB code→clear_board;
+  #JuuhG6ReNJxwspTc data→\_end_event := invalid→@action;
+  meta sync;
+}
+#XQPjg13t37zIEtpt44U6ff92
+action start_with_fixed_size(#x5Z0dR2qabb82pDA width: Number, #vP71QeZJBImfaq42 height: Number) returns(#QOzAYblVxQIXVsKF board: Board) {
+  #GIkGM27wDa43LVsh // Initializes the game engine with the given size and returns the game board.
+  #xnuJIIH3pQuwhAsw code→clear_board;
+  #xUWsaURY4G0KHWcS code→initialize($width, $height);
+  #CctsikpPaxGUdxUU data→\_board→add_on_every_frame($perform);
+  #NGgspE16GddTzQpD where perform() {
+    #iAVXIMARzmZHG9C4 code→evolve;
+    #xp5Ar4dvRYXdJEWH if `not` data→\_board→is_invalid then {
+      #KatnpCQDlegi4a82 data→\_board→update_on_wall;
+    }
+  }
+  #nggfDbuDWSW8HkO7 data→\_board→post_to_wall;
+  #qe89fHKQxAlM428p $board := data→\_board;
+  #rmmerjSOecJSwDqC app→log("game: end initialize");
+}
+#A69js6TDtOSLAIAQQr6S33zC
+action start_with_background_picture(#IqRuFOf9jijyzGQ6 pic: Picture) returns(#qgW4pkhngSp9yx4t board: Board) {
+  #DYuQdVsO2gdze4RK // Starts a game engine with the picture as background
+  #KhZxjKvfIr4UkTpf $board := code→start_with_fixed_size($pic→width, $pic→height);
+  #x6Z3xF23v2lYG3F2 $board→set_background_picture($pic);
+}
+#y5RrO2ILX7gVIvFQMpo6XjGo
+action board() returns(#y28JfFz47DWDtngG board: Board) {
+  #bnTv8HRMWLtLAU9q // Gets the current game board for the game. Invalid if game not started.
+  #nXVJcphXOyIll9oE $board := data→\_board;
+  meta sync;
+}
+#Eu2dngMaA73jYqD6d0u8iCju
+var \_end_event : Action {
+  transient = true;
+}
+#xTv6Ulq3EWIRTV6f6oXlbDh9
+action on_end(#xPcQEigjfypzEgie body: Action) {
+  #hs2S4pK5luKS7Yx7 // Attach code to run when the game ends. Overrides the default behavior.
+  #AYzAMJdPbb22r3I4 data→\_end_event := $body;
+  meta sync;
+}
+#Xd5cD2v2HyMBTyiuwycN9lHa
+action test_on_end() {
+  #y2RQOSjYPHCmTn7j code→on_end($@action);
+  #XjIoI4kD9LlHrUVX where @action() {
+    #fg4t4cENnu22YDnm wall→prompt("on end called");
+  }
+  #xWqn6Z7usZe5uNhV code→start;
+  #xVxjo0kGpkT8Gdob code→end;
+  meta private;
+  meta test;
+}
+#xOu0vfXrzi94ugA9AcysN2bf
+action test() {
+  #mdU4UX4XMXiUvcqM $board := code→start;
+  #hyMg45fVM9c4Ek5p $board→set_gravity(0, 200);
+  #YeRPrdEXM3lGGTde $board→create_boundary(0);
+  #QpoVJddHOtkHw28b $sprite := $board→create_rectangle(20, 20);
+  #px6QNcegyYne2apd $sprite→set_color(colors→random);
+  #xOLydxzUemgYcA0F code→add_score(100);
+  meta private;
+  meta test;
+}
+#xpQAnETcU9aowS6g7p1qZZbf
+action clear_board() {
+  #otzjU0KwlOeyFv7W if `not` data→\_board→is_invalid then {
+    #xb2iFSOWUmUxd3BO data→\_board→clear_every_frame_timers;
+  }
+  #znTtVcKS99o5PuwK data→\_board := invalid→board;
+  meta private;
+  meta sync;
+}
+#eIngK72C8H06n0lzszL8yaCm
+action start_landscape() returns(#vGhNIEVWNjf2DMe1 board: Board) {
+  #DiW6QoP2oFAWHrdh // Starts a new landscape game
+  #or2RSf2CvyV9CGi5 $board := code→start_with_fixed_size(800, - 1);
+}
+#sYve2cIuyW1MMqF3aRO2OZyU
+action start_portrait() returns(#dNtnzA61nztVz7ly board: Board) {
+  #RUqcBdXLfT3WLwtI // Starts a portrait game
+  #sKZshpWP91TKnlmc $board := code→start_with_fixed_size( - 1, 800);
+}
+#OMEJVlEdU2VpPg82GXpsMZTs
+action set_hud_colors(#ym5U3Gn6Cgc734j4 life: Color, #Ze4lgB3HYaEPaQms timer: Color, #x8GuNE6MswGyW8e8 score: Color) {
+  #IQSX7p2v7ihFyRgW // Sets the text color of the life, timer and score text in the head-up display (hud).
+  #xdJOASojRtIrV28p data→\_life_txt→set_color($life);
+  #YSRB5T5tGLdTpN6M data→\_timer_txt→set_color($timer);
+  #NRXdOMJdrV4Ktx6J data→\_score_txt→set_color($score);
+  #N8WL5zaLyqFuS7r6 data→\_board→update_on_wall;
+  meta sync;
+}
+#OSUi7mcMXLLJLfNRTez0CgSV
+action hud_sprites() returns(#xS4wU3OeXU6RjZLi sprites: Sprite_Set) {
+  #xP1yJJaa18LnCHT0 // Gets the sprites used by the game board to display the head-up display.
+  #ICC48H9UA4IZRlyg $sprites := data→\_board→create_sprite_set;
+  #xxzXIsbzTviF5El6 $sprites→add(data→\_timer_txt);
+  #Vx4vvyPFYOWBU33f $sprites→add(data→\_score_txt);
+  #ae9F20KA4qLwlsQG $sprites→add(data→\_life_txt);
+  meta sync;
+}
+#xoAgK46gsSE32UIau4PsRlbw
+action test_score() {
+  #INflARm2bc0ire1B $board := code→start;
+  #nQ3jWN002Btc09h0 $board→set_debug_mode(true);
+  #v7lsr4cRsspdWafA $board→on_tap($tapped);
+  #hfu0GsIcIHTumLfm where tapped(x: Number, y: Number) {
+    #PI1IuG3owK4henhk code→add_score(100);
+    #xWY0qUyGfdmcoj3E if code→score > 1000 then {
+      #xmr1ny8p58MtPfHb code→end;
+    }
+  }
+  meta private;
+  meta test;
+}
+#qScd7vJgHvp5y6wWRmglDahb
+var x : Boolean {
+  transient = true;
+}
+#QakFM2TVyNr4ziDe1asYvARy
+action life_visible() returns(#AUsSkrVIQdg5hKUl b: Boolean) {
+  #xoeItkItCNLhf6tS // Gets a value indicating if the life is visible in the hud.
+  #rX1u2cGvGpIlH5cv $b := data→\_life_txt→is_visible;
+}
+#gf2b0Sz627NLlyAFFj4MeOic
+action set_life_visible(#JTLRihoxN8cxPQ43 visible: Boolean) {
+  #sD4OBtrspT0Uh0k8 // Controls the visibility of the life counter.
+  #kBruCITydNqICsgy if $visible then {
+    #LY35FhMwu25cQBYw data→\_life_txt→show;
+  }
+  else {
+    #xAsc32ZmZ4mDOFhj data→\_life_txt→hide;
+  }
+}
+#sbBwOOYCaN7mUaF0ZlZyxAYU
+action sprites() returns(#xX6pkmdt8a5KVNiS sprites: Sprite_Set) {
+  #xc0QtpSbTXh1GwCV // Gets the sprites of the board, excluding hub sprites.
+  #Scb2mfgsd1z4R2G8 $excluded := code→hud_sprites;
+  #ws52NEnvj9qCKGjx $sprites := data→\_board→create_sprite_set;
+  #CWr1flThpV1vp2cs foreach sprite in data→\_board
+  #jcgSowlf2GnOKbqi where `not` $excluded→contains($sprite)
+  do {
+    #SqHBUc15dLrI44tQ $sprites→add($sprite);
+  }
+  meta sync;
+}
+#x8hRsIT9CAZerwKF
+action set_background_scene(#xxFyAjWYlZqmsd2c direction: String, #xWDQ4yQUS8QWIm2G pic: Picture) {
+  #b4qYeJJV5fXmlqL2 // Sets the background picture and the speed of the background.
+  #fDC7OSyUxOtiQToM // {hints:direction:horizontal,vertical}
+  #cXnTiVb5rm0qSDSX $b := $direction→trim(" \t")→to_lower_case→equals("horizontal");
+  #FjQX2QH2ZqBHBOpO $scene := data→\_board→background_scene;
+  #xbEzCcsY22RoPtXj $scene→clear;
+  #S7bkh6r4pVcHgV8c $pic := $pic→clone;
+  #VxjO3KnRByvOLvVK if $b then {
+    #U2a67VkZZO12op2U $pic→resize( - 1, data→\_board→height);
+  }
+  else {
+    #p7Io8ZWoL2G6yL92 $pic→resize(data→\_board→width, - 1);
+  }
+  #ozFKGP79IQraapHB $layer := $scene→create_layer(0, $pic);
+  #eGk2b4ExeTM73Kg5 if `not` data→background_scene_move→is_invalid then {
+    #TrbtdU7nPhE4r4tN data→background_scene_move→delete;
+  }
+  #lAeYACw4EOAzqkI9 if $b then {
+    #LZGihYJA823COO24 data→background_scene_move := data→\_board→add_on_every_frame($perform);
+    #dDXqnuq6ZX0XYuiq where perform() {
+      #OpD6ZCcvZ2IeZrER $scene→view_x := $scene→view_x + 1;
+    }
+  }
+  else {
+    #wzNI5zIvycykPz4e data→background_scene_move := data→\_board→add_on_every_frame($perform);
+    #CcNlh4HGCmc6EI44 where perform() {
+      #xRSy4Rcl9aKAtAcs $scene→view_y := $scene→view_y + 1;
+    }
+  }
+}
+#oJd6t0JYUca8Bpha
+var background_scene_move : Event_Binding {
+  transient = true;
+}
+#x7LNZH9OJJV4MHMQ
+action bounce_on_sides() {
+  #zDu3lJNCaInFBCJs // Makes all the sprite bounce on thee border of the screen
+  #xa1tv4gUnH7S5toZ data→\_board→create_boundary(0);
+  meta sync;
+}
+#xi31jXN7f2tym77g
+action create_sprite(#U0MZEHjiclDl3NQR pic: Picture) returns(#nXzTwbGcDPXL4IbM sprite: Sprite) {
+  #DHXP2H45qOOljGtB // Creates a new sprite of width 100 with the given picture.
+  #PvmYHlhdUQ7SCbU9 $sprite := data→\_board→create_picture($pic);
+  #foFswt2QK0q4XHqB $sprite→set_width(100);
+  meta sync;
+}
+#x7Vz1ZmH6VcaJlua
+action splash(#hGCLHQNWZiNWtoh5 message: String, #xW09NdgistI7i5VL options\u003f: * Splash_Options) {
+  #xBgJYP0JkLV8vLsu // Shows a full screen splash message and goes away. Does not block the game loop.
+  #iAbTUBn5UnH02hT4 // {hints:message:Get Ready!}
+  #xucGFQ2aCONYJsj4 if $options\u003f→seconds < 0.5 then {
+    #Gl9svYaw9KPAtSD4 $options\u003f→seconds := 0.5;
+  }
+  #xpgOw6sO8dWNOiDI if $options\u003f→foreground_color→is_invalid then {
+    #bj1pifyWf1UD3vf6 $options\u003f→foreground_color := colors→white;
+  }
+  #YlwAvzjiiCuLvRbQ if $options\u003f→background_color→is_invalid then {
+    #xhto7QFnl6G4cIiu $options\u003f→background_color := colors→random→darken(0.5);
+  }
+  #D2gJ2aRY7G1Wgqwj $back := data→\_board→create_rectangle(data→\_board→width, data→\_board→height);
+  #xQBmIbQZArDQK1DL $back→set_color($options\u003f→background_color);
+  #utiWa6diuPaMt7qw $back→set_z_index(1000);
+  #xzEFpi614YiD4AOU $text := data→\_board→create_text(data→\_board→width, 2, 60, $message);
+  #sgtqZkFVB2yypxiX $text→fit_text;
+  #N9uLwv3sSMul5KTd while $text→width > data→\_board→width * 0.8 do {
+    #GdP3sZefFfld8d63 $text→set_font_size($text→font_size * 0.8);
+    #QtElLFuIFqofqV4L $text→fit_text;
+  }
+  #xa0j4MSSRICa1yCV $text→set_color($options\u003f→foreground_color);
+  #x2deRPjfZc5imD1G $text→set_z_index(1000);
+  #KQFtfPZJutultOrV $text_anim := $text→create_animation;
+  #mqUe7l7KIaVRCE9J $text_anim→sleep($options\u003f→seconds);
+  #nXXLe2bQSf5s97tR $text_anim→puff_out(0.9, "cubic", 1.5);
+  #xmMpx7kl2Z6wGX5k $text_anim→delete;
+  #sclwDHGL3pYC7I8g $anim2 := $back→create_animation;
+  #xC2LFDuonXynWnZs $anim2→sleep($options\u003f→seconds + 0.7);
+  #IwAHdtxZYXAd7Ixk $anim2→fade_out(0.2, "cubic");
+  #vb92LcxyqpOkvWXT $anim2→delete;
+  #UZh2uFuZx5M69gXr $anim2→wait;
+}
+#BVGhpbmca
+table Splash_Options {
+  type = "Object";
+  exported = true;
+  persistent = false;
+  fields {
+    #X13V3PCWTQpT2ORT seconds : Number
+    #nk8FBg8KCO4gn30S foreground_color : Color
+    #Tl89ovYzNYTzCj6A background_color : Color
+  }
+}
+#xitA6AzKCSj7jr14
+action test_splash() {
+  #mH4n647I6RX3Pr0d $board := code→start_landscape;
+  #dO1aUG4TA9Z6hrt1 skip;
+  #QWfn57z2DhlT2JFV code→splash("Get Ready!");
+  #nShZjozF46reKDxU code→splash_text("Get Ready!", 0, colors→random, colors→random, $done);
+  #OX0tEUwVeQVbnx2b where done() {
+    #jEks25QODvuCIWKX skip;
+  }
+  #SoAL1SvMMRt4XNCx code→set_hud_colors(colors→random, colors→random, colors→random);
+  #fAgXJrzKv1FbXVTL code→start_countdown_timer(10);
+  #Xj7upwlsgslQ7u7c $board→add_on_every_frame($perform);
+  #x78Ey3ZT5canzl7t where perform() {
+    #i39JaH9PgBaGdUyO code→add_score(1);
+    #ltYm4Dte7zDTreVg code→add_life(1);
+  }
+  meta private;
+  meta test;
+}
+#VrNBbzfR0J7q4E3C
+action splash_text(#CA9uMnMJb89YJMbC message: String, #fxC4ka8ITNRb2qGo seconds: Number, #xdE0PK79kjesmqlt foreground: Color, #RuH75z7IkGHd1s42 background: Color, #WjisPpt6qlTfZgdt done: Action) {
+  #AT4CUHz7jETg7hzm // Shows a full screen splash message and goes away (obsolete, use ``splash`` instead...)
+  #MJjiPyY8duIetPrr // {hints:message:Get Ready!}
+  #aOnY2ZFsfdmQ4vys code→splash("Get Ready!");
+  #WJm64gJJ5a32uvrS where seconds := $seconds;
+  #x6gdQ1QvLIYvWifu where foreground_color := $foreground;
+  #BBN4zp8KQ0yoX4P0 where background_color := $background;
+  #xKaH5mqhj84r6aeW $done→run;
+}

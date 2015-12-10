@@ -1,0 +1,405 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank mysql web api";
+meta icon "Stacks";
+meta color "#ffffffff";
+meta rootId "x4mibwzdISu8zLeLgg7b3IKt";
+meta iconArtId "wyfreugv";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta isCloud "yes";
+meta hasIds "yes";
+meta platform "network,npm,shell";
+meta parentIds "";
+// An blank web api using MySql, Node.JS and Restify. #node #azure #restify
+#czWG9NcXY9uFZHMz
+action \_init() {
+  #uB5XO1H391C2DBKo // Look for ``TODO`` comments in this script to set things up.
+  #LVLHQddtUbbD1NAl code→init_logging;
+  #wG2N2qILjZpo6XNz code→init_mysql;
+  #x2Y2gFv2oHeZKjaB code→init_restify;
+}
+#FrNAgtgAKnFVC43t
+action GET_\u002fping() returns(#aM0QoLDaWxwAlfSy millis: Number) {
+  #xzy3cNZXu2Lbz9f2 // Returns the number of milliseconds since epoch.
+  #IYDlx4xcyWX5wD4m $millis := time→now→milliseconds_since_epoch;
+}
+#a4wL0Lb7xeWxhV4L meta import parallel {
+  pub "fncvb"
+  usage {
+    type queue
+    action `async` @for(count: Number, @action: Number_Action)
+    action `async` for_batched(count: Number, batch_count: Number, item_action: Number_Action, batch_action: Action)
+    action `sync` schedule(q: ♻ parallel → queue, task: Action)
+    action `sync` create_queue(max_running: Number) returns(queue: ♻ parallel → queue)
+    action `async` wait_for_empty(q: ♻ parallel → queue)
+    action `async` for_json(js: Json_Object, @action: Json_Action)
+  }
+}
+#CW3Wao3uu3Z2Fhe6
+var logger : App_Logger {
+  transient = true;
+}
+#rmfzWWMIFG8Ule9I
+action init_restify() {
+  #GL26xBm2sW9gi51S $server := @\u267b→restify→server;
+  #eq0FvCwwbob1i3UD $server→use(@\u267b→restify→authorization_parser);
+  #Ee6qD4jb4Xr4TCYg $server→pre(@\u267b→restify→sanitize_path);
+  #xiHn2sJ7jyfBOFLf $throttle := @\u267b→restify→throttle;
+  #ZU1qf4WMSwf2ZZs8 where rate := 40;
+  #S04R2349FF42Rb2O where burst := 100;
+  #qa878gtstkVP7tTO where ip := true;
+  #kld3kZpnFcZ4TVhB $server→use($throttle);
+  #sptEZCs70xCB68CA $server→use(@\u267b→restify→CORS);
+  #mFFPDO74C64OWH8s $server→use(@\u267b→restify→body_parser);
+  #xSqpOmBEP6L2VCFi $server→use(@\u267b→restify→gzip_response);
+  #xR4QGtRsV3hGoSJQ $server→use(@\u267b→restify→query_parser);
+  #x9bNZzJ9tZk0l1Z4 $server→use(@\u267b→restify→conditional_request);
+  #buXcIfKig0apgL4x @\u267b→restify_touchdevelop→autobind($server);
+  #kj30VDMt3gkmKiZM code→init_routes();
+  #UAx1DGb27XEqkYO5 $server→use(@\u267b→restify_touchdevelop→errors_to_log(data→logger));
+  meta private;
+}
+#pE2QJHs3edBqS2Ji meta import restify {
+  pub "wgscc"
+  usage {
+    action `async` `type` Request_Handler(req: ♻ restify → Request, res: ♻ restify → Response)
+    #xLPhdjOebDT8w77X
+    table Throttle_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xo6LfV0hyAQtz675 rate : Number
+        #yZ2QZAfeW3W74JA1 burst : Number
+        #JUlNvDq7Hm9cTUAG ip : Boolean
+        #w2h4dcf4I5K5h7kn xff : Boolean
+        #RO3Sx6iTt4WsVBm6 username : Boolean
+        #VbsYnDvr3t4Xr4VA maxKeys : Number
+        #w25h9R5LKJnWiBNu tokensTable : ♻ restify → Tokens_Table
+      }
+    }
+    #xdeuBx505IsZ6eEI
+    table Serve_Static_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #NfWLVJBBbHvtMqkl default : String
+        #KvIMj1sEoAwQCf22 maxAge : Number
+      }
+    }
+    #mqEMUbizkEp6naSD
+    table CORS_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xMYYV6C3eS7PWsfQ origins : String
+        #z5HdpFdSi792e1OX credentials : Boolean
+        #Fw1D0A9ZfeMCf5c3 headers : String
+      }
+    }
+    #w2zTzWkfMf01yOko
+    table Body_Parser_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #mhaHCLobgUgMrv72 maxBodySize : Number
+        #xr4fKleNd4wHHP1l mapParams : Boolean
+        #st0ir2vLTxbLTQWB mapFiles : Boolean
+        #z5ah2mZWb8c5FmTM overrideParams : Boolean
+      }
+    }
+    #xv4yZciZi2wFoqpM
+    table Send_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #svWYln7UIackFIpB status : Number
+      }
+    }
+    #BVGhpbmca
+    table HTTP_Status_Codes {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #BVGhpbmcaMjAwIE9L @200_OK : Number
+        #BVGhpbmcaMjAxIENyZWF0ZWQa @201_Created : Number
+        #BVGhpbmcaMzAwIE11bHRpcGxlIENob2ljZXMa @300_Multiple_Choices : Number
+        #BVGhpbmcaMzAxIE1vdmVkIFBlcm1hbmVudGx5 @301_Moved_Permanently : Number
+        #BVGhpbmcaMzAyIE1vdmVkIFRlbXBvcmFyaWx5 @302_Moved_Temporarily : Number
+        #BVGhpbmcaMzAzIFNlZSBPdGhlcgaa @303_See_Other : Number
+        #BVGhpbmcaMzA0IE5vdCBNb2RpZmllZAaa @304_Not_Modified : Number
+        #BVGhpbmcaMzA3IFRlbXBvcmFyeSBSZWRpcmVjdAaa @307_Temporary_Redirect : Number
+        #BVGhpbmcaNDAwIEJhZCBSZXF1ZXN0 @400_Bad_Request : Number
+        #BVGhpbmcaNDAxIFVuYXV0aG9yaXplZAaa @401_Unauthorized : Number
+        #BVGhpbmcaNDAyIFBheW1lbnQgUmVxdWlyZWQa @402_Payment_Required : Number
+        #BVGhpbmcaNDAzIEZvcmJpZGRlbgaa @403_Forbidden : Number
+        #BVGhpbmcaNDA0IE5vdCBGb3VuZAaa @404_Not_Found : Number
+        #BVGhpbmcaNDA1IE1ldGhvZCBOb3QgQWxsb3dlZAaa @405_Method_Not_Allowed : Number
+        #BVGhpbmcaNDA4IFJlcXVlc3QgVGltZW91dAaa @408_Request_Timeout : Number
+        #BVGhpbmcaNDA5IENvbmZsaWN0 @409_Conflict : Number
+        #BVGhpbmcaNDEwIEdvbmUa @410_Gone : Number
+        #BVGhpbmcaNDEyIFByZWNvbmRpdGlvbiBGYWlsZWQa @412_Precondition_Failed : Number
+        #BVGhpbmcaNDEzIFJlcXVlc3QgRW50aXR5IFRvbyBMYXJnZQaa @413_Request_Entity_Too_Large : Number
+        #BVGhpbmcaNDE1IFVuc3VwcG9ydGVkIE1lZGlhIFR5cGUa @415_Unsupported_Media_Type : Number
+        #BVGhpbmcaNDE4IEltIGEgdGVhcG90 @418_Im_a_teapot : Number
+        #BVGhpbmcaNDIyIFVucHJvY2Vzc2FibGUgRW50aXR5 @422_Unprocessable_Entity : Number
+        #BVGhpbmcaNDIzIExvY2tlZAaa @423_Locked : Number
+        #BVGhpbmcaNDI0IEZhaWxlZCBEZXBlbmRlbmN5 @424_Failed_Dependency : Number
+        #BVGhpbmcaNDI1IFVub3JkZXJlZCBDb2xsZWN0aW9u @425_Unordered_Collection : Number
+        #BVGhpbmcaNDI5IFRvbyBNYW55IFJlcXVlc3Rz @429_Too_Many_Requests : Number
+        #BVGhpbmcaNTAwIEludGVybmFsIFNlcnZlciBFcnJvcgaa @500_Internal_Server_Error : Number
+        #BVGhpbmcaNTAxIE5vdCBJbXBsZW1lbnRlZAaa @501_Not_Implemented : Number
+        #BVGhpbmcaNTAzIFNlcnZpY2UgVW5hdmFpbGFibGUa @503_Service_Unavailable : Number
+      }
+    }
+    type Request
+    type Response
+    type Tokens_Table
+    type Server
+    type Middleware
+    type Error
+    action `sync` use(server: ♻ restify → Server, mid: ♻ restify → Middleware)
+    action `sync` get(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` post(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` server() returns(server: ♻ restify → Server)
+    action `sync` send(res: ♻ restify → Response, content: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` status(res: ♻ restify → Response, status: Number)
+    action `sync` is(req: ♻ restify → Request, type: String) returns(r: Boolean)
+    action `sync` accepts(req: ♻ restify → Request, types: String) returns(type: String)
+    action `sync` put(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` del(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` head(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` pre(server: ♻ restify → Server, mid: ♻ restify → Middleware)
+    action `sync` CORS(options\u003f: ♻ restify → CORS_Options) returns(mid: ♻ restify → Middleware)
+    action `sync` conditional_request() returns(mid: ♻ restify → Middleware)
+    action `sync` route(server: ♻ restify → Server, method: String, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` json(res: ♻ restify → Response, content: Json_Object, options\u003f: ♻ restify → Send_Options)
+    action `sync` next(res: ♻ restify → Response)
+    action `sync` next_error(res: ♻ restify → Response, error: ♻ restify → Error)
+    action `sync` address(server: ♻ restify → Server) returns(address: String)
+    action `sync` gzip_response() returns(mid: ♻ restify → Middleware)
+    action `sync` header(req: ♻ restify → Request, name: String) returns(value: String)
+    action `sync` is_secure(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` is_chunked(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` is_keep_alive(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` set_header(res: ♻ restify → Response, name: String, value: String)
+    action `sync` body_parser(options\u003f: ♻ restify → Body_Parser_Options) returns(mid: ♻ restify → Middleware)
+    action `sync` throttle(options\u003f: ♻ restify → Throttle_Options) returns(middleware: ♻ restify → Middleware)
+    action `sync` date_parser(clock_skew: Number) returns(middleware: ♻ restify → Middleware)
+    action `sync` serve_static(directory: String, options\u003f: ♻ restify → Serve_Static_Options) returns(middleware: ♻ restify → Middleware)
+    action `sync` query_parser() returns(middleware: ♻ restify → Middleware)
+    action `sync` authorization_parser() returns(middleware: ♻ restify → Middleware)
+    action `sync` jsonp() returns(middleware: ♻ restify → Middleware)
+    action `sync` body_as_json(req: ♻ restify → Request) returns(body: Json_Object)
+    action `sync` id(req: ♻ restify → Request) returns(id: String)
+    action `sync` param(req: ♻ restify → Request, name: String) returns(value: String)
+    action `sync` opts(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` patch(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` to_string(ser: ♻ restify → Server) returns(s: String)
+    action `sync` sanitize_path() returns(middleware: ♻ restify → Middleware)
+    action `sync` body(req: ♻ restify → Request) returns(body: String)
+    action `sync` send_error(res: ♻ restify → Response, status: Number, message: String)
+    action `sync` all(server: ♻ restify → Server, @then: ♻ restify → Request_Handler)
+    action `sync` method(req: ♻ restify → Request) returns(method: String)
+    action `sync` url(req: ♻ restify → Request) returns(url: String)
+    action `sync` query(req: ♻ restify → Request) returns(query: Json_Object)
+    action `sync` redirect(res: ♻ restify → Response, status_code: Number, url: String)
+    action `sync` send_status(res: ♻ restify → Response, status_code: Number)
+    action `sync` charset(res: ♻ restify → Response, encoding: String)
+    action `sync` route_regex(server: ♻ restify → Server, method: String, path_regex: String, @then: ♻ restify → Request_Handler)
+    action `async` read_body_as_buffer(req: ♻ restify → Request) returns(body: Buffer)
+    action `sync` headers(req: ♻ restify → Request) returns(headers: Json_Object)
+    action `sync` server_url(req: ♻ restify → Request) returns(url: String)
+    action `sync` html(res: ♻ restify → Response, content: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` send_text(res: ♻ restify → Response, content: String, content_type: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` send_buffer(res: ♻ restify → Response, content: Buffer, content_type: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` finished(res: ♻ restify → Response) returns(done: Boolean)
+    action `sync` http() returns(codes: ♻ restify → HTTP_Status_Codes)
+    action `sync` remote_ip(req: ♻ restify → Request) returns(ip: String)
+    action `sync` disable_ticks()
+    action `sync` send_custom_error(res: ♻ restify → Response, status: Number, message: String)
+  }
+}
+#ujS3F2VHoZjLZbDz meta import restify_touchdevelop {
+  pub "mkrcc"
+  usage {
+    action `sync` autobind(server: ♻ restify → Server)
+    action `sync` errors_to_log(logger: App_Logger) returns(middleware: ♻ restify → Middleware)
+  }
+  #xMnci3yFwDflfyHU resolve restify = ♻ restify with {
+  }
+}
+#xcZnKOBpfz0lu8jD
+action init_routes() {
+  #xfBee6MhUSCe2Cti // TODO: (optional) register dynamic routes as needed
+  #MxIs21VA5KpTC0F8 $server := @\u267b→restify→server;
+  #B2Ui2S2BrMhefyH4 $server→get("/echo", $@then);
+  #c58sWTLqXwkWaboA where @then(req: ♻ restify → Request, res: ♻ restify → Response) {
+    #Ois5PPcsSPnel4wX $key := $req→query→string("api-key");
+    #WJUkCE6Vldj3EF3K if `not` @\u267b→mysql_api_key_auth→check_api_key($key, "") then {
+      #kGSYWXcotTVyVWi2 $res→send_error(403, "");
+    }
+    else {
+      #yXsNFxumA3UsfrbL $res→send($req→body);
+    }
+  }
+  meta private;
+}
+#XtmWYupkIPBJS394 meta import node_hash {
+  pub "ezbka"
+  usage {
+    action `sync` sha256(value: String) returns(digest: String)
+    action `sync` sha1(value: String) returns(digest: String)
+  }
+  #GWvhSP7JyKU8z6PI resolve node_crypto = ♻ node_crypto with {
+  }
+}
+#jNGbgstMyoeAb4pB meta import node_crypto {
+  pub "oevpc"
+  usage {
+    type credentials
+    type hash
+    type hmac
+    type cipher
+    type decipher
+    type sign
+    type verify
+    type DiffieHellman
+    action `sync` get_ciphers() returns(ciphers: Collection[String])
+    action `sync` get_hashes() returns(hashes: Collection[String])
+    action `sync` create_credentials(details: Json_Object) returns(credentials: ♻ node_crypto → credentials)
+    action `sync` create_hash(algorithm: String) returns(hash: ♻ node_crypto → hash)
+    action `sync` update_hash(hash: ♻ node_crypto → hash, hash_data: Buffer)
+    action `sync` digest_hash(hash: ♻ node_crypto → hash) returns(digest: Buffer)
+    action `sync` update_hmac(hmac: ♻ node_crypto → hmac, hmac_data: Buffer)
+    action `sync` digest_hmac(hmac: ♻ node_crypto → hmac) returns(digest: Buffer)
+    action `sync` create_cipher(algorithm: String, password: Buffer) returns(cipher: ♻ node_crypto → cipher)
+    action `sync` create_cipher_iv(algorithm: String, key: Buffer, iv: Buffer) returns(iv_cipher: ♻ node_crypto → cipher)
+    action `sync` update_cipher(cipher: ♻ node_crypto → cipher, _data: Buffer) returns(enciphered: Buffer)
+    action `sync` final(cipher: ♻ node_crypto → cipher) returns(cipher_final: Buffer)
+    action `sync` set_auto_padding(cipher: ♻ node_crypto → cipher)
+    action `sync` create_decipher(algorithm: String, password: Buffer) returns(decipher: ♻ node_crypto → decipher)
+    action `sync` create_decipher_iv(algorithm: String, key: Buffer, iv: Buffer) returns(iv_decipher: ♻ node_crypto → decipher)
+    action `sync` update_decipher(decipher: ♻ node_crypto → decipher, _data: Buffer) returns(deciphered: Buffer)
+    action `sync` final_(decipher: ♻ node_crypto → decipher) returns(decipher_final: Buffer)
+    action `sync` set_auto_padding_(decipher: ♻ node_crypto → decipher)
+    action `sync` create_sign(algorithm: String) returns(sign: ♻ node_crypto → sign)
+    action `sync` update_sign(sign: ♻ node_crypto → sign, sign\_data: Buffer)
+    action `sync` sign_(sign: ♻ node_crypto → sign, private_key: String) returns(signature: Buffer)
+    action `sync` create_verify(algorithm: String) returns(verify: ♻ node_crypto → verify)
+    action `sync` update_verify(verify: ♻ node_crypto → verify, verify_data: Buffer)
+    action `sync` verify_(verify: ♻ node_crypto → verify, object: String, signature: Buffer) returns(valid: Boolean)
+    action `sync` create_DiffieHellman(prime_length: Number) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `sync` generate_keys(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(public_key: Buffer)
+    action `sync` compute_secret(DiffieHellman: ♻ node_crypto → DiffieHellman, other_public_key: Buffer) returns(shared_secret: Buffer)
+    action `sync` get_prime(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(DH_prime: Buffer)
+    action `sync` get_generator(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(generator: Buffer)
+    action `sync` get_public_key(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(public_key: Buffer)
+    action `sync` get_private_key(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(private_key: Buffer)
+    action `sync` set_public_key(DiffieHellman: ♻ node_crypto → DiffieHellman, public_key: Buffer)
+    action `sync` set_private_key(DiffieHellman: ♻ node_crypto → DiffieHellman, private_key: Buffer)
+    action `sync` get_DiffieHellman(group_name: String) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `async` pbkdf2(password: String, salt: String, iterations: Number, keylen: Number) returns(derived_key: String)
+    action `async` random_bytes(size: Number) returns(strong_data: Buffer)
+    action `sync` DEFAULT\_ENCODING() returns(default_encoding: String)
+    action `sync` create_hmac(algorithm: String, key: String) returns(hmac: ♻ node_crypto → hmac)
+    action `sync` create_DiffieHellmanWithPrime(prime: Buffer) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `async` pseudo_random_bytes(size: Number) returns(non\u002dstrong_data: Buffer)
+    action `sync` update_hash_string(hash: ♻ node_crypto → hash, hash_data: String)
+    action `async` new_guid() returns(guid: String)
+  }
+}
+#xpq2HIKbvBbUdCZi meta import application_insights {
+  pub "obvrc"
+  usage {
+    #BVGhpbmca
+    table Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xLh2sfYIAZ4zGSaO instrumentation_key : String
+        #xYM2DFyGKHO12BbR ignore_exceptions : Boolean
+        #xp5FVyAAHVpPvqkQ ignore_console : Boolean
+        #ic0oN3OGFQdZ4eb0 ignore_requests : Boolean
+        #JC3cWz724nB9Rwoh ignore_performance : Boolean
+      }
+    }
+    action `sync` init(options\u003f: ♻ application_insights → Options) returns(active: Boolean)
+  }
+}
+#ZSO4Y5M7nQelijER meta import mysql {
+  pub "eubjc"
+  usage {
+    #r0tJfxjSIbXhbO9e
+    table Connection_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xNwN3QrMI17bs7yz connection_url : String
+        #fsHuRetucbnsZEVS connection_string : String
+        #ZzpXHWNzbAJrlZ19 host : String
+        #Mt2K2uHYlRKTEVJx port : Number
+        #y2w70nx2Hyy8MsA7 user : String
+        #xd39POiR8p9yrwYT password : String
+        #WwAH957omLslwnNp database : String
+        #O2Yw4tCSrD78rq3v connectionLimit : Number
+      }
+    }
+    #BVGhpbmca
+    table Query_Options {
+      // Optional arguments for queries
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        // A set of query parameters
+        #N3WWSRAlRR9i7ca2 values : Json_Object
+        // Time out in seconds
+        #c3E6U64V6u5e8tX5 time_out : Number
+      }
+    }
+    type Connection_Pool
+    action `async` create_pool(options\u003f: ♻ mysql → Connection_Options) returns(pool: ♻ mysql → Connection_Pool)
+    action `async` query(@this: ♻ mysql → Connection_Pool, sql: String, options\u003f: ♻ mysql → Query_Options) returns(rows: Json_Object)
+    action `async` escape(value: String) returns(escaped: String)
+    action `async` escape_id(id: String) returns(eid: String)
+    action `async` create_row() returns(row: Json_Builder)
+  }
+}
+#bsYbauqQtVM6TI7t
+var pool : ♻ mysql → Connection_Pool {
+  transient = true;
+}
+#EAGbH22wtwqURfHh
+action init_mysql() {
+  #vaO92ZLauJUCmo6s // TODO: set the ``MYSQL_CONNECTION_STRING`` server setting with your MySql database connection string.
+  #PP4VbypeiIqyhj8b data→pool := @\u267b→mysql→create_pool;
+  #xFH2E2o9IetuMq7t @\u267b→mysql_api_key_auth→init(0, data→pool);
+  #ZC48gHxp8ZY4ZUzs // TODO: insert SQL statement to lazily your database schema
+  meta private;
+}
+#LNGD4pzTmHpWLcaM
+action init_logging() {
+  #FKREwwQwC1P4M34a // TODO: (optional) set the ``APPINSIGHTS_INSTRUMENTATIONKEY`` server setting to enable tracking.
+  #rg6M5H46J1bK4x8c data→logger := app→create_logger("api");
+  #M9Zd0tmYk93sRRxT @\u267b→application_insights→init;
+  meta private;
+  meta sync;
+}
+#UZ31sY3DXz0w2Dq0 meta import mysql_api_key_auth {
+  pub "eippa"
+  usage {
+    action `async` init(p: Number, pool: ♻ mysql → Connection_Pool)
+    action `async` check_api_key(key: String, role: String) returns(valid: Boolean)
+    action `async` set_roles(id: String, roles: String)
+  }
+  #xnKxVoJid6RUuoby resolve mysql = ♻ mysql with {
+  }
+}

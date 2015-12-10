@@ -123,7 +123,7 @@ function runAndComplete(cmds, task) {
     });
 }
 
-mkSimpleTask('build/genmeta.js', [ 'editor', 'tools', 'generated/help.cache' ], "tools/genmeta.ts");
+mkSimpleTask('build/genmeta.js', [ 'editor', 'tools' ], "tools/genmeta.ts");
 file('build/api.js', expand([ "build/genmeta.js", "lib" ]), { async: true }, function () {
     console.log("[P] generating build/api.js, localization.json and topiclist.json");
     runAndComplete(["node build/genmeta.js"], this);
@@ -481,13 +481,6 @@ task('local', [ 'default' ], { async: true }, function() {
 task('nw', ['default', 'nw-npm'], { async: true }, function() {
   runAndComplete([ 'node node_modules/nw/bin/nw build/nw' ], this);
 })
-
-task('update-docs', [ 'build/client.js', 'default' ], { async: true }, function() {
-  var task = this;
-  runAndComplete(
-    [ 'node build/client.js updatehelp',
-      'node build/client.js updatelang'], this);
-});
 
 task('update-lang', [ 'build/client.js', 'default' ], { async: true }, function() {
   var task = this;

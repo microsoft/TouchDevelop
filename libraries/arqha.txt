@@ -1,0 +1,109 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank game template";
+meta icon "Controller";
+meta color "#ff9955bb";
+meta rootId "x0hukfGG4i3MRik2f8KmalqI";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+#Apxoi0VesSBXIz9PLx65FHFL
+action main() {
+  #xSdbHt6IzwL2zF22 $board := @\u267b→game→start;
+  #HcieLw2N0l20RLiX @\u267b→game→splash("Get Ready!");
+  #tO3dDceW3bsm8w4D @\u267b→game→bounce_on_sides;
+  #d3NEpyQ23dEnVv0F $monster := @\u267b→game→create_sprite(art→monster);
+  #DXV4iMnEfxNiTp9x $monster→acceleration_y := 400;
+  #b1vCOUVhFBUhOTZS @\u267b→gamepad→on_button_pressed;
+  #wenMZEk4bzR7XHM4 where `implicit` \_body\_() {
+    #nIR8WfYhh9EC5Qo1 $monster→speed_y := - 200;
+  }
+}
+#T3Ql4cZePvcJv2yq meta import game {
+  pub "angli"
+  usage {
+    #BVGhpbmca
+    table Splash_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #X13V3PCWTQpT2ORT seconds : Number
+        #nk8FBg8KCO4gn30S foreground_color : Color
+        #Tl89ovYzNYTzCj6A background_color : Color
+      }
+    }
+    action `sync` set_score(value: Number)
+    action `async` set_life(value: Number)
+    action `sync` start_timer()
+    action `sync` start_countdown_timer(seconds: Number)
+    action `sync` life() returns(r: Number)
+    action `sync` score() returns(r: Number)
+    action `sync` current_time() returns(seconds: Number)
+    action `sync` add_score(value: Number)
+    action `async` add_life(value: Number)
+    action `sync` clear_timer()
+    action `async` remove_life(value: Number)
+    action `async` end()
+    action `async` start() returns(board: Board)
+    action `sync` reset()
+    action `async` start_with_fixed_size(width: Number, height: Number) returns(board: Board)
+    action `async` start_with_background_picture(pic: Picture) returns(board: Board)
+    action `sync` board() returns(board: Board)
+    action `sync` on_end(body: Action)
+    action `async` start_landscape() returns(board: Board)
+    action `async` start_portrait() returns(board: Board)
+    action `sync` set_hud_colors(life: Color, timer: Color, score: Color)
+    action `sync` hud_sprites() returns(sprites: Sprite_Set)
+    action `async` life_visible() returns(b: Boolean)
+    action `async` set_life_visible(visible: Boolean)
+    action `sync` sprites() returns(sprites: Sprite_Set)
+    action `async` set_background_scene(direction: String, pic: Picture)
+    action `sync` bounce_on_sides()
+    action `sync` create_sprite(pic: Picture) returns(sprite: Sprite)
+    action `async` splash(message: String, options\u003f: ♻ game → Splash_Options)
+    action `async` splash_text(message: String, seconds: Number, foreground: Color, background: Color, done: Action)
+  }
+}
+#SU9oq98rU41J6G2v meta import gamepad {
+  pub "mlqea"
+  usage {
+    type Settings
+    type Gamepad_Event_Binding
+    action `sync` current() returns(p: Vector3)
+    action `sync` set_keys(settings: ♻ gamepad → Settings, left: String, up: String, right: String, down: String, button: String)
+    action `sync` set_use_accelerometer(settings: ♻ gamepad → Settings, enabled: Boolean)
+    action `sync` use_accelerometer(settings: ♻ gamepad → Settings) returns(b: Boolean)
+    action `sync` control_sprite(sprite: Sprite, max_speed_x: Number, max_speed_y: Number)
+    action `sync` control_background_scene(max_speed_x: Number, max_speed_y: Number)
+    action `sync` settings() returns(sets: ♻ gamepad → Settings)
+    action `sync` set_accelerometer_factor(settings: ♻ gamepad → Settings, factor: Number)
+    action `sync` set_keyboard_factor(settings: ♻ gamepad → Settings, factor: Number)
+    action `sync` set_touch_factor(settings: ♻ gamepad → Settings, factor: Number)
+    action `sync` accelerometer_factor(settings: ♻ gamepad → Settings) returns(factor: Number)
+    action `sync` keyboard_factor(settings: ♻ gamepad → Settings) returns(factor: Number)
+    action `sync` touch_factor(settings: ♻ gamepad → Settings) returns(factor: Number)
+    action `sync` gamepad_factor(settings: ♻ gamepad → Settings) returns(factor: Number)
+    action `sync` set_gamepad_factor(settings: ♻ gamepad → Settings, factor: Number)
+    action `async` on_button_pressed(body: Action) returns(binding: ♻ gamepad → Gamepad_Event_Binding)
+    action `sync` delete(binding: ♻ gamepad → Gamepad_Event_Binding)
+  }
+  #mfGdJ3XAnPOkRMuG resolve game = ♻ game with {
+  }
+}
+#OCiM38F7S5D68naX meta import game_animations {
+  pub "qvira"
+  usage {
+    action `async` splatter(sprite: Sprite, splatter: Picture)
+    action `sync` add_score(sprite: Sprite, score: Number)
+    action `async` puff(sprite: Sprite)
+  }
+  #wRSSCCH0lkUUewmO resolve game = ♻ game with {
+  }
+}
+#ZY2qZ7leUTySclE6
+var monster : Picture {
+  is\_resource = true;
+  url = "https://az31353.vo.msecnd.net/pub/mezojwug";
+  transient = true;
+}

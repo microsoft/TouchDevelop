@@ -113,7 +113,6 @@ module TDev {
         public operatorKeys:any = {};
         public eventMgr:AST.EventMgr;
         public restoreFlags = false; // for genStub
-        public addHelpTopics:any = () => {}
         public opStmtPriority = 0.5;
 
         public rt_start = "";

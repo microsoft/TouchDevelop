@@ -1702,8 +1702,6 @@ module TDev {
         public childTopics:HelpTopic[] = [];
 
         static contextTopics:HelpTopic[] = [];
-        static shippedScripts:any;
-        static scriptTemplates:any[];
 
         static getScriptAsync:(id:string)=>Promise;
 
@@ -1713,8 +1711,6 @@ module TDev {
         constructor(public json:HelpTopicJson)
         {
             this.id = MdComments.shrink(this.json.name);
-            if (!json.text && HelpTopic.shippedScripts.hasOwnProperty(json.id))
-                json.text = HelpTopic.shippedScripts[json.id]
         }
 
         static fromJsonScript(e:JsonScript)
@@ -1793,24 +1789,13 @@ module TDev {
             return t;
         }
 
-        static getAllTutorials(): HelpTopic[]{
-            var tuts = HelpTopic.getAll().filter(ht => ht.isTutorial());
-            return tuts;
-        }
-
         static getAll() : HelpTopic[]
         {
             if (!HelpTopic._initalized) {
                 HelpTopic._initalized = true;
-                var bestForTag:any = {}
+                var bestForTag:StringMap<HelpTopic> = {}
 
-                HelpTopic._topics.forEach((topic) => {
-                    bestForTag[topic.id] = topic;
-                    var ht = topic.hashTags().map(MdComments.shrink);
-                    if (ht.indexOf("docs") < 0) topic.hashTagsCache.push("#docs");
-                    var tt = Util.toHashTag(topic.json.name)
-                    if (ht.indexOf(MdComments.shrink(tt)) < 0) topic.hashTagsCache.push(tt);
-                })
+                HelpTopic._topics = [];                
 
                 api.getKinds().forEach((k:Kind) => {
                     if (k.isPrivate || k instanceof ThingSetKind || (k.isData && k.getContexts() == KindContext.None)) return;
@@ -1952,17 +1937,6 @@ module TDev {
             d = this.json.priority - other.json.priority;
             if (d != 0) return d < 0;
             return Util.stringCompare(this.id, other.id) < 0;
-        }
-
-        static addMany(scripts:any, topicsJson:HelpTopicJson[], templates:any[])
-        {
-            HelpTopic.shippedScripts = scripts;
-            var sc = (<any>TDev).ScriptCache;
-            if (sc) sc.shippedScripts = scripts;
-            HelpTopic.scriptTemplates = templates;
-            topicsJson.forEach((d) => {
-                HelpTopic._topics.push(new HelpTopic(d))
-            })
         }
 
         public updateKey()
@@ -2427,8 +2401,8 @@ module TDev {
         }
 
 
-        static topicCache:any;
-        static topicByScriptId:any;
+        static topicCache:StringMap<HelpTopic>;
+        static topicByScriptId:StringMap<HelpTopic>;
         static findById(id:string):HelpTopic
         {
             // deprecated in lite
@@ -2443,24 +2417,5 @@ module TDev {
                 return HelpTopic.topicCache[id];
             return null;
         }
-
-        static testSplit(id:string)
-        {
-            var h = HelpTopic.findById(id)
-            if (h)
-                h.renderAsync().done(text => {
-                    console.log(MdComments.splitDivs(text))
-                })
-        }
-
-        static findByScriptId(id:string):HelpTopic
-        {
-            if (!HelpTopic.topicByScriptId) HelpTopic.findById("anything");
-            if (HelpTopic.topicByScriptId.hasOwnProperty(id))
-                return HelpTopic.topicByScriptId[id]
-        }
-
     }
-
-    TDev.api.addHelpTopics = HelpTopic.addMany;
 }

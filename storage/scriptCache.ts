@@ -5,7 +5,6 @@ module TDev {
     export module ScriptCache {
         function log(s: string) { Util.log("ScriptCache: " + s); }
         var getScriptCacheTableAsync = () => Storage.getTableAsync("ScriptCache");
-        export var shippedScripts:any = {};
         export function scriptSource(text:string) : (id:string)=>Promise
         {
             return (id:string) => {
@@ -60,8 +59,6 @@ module TDev {
         export function getScriptAsync(id: string) : Promise // of string
         {
             if (!Util.check(!!id)) return Promise.as("");
-
-            if (shippedScripts.hasOwnProperty(id)) return Promise.as(shippedScripts[id]);
 
             var libCache = (<any>TDev).shippedLibraryCache
             if (libCache && libCache.text.hasOwnProperty(id))

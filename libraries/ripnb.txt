@@ -1,0 +1,37 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank cordova library";
+meta icon "ApproveButton";
+meta color "#ffe3256b";
+meta rootId "yGFW3wy9mcuwDt2lxN2XzLPS";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "accelerometer,compass,gyroscope,location,musicandsounds,network,orientation,phone,cordova";
+meta parentIds "";
+// A library that wraps an Apache cordova plugin #cordova
+#xbyRT3U8tTYlJuX3
+action init(#qC2ALk0kurvg43d9 options\u003f: * Options) {
+  #MNkyanFCYYm1mj2c // Initializes the plugin. Call once.
+  #X4G0I6zR3PXSOoW2 contract→requires(data→logger→is_invalid, "plugin already initialized");
+  #t7IXp9pyue4DKV3r app→import("cordova", "TODO: cordoval plugin name here", "*");
+  #pAoVhCYiE8wIBNx2 data→logger := app→create_logger("mylib");
+  #x5295YzyzYEkwRz9 // TODO: use `app-> javasctipt` and `app->javascript async` to proxy with javascript.
+  #NSEi48Fc3E82Gzhc // TODO: change the script description
+  #xGNJXaGae2QQzC4o // TODO: write docs in `code-> example`
+}
+#SHXfYJBDaSY28xmP
+var logger : App_Logger {
+  transient = true;
+}
+#BdGhpbmca
+table Options {
+  type = "Object";
+  exported = true;
+  persistent = false;
+}
+#M64FUpLsIJLTUj44
+action example() {
+  #HaX1MKDnbGBzPPnq // Document your library here!
+  meta private;
+  meta sync;
+}

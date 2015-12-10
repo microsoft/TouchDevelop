@@ -1,0 +1,32 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank tutorial";
+meta icon "Erase";
+meta rootId "H4TKg7Y9ZIPwaE5mv9KlRcjO";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// TODO: the description of the tutorial. #docs #tutorials #stepByStep
+#main
+action main() {
+  #wd94CHkIQdxK6o2b // {template:empty}
+  #hEIag1Q8aLxWeC2O // {templatename:ADJ app}
+  #xJTrnk59jwkR9BOR // TODO This is the initial screen of the tutorial. Change this description and the template name.
+}
+#wWW6zPLClAxV8Yi341qmQqil
+action \u00230_main() {
+  #B6Gew2vzLZ7ESE4U // This is a tutorial step description which should be followed by the code.
+  #brEJuGdYaNf7qgbv // TODO change the steps to create your tutorial
+  #lrlYh6kK5H647lXr // Learn more about the [Markdown syntax](/markdown) and [interactive tutorials](/creatinginteractivetutorials).
+  #zeLMpTteeNffLlvp // {stcode}
+  #sUpiOe8ncw2gHeNf "Hello" →post_to_wall;
+  #JjJBaLryuMKrtG7Y // {stcmd:run:this is how you run the code}
+  #V2SU8Z4ta4fzdGxz // You can add many steps
+  #aCIABF0m0BTTy8HF // {stcode}
+  #wp2rrmVX9hFhY39x for 0 ≤ i < 4 do {
+    #XQTz8o5zw0DVO0C1 // The steps are split using a depth-first-search strategy.
+    #BQn8GKDayPo4lUHr "Hello Again" →post_to_wall;
+    #kU8Awwr2AyDgx47P // {stcmd:run:this is how you run the code}
+  }
+}
+

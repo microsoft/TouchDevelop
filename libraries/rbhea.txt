@@ -1,0 +1,107 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank scratch";
+meta icon "Flag";
+meta color "#ffffa500";
+meta rootId "DW2rPXfOGG0eQFu92NcRb5TE";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// #scratch
+#mNUzNyy2wxUPIVGaxSd7qyIc
+action main() {
+  #QwrjW92btcu4OaTu skip;
+}
+#scratch meta import scratch {
+  pub "cagwa"
+  usage {
+    type scratch_sprite
+
+    action `sync` new_sprite(pic: Picture) returns(sprite: ♻ scratch → scratch_sprite)
+    action `async` move(sprite: ♻ scratch → scratch_sprite, steps: Number)
+    action `async` say_for(sprite: ♻ scratch → scratch_sprite, text: String, seconds: Number)
+    action `sync` play_sound(sound: Sound)
+    action `async` play_sound_until_done(sound: Sound)
+    action `async` turn_left(sprite: ♻ scratch → scratch_sprite, degrees: Number)
+    action `async` turn_right(sprite: ♻ scratch → scratch_sprite, degrees: Number)
+    action `sync` x_position(sprite: ♻ scratch → scratch_sprite) returns(x: Number)
+    action `sync` y_position(sprite: ♻ scratch → scratch_sprite) returns(y: Number)
+    action `sync` grid()
+    action `async` change_x_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `async` change_y_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` set_y_to(sprite: ♻ scratch → scratch_sprite, y: Number)
+    action `sync` set_x_to(sprite: ♻ scratch → scratch_sprite, x: Number)
+    action `sync` direction(sprite: ♻ scratch → scratch_sprite) returns(d: Number)
+    action `async` point_in_direction(sprite: ♻ scratch → scratch_sprite, degrees: Number)
+    action `async` glide_to(sprite: ♻ scratch → scratch_sprite, duration: Number, x: Number, y: Number)
+    action `async` go_to_x_y(sprite: ♻ scratch → scratch_sprite, x: Number, y: Number)
+    action `async` show(sprite: ♻ scratch → scratch_sprite)
+    action `async` hide(sprite: ♻ scratch → scratch_sprite)
+    action `async` change_size_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` size(sprite: ♻ scratch → scratch_sprite) returns(size: Number)
+    action `async` wait(seconds: Number)
+    action `sync` mouse_down\u003f() returns(b: Boolean)
+    action `sync` mouse_y() returns(x: Number)
+    action `sync` mouse_x() returns(x: Number)
+    action `sync` pick_random(start: Number, end: Number) returns(r: Number)
+    action `sync` user_name() returns(name: String)
+    action `sync` user_picture() returns(pic: Picture)
+    action `sync` ask_and_wait(text: String) returns(answer: String)
+    action `sync` go_to_front(sprite: ♻ scratch → scratch_sprite)
+    action `sync` go_back(sprite: ♻ scratch → scratch_sprite, layers: Number)
+    action `sync` if_on_edge\u002c_bounce(sprite: ♻ scratch → scratch_sprite)
+    action `sync` switch_backdrop_to(backdrop: Picture)
+    action `sync` current_time() returns(now: DateTime)
+    action `sync` when_clicked(sprite: ♻ scratch → scratch_sprite, clicked: Action)
+    action `sync` distance_to(sprite: ♻ scratch → scratch_sprite, other: ♻ scratch → scratch_sprite) returns(d: Number)
+    action `sync` point_towards(sprite: ♻ scratch → scratch_sprite, other: ♻ scratch → scratch_sprite)
+    action `sync` mouse\u002dpointer() returns(m: ♻ scratch → scratch_sprite)
+    action `sync` timer() returns(t: Number)
+    action `sync` reset_timer()
+    action `sync` when_backdrop_clicked(clicked: Position_Action)
+    action `async` go_to(sprite: ♻ scratch → scratch_sprite, other: ♻ scratch → scratch_sprite)
+    action `async` next_costume(sprite: ♻ scratch → scratch_sprite)
+    action `async` add_costume(sprite: ♻ scratch → scratch_sprite, pic: Picture)
+    action `async` say(sprite: ♻ scratch → scratch_sprite, text: String)
+    action `sync` when_flag_clicked(clicked: Action)
+    action `sync` create_clone(sprite: ♻ scratch → scratch_sprite) returns(clone: ♻ scratch → scratch_sprite)
+    action `sync` touching(sprite: ♻ scratch → scratch_sprite, other: ♻ scratch → scratch_sprite) returns(b: Boolean)
+    action `sync` x_speed(sprite: ♻ scratch → scratch_sprite) returns(vx: Number)
+    action `sync` y_speed(sprite: ♻ scratch → scratch_sprite) returns(y: Number)
+    action `sync` change_speed_x_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` change_speed_y_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` x_acceleration(sprite: ♻ scratch → scratch_sprite) returns(ax: Number)
+    action `sync` y_acceleration(sprite: ♻ scratch → scratch_sprite) returns(ay: Number)
+    action `sync` change_x_acceleration_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` change_y_acceleration_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` set_x_speed_to(sprite: ♻ scratch → scratch_sprite, speed: Number)
+    action `sync` set_y_speed_to(sprite: ♻ scratch → scratch_sprite, speed: Number)
+    action `sync` set_x_acceleration_to(sprite: ♻ scratch → scratch_sprite, acceleration: Number)
+    action `sync` set_y_acceleration_to(sprite: ♻ scratch → scratch_sprite, acceleration: Number)
+    action `sync` forever(@action: Action)
+    action `sync` friction(sprite: ♻ scratch → scratch_sprite) returns(f: Number)
+    action `sync` set_friction_to(sprite: ♻ scratch → scratch_sprite, friction: Number)
+    action `sync` when_swipped(sprite: ♻ scratch → scratch_sprite, swiped: Vector_Action)
+    action `sync` when_backdrop_swiped(swiped: Vector_Action)
+    action `sync` device_x_acceleration() returns(dev_ax: Number)
+    action `sync` device_y_acceleration() returns(dev_ay: Number)
+    action `sync` bounce_on_edges()
+    action `async` set_size_to(sprite: ♻ scratch → scratch_sprite, percent: Number)
+    action `async` clear()
+    action `sync` pen_down(sprite: ♻ scratch → scratch_sprite)
+    action `sync` pen_up(sprite: ♻ scratch → scratch_sprite)
+    action `sync` set_pen_color_to(sprite: ♻ scratch → scratch_sprite, c: Color)
+    action `sync` set_pen_color_to_wheel(sprite: ♻ scratch → scratch_sprite, c: Number)
+    action `sync` change_pen_color_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` set_pen_size_to(sprite: ♻ scratch → scratch_sprite, size: Number)
+    action `sync` change_pen_size_by(sprite: ♻ scratch → scratch_sprite, amount: Number)
+    action `sync` stamp(sprite: ♻ scratch → scratch_sprite)
+    action `sync` join(left: String, right: String) returns(s: String)
+    action `sync` letter_of(index: Number, s: String) returns(c: String)
+    action `sync` length(s: String) returns(r: Number)
+    action `sync` stop_all()
+    action `async` new_rectangle_sprite(color: Color, width: Number, height: Number) returns(sprite: ♻ scratch → scratch_sprite)
+    action `sync` key_pressed\u003f(key: String) returns(b: Boolean)
+    action `sync` when_key_pressed(key: String, @action: Action)
+  }
+}
+

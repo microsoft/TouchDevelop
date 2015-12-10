@@ -1,7 +1,4 @@
 A directory containing files that can be re-generated but that are currently
 under version control because they take a while to re-generate.
 
-- [help.cache] can be regenerated with the [updatehelp] command of [nodeclient/client.js]
 - [langs] can be regenerated with the [updatelang] command of [nodeclient/client.js]
-
-Running [jake update-docs] will perform both of the tasks above.

@@ -122,7 +122,6 @@ module TDev.Cloud {
         startTutorialButton?: boolean;
         publicationComments?: boolean;
         translateComments?: boolean;
-        searchHelp?: boolean;
         hideMyScriptHeader?: boolean;
 
         // script lifecycle
@@ -225,6 +224,7 @@ module TDev.Cloud {
         companyLogoHorizontalUrl?: string;
         touchDevelopLogoUrl?: string;
         
+        tutorialsid?: string; // channel containing tutorial scripts
         showcaseid?: string; // channel containing showcase scripts
         
         cachedScripts?: string[];
@@ -260,6 +260,7 @@ module TDev.Cloud {
         doNothingText: "do nothing",
         hintLevel: "full",
         userVoice: "touchdevelop",
+        tutorialsid: "vrpyfsou",
         showcaseid: "njigpnyj"
     }
 

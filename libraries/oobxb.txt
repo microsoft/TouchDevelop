@@ -1,0 +1,68 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank turtle";
+meta icon "Snowflake";
+meta color "#ff007fff";
+meta rootId "JfhbuKHwe3K29WLENfXE17iC";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// #turtle
+#k3GG7tZEQiPXLEm5bnyfOkDF
+action main() {
+  #iTGtxXhIwXwHLfFT @\u267b→turtle→forward(100);
+}
+#xEv66n448mkvLMp4 meta import turtle {
+  pub "smzqa"
+  usage {
+    type Maze
+    action `async` pen_down()
+    action `async` pen_up()
+    action `async` move_to(x: Number, y: Number)
+    action `async` forward(steps: Number)
+    action `async` left_turn(angle: Number)
+    action `async` set_pen_color(c: Color)
+    action `async` xcor() returns(x: Number)
+    action `async` ycor() returns(y: Number)
+    action `async` heading() returns(a: Number)
+    action `async` world_width() returns(w: Number)
+    action `async` world_height() returns(h: Number)
+    action `async` set_heading(angle: Number)
+    action `async` set_pen_size(thickness: Number)
+    action `async` right_turn(angle: Number)
+    action `async` circle(radius: Number)
+    action `async` world_board() returns(board: Board)
+    action `async` turn_to(dx: Number, dy: Number)
+    action `async` world_picture() returns(pic: Picture)
+    action `async` set_speed(steps_per_second: Number)
+    action `async` go_home()
+    action `async` back(steps: Number)
+    action `async` pen_size() returns(size: Number)
+    action `async` clean()
+    action `async` clear_screen()
+    action `async` speed() returns(v: Number)
+    action `async` set_xy(xcor: Number, ycor: Number)
+    action `async` set_x(xcor: Number)
+    action `async` set_y(ycor: Number)
+    action `async` pen_color() returns(c: Color)
+    action `async` color_under() returns(c: Color)
+    action `async` save_picture()
+    action `async` xy() returns(x: Number, y: Number)
+    action `async` touch_xy() returns(tx: Number, ty: Number)
+    action `async` grid()
+    action `async` fast()
+    action `async` stamp()
+    action `async` set_turtle_picture(pic: Picture)
+    action `async` set_turtle_opacity(opacity: Number)
+    action `async` trail()
+    action `async` add_obstacle(maze: ♻ turtle → Maze, x: Number, y: Number, width: Number, height: Number, c: Color)
+    action `async` set_goal(maze: ♻ turtle → Maze, x: Number, y: Number, radius: Number, c: Color)
+    action `async` maze() returns(maze: ♻ turtle → Maze)
+    action `async` lock(maze: ♻ turtle → Maze)
+    action `async` history() returns(commands: String)
+    action `async` clear_history()
+    action `sync` on_command(command: Text_Action)
+    action `async` add_way_point(maze: ♻ turtle → Maze)
+    action `async` on_collision(maze: ♻ turtle → Maze, collision: Action)
+  }
+}

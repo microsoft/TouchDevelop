@@ -996,30 +996,6 @@ var apiHandlers = {
         ar.ok(ar.data)
     },
 
-    "doctopics": (ar:ApiRequest) => {
-        var topicsExt = []
-        var topics = []
-
-        TDev.HelpTopic.getAll().forEach((t) => {
-            topics.push(t.id)
-            var o = JSON.parse(JSON.stringify(t.json))
-            delete o.text;
-            o.scriptId = t.json.id;
-            o.id = t.id;
-            if (t.parentTopic)
-                o.parentTopic = t.parentTopic.id;
-            if (t.childTopics)
-                o.childTopics = t.childTopics.map(c => c.id);
-            topicsExt.push(o)
-        })
-
-        ar.ok(<TDev.DocTopicsResponse>{
-            relid: ccfg.relid,
-            topics: topics,
-            topicsExt: topicsExt
-        });
-    },
-
     "language": (ar:ApiRequest) => {
         var r = <TDev.LanguageRequest>ar.data;
         if (!r || !r.path) r.path = ar.args
@@ -1896,11 +1872,6 @@ var scriptCacheSize = 0
 
 function getScriptAsync(id:string)
 {
-    if (!liteStorage) {
-        var s = TDev.HelpTopic.shippedScripts
-        if (s.hasOwnProperty(id)) return TDev.Promise.as(s[id])
-    }
-
     if (scriptCache.hasOwnProperty(id)) return TDev.Promise.as(scriptCache[id])
 
     if (!/^[a-z]+$/.test(id)) return null

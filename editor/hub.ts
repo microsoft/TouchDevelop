@@ -61,7 +61,7 @@ module TDev.Browser {
 
                     scriptSocialLinks: true,
                     scriptEmail: true,
-                    scriptAddToChannel:true,
+                    scriptAddToChannel: true,
                 }
             },
             'classic': {
@@ -142,7 +142,6 @@ module TDev.Browser {
                     startTutorialButton: true,
                     publicationComments: true,
                     translateComments: true,
-                    searchHelp: true,
                     outAssign: true,
 
                     scriptSocialLinks: true,
@@ -278,7 +277,6 @@ module TDev.Browser {
                     hubChannels: true,
                     publicationComments: true,
                     translateComments: true,
-                    searchHelp: true,
                     outAssign: true,
 
                     scriptSocialLinks: true,
@@ -362,6 +360,7 @@ module TDev.Browser {
                         ifConditionDefault: "true",
 
                         scriptSocialLinks: true,
+                        scriptAddToChannel: true,
                     }
                 }
             },
@@ -699,7 +698,6 @@ module TDev.Browser {
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { TemplateManager.createScript() }) : null),
-                    (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     // (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse review"), () => { AbuseReview.show() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
@@ -1561,8 +1559,8 @@ module TDev.Browser {
         function getAvailableTemplates():ScriptTemplate[]
         {
             if (!_templates) {
-                _templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
-                _templates.forEach((t) => { t.source = HelpTopic.shippedScripts[t.scriptid] })                
+                _templates = (<any>TDev).scriptTemplates.filter(t => isBeta || !t.betaOnly);
+                _templates.forEach(t => t.source = ScriptCache.forcedUpdate(t.scriptid).text);
             }
             // filter by editor mode
             var currentCap = PlatformCapabilityManager.current();
@@ -2905,14 +2903,11 @@ module TDev.Browser {
             })
         }
 
-        private showSimplifiedLearn(container:HTMLElement) {
+        private showSimplifiedLearn(container: HTMLElement) {
             var buttons = [];
-            var theme = EditorSettings.currentTheme;
-            var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
-            if (!helpTopic) {
-                Util.log("help topic not found"); return;
-            }
-            this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
+            var tutorials: ITutorial[] = []; // TODO
+            
+            tutorials.slice(0, 6).forEach((tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
                 if (buttons.length > 6)
                     return;
@@ -2927,7 +2922,7 @@ module TDev.Browser {
                         btn.style.backgroundSize = "cover";
                         btn.style.backgroundPosition = 'center';
                     } else {
-                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1",(res: JsonList) => {
+                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1", (res: JsonList) => {
                             var sc = res.items[0];
                             if (sc) {
                                 btn.style.backgroundImage = Cloud.artCssImg(sc.id, true);
@@ -2939,15 +2934,12 @@ module TDev.Browser {
 
                 ScriptInfo.addTutorialProgress(btn, tutorial.header);
                 buttons.push(btn);
-
-                if (buttons.length == 6) {
-                    buttons.push(this.createSkillButton());
-                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
-                        Util.setHash('#topic:' + helpTopic.id);
-                    }, Ticks.noEvent, false, 1));
-                    this.layoutTiles(container, buttons);
-                }
             });
+
+            buttons.push(this.createSkillButton());
+            buttons.push(this.mkFnBtn(lf("All tutorials"), () => this.browser().showList(Cloud.config.tutorialsid + "/scripts"), Ticks.noEvent, false, 1));
+            this.layoutTiles(container, buttons);
+
         }
 
         private createSkillButton(): HTMLElement {
@@ -2966,7 +2958,6 @@ module TDev.Browser {
                 return btn;
             }
 
-            var sellApps:HTMLElement;
             var docsEl: HTMLElement;
             var ccgaEl: HTMLElement;
             var whatsNew: HTMLElement;
@@ -2976,41 +2967,24 @@ module TDev.Browser {
             var searchEl: HTMLElement;
             var elements = [
                 this.startTutorialButton(Ticks.hubDocsTutorial),
-                docsEl = toTutBtn(this.mkFnBtn(lf("Search Help"), () => {
-                    this.hide();
-                    this.browser().loadHash(["help"]);
+                docsEl = toTutBtn(this.mkFnBtn(lf("Docs"), () => {
+                    Util.navigateNewWindow(Cloud.config.helpPath);
                 }, Ticks.hubDocs, false, 2)),
-                //advancedEl = toTutBtn(this.mkFnBtn(lf("Advanced Tutorial"), () => {
-                //    Util.setHash('#topic:devbootcamp')
-                //}, Ticks.hubDevBootCamp, false)),
                 whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
-                    Util.setHash('#topic:whatsnew')
+                    Util.navigateNewWindow(Cloud.config.helpPath + "/whatsnew");
                 }, Ticks.hubDocsWhatsNew, true)),
-                sellApps = this.exportBtn(lf("Export to Windows, Android, iOS, Azure"), () => {
-                    Hub.winStoreHelp();
-                }, Ticks.hubWinStore),
-                begginersEl = toTutBtn(this.smallBtn(lf("Getting started"), () => {
-                    Util.setHash('#topic:gettingstarted');
+                begginersEl = toTutBtn(this.mkFnBtn(lf("Getting started"), () => {
+                    Util.navigateNewWindow(Cloud.config.helpPath + "/gettingstarted");
                 }, Ticks.hubBeginnersGettingStarted, true)),
-                ccgaEl = toTutBtn(this.smallBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateInWindow("/ccga");
+                ccgaEl = toTutBtn(this.mkFnBtn(lf("Teach Creative Coding!"), () => {
+                    Util.navigateNewWindow("/ccga");
                 }, Ticks.hubCCGA, true)),
-                /*
-                apiEl = toTutBtn(this.smallBtn(lf("API Docs"), () => {
-                    Util.setHash('#topic:api')
-                }, Ticks.hubDocsApi, true)),
-                */
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()
-                }, Ticks.hubSettings),
-                Runtime.rateTouchDevelop && localStorage["rateTouchDevelop"] == 1 ?
-                  rate = this.mkFnBtn(lf("Rate Touch- Develop"), () => {
-                      localStorage["rateTouchDevelop"] = 2;
-                      Runtime.rateTouchDevelop();
-                  }, Ticks.hubRateTouchdevelop, false) : null,
+                }, Ticks.hubSettings)
             ];
             elements = elements.filter((e) => e != null);
             searchEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));

@@ -909,14 +909,6 @@
                         elts.push(searchDiv);
                     } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
-                        if (EditorSettings.widgets().searchHelp) {
-                            var t = HelpTopic.findById("howtosearch");
-                            if (t) {
-                                var s = TopicInfo.mk(t);
-                                var b = s.mkSmallBox();
-                                elts.push(b);
-                            }
-                        }
                     }
 
                     sd.setChildren(elts);
@@ -1434,11 +1426,6 @@
                     if (s) res.push(s);
                 });
                 f(res, null);
-                return Promise.as();
-            }
-
-            if (apiPath == "topics" || apiPath == "help") {
-                f(HelpTopic.getAll().map(TopicInfo.mk), null);
                 return Promise.as();
             }
 
@@ -7640,9 +7627,6 @@
                 setBtn(-1, ha < 0 ? "0" : ha.toString(), () => {});
                 Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id + "/reviews"), { kind: "review", userplatform: Browser.platformCaps })
                 .done((resp: JsonReview) => {
-                    if (localStorage["rateTouchDevelop"] != 2) {
-                        localStorage["rateTouchDevelop"] = 1;
-                    }
                     TheApiCacheMgr.storeHeart(id, resp.id);
                     patchScriptHeartCount(jscript, Math.max(ha,0)+1);
                     load(3, getScriptHeartCount(jscript));

@@ -26,13 +26,6 @@ var scriptsWithErrors = ["isrt", "bvxv", "cgcbb", "bkiza", "urde",
   "arxpa"
 ];
 
-var additionalTopics = [
-    "yiqnc"  // Coding Jetpack Jumper!
-    , "tjkjc" // Customize Jetpack Jumper!
-]
-
-var blogQuery = "#blog @ajlk @wonm @bqsl @ikyp @expza";
-
 var localUrl = "http://localhost:80/";
 
 var afterParse = () => {};
@@ -1720,256 +1713,6 @@ export function updatelang(args:string[])
         })
     })
     */
-}
-
-export function updatehelp(args:string[])
-{
-    var help = [];
-    var cachedScripts = {};
-    var numScripts = 0;
-    var artUrlSet = {}
-    var duplicates = []
-    var usedIds = {}
-    var visitedIds = {}
-    var offlineScripts = {}
-    var todo = {};
-
-
-    function oneDone(id: string) {
-        delete todo[id];
-        --numScripts;
-        if (numScripts == 0) {
-            var s = "";
-            s = "{\n";
-            help.sort((a, b) => stringCompare(a.name, b.name))
-            var keys = Object.keys(cachedScripts)
-            keys.sort(stringCompare)
-            s += keys.filter(k => offlineScripts.hasOwnProperty(k)).map((k) => "\"" + k + "\": " + JSON.stringify(cachedScripts[k])).join(",\n");
-            s += "\n}, [\n";
-            s += help.map((h) => JSON.stringify(h)).join(",\n");
-            s += "\n], [\n";
-            s += templates.map(t => JSON.stringify(t)).join(",\n");
-            s += "\n]";
-            fs.writeFileSync("generated/help.cache", s);
-
-            var offKeys = Object.keys(offlineScripts)
-            offKeys.sort((a, b) => cachedScripts[b].length - cachedScripts[a].length)
-            console.log("\n*** Top-sized cached scripts")
-            offKeys.slice(0,30).forEach(k => {
-                var text = cachedScripts[k]
-                var m = /meta name "([^\n]*)"/.exec(text)
-                console.log("%d\t%s\t%s", text.length, k, m[1])
-            })
-
-            console.log("\n\n*** Running checks\n")
-
-            if (duplicates.length > 0) {
-                console.error("there were duplicate topics!")
-                duplicates.forEach((s) => console.error(s))
-            }
-
-            var apiDocs = JSON.parse(fs.readFileSync("build/topiclist.json", "utf8"))
-
-            keys.forEach(k => {
-                var scr = cachedScripts[k]
-                scr.replace(/\[[^\]\n]*\]\s*\(\/([^\)\n]*)\)/g, (m, lnk) => {
-                    if (/^script:/.test(lnk)) return;
-                    var h = lnk.toLowerCase().replace(/[^a-z0-9]/g, "")
-                    if (!usedIds[h] && !apiDocs[h]) {
-                        console.error(k + ": dangling link to " + h)
-                    }
-                })
-            })
-
-            if (args[0] == "images") {
-                if (!fs.existsSync("help-images"))
-                    fs.mkdirSync("help-images");
-                var numUrls = 0
-                Object.keys(artUrlSet).forEach(u => {
-                    numUrls++;
-                    getArt(u, () => {
-                        numUrls--;
-                        if (numUrls == 0) {
-                            console.log("all done");
-                        }
-                    })
-                })
-            }
-        }
-    }
-
-    function getScript(id, f) {
-        cachedScripts[id] = "";
-        todo[id+'/text'] = 1;
-        numScripts++;
-        tdevGet(id + "/text?original=true", (text) => {
-            if (!text) {
-                console.log('error: failed to retreive text for /' + id);
-            } else {
-                cachedScripts[id] = text;
-                text.replace(/url\s*=\s*"(http[^"]*)"/g, (m, url) => {
-                    if (!/contoso\.com/.test(url)) {
-                        // console.log("   art: " + id + " -> " + url);
-                        artUrlSet[url] = 1;
-                    }
-                    return m
-                })
-            }
-            f(text);
-            oneDone(id+'/text');
-        })
-    }
-
-    function processScript(scr:any) {
-        if (visitedIds[scr.id]) return;
-        visitedIds[scr.id] = 1;
-
-        var plat = scr.platforms.filter(e => e != "webonly")
-        if (plat.length == 0) plat = undefined
-
-        var desc = {
-            name: scr.name,
-            id: scr.id,
-            rootid: scr.rootid,
-            userid: scr.userid,
-            description: scr.description,
-            iconbackground: scr.iconbackground,
-            icon: scr.icon,
-            iconArtId : scr.iconArtId,
-            splashArtId : scr.splashArtId,
-            time: scr.time,
-            priority: 10000,
-            platforms: plat,
-            screenshot: undefined,
-            parentTopic: undefined
-        }
-        help.push(desc);
-
-        var hashedId = scr.name.toLowerCase().replace(/[^a-z0-9]/g, "")
-        if (usedIds[hashedId]) {
-            duplicates.push("duplicate topic: " + scr.name + ": " + usedIds[hashedId] + " and " + scr.id)
-        } else {
-            usedIds[hashedId] = scr.id
-        }
-
-        var ids = [scr.id].concat(scr.librarydependencyids);
-        ids.forEach((id) => getScript(id, (text) => {
-            if (id == scr.id) {
-                var m = /\/\/\s*\{priority:(\d+)\}/i.exec(text);
-                if (m) desc.priority = parseInt(m[1]);
-                m = /\/\/\s*\{parentTopic:(\w+)\}/i.exec(text);
-                if (m) desc.parentTopic = m[1].toLowerCase().replace(/[^a-z0-9]/g, "")
-
-                var isOffline = false
-                if (desc.name == "contents" || desc.parentTopic == "contents")
-                    isOffline = true
-
-
-                if (isOffline) {
-                    offlineScripts[desc.id] = 1
-                }
-
-                console.log("%s             (%s, %d to go, %d bytes%s)", desc.name, desc.id, numScripts, JSON.stringify(text).length, isOffline ? " OFFLINE" : "");
-                if (numScripts <= 5) {
-                    console.log("remaining: %s", JSON.stringify(todo));
-                }
-                m = /\/\/\s*\{template:(\w+)\}/i.exec(text);
-                if (m) {
-                    todo[id + "/webast"] = 1;
-                    numScripts++;
-                    tdevGet(id + "/webast", dat => {
-                        var ast = JSON.parse(dat)
-                        var pics = ast.decls.filter(d =>
-                                    d.nodeType == "art" && d.type == "Picture" &&
-                                    /^http(s?):\/\/az31353.vo.msecnd.net\/pub\/\w+$/.test(d.url))
-                        var findImg = t => pics.filter(d => t.test(d.name))[0]
-                        var img = findImg(/screenshot/i) || findImg(/background/i);
-                        if (img) desc.screenshot = img.url
-                        else if (scr.screenshotids && scr.screenshotids[0])
-                            desc.screenshot = 'https://az31353.vo.msecnd.net/pub/' + scr.screenshotids[0];
-                        oneDone(id+"/webast")
-                    })
-
-                    if (m[1] == "empty" || m[1] == "emptyapp") {
-                    } else {
-                        var mid = m[1];
-                        todo[mid + '/empty'] = 1;
-                        numScripts++;
-                        getScript(mid, text => {
-                            if (!text)
-                                throw new Error('error: in /' + id + ', template ' + m[1] + ' not found');
-                            oneDone(mid + '/empty')
-                        })
-                    }
-                }
-
-                m = scr.rootid && scr.rootid != scr.id && /#blog/.exec(text);
-                if (m) {
-                    console.log('fetching original time blog entry of /' + scr.id + ' from /' + scr.rootid);
-                    todo[scr.rootid + '/blog'] = 1;
-                    numScripts++;
-                    tdevGet(scr.rootid, dat => {
-                        desc.time = <number>JSON.parse(dat)["time"];
-                        oneDone(scr.rootid + '/blog')
-                    });
-                }
-            }
-        }));
-    }
-
-    function getFrom(cont: string, path: string) {
-        todo[path + cont + '/from'] = 1;
-        numScripts++;
-        tdevGet(path + cont, (text) => {
-            var resp = JSON.parse(text);
-            resp.items.forEach(processScript)
-            if (resp.continuation) getFrom("&continuation=" + resp.continuation, path)
-            oneDone(path + cont + '/from');
-        })
-    }
-
-    additionalTopics.forEach(id => {
-        todo[id + '/add'] = 1;
-        numScripts++
-        tdevGet(id, text => {
-            var scr = JSON.parse(text)
-            delete todo[id + '/add'];
-            todo[scr.updateid + '/addupdate'] = 1;
-            tdevGet(scr.updateid, text => {
-                processScript(JSON.parse(text))
-                oneDone(scr.updateid + '/addupdate')
-            })
-        })
-    })
-
-    getFrom("", "jeiv/scripts?applyupdates=true&count=1000")
-    getFrom("", "scripts?q=" + encodeURIComponent(blogQuery) + "&applyupdates=true&count=100")
-
-    templates.forEach((t) => {
-        todo[t.scriptid + '/template'] = 1;
-        numScripts++;
-        function processJscript(scr) {
-            var ids = [scr.id].concat(scr.librarydependencyids);
-            //t.caps = scr.platforms.join(",");
-            offlineScripts[scr.id] = 1
-            ids.forEach((id) => getScript(id, (text) => {
-                if (t.section == sectTemplates)
-                    offlineScripts[id] = 1
-            }))
-            oneDone(t.scriptid + '/template');
-        }
-        tdevGet(t.scriptid, (text) => {
-            var jscript = JSON.parse(text)
-            if (!jscript.updateid || jscript.updateid == jscript.id)
-                processJscript(jscript)
-            else {
-                delete todo[t.scriptid + '/template'];
-                t.scriptid = jscript.updateid;
-                todo[jscript.updateid + '/template'] = 1;
-                tdevGet(jscript.updateid, t => processJscript(JSON.parse(t)));
-            }
-        })
-    })
 }
 
 function art(args:string[])
@@ -3788,26 +3531,31 @@ function tdliteKey() {
         console.log("invalid or missing $TD_UPLOAD_KEY")
         process.exit(1)
     }
-
     return {liteUrl: mm[1], key: "&" + mm[2].slice(1)}
 }
 
 function fetchlibraries(args) {
-    var k = tdliteKey()
+    fetchLibs(tdliteKey(), [
+        'nmhibf' // adj script
+        , 'vxwcfp' // micro:bit
+        , 'ldaqbf' // micro:bit game
+        , 'fdbsiw' // micro:bit serial
+        , 'xnkmqj' // micro:bit senses
+        , 'drdxps' // micro:bit screen
+        , 'lyusma' // micro:bit profile
+        , 'xczaux' // blocks new
+        , 'dceiba' // blocks blink
+        , 'pwjcnz' // flashing heart tutorial
+    ], "microbit/libraries", () => {        
+        fetchLibs({ liteUrl: "https://www.touchdevelop.com/", key: "" }, [
+        'angli' // game
+        ].concat(templates.map(t => t.scriptid)), "libraries", () => {
+            concatlibs();
+        });
+    });
+}
 
-    var ids = [
-      'nmhibf' // adj script
-    , 'vxwcfp' // micro:bit
-    , 'ldaqbf' // micro:bit game
-    , 'fdbsiw' // micro:bit serial
-    , 'xnkmqj' // micro:bit senses
-    , 'drdxps' // micro:bit screen
-    , 'lyusma' // micro:bit profile
-    , 'xczaux' // blocks new
-    , 'dceiba' // blocks blink
-    , 'pwjcnz' // flashing heart tutorial
-    ]
-
+function fetchLibs(k: { liteUrl: string; key: string;}, ids: string[], folder:string, onDone: () => void) {    
     var updates = {}
     var text = {}
     var json = {}
@@ -3828,11 +3576,11 @@ function fetchlibraries(args) {
             tdevGet(k.liteUrl + "api/" + updates[id] + "/text?original=true" + k.key, t => {
                 text[updates[id]] = t
                 if (--togo == 0) {
-                    fs.writeFileSync("microbit/libraries/meta.json", 
+                    fs.writeFileSync(folder + "/meta.json", 
                         JSON.stringify({ updates: updates, ids: ids, json: json }, null, 1))
                     ids.forEach(id =>
-                        fs.writeFileSync("microbit/libraries/" + id + ".txt", text[updates[id]]))
-                    concatlibs()
+                        fs.writeFileSync( folder + "/" + id + ".txt", text[updates[id]]))
+                    onDone()
                 }
             })
         }))
@@ -4093,6 +3841,11 @@ function litepost(args:string[])
 }
 
 function concatlibs() {
+    concatMicrobitLibs();
+    concatTDlibs();
+}
+
+function concatMicrobitLibs() {
     var meta = JSON.parse(fs.readFileSync("microbit/libraries/meta.json", "utf8"))
     meta.text = {}
     meta.ids.forEach(id =>
@@ -4102,91 +3855,28 @@ function concatlibs() {
         JSON.stringify(meta, null, 1) + "\n"
     if (fs.existsSync("microbit/bytecode.js"))
         txt += fs.readFileSync("microbit/bytecode.js", "utf8")
-    console.log("create library cache file; " + txt.length + " bytes")
+    console.log("create micro:bit library cache file; " + txt.length + " bytes")
     fs.writeFileSync("build/libraries.js", txt)
+}
+
+function concatTDlibs() {
+    var meta = JSON.parse(fs.readFileSync("libraries/meta.json", "utf8"))
+    meta.text = {}
+    meta.ids.forEach(id =>
+        meta.text[meta.updates[id]] = fs.readFileSync("libraries/" + id + ".txt", "utf8"))
+
+    var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
+        JSON.stringify(meta, null, 1) + ";\n"
+    
+    txt += "TDev.scriptTemplates = " + JSON.stringify(templates, null, 1) + ";n";
+     
+    console.log("create td library cache file; " + txt.length + " bytes")
+    fs.writeFileSync("build/tdlibraries.js", txt)
 }
 
 function genid()
 {
     return "#id" + Math.floor(Math.random()*100000000) + " "
-}
-
-function pubhelp()
-{
-    var k = tdliteKey()
-    var s = JSON.parse("[" + fs.readFileSync("generated/help.cache","utf8") + "]")
-    var topics = s[1]
-    var namemap = {}
-
-    topics.forEach(t => {
-        t.newid = t.name.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase().replace(/^-/, "").replace(/-$/, "")
-        t.oldid = t.name.replace(/[']/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
-        namemap[t.oldid] = t
-    })
-
-    topics = topics.filter(t => /#docs/i.test(t.description))
-    console.log(topics.length)
-
-    var p = Math.floor(Math.random() * topics.length)
-
-    topics.forEach(t => {
-        getScriptAsync(t.id, src => {
-            src = src.replace(/^action main.*\n/m, ln => {
-                return ln + genid() + "// {topic:/docs/" + t.newid + "}\n"
-            })
-            src = src.replace(/\[(.*?)\]\s*\(\/([a-zA-Z0-9]+)\)/g, (tot, nm, lnk) => {
-                var top = namemap[lnk.toLowerCase()]
-                if (!top) {
-                    //console.log("missing link: " + lnk + " [" + nm + "] in /docs/" + t.newid)
-                    return "[" + nm + "] (/docs/" + lnk.toLowerCase() + ")"
-                } else {
-                    return "[" + nm + "] (/docs/" + top.newid + ")"
-                }
-            })
-            src = src.replace(/ \{parenttopic:([\w]+)\}/ig, (tot, lnk) => {
-                var top = namemap[lnk.toLowerCase()]
-                var newid = (top ? top.newid : lnk.toLowerCase())
-                if (!top) {
-                    console.log("missing parent link: " + lnk + " in /docs/" + t.newid)
-                } else {
-                    // console.log("parent: " + t.newid + " -> " + newid)
-                }
-                return " {parentTopic:/docs/" + newid + "}"
-            })
-
-            //console.log(src.length, t.oldid)
-            //return
-
-            var post = (p, d, f) => 
-                tdevGet(k.liteUrl + "api/" + p + "?foo=bar" + k.key, f, 1, d)
-
-            post("scripts", { 
-                name: t.name,
-                description: t.description,
-                baseid: t.id,
-                text: src,
-                iconbackground: t.iconbackground,
-                icon: t.icon,
-                iconArtId: t.iconArtId,
-                splashArtId:  t.splashArtId,
-            }, resp => {
-                var d = JSON.parse(resp)
-                console.log("/docs/" + t.newid, d.id)
-                post("pointers", {
-                    path: "/docs/" + t.newid,
-                    scriptid: d.id
-                }, resp => {
-                })
-
-                if (t.newid != t.oldid)
-                    post("pointers", {
-                        path: "/docs/" + t.oldid,
-                        redirect: "/docs/" + t.newid,
-                    }, resp => {
-                    })
-            }) 
-        })
-    })
 }
 
 var cmds = {
@@ -4201,7 +3891,6 @@ var cmds = {
     "optimize": { f: optimize, a: "id", h: "write optimize script to compiled.js and display statistics" },
     "docs": { f: docs, a: "id", h: "print script as docs to results.html" },
     "topic": { f: topic, a: "id", h: "print docs topic to results.html" },
-    "updatehelp": { f: updatehelp, a: "", h: "update script cache for help topics" },
     "updatelang": { f: updatelang, a: "", h: "update language cache" },
     "query": { f: query, a: "id path", h: "simulate /api/id/path" },
     "language": { f: language, a: "path", h: "simulate /api/language/path" },
@@ -4251,7 +3940,6 @@ var cmds = {
     "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
     "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
     "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
-    "pubhelp": { f:pubhelp, a:'', h:'re-publish help' },
 }
 
 export interface ScriptTemplate {
@@ -4366,24 +4054,7 @@ var templates: ScriptTemplate[] = [{
     section: sectMinecraft,
     scriptid: 'uggce',
     editorMode: 2,
-}, 
-/*{
-    title: lf("blank boostrap app"),
-    id: 'blankbootstrapapp',
-    icon: 'ArrowLR',
-    name: 'ADJ app',
-    description: lf("An empty app using Bootstrap."),
-    section: sectTemplates,
-    scriptid: 'axhfb'
 }, {
-    title: lf("blank cordova app"),
-    id: 'blankcordovaapp',
-    icon: 'ArrowStandardCircle',
-    name: 'ADJ app',
-    description: lf("An navite Cordova+Boostrap app."),
-    section: sectCordova,
-    scriptid: 'tism',
-},*/ {
     title: lf("blank cordova library"),
     id: 'blankcordovalibrary',
     icon: 'ApproveButton',
