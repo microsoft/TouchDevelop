@@ -225,6 +225,8 @@ module TDev.Cloud {
         companyLogoHorizontalUrl?: string;
         touchDevelopLogoUrl?: string;
         
+        showcaseid?: string; // channel containing showcase scripts
+        
         cachedScripts?: string[];
         userVoice?: string;
         tickFilter?: StringMap<number>;
@@ -257,7 +259,8 @@ module TDev.Cloud {
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
-        userVoice:"touchdevelop"
+        userVoice: "touchdevelop",
+        showcaseid: "njigpnyj"
     }
 
     export function isArtUrl(url : string) : boolean {
