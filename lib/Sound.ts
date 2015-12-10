@@ -36,7 +36,7 @@ module TDev.RT {
         {
             if (!dataUrl) return Promise.as(null);
 
-            var m = dataUrl.match(/^data:audio\/(wav|mp4|mp3);base64,/i);
+            var m = dataUrl.match(/^data:audio\/(wav|mp4|mp3|mpeg);base64,/i);
             if (!m) return Promise.as(null);
 
             var p = Sound.mk(dataUrl, SoundUrlTokenDomain.None, originalUrl);
@@ -44,7 +44,7 @@ module TDev.RT {
         }
 
         static dataUriMimeType(url: string) : string {
-            var m = /^data:(audio\/(wav|mp4|mp3));base64,/.exec(url);
+            var m = /^data:(audio\/(wav|mp4|mp3|mpeg));base64,/.exec(url);
             return m ? m[1] : undefined;
         }
 
