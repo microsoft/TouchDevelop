@@ -180,7 +180,7 @@ module TDev.RT {
             tag(text, size, bw, 'text', r);
         }
 
-        //? Scans an id tag created by TouchDevelop and returns the embeded text.
+        //? Scans an id tag created by Touch Develop and returns the embedded text.
         //@ dbgOnly stub
         export function scan() : string
         { return ''; }

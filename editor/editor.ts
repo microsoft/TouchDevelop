@@ -1062,7 +1062,7 @@ module TDev
                         this.host.showAppView(logs);
                     }, e => {
                         logs.push(RT.App.createInfoMessage(''));
-                        logs.push(RT.App.createInfoMessage('--- error while retreiving web site logs ---'));
+                        logs.push(RT.App.createInfoMessage('--- error while retrieving web site logs ---'));
                         logs.push(RT.App.createInfoMessage(e.message || ""));
                         this.host.showAppView(logs);
                     });

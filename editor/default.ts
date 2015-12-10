@@ -210,7 +210,7 @@ module TDev
         }
 
         if ((<any>window.navigator).standalone) Util.log("standalone");
-        statusMsg("page loaded, initalizing");
+        statusMsg("page loaded, initializing");
         if (RT.Wab)
             return RT.Wab.initAsync().then(() => init2Async());
         else
