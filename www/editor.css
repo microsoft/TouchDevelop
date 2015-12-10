@@ -3100,14 +3100,6 @@ div.iconThumb {
   left: 8.3em;
 }
 
-.sdShowcase {
-  background: yellow;
-}
-
-.sdShowcaseIgnore {
-  background: #ccc;
-}
-
 .sdScriptShot {
   position:absolute;
   height: 100%;
@@ -4313,31 +4305,6 @@ right:4.5em;
 
 .hubTileBtnLabelMedium {
   font-size: 1.2em;
-}
-
-.showcaseScreens {
-  padding: 0.5em;
-  line-height:100%;
-}
-
-.showcaseLabel {
-  font-size: 0.7em;
-  font-weight: bold;
-  position: absolute;
-  right: 0.9em;
-  bottom: 0.5em;
-}
-
-.showcaseScreens img {
-  width: 2.3em;
-  height: 3.83em;
-  display:inline-block;
-  margin: 0.1em;
-}
-
-.hubTileSize1 .showcaseScreens img {
-  width: 1.8em;
-  height: 3em;
 }
 
 .hubTileCounter
