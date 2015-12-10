@@ -5485,7 +5485,7 @@ module TDev
         }
 
         public showDebuggingHelp() {
-            ModalDialog.ask(lf("Do you want to learn more about debugging in TouchDevelop? Accessing help will terminate your current debugging session."), lf("learn more"),
+            ModalDialog.ask(lf("Do you want to learn more about debugging in Touch Develop? Accessing help will terminate your current debugging session."), lf("learn more"),
                 () => {
                     TheEditor.leaveDebuggerMode();
                     Util.setHash("#topic:debugging")

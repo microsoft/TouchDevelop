@@ -829,7 +829,7 @@ module TDev.AppExport
         var sub = getManagementCerificate()
         var m = new ModalDialog()
 
-        m.add(div('wall-dialog-header', "export to Azure web app"));
+        m.add(div('wall-dialog-header', lf("export to Azure web app")));
         m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web apps</a> let you deploy and scale modern websites and web apps in seconds."));
         var err = div(null)
         m.add(err)
@@ -1092,7 +1092,7 @@ module TDev.AppExport
     }
 
     export function addRunLocalInstructions(m : ModalDialog, cmd : string = "") {
-        m.addHTML("<b>how to run TouchDevelop locally</b>")
+        m.addHTML(lf("<b>how to run Touch Develop locally</b>"))
         m.addHTML("<ol>" +
             "<li>" + lf("install {0}", "<a href='http://nodejs.org/' target='_blank'>node.js</a>") + "</li>" +
             "<li>" + lf("create a new empty folder and open a command prompt in it") + "</li>" +
@@ -1136,7 +1136,7 @@ module TDev.AppExport
     export function deployCordova(app: AST.App, baseScriptId: string) {
         if (!/^http:/.test(baseUrl)) {
             var info = ModalDialog.info(lf("Cordova: need local editor"),
-                lf("To export and build Cordova apps you need to run TouchDevelop from your machine."), "")
+                lf("To export and build Cordova apps you need to run Touch Develop from your machine."), "")
             addRunLocalInstructions(info);
             info.addOk("ok", null, "", [
                 HTML.mkButton(lf("long version"), () => Editor.goToTopic("export to Cordova"))
@@ -1146,7 +1146,7 @@ module TDev.AppExport
 
         if (!LocalShell.mgmtUrl("")) {
             var info = ModalDialog.info(lf("Cordova: deployment key missing"),
-                lf("We don't know the key to talk to local TouchDevelop server. Did you paste the link correctly?"))
+                lf("We don't know the key to talk to local Touch Develop server. Did you paste the link correctly?"))
             info.add(Editor.mkHelpLink("export to Cordova"))
             addRunLocalInstructions(info);
             return
@@ -1341,7 +1341,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
 
         return LocalShell.mgmtRequestAsync("stats")
         .then(resp => {
-            if (!resp) throw new Error("cannot talk to local proxy") // unlikely
+            if (!resp) throw new Error(lf("cannot talk to local proxy")) // unlikely
         }, err => {
             if (err.status == 403)
                 throw new Error(lf("the deployment key was rejected by the local proxy"))
@@ -1453,7 +1453,7 @@ options.cordova.email || options.cordova.website ? Util.fmt('    <author email="
             filePrefix: "static/",
         })
 
-        var md = ModalDialog.info(lf("deploying script"), lf("installing dependencies, this might take some minutes..."), lf("stop"))
+        var md = ModalDialog.info(lf("deploying script"), lf("installing dependencies, this might take a few minutes..."), lf("stop"))
 
         return AST.Apps.getDeploymentInstructionsAsync(app, options)
         .then((ins:AST.Apps.DeploymentInstructions) =>

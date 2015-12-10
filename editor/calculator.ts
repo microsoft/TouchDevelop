@@ -4102,7 +4102,7 @@ module TDev
                 e.descOverride = lf("turn into");
                 e.cbOverride = () => {
                     if (!prevStmt.rawElseBody.isBlockPlaceholder()) {
-                        ModalDialog.info(lf("sorry, no can do"), lf("'else' of the preceeding 'if' must be empty"))
+                        ModalDialog.info(lf("sorry, no can do"), lf("'else' of the preceding 'if' must be empty"))
                     } else {
                         ifStmt.isElseIf = true;
                         this.fullDisplay()
@@ -4145,11 +4145,11 @@ module TDev
         {
             var examples = []
             if (/background/i.test(fw.getName()))
-                examples = ["moon", "desert", "jungle", "island", "landscape", "background"]
+                examples = [lf("moon"), lf("desert"), lf("jungle"), lf("island"), lf("landscape"), lf("background")]
             else if (fw.getKind() == api.core.Picture)
-                examples = ["cat", "dog", "monster", "pumpkin", "alien", "unicorn", "ball", "fruit"]
+                examples = [lf("cat"), lf("dog"), lf("monster"), lf("pumpkin"), lf("alien"), lf("unicorn"), lf("ball"), lf("fruit")]
             else if (fw.getKind() == api.core.Sound)
-                examples = ["laser", "scream", "explosion", "meow", "piano", "bark", "moo", "bell"]
+                examples = [lf("laser"), lf("scream"), lf("explosion"), lf("meow"), lf("piano"), lf("bark"), lf("moo"), lf("bell")]
             Random.permute(examples)
             examples.unshift(fw.getName())
             examples = examples.filter((e, i) => examples.indexOf(e) == i)
