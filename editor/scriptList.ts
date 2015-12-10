@@ -10428,6 +10428,15 @@
                     Util.reportError("showcase", err, false);
                 })
         }
+        
+        export function exportToChannel(cid:string) {
+            getShowcaseIds(ids => {
+                ids.reverse();
+                Promise.sequentialMap(ids, (id) => {
+                    return Cloud.postPrivateApiAsync(id + "/channels/" + cid, {});
+                }).done(() => HTML.showProgressNotification("done!"));
+            })
+        }
 
         export function getListAsync(days:number)
         {
@@ -10804,7 +10813,8 @@
             });
         }
 
-        public addScriptAsync(si: ScriptInfo) : Promise {
+        public addScriptAsync(si: ScriptInfo): Promise {
+            if (!si) return Promise.as();
             return Cloud.postPrivateApiAsync(si.publicId + "/channels/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();
