@@ -247,11 +247,11 @@ module TDev
             var self = this;
 
 
-            buttons[0].setTextEx("wall", "go back", Ticks.debuggerGotoWall, () => TheEditor.gotoWall());
-            buttons[1].setTextEx("stack", "show", Ticks.debuggerShowStack, () => TheEditor.showStackTraceAgain(false));
-            buttons[2].setTextEx("current", "go to", Ticks.debuggerGotoCurrent, () => TheEditor.showRunningStmt());
-            buttons[3].setTextEx("log", "console", Ticks.debuggerAppLog, () => TheEditor.showAppLog(Script));
-            buttons[4].setTextEx("?", "help", Ticks.debuggerHelp, () => TheEditor.showDebuggingHelp());
+            buttons[0].setTextEx(lf("wall"), lf("go back"), Ticks.debuggerGotoWall, () => TheEditor.gotoWall());
+            buttons[1].setTextEx(lf("stack"), lf("show"), Ticks.debuggerShowStack, () => TheEditor.showStackTraceAgain(false));
+            buttons[2].setTextEx(lf("current"), lf("go to"), Ticks.debuggerGotoCurrent, () => TheEditor.showRunningStmt());
+            buttons[3].setTextEx(lf("log"), lf("console"), Ticks.debuggerAppLog, () => TheEditor.showAppLog(Script));
+            buttons[4].setTextEx(lf("?"), lf("help"), Ticks.debuggerHelp, () => TheEditor.showDebuggingHelp());
         }
 
         private setupCalcElements(slideIn: boolean) {
@@ -473,9 +473,9 @@ module TDev
 
         static mkSorryMsg() {
             return div(null,
-                div(null, "You cannot edit the script in debugger mode, sorry."),
+                div(null, lf("You cannot edit the script in debugger mode, sorry.")),
                 document.createElement("br"),
-                div(null, "If you want to edit the script, first exit debugger mode by pressing the \"exit\" button."));
+                div(null, lf("If you want to edit the script, first exit debugger mode by pressing the \"exit\" button.")));
         }
     }
 
