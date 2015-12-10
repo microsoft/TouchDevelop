@@ -3394,6 +3394,7 @@ function tdupload(args:string[])
             "build/noderuntime.js",
             "build/buildinfo.json",
             "build/libraries.js",
+            "build/tdlibraries.js",
             "webapp/webapp.html",
             "www",
             "build/touchdevelop.tgz",

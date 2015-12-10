@@ -250,7 +250,6 @@ file('build/libraries.js', expand([
   runAndComplete(['node build/client concatlibs'], this);
 })
 
-
 // Now come the rules for files that are obtained by concatenating multiple
 // _js_ files into another one. The sequence exactly reproduces what happened
 // previously, as there are ordering issues with initialization of global variables
@@ -394,6 +393,7 @@ task('default', [
   'build/ace-main.js',
   'build/blockly-main.js',
   'build/libraries.js',
+  'build/tdlibraries.js',
   'log'
 ].concat(Object.keys(concatMap)), {
   parallelLimit: branchingFactor,
