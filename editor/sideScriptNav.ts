@@ -179,7 +179,7 @@ module TDev
                                             }
                                         }, e => {
                                             pro.stop(); pro.removeSelf();
-                                            Util.log('failed to retreive progress info');
+                                            Util.log('failed to retrieve progress info');
                                         });
                                 }
                             })

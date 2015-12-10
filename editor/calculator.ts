@@ -395,7 +395,7 @@ module TDev
             }
 
             this.checkNextDisplay();
-            Util.log("about to resetstate");
+            Util.log("about to reset state");
             this.resetState();
             TheEditor.sideKeyFocus = false;
             TDev.Collab.setTemporaryPullSuppression(false);

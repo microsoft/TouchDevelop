@@ -1172,7 +1172,7 @@ module TDev.AST.Json
             var s = n.stringForm
             if (!s || (typeof n.value == "number" && parseFloat(s) !== n.value)) {
                 s = Util.numberToStringNoE(n.value)
-                if (/e/.test(s)) Util.oops("too big number in flattining; sorry, not implemented yet")
+                if (/e/.test(s)) Util.oops("too big of a number in flattening; sorry, not implemented yet")
             }
             return s.split("")
         }

@@ -8793,7 +8793,7 @@
                                     return null
                             }));
                     }, e => {
-                        Util.check(false, lf("failed to retreive scripts"));
+                        Util.check(false, lf("failed to retrieve scripts"));
                         loadingDiv.removeSelf();
                         ch.appendChild(div('', lf("Oops, we could not get the scripts for this group. Please try again later.")));
                 });
@@ -9116,7 +9116,7 @@
                                 }
                                 ad.appendChild(HTML.mkButton(lf("new invitation code"), () => {
                                     tick(Ticks.groupCodeNew);
-                                    HTML.showProgressNotification(lf("requesting new invitiation code..."));
+                                    HTML.showProgressNotification(lf("requesting new invitation code..."));
                                     this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
                                 }));
                                 if (!Cloud.isRestricted())
@@ -9218,7 +9218,7 @@
         }
 
         public resetInvitationCode() {
-            HTML.showProgressNotification(lf("clearing invitiation code..."));
+            HTML.showProgressNotification(lf("clearing invitation code..."));
             Cloud.deletePrivateApiAsync(this.publicId + "/code")
                 .done(() => {
                     this.invalidateCaches();
