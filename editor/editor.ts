@@ -1846,14 +1846,14 @@ module TDev
         {
             var t = MdComments.shrink(topic)
             Ticker.rawTick("helpButton_" + t);
-            Util.setHash("#topic:" + t)
+            Util.navigateNewWindow(Cloud.config.topicPath + t);
         }
 
         static mkHelpLink(topic: string, lbl = lf("read more...")) {
 
             var r = div("float-help-link");
             if (TheEditor.widgetEnabled("helpLinks")) {
-                Browser.setInnerHTML(r, "<a href=\"#topic:" + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
+                Browser.setInnerHTML(r, "<a href=\"" + Cloud.config.topicPath + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
                 r.firstElementChild.setAttribute("aria-label", lf("learn more about {0}", topic));
                 HTML.fixWp8Links(r);
             }
@@ -5460,14 +5460,6 @@ module TDev
                 if (topic.json && topic.json.helpPath)
                     Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
             }
-        }
-
-        public showDebuggingHelp() {
-            ModalDialog.ask(lf("Do you want to learn more about debugging in Touch Develop? Accessing help will terminate your current debugging session."), lf("learn more"),
-                () => {
-                    TheEditor.leaveDebuggerMode();
-                    Util.setHash("#topic:debugging")
-                });
         }
 
         public updateScript()

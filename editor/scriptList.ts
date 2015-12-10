@@ -1083,8 +1083,7 @@
                                             }).done();
                                     }),
                                     HTML.mkButton(lf("learn more"), () => {
-                                        m.dismiss();
-                                        Util.setHash("#topic:beta")
+                                        Util.navigateInWindow(Cloud.config.topicPath + "beta");
                                     }),
                                     HTML.mkButton(lf("not today"), () => {
                                         m.dismiss();

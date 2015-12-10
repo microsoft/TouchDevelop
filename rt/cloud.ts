@@ -204,7 +204,6 @@ module TDev.Cloud {
         hashtag: string;
         helpPath: string;
         topicPath: string;
-        localTopicPath: string;
         legalButtons: { name: string; url: string; }[];
         doNothingText: string;
         hintLevel: string;
@@ -251,7 +250,6 @@ module TDev.Cloud {
         liteVersion: null,
         helpPath: "/docs",
         topicPath: "/docs/",
-        localTopicPath: "#topic:",
         legalButtons: [
             { name: "terms of use", url: "/terms-of-use" },
             { name: "privacy and cookies", url: "/privacy"},

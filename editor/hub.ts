@@ -2865,10 +2865,6 @@ module TDev.Browser {
                 Util.navigateInWindow(Cloud.config.rootUrl);
         }
 
-        static winStoreHelp() {
-            Util.setHash('#topic:exporttoapp');
-        }
-
         // Takes care of the painful, non-trivial task of fetching all the
         // tutorials. For each tutorial found, we call [k] with it.
         private fetchAllTutorials(helpTopic: HelpTopic, k: (t: ITutorial) => void) {
@@ -2969,10 +2965,10 @@ module TDev.Browser {
                     Util.navigateNewWindow(Cloud.config.helpPath);
                 }, Ticks.hubDocs, false, 2)),
                 whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
-                    Util.navigateNewWindow(Cloud.config.helpPath + "/whatsnew");
+                    Util.navigateNewWindow(Cloud.config.topicPath + "whatsnew");
                 }, Ticks.hubDocsWhatsNew, true)),
                 begginersEl = toTutBtn(this.mkFnBtn(lf("Getting started"), () => {
-                    Util.navigateNewWindow(Cloud.config.helpPath + "/gettingstarted");
+                    Util.navigateNewWindow(Cloud.config.topicPath + "gettingstarted");
                 }, Ticks.hubBeginnersGettingStarted, true)),
                 ccgaEl = toTutBtn(this.mkFnBtn(lf("Teach Creative Coding!"), () => {
                     Util.navigateNewWindow("/ccga");

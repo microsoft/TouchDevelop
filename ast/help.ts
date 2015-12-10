@@ -586,7 +586,7 @@ module TDev {
 
         public topicLink(id:string)
         {
-            return this.serviceUrlOr(Cloud.config.topicPath, Cloud.config.localTopicPath) + MdComments.shrink(id);
+            return this.serviceUrlOr(Cloud.config.topicPath, Cloud.config.topicPath) + MdComments.shrink(id);
         }
  
         public appLink(id:string)
@@ -2131,14 +2131,11 @@ module TDev {
                 ch += "<div class='md-tutorial'>" +
                         "<ul>" +
                           (cap == PlatformCapability.None ? "" :
-                            "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) +
-                             " <a title='" + lf("read more about platforms") + "' href='/help/platforms'>" + lf("Learn more...") + "</a></li>") +
+                            "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap))) +
                           (!this.apiProperty.isBeta() ? "" :
-                            "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change") +
-                            " <a title='" + lf("read more about the beta") + "' href='#topic:beta'>" + lf("Learn more...") + "</a></li>") +
+                            "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change")) +
                           (this.apiProperty.isImplementedAnywhere() ? "" :
-                            "<li><strong>" + lf("API not implemented") + "</strong>, sorry " +
-                            "<a title='" + lf("read more about unimplemented features") + "' href='#topic:notImplemented'>" + lf("Learn more...") + "</a></li>") +
+                            "<li><strong>" + lf("API not implemented") + "</strong>, sorry ") +
                         "</ul>" +
                       "</div>";
             }
