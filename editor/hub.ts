@@ -2963,7 +2963,7 @@ module TDev.Browser {
                 this.startTutorialButton(Ticks.hubDocsTutorial),
                 docsEl = toTutBtn(this.mkFnBtn(lf("Docs"), () => {
                     Util.navigateNewWindow(Cloud.config.helpPath);
-                }, Ticks.hubDocs, false, 2)),
+                }, Ticks.hubDocs, true, 2)),
                 whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
                     Util.navigateNewWindow(Cloud.config.topicPath + "whatsnew");
                 }, Ticks.hubDocsWhatsNew, true)),
