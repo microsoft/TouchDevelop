@@ -4429,7 +4429,6 @@ module TDev
                             ),
                         div("wall-dialog-body", HTML.mkCheckBox("enable new intelli prediction",
                             (v) => { TheEditor.calculator.enableNewPredictor = v; }, TheEditor.calculator.enableNewPredictor)),
-                        (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
@@ -5455,15 +5454,11 @@ module TDev
         {
             tick(Ticks.calcHelp);
             if (HelpTopic.contextTopics.length == 0) {
-                if (Cloud.lite) Util.navigateNewWindow(Cloud.config.helpPath);
-                else Util.setHash("#help")
+                Util.navigateNewWindow(Cloud.config.helpPath);
             } else {
                 var topic = HelpTopic.contextTopics[0];
-                if (Cloud.lite) {
-                    if (topic.json && topic.json.helpPath)
-                        Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
-                }
-                else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
+                if (topic.json && topic.json.helpPath)
+                    Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
             }
         }
 
@@ -5705,7 +5700,6 @@ module TDev
                 ScriptCache.restoreCacheAsync(store),
                 RT.ArtCache.restoreCacheAsync(store),
                 Browser.TheApiCacheMgr.restoreCacheAsync(store),
-                Browser.Showcase.restoreCacheAsync(store),
             ])
         }
 
@@ -5725,7 +5719,6 @@ module TDev
                 ScriptCache.snapshotCacheAsync(store),
                 RT.ArtCache.snapshotCacheAsync(store),
                 Browser.TheApiCacheMgr.snapshotCacheAsync(store),
-                Browser.Showcase.snapshotCacheAsync(store),
             ]).then(() => {
                 Util.log('snapshot cache: {0}', store)
                 return store

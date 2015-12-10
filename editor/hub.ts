@@ -61,6 +61,7 @@ module TDev.Browser {
 
                     scriptSocialLinks: true,
                     scriptEmail: true,
+                    scriptAddToChannel:true,
                 }
             },
             'classic': {
@@ -148,6 +149,7 @@ module TDev.Browser {
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             },
             'pro': {
@@ -283,6 +285,7 @@ module TDev.Browser {
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             }
         }
@@ -2239,6 +2242,7 @@ module TDev.Browser {
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
                     else if (s == "channels") this.browser().showList("channels", item);
+                    else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid, item);    
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -2360,12 +2364,15 @@ module TDev.Browser {
                 addFnBtn(lf("Create channel"), Ticks.hubCreateList,
                     () => { this.browser().createChannel(); });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));
+            } else if (s == "showcase") {
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreShowcase,
+                () => { this.hide(); this.browser().loadDetails(this.browser().getChannelInfoById(Cloud.config.showcaseid)) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));                
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
                 addFnBtn(lf("See More"), s == "new" ? Ticks.hubSeeMoreNewScripts :
                                      s == "top" ? Ticks.hubSeeMoreTopScripts :
-                                     s == "showcase" ? Ticks.hubSeeMoreShowcase :
                                      Ticks.hubSeeMoreCloudOther,
                 () => { this.hide(); this.browser().showList(s + "-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
@@ -3166,6 +3173,9 @@ module TDev.Browser {
                     else
                         this.addPageTiles(s, c, []);
                 }
+                else if (s == "showcase") {
+                    this.browser().getLocationList(Cloud.config.showcaseid + "/scripts/?count=6",(items, cont) => this.addPageTiles(s, c, items));
+                }    
                 else
                     this.browser().getLocationList(s + "-scripts", (items, cont) => this.addPageTiles(s, c, items));
             });
