@@ -6936,7 +6936,7 @@
         
         public saveAsync(): Promise {
 
-            if (true|| Browser.isMobileSafari || Browser.isMobileSafariOld)
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
                 return ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."), { cancel: true })
                     .then(ok => ok ? this.internalSaveAsync() : undefined);
             else
