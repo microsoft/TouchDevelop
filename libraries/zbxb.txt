@@ -1,0 +1,203 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank office mix";
+meta icon "AddressBook";
+meta rootId "w0BIoDnMjckDm4IxHPWUL5LO";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+#theme meta import theme {
+  pub "gnvi"
+  usage {
+
+    action `async` title_1()
+    action `async` title_2()
+    action `async` title_3()
+    action `async` subtle()
+    action `async` normal()
+    action `sync` example()
+    action `async` accent()
+    action `async` set_right_aligned(value: Boolean)
+    action `async` huge()
+  }
+}
+#main
+action slideshow_view(#gWR7usfPDjBZx8MB \u2756: * slideshow_view_page_data) {
+  #NWusR3iDIRoj225f if box→is_init then {
+    #R0hEIBaW249814Hp code→load_settings;
+  }
+  #xiB2tAm2mGBbi44i if true then {
+    #KarVz60bZv5qPknX // We show the question taken as input in the Edit Mode. The answer is passed to the Input Activity created in Edit Mode (and referred by index `0`).
+    #z4risXKLzFJOxZ1j do box {
+      #PNRqqNbtlgFKBX7A data→settings→question→post_to_wall;
+    }
+    #dn4Es5w8qZRHCEuS @\u267b→forms→input_text_area("", $\u2756→text→\u25c8ref);
+    #xN0rhiZst8wsVzk4 @\u267b→forms→button("submit", $on_tapped);
+    #NbvCaHwHelguv3VI where on_tapped() {
+      #Swp85LoI2Qy4YSkL $slideshow := @\u267b→office_mix→current_viewer;
+      #TKO5h8kd18Oey5x9 $slideshow→complete_input_activity(0, $\u2756→text, 1, true);
+      #xyL6rWHd0ipV7q9s $slideshow→next_slide;
+    }
+  }
+  meta private;
+  meta page;
+  meta sync;
+}
+#BbWFpbiBwYWdlIGRhdGEa
+table slideshow_view_page_data {
+  type = "Object";
+  persistent = false;
+  fields {
+    #mxIky6R9ZTE4uS48eYA6Q8jB text : String
+  }
+}
+#YZGaVg1jhqq9sfncCGsIoHbh meta import forms {
+  pub "rwffb"
+  usage {
+
+    action `sync` `type` display_code()
+
+    action `sync` `type` validator(s: String) returns(error: String)
+
+    action `sync` button(text: String, on_tapped: Action)
+    action `sync` checkbox(text: String, checked: Ref[Boolean])
+    action `sync` show_example()
+    action `sync` input_string_collection(label: String, strings: String_Collection)
+    action `sync` input_text_line(label: String, text: Ref[String])
+    action `sync` input_text_area(label: String, text: Ref[String])
+    action `sync` input_password(label: String, password: Ref[String])
+    action `sync` input_number(label: String, text: Ref[String], changehandler: Number_Action)
+    action `sync` labeled_content(label: String, content: * display_code)
+    action `sync` indented_content(content: * display_code)
+    action `sync` input_choice(label: String, choices: String_Collection, index: Ref[Number])
+    action `sync` input_text_line_w\u002f_validator(label: String, text: Ref[String], errorcheck: * validator, changehandler: Text_Action)
+  }
+}
+#LHF2iIBnkOQcwhcoQKFiR4A2 meta import widgets {
+  pub "abgjb"
+  usage {
+
+    action `sync` message(user: User, dt: DateTime, text: String)
+    action `sync` picture(url: String)
+  }
+}
+#iDxzKDq4042OKy7IX4V4D91F meta import layout {
+  pub "cwgn"
+  usage {
+
+    action `sync` stretch_and_center()
+    action `async` grid_of_squares(cell_content: Number_Action, count: Number, grid_width: Number, grid_height: Number)
+    action `async` horizontal_hub_of_squares(cell_content: Number_Action, count: Number, cell_size: Number, group_width: Number, total_height: Number)
+    action `async` vertical_hub_of_squares(cell_content: Number_Action, count: Number, cell_size: Number, total_width: Number, group_height: Number)
+  }
+}
+#BdGhpbmca
+table Settings {
+  type = "Object";
+  persistent = false;
+  fields {
+    #qkFSUVeLWy15xGwkOSkxcgi8 question : String
+  }
+}
+#xlTdxT5HNK4dNq8WHyG47gDw
+action main() {
+  #vFP34tdmz699NqE2 // See `Office Mix` library for more documentation.
+  #qRPKG2S0HTbZ5W03 @\u267b→office_mix→connect;
+  #hWNRRgicd2eU0qCy if @\u267b→office_mix→is_edit_mode then {
+    #x3ydTU3iVjDhDN3D // `Edit Mode` is activated when the user opens your app while making the slides.
+    #UC41lvtv5BNpa2X0 code→settings_view;
+  }
+  else { #fUO2oK20LQcmmaZ9 if @\u267b→office_mix→is_view_mode then {
+    #NRdsjm5M1snm9XZ2 // `View Mode` is fired when the slide containing your app is activated on a slideshow or in Mix lesson player.
+    #D28QMI7K2CnUzo7t code→slideshow_view;
+  }
+  else { } } 
+}
+#megDAnWFZthpuq80jwFuWisO
+var settings : * Settings {
+  // Add fields that need to be stored for the configuration of the app.
+  transient = true;
+}
+#UW3iOsSblj12g3meTHz4P9yV
+action settings_view(#SDxVJi7aOBOd8Dtx \u2756: * settings_view_page_data) {
+  #d9aMBQbeAvYXxn5V if box→is_init then {
+    #xKfgEJnpPPN3VALl code→load_settings;
+    #xle6ioK9lFcW9euj wall→set_subtitle("settings");
+  }
+  #nRZevjmMGReISkpz if true then {
+    #g86sBP8SxyUhwd5Z // This app stores a question from the user.
+    #fdnSmOgsqF1mLAKV @\u267b→forms→input_text_area("Question", data→settings→question→\u25c8ref);
+    #QaPC4ss4lDh5Oll7 @\u267b→forms→button("save", $on_tapped);
+    #xn16tCOO4tmMm3GX where on_tapped() {
+      #LQzVPWhiGFEt8ao4 code→save_settings;
+    }
+  }
+  meta private;
+  meta page;
+  meta sync;
+}
+#BICBuYW1lICAa
+table settings_view_page_data {
+  type = "Object";
+  persistent = false;
+}
+#Ofpos6ZVH8Uq4wNIrVcx6Oj5
+action save_settings() {
+  #YubVs2tqZuzdS2LU $editor := @\u267b→office_mix→current_editor;
+  #x9PhVzRJr527n4V2 // The index of an activity is a unique number to reference it. The expected answer is optional and is used by Office Mix analytics.
+  #HEgtffQuBg72Zj4b // Custom data is any data that you need while the app starts in View Mode. In this particular script, it is the `question` set by the user.
+  #uuKE6N8yEU7EtJUo $editor→set_input_activity(0, "", 1, data→settings→to_json);
+  meta private;
+}
+#TyCJn9KTtksCY1nxdUpgB18L
+action load_settings() {
+  #xnzYgjFZQXLYoqsi $js := @\u267b→office_mix→current_configuration(0);
+  #xSS4f26tuXilEua7 data→settings := records→Settings→create;
+  #fFPixVuujGekrCuu if `not` $js→is_invalid then {
+    #nUrVv4f4ja61nxHx data→settings→from_json($js);
+  }
+  else {
+    #fSXjzPnzUZ2qSkKN code→default_settings;
+  }
+  meta private;
+}
+#XOVEmidye5OpPaWMlmI6njTk
+action default_settings() {
+  #xbgycRzVc3Xchxgn // This is the sample question to be used if no configuration is provided in `Edit Mode`
+  #l2AA2drEGV7AXPVG data→settings→question := "Edit me to set the question";
+  meta private;
+  meta sync;
+}
+#h2r1rbrbC280iZiz2Hvcq740 meta import office_mix {
+  pub "smola"
+  usage {
+    type viewer
+    type editor
+    type choice
+
+    action `async` slide_state(viewer: ♻ office_mix → viewer) returns(js: Json_Object)
+    action `async` set_slide_state(viewer: ♻ office_mix → viewer, state: Json_Object)
+    action `async` next_slide(viewer: ♻ office_mix → viewer)
+    action `async` complete_simple_activity(viewer: ♻ office_mix → viewer, index: Number)
+    action `async` current_viewer() returns(viewer: ♻ office_mix → viewer)
+    action `async` connect()
+    action `async` current_editor() returns(editor: ♻ office_mix → editor)
+    action `sync` is_edit_mode() returns(b: Boolean)
+    action `sync` is_connected() returns(connected: Boolean)
+    action `sync` is_view_mode() returns(b: Boolean)
+    action `async` current_configuration(index: Number) returns(js: Json_Object)
+    action `async` set_simple_activity(editor: ♻ office_mix → editor, index: Number, custom_data: Json_Object)
+    action `async` set_input_activity(editor: ♻ office_mix → editor, index: Number, answer: String, max_score: Number, custom_data: Json_Object)
+    action `async` complete_input_activity(viewer: ♻ office_mix → viewer, index: Number, answer: String, score: Number, is_complete: Boolean)
+    action `async` set_choice_activity(editor: ♻ office_mix → editor, index: Number, choices: Collection[ ♻ office_mix → choice], max_score: Number, custom_data: Json_Object)
+    action `sync` create_choices(editor: ♻ office_mix → editor) returns(choices: Collection[ ♻ office_mix → choice])
+    action `sync` add_choice(choices: Collection[ ♻ office_mix → choice], name: String, is_answer: Boolean)
+    action `async` complete_choice_activity(viewer: ♻ office_mix → viewer, index: Number, answer: String_Collection, score: Number, is_complete: Boolean)
+    action `async` start_attempt(viewer: ♻ office_mix → viewer, index: Number, type: String)
+    action `async` add_hints(editor: ♻ office_mix → editor, index: Number, hints: String_Collection)
+    action `async` get_hint(viewer: ♻ office_mix → viewer, index: Number, hint_index: Number) returns(hint: String)
+    action `sync` is_run_locally() returns(b: Boolean)
+    action `async` on_skip_slide(viewer: ♻ office_mix → viewer, @action: Action)
+  }
+}
+

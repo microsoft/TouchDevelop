@@ -1,0 +1,192 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank creeper";
+meta color "#ffffffff";
+meta rootId "nHs55hVQebfHsdRXLqdn6Z3u";
+meta iconArtId "yapqobto";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "accelerometer,location,musicandsounds,network,orientation,shell";
+meta parentIds "";
+// Move the creeper to create cool structures! #minecraft #turtle
+#ew46jSsSq5jX27bx
+action main() {
+  #C5Nw6Q63PHrMOwzg creeper[lib creeper] →change_block("tnt");
+  #GntZkP8LuGenbICm for 0 ≤ i < 50 do {
+    #PP9GM4o5xyjrF9bc creeper[lib creeper] →move_forward(5);
+    #x17oHSx7q2zlZQpM creeper[lib creeper] →turn_left(90);
+  }
+}
+#dgygRomyCOybdz46 meta import creeper {
+  pub "yaixc"
+  usage {
+    action `async` move_forward(blocks: Number)
+    action `async` turn_left(angle: Number)
+    action `async` turn_right(angle: Number)
+    action `async` move_back(blocks: Number)
+    action `async` change_block(name: String)
+    action `async` fly_down(blocks: Number)
+    action `async` fly_up(blocks: Number)
+    action `async` position() returns(x: Number, z: Number)
+    action `async` fly_mode()
+    action `async` build_cube(sides: Number)
+    action `async` build_tower(sides: Number, height: Number)
+    action `async` wipe_out()
+    action `async` mine(blocks: Number)
+    action `async` ground_height() returns(y: Number)
+    action `async` walk_mode()
+    action `async` dig_mode()
+    action `async` block() returns(kind: String)
+    action `async` add_checkpoint(id: String)
+    action `async` go_to_checkpoint(id: String)
+    action `async` build_walls()
+    action `async` change_wool(c: Color)
+  }
+  #XQ2I54os1d7S6vEm resolve turtle = ♻ turtle with {
+  }
+  #ygicPwWrZRmFUfPf resolve minecraft = ♻ minecraft with {
+  }
+}
+#mDbZKA4zyanhcLrQ meta import turtle {
+  pub "gkgtg"
+  usage {
+    type Maze
+    action `async` pen_down()
+    action `async` pen_up()
+    action `async` move_to(x: Number, y: Number)
+    action `async` forward(steps: Number)
+    action `async` left_turn(angle: Number)
+    action `async` set_pen_color(c: Color)
+    action `async` xcor() returns(x: Number)
+    action `async` ycor() returns(y: Number)
+    action `async` heading() returns(a: Number)
+    action `async` world_width() returns(w: Number)
+    action `async` world_height() returns(h: Number)
+    action `async` set_heading(angle: Number)
+    action `async` set_pen_size(thickness: Number)
+    action `async` right_turn(angle: Number)
+    action `async` circle(radius: Number)
+    action `async` world_board() returns(board: Board)
+    action `async` turn_to(dx: Number, dy: Number)
+    action `async` world_picture() returns(pic: Picture)
+    action `async` set_speed(steps_per_second: Number)
+    action `async` go_home()
+    action `async` back(steps: Number)
+    action `async` pen_size() returns(size: Number)
+    action `async` clean()
+    action `async` clear_screen()
+    action `async` speed() returns(v: Number)
+    action `async` set_xy(xcor: Number, ycor: Number)
+    action `async` set_x(xcor: Number)
+    action `async` set_y(ycor: Number)
+    action `async` pen_color() returns(c: Color)
+    action `async` color_under() returns(c: Color)
+    action `async` save_picture()
+    action `async` xy() returns(x: Number, y: Number)
+    action `async` touch_xy() returns(tx: Number, ty: Number)
+    action `async` show_grid()
+    action `async` fast()
+    action `async` stamp()
+    action `async` set_turtle_picture(pic: Picture)
+    action `async` set_turtle_opacity(opacity: Number)
+    action `async` trail()
+    action `async` add_obstacle(maze: ♻ turtle → Maze, x: Number, y: Number, width: Number, height: Number, c: Color)
+    action `async` set_goal(maze: ♻ turtle → Maze, x: Number, y: Number, radius: Number, c: Color)
+    action `async` maze() returns(maze: ♻ turtle → Maze)
+    action `async` lock(maze: ♻ turtle → Maze)
+    action `async` history() returns(commands: String)
+    action `async` clear_history()
+    action `sync` on_command(command: Text_Action)
+    action `async` add_way_point(maze: ♻ turtle → Maze)
+    action `async` on_collision(maze: ♻ turtle → Maze, collision: Action)
+    action `async` interactive()
+    action `async` on_move(@action: Action)
+    action `async` set_raster(value: Boolean)
+    action `async` \_libinit()
+  }
+}
+#eayWfPeKychKaiG2 meta import minecraft {
+  pub "glrc"
+  usage {
+    #BVGhpbmca
+    table Block_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xNQF2IfWS5kUTCuC state : Number
+        #xUNtn4WzFNh0J275 wool : String
+      }
+    }
+    #umgRs0Idq3y9jRyc
+    table Block_Event {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #SCV1txxxrjigP8XC kind : String
+        #UIy6UFvY6WJWDDoA x : Number
+        #wWASeEjKJDoiqrL2 y : Number
+        #MkoIqcTcP3QiIoot z : Number
+        #kYCW4sVB0Q5jQy0Q face : Number
+        #EayHvTpmMjNF3Sfh entity : ♻ minecraft → Entity
+      }
+    }
+    #pqaWOjEWNqEkbxwJ
+    table Position {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #L4NO4JXo2Sev2b1J x : Number
+        #x2UU2Lt4BiV8NNNz y : Number
+        #gw4VDwinZ6yVcwzL z : Number
+      }
+    }
+    #eVDb6TwJ7CKitS8g
+    table Repeat_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #VB0iDf9EazabCCQM delay : Number
+      }
+    }
+    type Entity
+    type Batch_Command
+    action `async` fill(@this: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` fill_many(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` block(@this: ♻ minecraft → Position) returns(name: String)
+    action `async` height(@this: ♻ minecraft → Position) returns(h: Number)
+    action `async` chat(msg: String)
+    action `async` position(entity: ♻ minecraft → Entity) returns(pos: ♻ minecraft → Position)
+    action `async` set_position(entity: ♻ minecraft → Entity, p: ♻ minecraft → Position)
+    action `async` player_() returns(p: ♻ minecraft → Entity)
+    action `sync` block_names() returns(names: Collection[String])
+    action `async` forever(body: Action, options\u003f: ♻ minecraft → Repeat_Options) returns(t: Timer)
+    action `sync` wool_colors() returns(cs: Collection[Color])
+    action `sync` wool_color(c: Color) returns(name: String)
+    action `async` spawn(@this: ♻ minecraft → Position, kind: String) returns(mob: ♻ minecraft → Entity)
+    action `async` test_spawn()
+    action `async` up(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` down(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` move(@this: ♻ minecraft → Position, x: Number, y: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` pos(x: Number, y: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` west(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` east(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` north(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` south(@this: ♻ minecraft → Position, value: Number) returns(r: ♻ minecraft → Position)
+    action `async` strafe(@this: ♻ minecraft → Position, x: Number, z: Number) returns(r: ♻ minecraft → Position)
+    action `async` ground(@this: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` build_wall(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position, height: Number, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Position)
+    action `async` wire_redstone(@this: ♻ minecraft → Position, corner: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` fill_redstone(@this: ♻ minecraft → Position, name: String) returns(r: ♻ minecraft → Position)
+    action `async` command(msg: String)
+    action `async` sunny_day()
+    action `async` clone(@this: ♻ minecraft → Position) returns(r: ♻ minecraft → Position)
+    action `async` set_command(@this: ♻ minecraft → Position, command: String) returns(r: ♻ minecraft → Position)
+    action `async` batch() returns(batch: ♻ minecraft → Batch_Command)
+    action `async` add_fill(@this: ♻ minecraft → Batch_Command, pos: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Batch_Command)
+    action `async` run(@this: ♻ minecraft → Batch_Command)
+    action `async` add_fill_many(batch: ♻ minecraft → Batch_Command, start: ♻ minecraft → Position, corner: ♻ minecraft → Position, name: String, options\u003f: ♻ minecraft → Block_Options) returns(r: ♻ minecraft → Batch_Command)
+  }
+}

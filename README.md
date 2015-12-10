@@ -147,9 +147,6 @@ All the docs are available online at
 
 The docs are authored as Touch Develop scripts in Touch Develop itself. You can
 fork them and send pull requests from Touch Develop itself to update them.
-You can update the local cache of documents by running this command:
-
-    jake update-docs
 
 ## More handy commands
 

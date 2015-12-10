@@ -452,7 +452,6 @@ module TDev
         }
 
         static lockOrientation: (portraitAllowed: boolean, landscapeAllowed: boolean, showClock: boolean) => void = () => { };
-        static rateTouchDevelop: () => void = null;
         static refreshNotifications: (enable: boolean) => void;
         static offerNotifications() { return !!Runtime.refreshNotifications || !!localStorage["gcm"]; }
         static legalNotice: string = "";

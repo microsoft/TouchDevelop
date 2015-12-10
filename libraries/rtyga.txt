@@ -1,0 +1,77 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank arduino";
+meta icon "ArrowStandardCircle";
+meta color "#ff00cc99";
+meta rootId "xkbt9ErH776FGA72sWuqxeOz";
+meta iconArtId "kzajxznr";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// An Arduino sketch. #arduino #arduinoSketch
+#KUJMn0ag6zrqQys9
+action setup() {
+  #qWODTg5ZnR95PTeF @\u267b→arduino→pin_mode(13, @\u267b→arduino→OUTPUT);
+  meta private;
+}
+#UzRPACG9RBTCLU2MkuwLAhpD
+action loop() {
+  #x5bamvNg9UVXaFY7 @\u267b→arduino→digital_write(13, @\u267b→arduino→HIGH);
+  #UybvnpQJqqrqtrnH @\u267b→arduino→delay(200);
+  #xqXPRRCVUKc8rCTO @\u267b→arduino→digital_write(13, @\u267b→arduino→LOW);
+  #um2lxP36WxO2OgOk @\u267b→arduino→delay(200);
+  meta private;
+}
+#iHY2wlj4qcvFdTHc meta import arduino {
+  pub "cqfda"
+  usage {
+    action `sync` digital_read(pin: Number) returns(bit: Number)
+    action `sync` digital_write(pin: Number, value: Number)
+    action `sync` analog_read(pin: Number) returns(bit: Number)
+    action `sync` analog_write(pin: Number, value: Number)
+    action `async` pin_mode(pin: Number, mode: Number)
+    action `sync` HIGH() returns(v: Number)
+    action `sync` LOW() returns(v: Number)
+    action `sync` OUTPUT() returns(v: Number)
+    action `sync` INPUT() returns(v: Number)
+    action `async` delay(millis: Number)
+    action `sync` sketch(source: String)
+    action `sync` static_buffer(bytes: String) returns(buf: Buffer)
+    action `sync` INPUT\_PULLUP() returns(v: Number)
+    action `sync` LED\_BUILTIN() returns(r: Number)
+    action `sync` mac(address: String)
+    action `sync` analog_reference(type: Number)
+    action `sync` DEFAULT() returns(r: Number)
+    action `sync` EXTERNAL() returns(r: Number)
+    action `sync` tone(pin: Number, frequency: Number, duration: Number)
+    action `sync` no_tone(pin: Number)
+    action `sync` millis() returns(millis: Number)
+    action `sync` micros() returns(micros: Number)
+    action `sync` pulse_in(pin: Number, value: Number, timeout: Number) returns(micros: Number)
+    action `sync` board(name: String)
+    action `sync` print_value(name: String, value: Number)
+    action `sync` print(text: String)
+    action `sync` println(text: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` constrain(value: Number, a: Number, b: Number) returns(r: Number)
+    action `async` delay_microseconds(micros: Number)
+  }
+}
+#xJTsvVkdQIFOcF0fRDHFLPLk
+action variables() {
+  #xaFPmIVW8ylv5b9P // Initializes your global variables here.
+  meta private;
+}
+#CvN1nxjx0F41jAPT meta import serial {
+  pub "kzkua"
+  usage {
+    action `sync` read() returns(byte: Number)
+    action `sync` available() returns(bytes: Number)
+    action `sync` peek() returns(byte: Number)
+    action `sync` print(msg: String)
+    action `sync` println(msg: String)
+    action `sync` write(byte: Number)
+  }
+  #ojn444WfORgPYrSW resolve arduino = ♻ arduino with {
+  }
+}

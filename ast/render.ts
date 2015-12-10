@@ -1134,13 +1134,13 @@ module TDev
 
             var topicLink = (name:string, topic = name) => {
                 if (!withLinks) return this.id(name);
-                return "<a href='#topic:" + MdComments.shrink(topic) + "'>" + this.id(name) + "</a>";
+                return "<a href='" + topicLink(topic) + "'>" + this.id(name) + "</a>";
             }
 
             var kindLink = (k:Kind) => {
                 //if (!withLinks) return this.kind(k);
                 if (!withLinks) return this.id(k.getName());
-                return "<a href='#topic:" + MdComments.shrink(k.getName()) + "'>" + this.kind(k) + "</a>";
+                return "<a href='" + topicLink(k.getName()) + "'>" + this.kind(k) + "</a>";
             }
 
             if ((<any>prop)._extensionAction) prop = (<any>prop)._extensionAction;            

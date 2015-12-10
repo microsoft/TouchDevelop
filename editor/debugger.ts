@@ -251,7 +251,6 @@ module TDev
             buttons[1].setTextEx(lf("stack"), lf("show"), Ticks.debuggerShowStack, () => TheEditor.showStackTraceAgain(false));
             buttons[2].setTextEx(lf("current"), lf("go to"), Ticks.debuggerGotoCurrent, () => TheEditor.showRunningStmt());
             buttons[3].setTextEx(lf("log"), lf("console"), Ticks.debuggerAppLog, () => TheEditor.showAppLog(Script));
-            buttons[4].setTextEx(lf("?"), lf("help"), Ticks.debuggerHelp, () => TheEditor.showDebuggingHelp());
         }
 
         private setupCalcElements(slideIn: boolean) {

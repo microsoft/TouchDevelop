@@ -59,8 +59,9 @@ module TDev.Browser {
                     forConditionDefault: "5",
                     ifConditionDefault: "true",
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             },
             'classic': {
@@ -136,18 +137,18 @@ module TDev.Browser {
                     hubTopAndNew: true,
                     hubScriptUpdates: true,
                     hubUsers: true,
-                    hubChannels: Cloud.lite,
+                    hubChannels: true,
                     notifyAppReloaded: true,
                     startTutorialButton: true,
                     publicationComments: true,
                     translateComments: true,
-                    searchHelp: true,
                     outAssign: true,
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             },
             'pro': {
@@ -273,16 +274,16 @@ module TDev.Browser {
                     hubScriptUpdates: true,
                     hubUsers: true,
                     hubMyArt: true,
-                    hubChannels: Cloud.lite,
+                    hubChannels: true,
                     publicationComments: true,
                     translateComments: true,
-                    searchHelp: true,
                     outAssign: true,
 
-                    scriptSocialLinks: Cloud.lite,
+                    scriptSocialLinks: true,
                     scriptPrintScript: true,
                     scriptPrintTopic: true,
                     scriptEmail: true,
+                    scriptAddToChannel: true,
                 }
             }
         }
@@ -358,7 +359,8 @@ module TDev.Browser {
                         forConditionDefault: "5",
                         ifConditionDefault: "true",
 
-                        scriptSocialLinks: Cloud.lite,
+                        scriptSocialLinks: true,
+                        scriptAddToChannel: true,
                     }
                 }
             },
@@ -696,7 +698,6 @@ module TDev.Browser {
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { TemplateManager.createScript() }) : null),
-                    (Cloud.hasPermission("root-ptr") ? HTML.mkButton(lf("import docs"), () => { Browser.TheHub.importDocs() }) : null),
                     // (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse review"), () => { AbuseReview.show() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("API config"), () => { editApiConfig() }) : null),
@@ -1558,8 +1559,8 @@ module TDev.Browser {
         function getAvailableTemplates():ScriptTemplate[]
         {
             if (!_templates) {
-                _templates = HelpTopic.scriptTemplates.filter(t => isBeta || !t.betaOnly);
-                _templates.forEach((t) => { t.source = HelpTopic.shippedScripts[t.scriptid] })                
+                _templates = (<any>TDev).scriptTemplates.filter(t => isBeta || !t.betaOnly);
+                _templates.forEach(t => t.source = ScriptCache.forcedUpdate(t.scriptid).text);
             }
             // filter by editor mode
             var currentCap = PlatformCapabilityManager.current();
@@ -2239,6 +2240,7 @@ module TDev.Browser {
                     else if (s == "social") this.browser().showList("groups", item);
                     else if (s == "users") this.browser().showList("users", item);
                     else if (s == "channels") this.browser().showList("channels", item);
+                    else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid, item);    
                     else this.browser().showList(s + "-scripts", item);
                 });
                 elements.push(t);
@@ -2360,12 +2362,15 @@ module TDev.Browser {
                 addFnBtn(lf("Create channel"), Ticks.hubCreateList,
                     () => { this.browser().createChannel(); });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));
+            } else if (s == "showcase") {
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreShowcase,
+                () => { this.hide(); this.browser().loadDetails(this.browser().getChannelInfoById(Cloud.config.showcaseid)) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));                
             } else {
                 //if (items.length > 5)
                 // there is almost always more; the list will filter by capabilities, so it may seem short
                 addFnBtn(lf("See More"), s == "new" ? Ticks.hubSeeMoreNewScripts :
                                      s == "top" ? Ticks.hubSeeMoreTopScripts :
-                                     s == "showcase" ? Ticks.hubSeeMoreShowcase :
                                      Ticks.hubSeeMoreCloudOther,
                 () => { this.hide(); this.browser().showList(s + "-scripts", null) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
@@ -2509,18 +2514,16 @@ module TDev.Browser {
                         return;
                     }
 
+                    // 500px max
                     var f = 500 / Math.max(w, h);
 
-                    // does it need scaling?
-                    if (f < 1.05 || !/^data:image\/jpeg/.test(uri)) {
-                        if (f < 1) f = 1;
-                        var canvas = <HTMLCanvasElement>document.createElement("canvas");
-                        canvas.width = Math.floor(w * f);
-                        canvas.height = Math.floor(h * f);
-                        var ctx = canvas.getContext("2d");
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        uri = canvas.toDataURL('image/jpeg', 0.85);
-                    }
+                    if (f > 1) f = 1;
+                    var canvas = <HTMLCanvasElement>document.createElement("canvas");
+                    canvas.width = Math.floor(w * f);
+                    canvas.height = Math.floor(h * f);
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    uri = canvas.toDataURL('image/jpeg', 0.85);
 
                     preview.src = uri;
                     msg.setChildren([])
@@ -2565,17 +2568,8 @@ module TDev.Browser {
         }
 
         static askToEnableNotifications(finish: () => void = undefined) {
-            if (!Cloud.lite &&
-                !ModalDialog.currentIsVisible() && // don't show dialog on top of other dialog
-                !TheEditor.stepTutorial && // don't show dialog during tutorials
-                (Runtime.offerNotifications() && World._askToEnableNotifications ||
-                 (World._askEmail || World._askToEnableEmailNewsletter || World._askToEnableEmailNotifications)))
-            {
-                Hub.accountSettings(true, finish);
-            }
-            else if (finish !== undefined) {
+            if (finish)
                 finish();
-            }
         }
 
         static accountSettings(notificationsOnly: boolean = false, finish: () => void = undefined) {
@@ -2871,10 +2865,6 @@ module TDev.Browser {
                 Util.navigateInWindow(Cloud.config.rootUrl);
         }
 
-        static winStoreHelp() {
-            Util.setHash('#topic:exporttoapp');
-        }
-
         // Takes care of the painful, non-trivial task of fetching all the
         // tutorials. For each tutorial found, we call [k] with it.
         private fetchAllTutorials(helpTopic: HelpTopic, k: (t: ITutorial) => void) {
@@ -2907,14 +2897,11 @@ module TDev.Browser {
             })
         }
 
-        private showSimplifiedLearn(container:HTMLElement) {
+        private showSimplifiedLearn(container: HTMLElement) {
             var buttons = [];
-            var theme = EditorSettings.currentTheme;
-            var helpTopic = HelpTopic.findById((theme && theme.tutorialsTopic) ? theme.tutorialsTopic : "tutorials");
-            if (!helpTopic) {
-                Util.log("help topic not found"); return;
-            }
-            this.fetchAllTutorials(helpTopic, (tutorial: ITutorial) => {
+            var tutorials: ITutorial[] = []; // TODO
+            
+            tutorials.slice(0, 6).forEach((tutorial: ITutorial) => {
                 // We just listen for the first eight tutorials.
                 if (buttons.length > 6)
                     return;
@@ -2929,7 +2916,7 @@ module TDev.Browser {
                         btn.style.backgroundSize = "cover";
                         btn.style.backgroundPosition = 'center';
                     } else {
-                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1",(res: JsonList) => {
+                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1", (res: JsonList) => {
                             var sc = res.items[0];
                             if (sc) {
                                 btn.style.backgroundImage = Cloud.artCssImg(sc.id, true);
@@ -2941,15 +2928,12 @@ module TDev.Browser {
 
                 ScriptInfo.addTutorialProgress(btn, tutorial.header);
                 buttons.push(btn);
-
-                if (buttons.length == 6) {
-                    buttons.push(this.createSkillButton());
-                    buttons.push(this.mkFnBtn(lf("All tutorials"), () => {
-                        Util.setHash('#topic:' + helpTopic.id);
-                    }, Ticks.noEvent, false, 1));
-                    this.layoutTiles(container, buttons);
-                }
             });
+
+            buttons.push(this.createSkillButton());
+            buttons.push(this.mkFnBtn(lf("All tutorials"), () => this.browser().showList(Cloud.config.tutorialsid + "/scripts"), Ticks.noEvent, false, 1));
+            this.layoutTiles(container, buttons);
+
         }
 
         private createSkillButton(): HTMLElement {
@@ -2968,7 +2952,6 @@ module TDev.Browser {
                 return btn;
             }
 
-            var sellApps:HTMLElement;
             var docsEl: HTMLElement;
             var ccgaEl: HTMLElement;
             var whatsNew: HTMLElement;
@@ -2978,41 +2961,24 @@ module TDev.Browser {
             var searchEl: HTMLElement;
             var elements = [
                 this.startTutorialButton(Ticks.hubDocsTutorial),
-                docsEl = toTutBtn(this.mkFnBtn(lf("Search Help"), () => {
-                    this.hide();
-                    this.browser().loadHash(["help"]);
+                docsEl = toTutBtn(this.mkFnBtn(lf("Docs"), () => {
+                    Util.navigateNewWindow(Cloud.config.helpPath);
                 }, Ticks.hubDocs, false, 2)),
-                //advancedEl = toTutBtn(this.mkFnBtn(lf("Advanced Tutorial"), () => {
-                //    Util.setHash('#topic:devbootcamp')
-                //}, Ticks.hubDevBootCamp, false)),
                 whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
-                    Util.setHash('#topic:whatsnew')
+                    Util.navigateNewWindow(Cloud.config.topicPath + "whatsnew");
                 }, Ticks.hubDocsWhatsNew, true)),
-                sellApps = this.exportBtn(lf("Export to Windows, Android, iOS, Azure"), () => {
-                    Hub.winStoreHelp();
-                }, Ticks.hubWinStore),
-                begginersEl = toTutBtn(this.smallBtn(lf("Getting started"), () => {
-                    Util.setHash('#topic:gettingstarted');
+                begginersEl = toTutBtn(this.mkFnBtn(lf("Getting started"), () => {
+                    Util.navigateNewWindow(Cloud.config.topicPath + "gettingstarted");
                 }, Ticks.hubBeginnersGettingStarted, true)),
-                ccgaEl = toTutBtn(this.smallBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateInWindow("/ccga");
+                ccgaEl = toTutBtn(this.mkFnBtn(lf("Teach Creative Coding!"), () => {
+                    Util.navigateNewWindow("/ccga");
                 }, Ticks.hubCCGA, true)),
-                /*
-                apiEl = toTutBtn(this.smallBtn(lf("API Docs"), () => {
-                    Util.setHash('#topic:api')
-                }, Ticks.hubDocsApi, true)),
-                */
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()
-                }, Ticks.hubSettings),
-                Runtime.rateTouchDevelop && localStorage["rateTouchDevelop"] == 1 ?
-                  rate = this.mkFnBtn(lf("Rate Touch- Develop"), () => {
-                      localStorage["rateTouchDevelop"] = 2;
-                      Runtime.rateTouchDevelop();
-                  }, Ticks.hubRateTouchdevelop, false) : null,
+                }, Ticks.hubSettings)
             ];
             elements = elements.filter((e) => e != null);
             searchEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
@@ -3177,6 +3143,9 @@ module TDev.Browser {
                     else
                         this.addPageTiles(s, c, []);
                 }
+                else if (s == "showcase") {
+                    this.browser().getLocationList(Cloud.config.showcaseid + "/scripts/?count=6",(items, cont) => this.addPageTiles(s, c, items));
+                }    
                 else
                     this.browser().getLocationList(s + "-scripts", (items, cont) => this.addPageTiles(s, c, items));
             });

@@ -1,0 +1,28 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank docs";
+meta icon "GPS";
+meta color "#ffa1caf1";
+meta rootId "kPNw3L4aANMbOhHGjD3Zu2QI";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// TODO: update the description. #docs
+#KuT2EaOAEn47T69Y
+action main() {
+  #yiJrPOX5VkxgcJrp // You can use the [](/markdown) syntax to write **documentation**.
+  #K1W8LqOgGHoaTE04 $x := 42;
+  #velf3fNZzB4D7q65 // And interleave code as need or even insert snippets using the ``decl`` macro:
+  #zrmo9BjVQdTGtzPL // {decl:main}
+}
+#xOiiduqfYBGjAp4X
+var snd : Sound {
+  is\_resource = true;
+  transient = true;
+}
+#LrnoHkgZHl46sgP8
+action test() {
+  #aS25XlJHypSNPB32 skip;
+  meta private;
+  meta test;
+}

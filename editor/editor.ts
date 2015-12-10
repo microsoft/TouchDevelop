@@ -1062,7 +1062,7 @@ module TDev
                         this.host.showAppView(logs);
                     }, e => {
                         logs.push(RT.App.createInfoMessage(''));
-                        logs.push(RT.App.createInfoMessage('--- error while retreiving web site logs ---'));
+                        logs.push(RT.App.createInfoMessage('--- error while retrieving web site logs ---'));
                         logs.push(RT.App.createInfoMessage(e.message || ""));
                         this.host.showAppView(logs);
                     });
@@ -1282,23 +1282,6 @@ module TDev
 
         public syncDone() {
             Ticker.dbg("syncDone");
-            if (Cloud.lite) return
-            ProgressOverlay.lock.done(() => {
-                this.getDepsVersionsAsync().done((ver) => {
-                    if (!Script) return;
-                    if (!Util.jsonEq(ver, this.scriptVersions)) {
-                        var script = this.serializeScript();
-                        if (this.scriptForCloud !== script || this.serializeState() != this.editorStateForCloud) {
-                            // ignore this message while running a tutorial
-                            if (!TheEditor || !TheEditor.stepTutorial)
-                                HTML.showErrorNotification("local edits have overridden changes from the cloud; use version history to recover")
-                            this.saveStateAsync().done();
-                        } else {
-                            this.reload();
-                        }
-                    }
-                })
-            })
         }
 
         public applySizes() {
@@ -1863,14 +1846,14 @@ module TDev
         {
             var t = MdComments.shrink(topic)
             Ticker.rawTick("helpButton_" + t);
-            Util.setHash("#topic:" + t)
+            Util.navigateNewWindow(Cloud.config.topicPath + t);
         }
 
         static mkHelpLink(topic: string, lbl = lf("read more...")) {
 
             var r = div("float-help-link");
             if (TheEditor.widgetEnabled("helpLinks")) {
-                Browser.setInnerHTML(r, "<a href=\"#topic:" + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
+                Browser.setInnerHTML(r, "<a href=\"" + Cloud.config.topicPath + MdComments.shrink(topic) + "\">" + Util.htmlEscape(lbl) + "</a>");
                 r.firstElementChild.setAttribute("aria-label", lf("learn more about {0}", topic));
                 HTML.fixWp8Links(r);
             }
@@ -2672,7 +2655,7 @@ module TDev
                         }
                         localStorage.removeItem("editorScriptToSaveDirty");
 
-                        if (syncOnFail && Cloud.lite && response.numErrors && !World.syncIsActive()) {
+                        if (syncOnFail && response.numErrors && !World.syncIsActive()) {
                             Util.log("save failed; triggering sync")
                             World.syncAsync().done()
                         }
@@ -4446,7 +4429,6 @@ module TDev
                             ),
                         div("wall-dialog-body", HTML.mkCheckBox("enable new intelli prediction",
                             (v) => { TheEditor.calculator.enableNewPredictor = v; }, TheEditor.calculator.enableNewPredictor)),
-                        (dbg ? HTML.mkButtonTick(lf("manage showcase"), Ticks.hubShowcaseMgmt, () => { this.hide(); Browser.TheHost.showList("showcase-mgmt", null); }) : null),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),
                 ]);
@@ -5472,24 +5454,12 @@ module TDev
         {
             tick(Ticks.calcHelp);
             if (HelpTopic.contextTopics.length == 0) {
-                if (Cloud.lite) Util.navigateNewWindow(Cloud.config.helpPath);
-                else Util.setHash("#help")
+                Util.navigateNewWindow(Cloud.config.helpPath);
             } else {
                 var topic = HelpTopic.contextTopics[0];
-                if (Cloud.lite) {
-                    if (topic.json && topic.json.helpPath)
-                        Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
-                }
-                else Util.setHash("#topic:" + HelpTopic.contextTopics[0].id)
+                if (topic.json && topic.json.helpPath)
+                    Util.navigateNewWindow("/" + topic.json.helpPath.replace(/^\/+/, ""));
             }
-        }
-
-        public showDebuggingHelp() {
-            ModalDialog.ask(lf("Do you want to learn more about debugging in Touch Develop? Accessing help will terminate your current debugging session."), lf("learn more"),
-                () => {
-                    TheEditor.leaveDebuggerMode();
-                    Util.setHash("#topic:debugging")
-                });
         }
 
         public updateScript()
@@ -5722,7 +5692,6 @@ module TDev
                 ScriptCache.restoreCacheAsync(store),
                 RT.ArtCache.restoreCacheAsync(store),
                 Browser.TheApiCacheMgr.restoreCacheAsync(store),
-                Browser.Showcase.restoreCacheAsync(store),
             ])
         }
 
@@ -5742,7 +5711,6 @@ module TDev
                 ScriptCache.snapshotCacheAsync(store),
                 RT.ArtCache.snapshotCacheAsync(store),
                 Browser.TheApiCacheMgr.snapshotCacheAsync(store),
-                Browser.Showcase.snapshotCacheAsync(store),
             ]).then(() => {
                 Util.log('snapshot cache: {0}', store)
                 return store

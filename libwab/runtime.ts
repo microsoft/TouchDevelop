@@ -1088,9 +1088,6 @@ module TDev.RT.Wab {
             Runtime.lockOrientation = lockOrientation;
             if (isSupportedAction(Action.CURRENT_HASH))
                 Screen.arrivedAtHash = arrivedAtHash;
-            Runtime.rateTouchDevelop = () => {
-                sendRequestAsync(<Request>{ action: Action.REVIEW_CURRENT_APP }).done();
-            };
             lockOrientation(true, false, true);
 
             function waitForUpdate(id:string)

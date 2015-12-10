@@ -1,0 +1,40 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "physics game starter";
+meta rootId "J8l0VA2xw013xsyuQcW23dW9";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// Tap the screen to creates bubbles!
+#main
+action main() {
+  #xjbGvoL5oV4UQo12 // The board is a 2D canvas with a physics engine. Gravity makes sprites fall and boundary makes them bounce.
+  #xAbmPEYWqY4dcFDh wall→set_background(colors→random);
+  #ATe8pRm8hjMiM49h data→board := media→create_landscape_board(800, 480);
+  #x7SZTXDuCkSe7MCi data→board→set_gravity(0, 400);
+  #D2KLQbULGPgCxdDf data→board→create_boundary(0);
+  #oBr9kZAto2h6N4XY $info := data→board→create_text(100, 20, 24, "tap to create bubbles");
+  #OKOEBhZczuuEpdo5 $info→set_friction(1);
+  #DKutMH8rdXx905hj // Display the board. The game loop will start after leaving main.
+  #pxQF93SSe4Frpzlp data→board→post_to_wall;
+}
+#board
+var board : Board {
+  transient = true;
+}
+#gameloop
+event gameloop() {
+  #pqLfQ3Be6WjEbxi0 // Apply physics and redraw.
+  #urbA3m1JyvQIxOEV data→board→evolve;
+  #Rr9YdtuTrhzrJCJQ data→board→update_on_wall;
+  meta private;
+}
+#tapboard3aboard
+event tap_board\u003a_board(#RzNcIndjF9n7joOr x: Number, #GuXGfDP5Sarr7ItZ y: Number) {
+  #xSrN70PpwJk0CFVL // When the board is tapped, create a circle sprite that falls down.
+  #xKrwldEvkTGVOoJg $circle := data→board→create_ellipse(100, 100);
+  #GQihuegmhAKU2HnT $circle→set_pos($x, $y);
+  #Z2pK2E7DLaxMt27K $circle→set_color(colors→random);
+  #jEO0fEng3zDgYsXw $circle→set_friction(0.005);
+  meta private;
+}
+

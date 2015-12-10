@@ -179,7 +179,7 @@ module TDev
                                             }
                                         }, e => {
                                             pro.stop(); pro.removeSelf();
-                                            Util.log('failed to retreive progress info');
+                                            Util.log('failed to retrieve progress info');
                                         });
                                 }
                             })
@@ -491,7 +491,7 @@ module TDev
                         { decl: this.editor.freshPictureResource(), displayName: lf("picture resource"), tick: Ticks.sideAddResource, description: lf("A picture") },
                         { decl: this.editor.freshSoundResource(), displayName: lf("sound resource"), tick: Ticks.sideAddResource, description: lf("A sound") },
                         { decl: this.editor.freshArtResource("String", "str"), initiallyHidden: AST.blockMode || AST.legacyMode, displayName: lf("string resource"), tick: Ticks.sideAddResource, description: lf("Embedded text or downloaded from the web") },
-                        Cloud.lite ? { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: lf("document resource"), tick: Ticks.sideAddResource, description: lf("A document") } : undefined,
+                        { decl: this.editor.freshDocumentResource(), initiallyHidden: true, displayName: lf("document resource"), tick: Ticks.sideAddResource, description: lf("A document") },
                         { decl: this.editor.freshArtResource("Json Object", "json"), initiallyHidden: true, displayName: lf("JSON resource"), tick: Ticks.sideAddResource, description: lf("JSON data") },
                         { decl: this.editor.freshArtResource("Color", "col"), initiallyHidden: true, displayName: lf("color resource"), tick: Ticks.sideAddResource, description: lf("A color constant") },
                         { decl: this.editor.freshArtResource("Number", "n"), initiallyHidden: true, displayName: lf("number resource"), tick: Ticks.sideAddResource, description: lf("A number constant") }

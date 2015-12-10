@@ -76,43 +76,11 @@ module TDev.Meta {
 
     export function searchArtAsync(terms: string, type: string) { // ArtInfo[]
         if (!terms || Cloud.isOffline()) return Promise.as([]);
-        
-        if (Cloud.lite) {
-            var url = "art?q=" + encodeURIComponent(terms);
-            if (type) url += "&type=" + encodeURIComponent(type);
-            return Cloud.getPrivateApiAsync(url)
-                .then((result: JsonList) => result.items.map(item => Browser.TheHost.getArtInfoById(item.id)));
-        }
-        
-        var skip = 0;
-        var top = 50;
-        var indexName = "art1";
-        var apiKey = Cloud.config.searchApiKey;
-        var serviceUrl = Cloud.config.searchUrl;
-        var query = terms.split(' ').map(term => /sound|picture|document/i.test(term) ? undefined : term + "*").filter(s => !!s).join("+");
-        var filter = type ? "type eq '" + type + "'" : /sound/i.test(terms) ? "type eq 'sound'" : /picture/i.test(terms) ? "type eq 'picture'" : /document/i.test(terms) ? "type eq 'document'" : undefined;
-        var scoringProfile = "editorpics";
 
-        var queryUrl = serviceUrl + "/indexes/" + indexName + "/docs?api-version=2014-07-31-Preview&$select=id,type&search=" + encodeURIComponent(query) + "&$top=" + top;
-        if (scoringProfile)
-            queryUrl += "&scoringProfile=" + encodeURIComponent(scoringProfile);
-        if (filter)
-            queryUrl += "&$filter=" + encodeURIComponent(filter);
-        if(skip)
-            queryUrl += "&$skip=" + skip;
-        var request = RT.WebRequest.mk(queryUrl, undefined);
-        request.set_header("api-key", apiKey);
-        request.set_header("accept", "application/json");
-        request.show_notifications(false);
-        return request.sendAsync().then((response: RT.WebResponse) => {
-            var js = response.content_as_json();
-            if (js) {
-                var results = js.value();
-                if (results && results.value)
-                    return results.value.map(result => Browser.TheHost.getArtInfoById(result.id));
-            }
-            return [];
-        });
+        var url = "art?q=" + encodeURIComponent(terms);
+        if (type) url += "&type=" + encodeURIComponent(type);
+        return Cloud.getPrivateApiAsync(url)
+            .then((result: JsonList) => result.items.map(item => Browser.TheHost.getArtInfoById(item.id)));
     }
 
     export interface ChooseArtPictureOptions {

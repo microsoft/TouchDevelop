@@ -8,11 +8,6 @@
             "taskName": "build",
             "args": [],
             "isTestCommand": false
-        },
-        {
-            "taskName": "docs",
-            "args": ["update-docs"],
-            "isTestCommand": false
         }
     ]
 }

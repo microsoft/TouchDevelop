@@ -695,7 +695,6 @@
                     break;
                 case "new-scripts":
                 case "top-scripts":
-                case "showcase-scripts":
                     searchPath = this.apiPath;
                     break;
                 case "mygroups":
@@ -773,15 +772,6 @@
                 this.listDivs.push(div(null, HTML.mkButton(Util.fmt("uninstall {0} script{0:s}", lst.length), () => {
                     this.massUninstall(lst.map((si:ScriptInfo) => si.getCloudHeader()));
                 })))
-            }
-            if (this.apiPath == "showcase-mgmt") {
-                var showDiv = div(null, HTML.mkButton(lf("publish showcase"), () => {
-                    showDiv.setChildren(lf("working on it..."))
-                    Showcase.snapshotAsync().done(msg => {
-                        showDiv.setChildren(msg)
-                    })
-                }))
-                this.listDivs.push(showDiv)
             }
             var seen:any = {}
             var len = 0
@@ -919,14 +909,6 @@
                         elts.push(searchDiv);
                     } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
-                        if (EditorSettings.widgets().searchHelp) {
-                            var t = HelpTopic.findById("howtosearch");
-                            if (t) {
-                                var s = TopicInfo.mk(t);
-                                var b = s.mkSmallBox();
-                                elts.push(b);
-                            }
-                        }
                     }
 
                     sd.setChildren(elts);
@@ -1101,8 +1083,7 @@
                                             }).done();
                                     }),
                                     HTML.mkButton(lf("learn more"), () => {
-                                        m.dismiss();
-                                        Util.setHash("#topic:beta")
+                                        Util.navigateInWindow(Cloud.config.topicPath + "beta");
                                     }),
                                     HTML.mkButton(lf("not today"), () => {
                                         m.dismiss();
@@ -1424,7 +1405,7 @@
             return this.createInstalled(h);
         }
 
-        /* new-scripts top-scripts showcase-scripts search?text=[text] users comments screenshots reviews tags */
+        /* new-scripts top-scripts search?text=[text] users comments screenshots reviews tags */
         public getLocationList(apiPath:string, f:(itms:BrowserPage[], cont:string)=>void, noCache = false, includeETags = true) : Promise
         {
             TheApiCacheMgr.initMassiveReview();
@@ -1445,25 +1426,6 @@
                 });
                 f(res, null);
                 return Promise.as();
-            }
-
-            if (apiPath == "showcase-mgmt") {
-                Showcase.getListAsync(2)
-                    .then((list:Showcase.Entry[]) => {
-                        f(list.map(js => this.getScriptInfo(js.json)), null)
-                    })
-                    .done()
-                return Promise.as()
-            }
-
-            if (apiPath == "topics" || apiPath == "help") {
-                f(HelpTopic.getAll().map(TopicInfo.mk), null);
-                return Promise.as();
-            }
-
-            if (!Cloud.lite && apiPath == "showcase-scripts") {
-                Showcase.getShowcaseIds(ids => f(ids.map(id => this.getScriptInfoById(id)), null))
-                return Promise.as()
             }
 
             var suspended = <ApiCacheEntry[]>[];
@@ -1756,9 +1718,6 @@
                 case "releases":
                     tick(Ticks.browseListReleases)
                     header = lf("releases");
-                    break;
-                case "showcase-mgmt":
-                    header = "show-mgmt";
                     break;
                 case "search":
                     tick(Ticks.browseListSearch);
@@ -2147,6 +2106,17 @@
             }
             return si;
         }
+        
+        public getChannelInfoById(id:string)
+        {
+            var si = <ChannelInfo>this.getLocation(id);
+            if (!si) {
+                si = new ChannelInfo(this);
+                si.loadFromWeb(id);
+                this.saveLocation(si);
+            }
+            return si;
+        }        
 
         public getChannelInfo(c: JsonChannel) {
             var si = <ChannelInfo>this.getLocation(c.id);
@@ -6691,16 +6661,6 @@
                     res.className += " sdHasScriptShot";
                     screenShot.setChildren([HTML.mkImg(this.jsonScript.screenshotthumburl)]);
                 }
-
-                if (Showcase.mgmtMode()) {
-                    if (Showcase.isIn(this.jsonScript.id))
-                        res.className += " sdShowcase";
-                    if (Showcase.isIgnored(this.jsonScript.id))
-                        res.className += " sdShowcaseIgnore";
-                    var sc = Showcase.getStars(this.jsonScript.id)
-                    if (sc)
-                        res.appendChild(div("sdBaseCorner", sc))
-                }
             }
 
             setLocal();
@@ -6906,34 +6866,8 @@
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, save, clone, uninstall, this.showcaseBtns()]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, save, clone, uninstall]);
             return btns;
-        }
-
-        private showcaseBtns()
-        {
-            if (!Showcase.mgmtMode()) return null
-            if (!this.jsonScript) return null
-            var id = this.jsonScript.id
-            if (!id) return null
-
-            var btns = []
-            if (!Showcase.isIn(id))
-                btns.push(HTML.mkButton("add to showcase", () =>
-                            Showcase.setStatusAsync(id, "showcase").done()))
-            btns.push(HTML.mkButton("ignore for showcase", () =>
-                        Showcase.setStatusAsync(id, "ignore").done()))
-            var warning = div(null)
-            if (this.jsonScript.id != this.jsonScript.rootid)
-                TheApiCacheMgr.getAsync(this.jsonScript.rootid, true)
-                    .done((js:JsonScript) => {
-                        if (js.userid != this.jsonScript.userid) {
-                            warning.style.color = "#f00"
-                            warning.setChildren("Root script has as different author. Check comments.")
-                        }
-                    })
-            btns.push(warning)
-            return btns
         }
 
         static mkBtn(icon:string, desc:string, f:()=>void)
@@ -7001,13 +6935,18 @@
         }
         
         public saveAsync(): Promise {
+
+            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
+                return ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app."), { cancel: true })
+                    .then(ok => ok ? this.internalSaveAsync() : undefined);
+            else
+                return this.internalSaveAsync();
+        }
+            
+        private internalSaveAsync() : Promise {
             var guid = this.getGuid();
             var json: string;
-            
             var p = Promise.as();
-            if (Browser.isMobileSafari || Browser.isMobileSafariOld)
-                p = p.then(() => ModalDialog.showAsync(lf("To save files created on your iPhone or iPad, you need to have the latest software installed and a cloud storage app.")));
-
             return p.then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
                 .then(r => {
                     var text = <string>r[0];
@@ -7687,9 +7626,6 @@
                 setBtn(-1, ha < 0 ? "0" : ha.toString(), () => {});
                 Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id + "/reviews"), { kind: "review", userplatform: Browser.platformCaps })
                 .done((resp: JsonReview) => {
-                    if (localStorage["rateTouchDevelop"] != 2) {
-                        localStorage["rateTouchDevelop"] = 1;
-                    }
                     TheApiCacheMgr.storeHeart(id, resp.id);
                     patchScriptHeartCount(jscript, Math.max(ha,0)+1);
                     load(3, getScriptHeartCount(jscript));
@@ -8857,7 +8793,7 @@
                                     return null
                             }));
                     }, e => {
-                        Util.check(false, lf("failed to retreive scripts"));
+                        Util.check(false, lf("failed to retrieve scripts"));
                         loadingDiv.removeSelf();
                         ch.appendChild(div('', lf("Oops, we could not get the scripts for this group. Please try again later.")));
                 });
@@ -9180,7 +9116,7 @@
                                 }
                                 ad.appendChild(HTML.mkButton(lf("new invitation code"), () => {
                                     tick(Ticks.groupCodeNew);
-                                    HTML.showProgressNotification(lf("requesting new invitiation code..."));
+                                    HTML.showProgressNotification(lf("requesting new invitation code..."));
                                     this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
                                 }));
                                 if (!Cloud.isRestricted())
@@ -9282,7 +9218,7 @@
         }
 
         public resetInvitationCode() {
-            HTML.showProgressNotification(lf("clearing invitiation code..."));
+            HTML.showProgressNotification(lf("clearing invitation code..."));
             Cloud.deletePrivateApiAsync(this.publicId + "/code")
                 .done(() => {
                     this.invalidateCaches();
@@ -10372,141 +10308,6 @@
 
     HelpTopic.getScriptAsync = World.getAnyScriptAsync;
 
-    export module Showcase {
-        export interface Entry {
-            id:string;
-            status:string;
-            reason:string;
-            info:string;
-            score:number;
-            stars:string;
-            json:JsonScript;
-        }
-
-        var cache:Entry[];
-        var cacheById:StringMap<Entry> = {}
-        var statusCache:StringMap<string> = {}
-        var serviceUrl = "https://tdshowcase.azurewebsites.net/api/"
-
-        var listCached = false;
-
-        export function snapshotCacheAsync(storage:any)
-        {
-            var l = localStorage["showcaseIds"]
-            if (l) storage.showcaseIds = JSON.parse(l)
-            return Promise.as()
-        }
-
-        export function restoreCacheAsync(storage:any)
-        {
-            if (storage.showcaseIds)
-                localStorage["showcaseIds"] = JSON.stringify(storage.showcaseIds)
-            return Promise.as()
-        }
-
-        export function getShowcaseIds(f:(ids:string[])=>void)
-        {
-            var cached = localStorage["showcaseIds"]
-            if (cached)
-                f(JSON.parse(cached).ids)
-            if (Cloud.isOffline()) return;
-            if (listCached) return
-            listCached = true
-            Util.httpGetTextAsync("https://tdshowcase.blob.core.windows.net/export/current.json?nocache=" + Util.guidGen())
-                .done(text => {
-                    if (text != cached) {
-                        localStorage["showcaseIds"] = text
-                        f(JSON.parse(text).ids)
-                    }
-                },(err) => {
-                    // log and ignore
-                    Util.reportError("showcase", err, false);
-                })
-        }
-
-        export function getListAsync(days:number)
-        {
-            if (cache)
-                return Promise.as(cache)
-
-            return Promise.join([
-                    Util.httpGetJsonAsync(serviceUrl + "scripts?days=" + days),
-                    Util.httpGetJsonAsync(serviceUrl + "showcase_ids")
-                ])
-                .then(resps => {
-                    resps[1].items.forEach(k => statusCache[k] = "showcase")
-                    cache = resps[0].items
-                    cache.forEach(c => {
-                        cacheById[c.id] = c
-                    })
-                    return cache
-                })
-        }
-
-        export function mgmtMode()
-        {
-            return !!cache
-        }
-
-        export function isIn(id:string)
-        {
-            return statusCache[id] == "showcase"
-        }
-
-        export function isIgnored(id:string)
-        {
-            return statusCache[id] == "ignore"
-        }
-
-        export function getStars(id:string)
-        {
-            var ent = cacheById[id]
-            if (ent) return ent.stars
-            return ""
-        }
-
-        export function setStatusAsync(id:string, status:string)
-        {
-            return getTokenAsync()
-                .then(tok => Util.httpPostRealJsonAsync(serviceUrl + "set_status",
-                                    { id: id, status: status, access_token: tok }))
-                .then(resp => {
-                    if (cache) {
-                        var ent = cacheById[id]
-                        if (ent) {
-                            ent.status = status
-                            ent.reason = "web"
-                        }
-                    }
-                    statusCache[id] = status
-                    HTML.showProgressNotification(lf("status updated"))
-                    return resp
-                })
-        }
-
-        function getTokenAsync()
-        {
-            var tok = localStorage["showcase_access_token"]
-            if (tok) return Promise.as(tok)
-            return TDev.RT.EditorServices.getTokenAsync("TouchDevelop Showcase Management")
-                .then(tok => {
-                    localStorage["showcase_access_token"] = tok
-                    return tok
-                })
-        }
-
-        export function snapshotAsync()
-        {
-            return getTokenAsync()
-                .then(tok => Util.httpPostRealJsonAsync(serviceUrl + "snapshot",
-                                    { access_token: tok }))
-                .then(resp => {
-                    listCached = false
-                    return resp ? resp.info : "bad response"
-                })
-        }
-    }
-
     export class ReleaseInfo
         extends BrowserPage {
         private name: string;
@@ -10664,7 +10465,7 @@
                     icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
                     icon.style.backgroundRepeat = 'no-repeat';
                     icon.style.backgroundPosition = 'center';
-                    icon.style.backgroundSize = 'contain';
+                    icon.style.backgroundSize = 'cover';
                     icon.setChildren([]);
                 }
                 nameBlock.setChildren([this.json.name])
@@ -10768,15 +10569,7 @@
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
 
                 if (this.isMine()) {
-                    btn.appendChild(HTML.mkButton(lf("add script"),() => {
-                        Meta.chooseScriptAsync({ filter: si => !!si.publicId, 
-                            header: lf("add a script to your list"), 
-                            searchPath: "scripts?count=50" }).done((info: ScriptInfo) => {
-                            if (info) this.addScriptAsync(info).done(() => {
-                                this.browser().loadDetails(this);
-                            });
-                        });
-                    }));
+                    btn.setChildren([]);
                     btn.appendChild(HTML.mkButton(lf("delete channel"),() => {
                         ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"),() => {
                             HTML.showProgressNotification(lf("deleting channel..."));
@@ -10807,7 +10600,8 @@
             });
         }
 
-        public addScriptAsync(si: ScriptInfo) : Promise {
+        public addScriptAsync(si: ScriptInfo): Promise {
+            if (!si) return Promise.as();
             return Cloud.postPrivateApiAsync(si.publicId + "/channels/" + this.publicId, {})
                 .then(() => {
                     this.invalidateCaches();

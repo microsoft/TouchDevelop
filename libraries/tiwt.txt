@@ -1,0 +1,37 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank script plugin";
+meta icon "Brush";
+meta color "#ffe3256b";
+meta rootId "B1BBU2S1UsnHiEXWlTqkabme";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current,editoronly";
+meta parentIds "";
+// A TouchDevelop plugin. #scriptPlugin #buttonPlugin
+#gYzBYlK5jAx3Qfv9
+action do_stuff(#fK8mH7TfckAPC9Ui editor: Editor) {
+  #dFvzotTJtIW2DkOD code→init_log;
+  #x1Y6B2xJRSkIezBw // TODO: this action gets called by the editor!
+}
+#YCEitfuBjl2PqD4f meta import ast {
+  pub "njle"
+  usage {
+    action `async` `type` update_node(type: String, node: Json_Builder)
+    action `async` update_nodes(ast: Json_Builder, update: ♻ ast → update_node)
+    action `async` update_script(id: String, update: ♻ ast → update_node)
+    action `async` test_plugin(plugin: Text_Action)
+    action `sync` find_decl(@script: Json_Builder, name: String) returns(decl: Json_Builder)
+  }
+}
+#xUKJA4AiahTHnwv2
+var logger : App_Logger {
+  transient = true;
+}
+#PNnxmlnhF0t47I8b
+action init_log() {
+  #QliVR9SuYlA9GDox if data→logger→is_invalid then {
+    #tE4d3cGdvoaUcNRY data→logger := app→create_logger("plugin");
+  }
+  meta private;
+  meta sync;
+}

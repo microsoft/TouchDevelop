@@ -83,7 +83,6 @@ module TDev {
         // if sound
         wavurl: string;
         aacurl: string;
-        // cloud.lite
         bloburl?: string;
         arttype?: string;
     }
@@ -476,19 +475,10 @@ module TDev {
                 return links;
             },
             idToUrl: id => "https://vimeo.com/" + id,
-            idToHTMLAsync: (id:string) : Promise => {
-                if (Cloud.lite)
-                    return Promise.as(HTML.mkLazyVideoPlayer(
-                        Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), id),
-                        "https://player.vimeo.com/video/" + id))
-                var url = 'https://vimeo.com/' + id;
-                var p = oembedCache[url] ? Promise.as(oembedCache[url])
-                    : Util.httpGetJsonAsync("https://vimeo.com/api/oembed.json?url=https%3A//vimeo.com/" + id)
-                        .then(oembed => {
-                        oembedCache[url] = oembed;
-                        return oembed;
-                        });
-                return p.then((oe: HTML.OEmbed) => HTML.mkLazyVideoPlayer(oe.thumbnail_url, "https://player.vimeo.com/video/" + id));
+            idToHTMLAsync: (id: string): Promise => {
+                return Promise.as(HTML.mkLazyVideoPlayer(
+                    Util.fmt("{0}/thumbnail/512/vimeo/{1:uri}", Cloud.getServiceUrl(), id),
+                    "https://player.vimeo.com/video/" + id))
             },
         }, {
             id: "instagram",
@@ -573,7 +563,7 @@ module TDev {
         public useSVG = true;
         public useExternalLinks = false;
         public blockExternalLinks:boolean = undefined;
-        public pointerHelp = Cloud.lite;
+        public pointerHelp = true;
         public allowLinks = true;
         public allowImages = true;
         public allowVideos = true;
@@ -596,7 +586,7 @@ module TDev {
 
         public topicLink(id:string)
         {
-            return this.serviceUrlOr(Cloud.config.topicPath, Cloud.config.localTopicPath) + MdComments.shrink(id);
+            return this.serviceUrlOr(Cloud.config.topicPath, Cloud.config.topicPath) + MdComments.shrink(id);
         }
  
         public appLink(id:string)
@@ -1025,7 +1015,7 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://img.youtube.com/vi/{0:q}/hqdefault.jpg', arg))
                         );
                 }
-            } else if (Cloud.lite && macro == "videoptr") {
+            } else if (macro == "videoptr") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
                 if (!arg)
@@ -1059,7 +1049,7 @@ module TDev {
                         SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', arg))
                         );
                 }
-            } else if (Cloud.lite && macro == "vimeo") {
+            } else if (macro == "vimeo") {
                 if (!this.allowVideos) return "";
                 if (Cloud.isRestricted())
                     return MdComments.error("vimeo not allowed");
@@ -1712,8 +1702,6 @@ module TDev {
         public childTopics:HelpTopic[] = [];
 
         static contextTopics:HelpTopic[] = [];
-        static shippedScripts:any;
-        static scriptTemplates:any[];
 
         static getScriptAsync:(id:string)=>Promise;
 
@@ -1723,8 +1711,6 @@ module TDev {
         constructor(public json:HelpTopicJson)
         {
             this.id = MdComments.shrink(this.json.name);
-            if (!json.text && HelpTopic.shippedScripts.hasOwnProperty(json.id))
-                json.text = HelpTopic.shippedScripts[json.id]
         }
 
         static fromJsonScript(e:JsonScript)
@@ -1803,24 +1789,13 @@ module TDev {
             return t;
         }
 
-        static getAllTutorials(): HelpTopic[]{
-            var tuts = HelpTopic.getAll().filter(ht => ht.isTutorial());
-            return tuts;
-        }
-
         static getAll() : HelpTopic[]
         {
             if (!HelpTopic._initalized) {
                 HelpTopic._initalized = true;
-                var bestForTag:any = {}
+                var bestForTag:StringMap<HelpTopic> = {}
 
-                HelpTopic._topics.forEach((topic) => {
-                    bestForTag[topic.id] = topic;
-                    var ht = topic.hashTags().map(MdComments.shrink);
-                    if (ht.indexOf("docs") < 0) topic.hashTagsCache.push("#docs");
-                    var tt = Util.toHashTag(topic.json.name)
-                    if (ht.indexOf(MdComments.shrink(tt)) < 0) topic.hashTagsCache.push(tt);
-                })
+                HelpTopic._topics = [];                
 
                 api.getKinds().forEach((k:Kind) => {
                     if (k.isPrivate || k instanceof ThingSetKind || (k.isData && k.getContexts() == KindContext.None)) return;
@@ -1962,17 +1937,6 @@ module TDev {
             d = this.json.priority - other.json.priority;
             if (d != 0) return d < 0;
             return Util.stringCompare(this.id, other.id) < 0;
-        }
-
-        static addMany(scripts:any, topicsJson:HelpTopicJson[], templates:any[])
-        {
-            HelpTopic.shippedScripts = scripts;
-            var sc = (<any>TDev).ScriptCache;
-            if (sc) sc.shippedScripts = scripts;
-            HelpTopic.scriptTemplates = templates;
-            topicsJson.forEach((d) => {
-                HelpTopic._topics.push(new HelpTopic(d))
-            })
         }
 
         public updateKey()
@@ -2167,14 +2131,11 @@ module TDev {
                 ch += "<div class='md-tutorial'>" +
                         "<ul>" +
                           (cap == PlatformCapability.None ? "" :
-                            "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap)) +
-                             " <a title='" + lf("read more about platforms") + "' href='/help/platforms'>" + lf("Learn more...") + "</a></li>") +
+                            "<li>" + lf("<strong>required platform:</strong>") + " " + Util.htmlEscape(AST.App.capabilityName(cap))) +
                           (!this.apiProperty.isBeta() ? "" :
-                            "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change") +
-                            " <a title='" + lf("read more about the beta") + "' href='#topic:beta'>" + lf("Learn more...") + "</a></li>") +
+                            "<li>" + lf("<strong>feature in beta testing:</strong> the syntax and semantics is subject to change")) +
                           (this.apiProperty.isImplementedAnywhere() ? "" :
-                            "<li><strong>" + lf("API not implemented") + "</strong>, sorry " +
-                            "<a title='" + lf("read more about unimplemented features") + "' href='#topic:notImplemented'>" + lf("Learn more...") + "</a></li>") +
+                            "<li><strong>" + lf("API not implemented") + "</strong>, sorry ") +
                         "</ul>" +
                       "</div>";
             }
@@ -2437,8 +2398,8 @@ module TDev {
         }
 
 
-        static topicCache:any;
-        static topicByScriptId:any;
+        static topicCache:StringMap<HelpTopic>;
+        static topicByScriptId:StringMap<HelpTopic>;
         static findById(id:string):HelpTopic
         {
             // deprecated in lite
@@ -2453,62 +2414,5 @@ module TDev {
                 return HelpTopic.topicCache[id];
             return null;
         }
-
-        static testSplit(id:string)
-        {
-            var h = HelpTopic.findById(id)
-            if (h)
-                h.renderAsync().done(text => {
-                    console.log(MdComments.splitDivs(text))
-                })
-        }
-
-        static findByScriptId(id:string):HelpTopic
-        {
-            if (!HelpTopic.topicByScriptId) HelpTopic.findById("anything");
-            if (HelpTopic.topicByScriptId.hasOwnProperty(id))
-                return HelpTopic.topicByScriptId[id]
-        }
-
-        /*
-        public genScript()
-        {
-            if (!this.apiKind || this.apiProperty || this.json.id)
-                return Promise.as();
-            var app = AST.Parser.parseScript('meta version "v2.2,js,ctx";\naction main() {}')
-            app.setName(this.json.name)
-            app.comment = this.json.description + " #docs"
-            var b = app.actions()[0].body
-            var cmt = t => {
-                var c = new AST.Comment()
-                c.text = t
-                return <AST.Stmt> c
-            }
-            b.setChildren([
-                cmt("{topic:/docs/" + this.id + "}"),
-                cmt("{parenttopic:/docs/api}"),
-                cmt(this.json.description),
-                cmt("{api:" + this.id + "}")
-            ])
-            new AST.InitIdVisitor(true).dispatch(app);
-            return Cloud.getPrivateApiAsync("ptr-docs-" + this.id)
-                .then(() => {},
-                      e => Cloud.postPrivateApiAsync("scripts", {
-                            name: app.getName(),
-                            description: app.getDescription(),
-                            ishidden: true,
-                            text: app.serialize()
-                        }).then(resp =>
-                            Cloud.postPrivateApiAsync("pointers", { 
-                                path: "/docs/" + this.id,
-                                scriptid: resp.id,
-                                description: app.getName()
-                        }))
-                        .then(() => {}, 
-                              e => Cloud.handlePostingError(e, "pub")))
-        }
-        */
     }
-
-    TDev.api.addHelpTopics = HelpTopic.addMany;
 }

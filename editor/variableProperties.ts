@@ -868,14 +868,14 @@ module TDev
                                         TheEditor.addNode(n);
                                     }
                                 });
-                        } else if (/^audio\/(wav|x-wav)$/i.test(file.type)) {
+                        } else if (/^audio\/(mp3|mpeg)$/i.test(file.type)) {
                             ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshSoundResource(art.name, art.wavurl);
                                     TheEditor.addNode(n);
                                 }
                             });
-                        } else if (Cloud.lite && isDoc) {
+                        } else if (isDoc) {
                             ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
@@ -883,7 +883,7 @@ module TDev
                                 }
                             });
                         } else {
-                            ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (WAV)"));
+                            ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (MP3)"));
                         }
                     }
                 })
@@ -937,7 +937,7 @@ module TDev
                 Util.log('clipboard paste');
                 if (e.clipboardData) {
                     // has file?
-                    var files = Util.toArray<File>(e.clipboardData.files).filter((file: File) => /^(image|sound)/.test(file.type));
+                    var files = Util.toArray<File>(e.clipboardData.files).filter((file: File) => /^(image|sound|audio)/.test(file.type));
                     if (files.length > 1) {
                         e.stopPropagation(); // Stops some browsers from redirecting.
                         e.preventDefault();
@@ -990,9 +990,9 @@ module TDev
         }
 
         export function uploadDocumentDialogAsync(input?: TDev.HTML.IInputElement, initialName?: string): Promise {
-            if (!Cloud.lite || Cloud.anonMode(lf("uploading documents"))) {
+            if (Cloud.anonMode(lf("uploading documents")))
                 return Promise.as();
-            }
+
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 var art: JsonArt = null;
@@ -1077,7 +1077,7 @@ module TDev
                 m.add(div("wall-dialog-header", lf("upload sound")));
                 m.add(div("wall-dialog-body",
                     [
-                     div('', div('', lf("1. choose a WAV sound (less than 1MB, PCM, mono or stereo, 8 or 16 bit per channel)")), file.element),
+                     div('', div('', lf("1. choose an MP3 sound (less than 1MB)")), file.element),
                      div('', div('', lf("2. give it a name (minimum 4 characters)")), name),
                      div('', div('', lf("3. describe it")), description),
                      div('', progressBar),
@@ -1105,6 +1105,8 @@ module TDev
                             if (!data) return Promise.as(undefined);
                             else {
                                 Util.log('upload sound: uploading');
+                                // Chrome insists on calling this audio/mp3 not audio/mpeg
+                                data = data.replace(/^data:audio\/mp3/, "data:audio/mpeg")
                                 return uploadArtAsync(name.value, description.value, data);
                             }
                         }).done((resp) => {

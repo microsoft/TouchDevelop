@@ -1,0 +1,29 @@
+meta version "v3.0,js,ctx,refs,localcloud,unicodemodel,allasync,replay,partial";
+meta name "blank pixel art";
+meta icon "NineColumn";
+meta color "#ff9955bb";
+meta rootId "VBXALpufM78Zg6nXlU4VkoKX";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// A pixel art script. #pixelart
+#RgqvETdZVOPoT1G4
+action main() {
+  #QECmOCB8D9No5rO6 @\u267b→pixel_art→set_pen_color(colors→random);
+  #xO2UVI7FHoavaFrj @\u267b→pixel_art→paint(8, 8);
+}
+#TTrakYktVjHUznf2 meta import pixel_art {
+  pub "tsrn"
+  usage {
+    action `sync` create(terrain: String)
+    action `async` test()
+    action `sync` set_pen_color(c: Color)
+    action `sync` pen_color() returns(c: Color)
+    action `async` paint(x: Number, y: Number)
+    action `sync` pixel(x: Number, y: Number) returns(c: Color)
+    action `sync` sides() returns(cols: Number)
+    action `async` test_fail()
+    action `async` test_success()
+  }
+}

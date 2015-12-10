@@ -309,16 +309,16 @@ module TDev
             return b;
         }
         
-        static showAsync(msg: any, options: { title?: string; } = {}): Promise {
+        static showAsync(msg: any, options: { title?: string; cancel?: boolean } = {}): Promise {
             return new Promise(function(onSuccess, onError, onProgress) {
                 var m = new ModalDialog();
-                var ok = true;
+                var ok = false;
                 if (options.title) m.add(div('wall-dialog-header', options.title));
                 if (msg) m.add(div('wall-dialog-body', msg))
                 m.addOk(lf("ok"), () => {
                     ok = true;
                     m.dismiss();
-                });
+                }, "", options.cancel ? HTML.mkButton(lf("cancel"), () => m.dismiss()) : undefined);
                 m.onDismiss = () => onSuccess(ok);
                 m.show();                
             })            

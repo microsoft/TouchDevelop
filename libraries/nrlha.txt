@@ -1,0 +1,39 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank node library";
+meta icon "ArrowStandardCircle";
+meta color "#ff007fff";
+meta rootId "yGFW3wy9mcuwDt2lxN2XzLPS";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "network,npm,shell";
+meta parentIds "";
+// A library that wraps a npm module #node #npm #azure
+#xbyRT3U8tTYlJuX3
+action init(#qC2ALk0kurvg43d9 options\u003f: * Options) {
+  #MNkyanFCYYm1mj2c // Initializes the library. Call this action from your ``_init`` function.
+  #t7IXp9pyue4DKV3r app→import("npm", "TODO: npm package name here", "*");
+  #pAoVhCYiE8wIBNx2 data→logger := app→create_logger("TODO: mylib");
+  #PUrP48D9R04LP8ev // TODO: use `app-> server setting` to read environment variables or node command line arguments.
+  #x5295YzyzYEkwRz9 // TODO: use `app-> javasctipt` and `app->javascript async` to proxy with javascript.
+  #fNRnVruS6cg7D9H3 // TODO: write some unit tests!
+  #xlb7m4Eyw0BWFbzP // TODO: change the script description
+  #s4LqDBpWVhF4APDU // TODO: write the docs in `code-> example`
+}
+#SHXfYJBDaSY28xmP
+var logger : App_Logger {
+  transient = true;
+}
+#BdGhpbmca
+table Options {
+  type = "Object";
+  exported = true;
+  persistent = false;
+}
+#egka9cxvzrsZcSyc
+action example() {
+  #xbnNQHjvSDNjeKCB // Document your library here!
+  #CHb8jtuTrMd1PuMI // {imports}
+  meta private;
+  meta sync;
+}

@@ -1,0 +1,53 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";
+meta name "blank esplora";
+meta icon "Controller";
+meta color "#ff008000";
+meta rootId "pC5UwMf4G7SPUhesWRaUHyQ6";
+meta allowExport "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// An script that gets exported to the Arduino #Esplora board.
+#main
+action setup() {
+  #nqYA5RaGMCO1SEXm skip;
+  meta private;
+}
+#rK9jginmrEINvgw7qIb2i66k meta import esplora {
+  pub "xblmc"
+  usage {
+
+    action `sync` millis() returns(ms: Number)
+    action `sync` micros() returns(us: Number)
+    action `async` delay(ms: Number)
+    action `sync` acceleration() returns(p: Vector3)
+    action `sync` temperature() returns(p: Number)
+    action `sync` light_sensor() returns(light: Number)
+    action `sync` slider() returns(pos: Number)
+    action `sync` microphone() returns(sound: Number)
+    action `sync` is_joystick_button_pressed() returns(b: Boolean)
+    action `sync` is_button_pressed(switch_index: Number) returns(b: Boolean)
+    action `sync` joystick_x() returns(x: Number)
+    action `sync` joystick_y() returns(y: Number)
+    action `sync` color() returns(c: Color)
+    action `sync` set_color(c: Color)
+    action `sync` tone(frequency: Number, ms: Number)
+    action `sync` no_tone()
+  }
+}
+#r75MjRvGqDKnLhJ9inuyjofK
+action main() {
+  #y0vx1tzTFjGyHJkm // This code emulates the Arduino Esplora runtime. Do not edit.
+  #EU0Lbjt5Ymd8ZLq1 code→setup;
+  #WSRin48VrrVAfrXr time→on_every_frame($perform);
+  #hFmWRPI0zDzDGZDn where perform() {
+    #qXbYfSqwNjdUFBak code→loop;
+    #UfmaSAi6i9RD6NVp @\u267b→esplora→delay(10);
+  }
+}
+#OMQT5yM1JrJcj3UdHlpxgTaJ
+action loop() {
+  #jVLKoVH3tv4asgIZ skip;
+  meta private;
+}
+

@@ -1,0 +1,368 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "blank event hubs";
+meta icon "Stacks";
+meta color "#ffffffff";
+meta rootId "rTo1i2UE9ZqDVMIBTLAUqMYl";
+meta iconArtId "wyfreugv";
+meta isLibrary "yes";
+meta allowExport "yes";
+meta isCloud "yes";
+meta hasIds "yes";
+meta platform "network,npm,shell";
+meta parentIds "";
+// A node.js web site that sends events to Azure Event Hubs using AMQP. #node #azure #restify #rest #api
+#x6T4YCsBsZWtPUmF
+action \_init() {
+  #Zy8rc2YHRBIcmnOf // This template allows you to easily stream data to an Azure Event Hubs instance using the AMQP1.0 protocol.
+  #LKpR3HLsnUt8zjTC // To setup this service, you will have to setup the following:
+  #x0DCfAxIkDRE4kH5 // * An [Event Hub](http://azure.microsoft.com/en-us/services/event-hubs/) in Azure.
+  #BPgmHhKMscVJieMa // * define the ``AZURE_SERVICEBUS_SAS_KEY_NAME`` environment variable with your SAS key name
+  #R7tTfXVWqjfIjJuw // * define the ``AZURE_SERVICEBUS_SAS_KEY`` environment variable with the SAS key.
+  #uHkwReQVwrICaHzH // * (optional) setup application insights instrumentation key by defining the ``APPINSIGHTS_INSTRUMENTATION_KEY`` environment variable.
+  #JGUzkYMjc2rxbxQ2 // * `[Export]` this script to a node.js web site.
+  #bMtNnag4oaUSbmG8 data→logger := app→create_logger("api");
+  #ggtkH2QPjkFSMATl code→init_restify;
+  #xYi50zyUUbDrUiYA code→init_azure_services;
+  #GmpMiJN3N0hJ473p // TODO: change the event hubname below
+  #A3exv4u2E6ZcTY5F data→hub := @\u267b→azure_event_hubs→create_event_hub_if_not_exists("events");
+  #rlP2tbcbetF1rUVe time→run_every(1, $perform);
+  #OVfCshDzbjMrMcel where perform() {
+    #wjsvsYZW73p1LRfD // this is where you read your sensor data
+    #xViWmNVnfqeTVF3p $msg := records→Message→create;
+    #hzLc4iJcGXm7Yk3P $msg→temp := math→random(1000);
+    #T9qIzqSC0FK3USRu // and send it to the event hub...
+    #uX42zx1Jbgxuczbb data→hub→send_message_as_json(data→deviceid, $msg→to_json);
+  }
+}
+#yjW8JMhhkCVxVG9z meta import parallel {
+  pub "fncvb"
+  usage {
+    type queue
+    action `async` @for(count: Number, @action: Number_Action)
+    action `async` for_batched(count: Number, batch_count: Number, item_action: Number_Action, batch_action: Action)
+    action `sync` schedule(q: ♻ parallel → queue, task: Action)
+    action `sync` create_queue(max_running: Number) returns(queue: ♻ parallel → queue)
+    action `async` wait_for_empty(q: ♻ parallel → queue)
+    action `async` for_json(js: Json_Object, @action: Json_Action)
+  }
+}
+#kGiIbArLBJgrGrUh
+var logger : App_Logger {
+  transient = true;
+}
+#xht4tB8QBEGYhcxd
+action init_azure_services() {
+  #xrdwLuCApP4dSbPN @\u267b→azure_event_hubs→init;
+  #rIelx44MT4mxwsuP if data→deviceid→is_empty then {
+    #lVuKP04Sv0BPFvTe data→deviceid := @\u267b→node_crypto→random_bytes(16)→to_string("hex");
+  }
+  #SqiRrk2SBmwfUygc data→logger→info("deviceid: " ∥ data→deviceid);
+  meta private;
+}
+#VJhyWCgHgpoXBxQe
+action init_restify() {
+  #Rfk2zOUWd63utX0c $server := @\u267b→restify→server;
+  #xwHqz4BboMG6fFYA $server→use(@\u267b→restify→authorization_parser);
+  #CCiEC9MjVyBu1Alm $server→pre(@\u267b→restify→sanitize_path);
+  #QhDtswBtwpK4HWfj $throttle := @\u267b→restify→throttle;
+  #xnNL4UkM1HGz7bML where rate := 40;
+  #pjHy3CkNNDrbTRdj where burst := 100;
+  #u8A4y4yHMKc8lyUK where ip := true;
+  #hivZ6Vt6ftjQnefM $server→use($throttle);
+  #xHYwcSAiT7KduHhg $server→use(@\u267b→restify→CORS);
+  #uouNso31DPAdpy0R $server→use(@\u267b→restify→body_parser);
+  #PQsbPK8j0KxXP7BN $server→use(@\u267b→restify→gzip_response);
+  #krhauhLHNWLfS4Rr $server→use(@\u267b→restify→query_parser);
+  #OQV2aOnQMrFwfSMH $server→use(@\u267b→restify→conditional_request);
+  #dJCZRF6m52AEcGvh @\u267b→restify_touchdevelop→autobind($server);
+  #RheHhoSGEfw2gVg7 code→init_routes;
+  #JCEJ0pDtVdSmeI23 $server→use(@\u267b→restify_touchdevelop→errors_to_log(data→logger));
+  meta private;
+}
+#RtmLKYphNIzdwos1 meta import restify {
+  pub "uqffa"
+  usage {
+    action `async` `type` Request_Handler(req: ♻ restify → Request, res: ♻ restify → Response)
+    #xLPhdjOebDT8w77X
+    table Throttle_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xo6LfV0hyAQtz675 rate : Number
+        #yZ2QZAfeW3W74JA1 burst : Number
+        #JUlNvDq7Hm9cTUAG ip : Boolean
+        #w2h4dcf4I5K5h7kn xff : Boolean
+        #RO3Sx6iTt4WsVBm6 username : Boolean
+        #VbsYnDvr3t4Xr4VA maxKeys : Number
+        #w25h9R5LKJnWiBNu tokensTable : ♻ restify → Tokens_Table
+      }
+    }
+    #xdeuBx505IsZ6eEI
+    table Serve_Static_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #NfWLVJBBbHvtMqkl default : String
+        #KvIMj1sEoAwQCf22 maxAge : Number
+      }
+    }
+    #mqEMUbizkEp6naSD
+    table CORS_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #xMYYV6C3eS7PWsfQ origins : String
+        #z5HdpFdSi792e1OX credentials : Boolean
+        #Fw1D0A9ZfeMCf5c3 headers : String
+      }
+    }
+    #w2zTzWkfMf01yOko
+    table Body_Parser_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #mhaHCLobgUgMrv72 maxBodySize : Number
+        #xr4fKleNd4wHHP1l mapParams : Boolean
+        #st0ir2vLTxbLTQWB mapFiles : Boolean
+        #z5ah2mZWb8c5FmTM overrideParams : Boolean
+      }
+    }
+    #xv4yZciZi2wFoqpM
+    table Send_Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #svWYln7UIackFIpB status : Number
+      }
+    }
+    #BVGhpbmca
+    table HTTP_Status_Codes {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #BVGhpbmcaMjAwIE9L @200_OK : Number
+        #BVGhpbmcaMjAxIENyZWF0ZWQa @201_Created : Number
+        #BVGhpbmcaMzAwIE11bHRpcGxlIENob2ljZXMa @300_Multiple_Choices : Number
+        #BVGhpbmcaMzAxIE1vdmVkIFBlcm1hbmVudGx5 @301_Moved_Permanently : Number
+        #BVGhpbmcaMzAyIE1vdmVkIFRlbXBvcmFyaWx5 @302_Moved_Temporarily : Number
+        #BVGhpbmcaMzAzIFNlZSBPdGhlcgaa @303_See_Other : Number
+        #BVGhpbmcaMzA0IE5vdCBNb2RpZmllZAaa @304_Not_Modified : Number
+        #BVGhpbmcaMzA3IFRlbXBvcmFyeSBSZWRpcmVjdAaa @307_Temporary_Redirect : Number
+        #BVGhpbmcaNDAwIEJhZCBSZXF1ZXN0 @400_Bad_Request : Number
+        #BVGhpbmcaNDAxIFVuYXV0aG9yaXplZAaa @401_Unauthorized : Number
+        #BVGhpbmcaNDAyIFBheW1lbnQgUmVxdWlyZWQa @402_Payment_Required : Number
+        #BVGhpbmcaNDAzIEZvcmJpZGRlbgaa @403_Forbidden : Number
+        #BVGhpbmcaNDA0IE5vdCBGb3VuZAaa @404_Not_Found : Number
+        #BVGhpbmcaNDA1IE1ldGhvZCBOb3QgQWxsb3dlZAaa @405_Method_Not_Allowed : Number
+        #BVGhpbmcaNDA4IFJlcXVlc3QgVGltZW91dAaa @408_Request_Timeout : Number
+        #BVGhpbmcaNDA5IENvbmZsaWN0 @409_Conflict : Number
+        #BVGhpbmcaNDEwIEdvbmUa @410_Gone : Number
+        #BVGhpbmcaNDEyIFByZWNvbmRpdGlvbiBGYWlsZWQa @412_Precondition_Failed : Number
+        #BVGhpbmcaNDEzIFJlcXVlc3QgRW50aXR5IFRvbyBMYXJnZQaa @413_Request_Entity_Too_Large : Number
+        #BVGhpbmcaNDE1IFVuc3VwcG9ydGVkIE1lZGlhIFR5cGUa @415_Unsupported_Media_Type : Number
+        #BVGhpbmcaNDE4IEltIGEgdGVhcG90 @418_Im_a_teapot : Number
+        #BVGhpbmcaNDIyIFVucHJvY2Vzc2FibGUgRW50aXR5 @422_Unprocessable_Entity : Number
+        #BVGhpbmcaNDIzIExvY2tlZAaa @423_Locked : Number
+        #BVGhpbmcaNDI0IEZhaWxlZCBEZXBlbmRlbmN5 @424_Failed_Dependency : Number
+        #BVGhpbmcaNDI1IFVub3JkZXJlZCBDb2xsZWN0aW9u @425_Unordered_Collection : Number
+        #BVGhpbmcaNDI5IFRvbyBNYW55IFJlcXVlc3Rz @429_Too_Many_Requests : Number
+        #BVGhpbmcaNTAwIEludGVybmFsIFNlcnZlciBFcnJvcgaa @500_Internal_Server_Error : Number
+        #BVGhpbmcaNTAxIE5vdCBJbXBsZW1lbnRlZAaa @501_Not_Implemented : Number
+        #BVGhpbmcaNTAzIFNlcnZpY2UgVW5hdmFpbGFibGUa @503_Service_Unavailable : Number
+      }
+    }
+    type Request
+    type Response
+    type Tokens_Table
+    type Server
+    type Middleware
+    type Error
+    action `sync` use(server: ♻ restify → Server, mid: ♻ restify → Middleware)
+    action `sync` get(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` post(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` server() returns(server: ♻ restify → Server)
+    action `sync` send(res: ♻ restify → Response, content: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` status(res: ♻ restify → Response, status: Number)
+    action `sync` is(req: ♻ restify → Request, type: String) returns(r: Boolean)
+    action `sync` accepts(req: ♻ restify → Request, types: String) returns(type: String)
+    action `sync` put(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` del(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` head(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` pre(server: ♻ restify → Server, mid: ♻ restify → Middleware)
+    action `sync` CORS(options\u003f: ♻ restify → CORS_Options) returns(mid: ♻ restify → Middleware)
+    action `sync` conditional_request() returns(mid: ♻ restify → Middleware)
+    action `sync` route(server: ♻ restify → Server, method: String, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` json(res: ♻ restify → Response, content: Json_Object, options\u003f: ♻ restify → Send_Options)
+    action `sync` next(res: ♻ restify → Response)
+    action `sync` next_error(res: ♻ restify → Response, error: ♻ restify → Error)
+    action `sync` address(server: ♻ restify → Server) returns(address: String)
+    action `sync` gzip_response() returns(mid: ♻ restify → Middleware)
+    action `sync` header(req: ♻ restify → Request, name: String) returns(value: String)
+    action `sync` is_secure(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` is_chunked(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` is_keep_alive(req: ♻ restify → Request) returns(r: Boolean)
+    action `sync` set_header(res: ♻ restify → Response, name: String, value: String)
+    action `sync` body_parser(options\u003f: ♻ restify → Body_Parser_Options) returns(mid: ♻ restify → Middleware)
+    action `sync` throttle(options\u003f: ♻ restify → Throttle_Options) returns(middleware: ♻ restify → Middleware)
+    action `sync` date_parser(clock_skew: Number) returns(middleware: ♻ restify → Middleware)
+    action `sync` serve_static(directory: String, options\u003f: ♻ restify → Serve_Static_Options) returns(middleware: ♻ restify → Middleware)
+    action `sync` query_parser() returns(middleware: ♻ restify → Middleware)
+    action `sync` authorization_parser() returns(middleware: ♻ restify → Middleware)
+    action `sync` jsonp() returns(middleware: ♻ restify → Middleware)
+    action `sync` body_as_json(req: ♻ restify → Request) returns(body: Json_Object)
+    action `sync` id(req: ♻ restify → Request) returns(id: String)
+    action `sync` param(req: ♻ restify → Request, name: String) returns(value: String)
+    action `sync` opts(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` patch(server: ♻ restify → Server, path: String, @then: ♻ restify → Request_Handler)
+    action `sync` to_string(ser: ♻ restify → Server) returns(s: String)
+    action `sync` sanitize_path() returns(middleware: ♻ restify → Middleware)
+    action `sync` body(req: ♻ restify → Request) returns(body: String)
+    action `sync` send_error(res: ♻ restify → Response, status: Number, message: String)
+    action `sync` all(server: ♻ restify → Server, @then: ♻ restify → Request_Handler)
+    action `sync` method(req: ♻ restify → Request) returns(method: String)
+    action `sync` url(req: ♻ restify → Request) returns(url: String)
+    action `sync` query(req: ♻ restify → Request) returns(query: Json_Object)
+    action `sync` redirect(res: ♻ restify → Response, status_code: Number, url: String)
+    action `sync` send_status(res: ♻ restify → Response, status_code: Number)
+    action `sync` charset(res: ♻ restify → Response, encoding: String)
+    action `sync` route_regex(server: ♻ restify → Server, method: String, path_regex: String, @then: ♻ restify → Request_Handler)
+    action `async` read_body_as_buffer(req: ♻ restify → Request) returns(body: Buffer)
+    action `sync` headers(req: ♻ restify → Request) returns(headers: Json_Object)
+    action `sync` server_url(req: ♻ restify → Request) returns(url: String)
+    action `sync` html(res: ♻ restify → Response, content: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` send_text(res: ♻ restify → Response, content: String, content_type: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` send_buffer(res: ♻ restify → Response, content: Buffer, content_type: String, options\u003f: ♻ restify → Send_Options)
+    action `sync` finished(res: ♻ restify → Response) returns(done: Boolean)
+    action `sync` http() returns(codes: ♻ restify → HTTP_Status_Codes)
+  }
+}
+#A3d3ZvbSo4doxSON meta import restify_touchdevelop {
+  pub "dvuhb"
+  usage {
+    action `sync` autobind(server: ♻ restify → Server)
+    action `sync` errors_to_log(logger: App_Logger) returns(middleware: ♻ restify → Middleware)
+  }
+  #Ndi4Jc7GXTkHfWcQ resolve restify = ♻ restify with {
+  }
+}
+#rMIDyd4TDaMKCuVx
+action init_routes() {
+  #JtHQs8S4PNExhJqH skip;
+  meta private;
+}
+#vOmAlM8jBeSaiHx8 meta import node_crypto {
+  pub "oevpc"
+  usage {
+    type credentials
+    type hash
+    type hmac
+    type cipher
+    type decipher
+    type sign
+    type verify
+    type DiffieHellman
+    action `sync` get_ciphers() returns(ciphers: Collection[String])
+    action `sync` get_hashes() returns(hashes: Collection[String])
+    action `sync` create_credentials(details: Json_Object) returns(credentials: ♻ node_crypto → credentials)
+    action `sync` create_hash(algorithm: String) returns(hash: ♻ node_crypto → hash)
+    action `sync` update_hash(hash: ♻ node_crypto → hash, hash_data: Buffer)
+    action `sync` digest_hash(hash: ♻ node_crypto → hash) returns(digest: Buffer)
+    action `sync` update_hmac(hmac: ♻ node_crypto → hmac, hmac_data: Buffer)
+    action `sync` digest_hmac(hmac: ♻ node_crypto → hmac) returns(digest: Buffer)
+    action `sync` create_cipher(algorithm: String, password: Buffer) returns(cipher: ♻ node_crypto → cipher)
+    action `sync` create_cipher_iv(algorithm: String, key: Buffer, iv: Buffer) returns(iv_cipher: ♻ node_crypto → cipher)
+    action `sync` update_cipher(cipher: ♻ node_crypto → cipher, _data: Buffer) returns(enciphered: Buffer)
+    action `sync` final(cipher: ♻ node_crypto → cipher) returns(cipher_final: Buffer)
+    action `sync` set_auto_padding(cipher: ♻ node_crypto → cipher)
+    action `sync` create_decipher(algorithm: String, password: Buffer) returns(decipher: ♻ node_crypto → decipher)
+    action `sync` create_decipher_iv(algorithm: String, key: Buffer, iv: Buffer) returns(iv_decipher: ♻ node_crypto → decipher)
+    action `sync` update_decipher(decipher: ♻ node_crypto → decipher, _data: Buffer) returns(deciphered: Buffer)
+    action `sync` final_(decipher: ♻ node_crypto → decipher) returns(decipher_final: Buffer)
+    action `sync` set_auto_padding_(decipher: ♻ node_crypto → decipher)
+    action `sync` create_sign(algorithm: String) returns(sign: ♻ node_crypto → sign)
+    action `sync` update_sign(sign: ♻ node_crypto → sign, sign\_data: Buffer)
+    action `sync` sign_(sign: ♻ node_crypto → sign, private_key: String) returns(signature: Buffer)
+    action `sync` create_verify(algorithm: String) returns(verify: ♻ node_crypto → verify)
+    action `sync` update_verify(verify: ♻ node_crypto → verify, verify_data: Buffer)
+    action `sync` verify_(verify: ♻ node_crypto → verify, object: String, signature: Buffer) returns(valid: Boolean)
+    action `sync` create_DiffieHellman(prime_length: Number) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `sync` generate_keys(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(public_key: Buffer)
+    action `sync` compute_secret(DiffieHellman: ♻ node_crypto → DiffieHellman, other_public_key: Buffer) returns(shared_secret: Buffer)
+    action `sync` get_prime(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(DH_prime: Buffer)
+    action `sync` get_generator(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(generator: Buffer)
+    action `sync` get_public_key(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(public_key: Buffer)
+    action `sync` get_private_key(DiffieHellman: ♻ node_crypto → DiffieHellman) returns(private_key: Buffer)
+    action `sync` set_public_key(DiffieHellman: ♻ node_crypto → DiffieHellman, public_key: Buffer)
+    action `sync` set_private_key(DiffieHellman: ♻ node_crypto → DiffieHellman, private_key: Buffer)
+    action `sync` get_DiffieHellman(group_name: String) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `async` pbkdf2(password: String, salt: String, iterations: Number, keylen: Number) returns(derived_key: String)
+    action `async` random_bytes(size: Number) returns(strong_data: Buffer)
+    action `sync` DEFAULT\_ENCODING() returns(default_encoding: String)
+    action `sync` create_hmac(algorithm: String, key: String) returns(hmac: ♻ node_crypto → hmac)
+    action `sync` create_DiffieHellmanWithPrime(prime: Buffer) returns(DiffieHellman: ♻ node_crypto → DiffieHellman)
+    action `async` pseudo_random_bytes(size: Number) returns(non\u002dstrong_data: Buffer)
+    action `sync` update_hash_string(hash: ♻ node_crypto → hash, hash_data: String)
+    action `async` new_guid() returns(guid: String)
+  }
+}
+#lQzkFetSEgRfkoD1
+var deviceid : String {
+}
+#BVGhpbmca
+table Message {
+  type = "Object";
+  exported = true;
+  persistent = false;
+  fields {
+    #wy6NESQzEaxcVB7P temp : Number
+  }
+}
+#j113cC0ZjCAoNnDS meta import node_hash {
+  pub "ezbka"
+  usage {
+    action `sync` sha256(value: String) returns(digest: String)
+    action `sync` sha1(value: String) returns(digest: String)
+  }
+  #MBLWOTnilXzcOFAX resolve node_crypto = ♻ node_crypto with {
+  }
+}
+#OAqit425iZkuTA35
+var hub : ♻ azure_event_hubs → Event_Hub {
+  transient = true;
+}
+#x41EhzlB627EK4e1 meta import azure_event_hubs {
+  pub "qbjtg"
+  usage {
+    #qy4yPchAE7AUedlB
+    table Options {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        // Name of the event hub
+        #BULIHveLGv3xhPGc hub_namespace : String
+        // Shared Access Signature token; otherwise the server setting ``AZURE_SERVICEBUS_SAS_TOKEN`` is used.
+        #xr7jIhKzmCpq0i5N sas_token : String
+      }
+    }
+    #EyRHf2UILCkoocED
+    table Event_Hub {
+      type = "Object";
+      exported = true;
+      persistent = false;
+      fields {
+        #t4VjI1BVPLvcUl22 name : String
+      }
+    }
+    action `sync` init(options\u003f: ♻ azure_event_hubs → Options)
+    action `async` send_message(hub: ♻ azure_event_hubs → Event_Hub, device_id: String, msg: String) returns(status: Number)
+    action `async` create_event_hub_if_not_exists(name_: String) returns(hub: ♻ azure_event_hubs → Event_Hub)
+    action `async` send_message_as_json(hub: ♻ azure_event_hubs → Event_Hub, device_id: String, msg: Json_Object) returns(status: Number)
+  }
+}

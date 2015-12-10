@@ -165,7 +165,7 @@ module TDev.HTML {
         }
 
         // special handling of data urls
-        var m = url.match(/^data:audio\/(mp3|mp4|wav);base64,/i);
+        var m = url.match(/^data:audio\/(mpeg|mp3|mp4|wav);base64,/i);
         if (m) {
             Util.log('audio: src datauri ' + m[1]);
             var src = <HTMLSourceElement>document.createElement('source');
@@ -473,7 +473,7 @@ module TDev.HTML {
     export var mkAudioInput = (allowEmpty: boolean, maxMb: number): IInputElement =>
     {
         var input = HTML.mkTextInput("file", lf("choose a file"));
-        input.accept = "audio/wav";
+        input.accept = "audio/mpeg";
         return <IInputElement>{
             element: input,
             validate: function (): string {
@@ -482,9 +482,9 @@ module TDev.HTML {
                     return allowEmpty ? null : 'Oops, you need to select a sound...';
                 var f = files[0];
                 if (maxMb > 0 && f.size > maxMb * 1000000)
-                    return 'Sorry, the sound is too big. The sound must be less than ' + maxMb + 'Mb...';
-                if (f.type !== 'audio/wav' && f.type !== 'audio/x-wav') // audio/x-wav on Mac/Safari
-                    return 'Sorry, you can only upload WAV sounds...';
+                    return lf("Sorry, the sound is too big. The sound must be less than {0}Mb...", maxMb);
+                if (f.type !== 'audio/mpeg' && f.type !== 'audio/mp3') // audio/mp3 on Chrome
+                    return lf("Sorry, you can only upload MP3 sounds...");
                 return null;
             },
             readAsync: () => fileReadAsDataURLAsync(input.files[0])

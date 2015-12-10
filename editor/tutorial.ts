@@ -1106,12 +1106,12 @@ module TDev
                             var moreTutorials = <HTMLUListElement>createElement('ul', 'tutorial-list');
 
                             var tutLength = 8 - (moreTutorialsId ? 1 : 0);
-                            var allTutorials = HelpTopic.getAllTutorials();
+                            var allTutorials = []; // TODO: fix all tutorials
                             var theme = Browser.EditorSettings.currentTheme;
                             var score = (ht: HelpTopic) => {
                                 var sc = 0;
                                 if (this.hourOfCode && ht.isHourOfCode()) sc += 100;
-                                if (/jetpack/i.test(ht.id)) sc += 25;
+                                if (/jetpack|flashverse/i.test(ht.id)) sc += 25;
                                 if (/jump/i.test(ht.id)) sc += 20;
                                 if (progs[ht.updateKey()]) sc -= 50;
                                 if (theme && theme.scriptSearch) sc += ht.hashTags().indexOf(theme.scriptSearch) > -1 ? 200 : 0;
