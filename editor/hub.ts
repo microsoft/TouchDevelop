@@ -2509,18 +2509,16 @@ module TDev.Browser {
                         return;
                     }
 
+                    // 500px max
                     var f = 500 / Math.max(w, h);
 
-                    // does it need scaling?
-                    if (f < 1.05 || !/^data:image\/jpeg/.test(uri)) {
-                        if (f < 1) f = 1;
-                        var canvas = <HTMLCanvasElement>document.createElement("canvas");
-                        canvas.width = Math.floor(w * f);
-                        canvas.height = Math.floor(h * f);
-                        var ctx = canvas.getContext("2d");
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        uri = canvas.toDataURL('image/jpeg', 0.85);
-                    }
+                    if (f > 1) f = 1;
+                    var canvas = <HTMLCanvasElement>document.createElement("canvas");
+                    canvas.width = Math.floor(w * f);
+                    canvas.height = Math.floor(h * f);
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    uri = canvas.toDataURL('image/jpeg', 0.85);
 
                     preview.src = uri;
                     msg.setChildren([])
