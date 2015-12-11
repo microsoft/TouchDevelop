@@ -382,7 +382,7 @@ task('log', [], { async: false }, function () {
 
 // Our targets are the concatenated files, which are the final result of the
 // compilation. We also re-run the CSS prefixes thingy everytime.
-desc('build the whole TouchDevelop project')
+desc('build the whole Touch Develop project')
 task('default', [
   'css-prefixes',
   'build/client.js',

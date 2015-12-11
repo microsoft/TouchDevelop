@@ -37,11 +37,11 @@ module TDev.RT {
                     onSuccess(undefined);
                 };
                 if (writeTag) {
-                    m.add(div('wall-dialog-header', 'write tag'));
-                    m.add(div('wall-dialog-body', 'Place your device near your tag to write it.'));
+                    m.add(div('wall-dialog-header', lf("write tag")));
+                    m.add(div('wall-dialog-body', lf("Place your device near your tag to write it.")));
                 } else {
-                    m.add(div('wall-dialog-header', 'tap+send'));
-                    m.add(div('wall-dialog-body', 'Go ahead and tap your device to another device that supports NFC.'));
+                    m.add(div('wall-dialog-header', lf("tap+send")));
+                    m.add(div('wall-dialog-body', lf("Go ahead and tap your device to another device that supports NFC.")));
                 }
                 m.add(div('wall-dialog-buttons',
                     HTML.mkButton('cancel', () => {
@@ -69,8 +69,8 @@ module TDev.RT {
                     Tags.stopReceiveNFCAsync(mid).done();
                     onSuccess(value);
                 };
-                m.add(div('wall-dialog-header', 'tap+receive'));
-                m.add(div('wall-dialog-body', 'Go ahead and tap your device to another device that supports NFC.'));
+                m.add(div('wall-dialog-header', lf("tap+receive")));
+                m.add(div('wall-dialog-body', lf("Go ahead and tap your device to another device that supports NFC.")));
                 m.add(div('wall-dialog-buttons',
                     HTML.mkButton('cancel', () => {
                         Util.log('nfc: user cancel');

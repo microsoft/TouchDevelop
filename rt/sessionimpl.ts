@@ -2132,7 +2132,7 @@ module TDev {
                         return {
                             type: StatusType.Warning,
                             status: lf("offline") ,
-                            description: lf("touchdevelop is in offline mode{0}", retrymsg)
+                            description: lf("touch develop is in offline mode{0}", retrymsg)
                         };
                     else {
                         return {
