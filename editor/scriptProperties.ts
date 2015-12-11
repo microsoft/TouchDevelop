@@ -819,7 +819,7 @@ module TDev
                     () => {
                         this.editor.onExitAsync().then(() => {
                             this.editor.hide(true);
-                            Browser.TheHost.showList("groups", groupInfo);
+                            Browser.TheHost.showList("groups", { item: groupInfo });
                         }).done();
                     }
                 );

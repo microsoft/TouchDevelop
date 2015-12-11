@@ -404,7 +404,7 @@
             if (currentScreen)
                 currentScreen.hide()
             this.initialSearch = s;
-            this.showList("installed-scripts", null);
+            this.showList("installed-scripts");
             this.searchBox.style.opacity = "0"
         }
 
@@ -1528,7 +1528,7 @@
 
         private showInstalledAsync()
         {
-            this.showList("installed-scripts", null);
+            this.showList("installed-scripts");
             return Promise.wrap(null);
         }
 
@@ -1636,7 +1636,7 @@
                     pg = this.getAnyInfoByEtag(etag);
                 }
 
-                this.showList(h[1] || "", pg, h[4]);
+                this.showList(h[1] || "", { item: pg, tab: h[4] });
 
                 var f = this.runOnReload
                 if (f) {
@@ -1652,15 +1652,27 @@
             this.syncView()
         }
 
-        public showList(path:string, item:BrowserPage = null, tab = "", noCache = false, includeETags = false)
+        public showList(path: string, options: {
+            item?: BrowserPage;
+            tab?: string;
+            noCache?: boolean;
+            includeETags?: boolean;
+            header?: string;
+            } = {})
         {
+            var item = options.item;
+            var tab = options.tab || "";
+            var noCache = !!options.noCache;
+            var includeETags = !!options.includeETags;
+            
             this.setSearch("");
-            var header = path.replace(/-scripts/, "").replace(/\/scripts/, "");
+            var listKind = path.replace(/-scripts/, "").replace(/\/scripts/, "");
+            var header = options.header || listKind;
             this.shownSomething = false;
             this.apiPath = path;
             this.botDiv = div(null);
             var hideHeader = false;
-            switch (header) {
+            switch (listKind) {
                 case "installed":
                     tick(Ticks.browseListMyScripts);
                     header = lf("my scripts");
@@ -1966,7 +1978,7 @@
             if (currentScreen != this) {
                 if (currentScreen)
                     currentScreen.hide();
-                this.showList("installed-scripts", s, tab);
+                this.showList("installed-scripts",  { item:s, tab: tab});
                 return;
             }
 

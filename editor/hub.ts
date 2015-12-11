@@ -1621,7 +1621,7 @@ module TDev.Browser {
             if (s && !e.ctrlKey && !e.metaKey) {
                 this.hide();
                 this.browser().initialSearch = s;
-                this.browser().showList("search", null);
+                this.browser().showList("search");
                 return true;
             }
             return false;
@@ -2233,15 +2233,15 @@ module TDev.Browser {
                 var t = items[i].mkTile(sz);
                 this.tileClick(t, () => {
                     this.hide();
-                    if (s == "recent") this.browser().showList("installed-scripts", item);
+                    if (s == "recent") this.browser().showList("installed-scripts", { item: item });
                     else if (s == "myart") {
-                        if (Cloud.getUserId()) this.browser().showList("myart", item);
-                    } else if (s == "art") this.browser().showList("art", item);
-                    else if (s == "social") this.browser().showList("groups", item);
-                    else if (s == "users") this.browser().showList("users", item);
-                    else if (s == "channels") this.browser().showList("channels", item);
-                    else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid, item);    
-                    else this.browser().showList(s + "-scripts", item);
+                        if (Cloud.getUserId()) this.browser().showList("myart", { item: item });
+                    } else if (s == "art") this.browser().showList("art", { item: item });
+                    else if (s == "social") this.browser().showList("groups", { item: item } );
+                    else if (s == "users") this.browser().showList("users", { item: item });
+                    else if (s == "channels") this.browser().showList("channels", { item: item });
+                    else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid + "/scripts", { item: item, header: lf("showcase") });    
+                    else this.browser().showList(s + "-scripts", { item: item });
                 });
                 elements.push(t);
             });
@@ -2310,11 +2310,11 @@ module TDev.Browser {
             if (s == "recent") {
                 noFnBreak = true;
                 addFnBtn(lf("All my scripts"), Ticks.hubSeeMoreMyScripts,
-                    () => { this.hide(); this.browser().showList("installed-scripts", null) });
+                    () => { this.hide(); this.browser().showList("installed-scripts") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { TemplateManager.createScript(); }, true);
                 if (Cloud.isRestricted())
-                    addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups", null); }, true);
+                    addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups"); }, true);
 
                 if (EditorSettings.widgets().hubScriptUpdates) {
                     var upd = this.browser().headersWithUpdates();
@@ -2334,17 +2334,17 @@ module TDev.Browser {
                     oneSlot.className += " scriptSlot";
                     elements.push(oneSlot)
                 }
-                addFnBtn(lf("See More"), Ticks.hubSeeMoreArt, () => { this.hide(); this.browser().showList("myart", null) });
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreArt, () => { this.hide(); this.browser().showList("myart") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Upload Picture"), Ticks.hubUploadPicture, () => { ArtUtil.uploadPictureDialogAsync({ finalDialog: true }).done() }, true);
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups", null) });
+                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
                 if (EditorSettings.widgets().hubUsers)
-                    elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users", null) }, Ticks.hubSeeMoreUsers));
+                    elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users") }, Ticks.hubSeeMoreUsers));
                 elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
                 elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
             } else if (s == "channels") {
@@ -2357,14 +2357,14 @@ module TDev.Browser {
                 }
 
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreLists,
-                    () => { this.hide(); this.browser().showList("channels", null) });
+                    () => { this.hide(); this.browser().showList("channels") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create channel"), Ticks.hubCreateList,
                     () => { this.browser().createChannel(); });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:list,white")));
             } else if (s == "showcase") {
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreShowcase,
-                () => { this.hide(); this.browser().loadDetails(this.browser().getChannelInfoById(Cloud.config.showcaseid)) });
+                () => { this.hide(); this.browser().showList(Cloud.config.showcaseid + "/scripts", { header : lf("showcase")}) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));                
             } else {
                 //if (items.length > 5)
@@ -2372,12 +2372,12 @@ module TDev.Browser {
                 addFnBtn(lf("See More"), s == "new" ? Ticks.hubSeeMoreNewScripts :
                                      s == "top" ? Ticks.hubSeeMoreTopScripts :
                                      Ticks.hubSeeMoreCloudOther,
-                () => { this.hide(); this.browser().showList(s + "-scripts", null) });
+                () => { this.hide(); this.browser().showList(s + "-scripts") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
                 if (s == "top") {
                     addFnBtn(lf("New Scripts"), Ticks.hubSeeMoreNewScripts,
-                        () => { this.hide(); this.browser().showList("new-scripts", null) });
+                        () => { this.hide(); this.browser().showList("new-scripts") });
                     elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:star,white")));
                 }
             }
@@ -2931,7 +2931,7 @@ module TDev.Browser {
             });
 
             buttons.push(this.createSkillButton());
-            buttons.push(this.mkFnBtn(lf("All tutorials"), () => this.browser().showList(Cloud.config.tutorialsid + "/scripts"), Ticks.noEvent, false, 1));
+            buttons.push(this.mkFnBtn(lf("All tutorials"), () => this.browser().showList(Cloud.config.tutorialsid + "/scripts", { header: lf("tutorials") }), Ticks.noEvent, false, 1));
             this.layoutTiles(container, buttons);
 
         }
@@ -2974,7 +2974,7 @@ module TDev.Browser {
                     Util.navigateNewWindow("/ccga");
                 }, Ticks.hubCCGA, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
-                searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search", null); }, Ticks.hubChatSearch, false),
+                searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search"); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
                 settings = this.smallBtn(lf("Settings"), () => {
                     TheEditor.popupMenu()

@@ -258,7 +258,7 @@ module TDev.Cloud {
         doNothingText: "do nothing",
         hintLevel: "full",
         userVoice: "touchdevelop",
-        tutorialsid: "vrpyfsou",
+        tutorialsid: "vjsseqks",
         showcaseid: "njigpnyj"
     }
 
