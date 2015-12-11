@@ -123,49 +123,49 @@
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="trayIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAABMLAAATCwAAAAAAAAAA
-        AAD/////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////9/83f+L9YP/afJg/2XyXP9m8l3/ZvJd/2byXf9m8l3/ZfJc/2jy
-        X/+J9YL/2/zZ/////////////////6D3mv8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbr
-        B/8W6wf/FusH/xbrB/+a9pP//////837yv8W6wf/FusH/4/1h//M+8n/zfvK/8r6x//K+sf/yvrH/8r6
-        x//N+8r/zPvJ/5L2i/8W6wf/FusH/8X6wv9J7z3/FusH/7b5sf//////////////////////////////
-        ////////////////////////v/q7/xbrB/9B7zX/FusH/yPsFf//////1fvS/ybsGf+e95j/////////
-        /////////////5P2jP8n7Bn/3Pza//////8o7Rr/FusH/xbrB/8j7BX//////9P70P8b6wz/mvaT////
-        //////////////////+O9Yb/G+sM/9r82P//////Ke0b/xbrB/9H7zz/FusH/7r5tv//////////////
-        ////////////////////////////////////////wvq+/xbrB/8/7zP/yfrG/xbrB/8W6wf/lPaN/9n8
-        1v/Y/NX/1fvS/9X70v/V+9L/1fvS/9j81f/Z/Nb/mfaS/xbrB/8W6wf/w/q///////+c95b/FusH/xbr
-        B/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/lvaP/////////////////9v8
-        2f+E9Hz/XPFS/1rxT/9a8U//WvFP/1rxT/9a8U//WvFP/1vxUf+C9Hr/2PzV////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAACMuAAAjLgAAAAAAAAAA
+        AAD/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+V
+        AOL/lQDH/5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQD//5UA4f+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQD//5UA//+VAOH/lQD//5UA//+VAP//lQD//5UA//+VAP//lAD//5cG//+cEf//mgv//5QB//+V
+        AP//lQD//5UA//+VAP//lQDh/5UA//+VAP//lQD//5cF//+YCP//lwX//7BB///Dbv//wm3//8Nv//+6
+        Wv//nBP//5QA//+VAP//lQD//5UA4f+VAP//lQD//5UA//+9YP//y4P//7VN//+8X///nhX//5YC//+Z
+        C///sEH//8Rx//+bEP//lQD//5UA//+VAOH/lQD//5UA//+XBv//y4L//9ii//+mKf//lQP//5wT//+o
+        L///lAH//5MA//+yR///t1L//5QA//+VAP//lQDh/5UA//+VAP//qjP//82G///SlP//tUz//5YD//+n
+        K///68///8Fp//+XBf//nRT//8Nu//+XBf//lQD//5UA4f+VAP//mg3//7ZO//+0Sv//ulr//7NH//+k
+        JP//pin///Xn///Wnv//mg3//5oN///Db///mAj//5UA//+VAOH/lQD//5oM//+2UP//mQr//5YC//+v
+        P///oyP//6Ed//+/ZP//mg7//5MA//+mKv//v2T//5UA//+VAP//lQDh/5UA//+VAP//qTH//7VO//+y
+        Rf//u1z//6Yp//+UAf//kwH//5MA//+cEv//w2///6Yq//+UAP//lQD//5UA4f+VAP//lQD//5UB//+d
+        Ev//nxf//6Ab///Cbf//vWD//7FE//+2UP//xXP//607//+VAP//lQD//5UA//+VAOH/lQD//5UA//+V
+        AP//lQD//5QA//+UAP//mAn//6kw//+yRv//rjz//50V//+UAP//lQD//5UA//+VAP//lQDh/5UA//+V
+        AP//lQD//5UA//+VAP//lQD//5UA//+UAP//kwD//5QA//+VAP//lQD//5UA//+VAP//lQD//5UA4f+V
+        AP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AOH/lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         AAAAAAAAAAAAAA==
 </value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAABMLAAATCwAAAAAAAAAA
-        AAD/////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////9/83f+L9YP/afJg/2XyXP9m8l3/ZvJd/2byXf9m8l3/ZfJc/2jy
-        X/+J9YL/2/zZ/////////////////6D3mv8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbr
-        B/8W6wf/FusH/xbrB/+a9pP//////837yv8W6wf/FusH/4/1h//M+8n/zfvK/8r6x//K+sf/yvrH/8r6
-        x//N+8r/zPvJ/5L2i/8W6wf/FusH/8X6wv9J7z3/FusH/7b5sf//////////////////////////////
-        ////////////////////////v/q7/xbrB/9B7zX/FusH/yPsFf//////1fvS/ybsGf+e95j/////////
-        /////////////5P2jP8n7Bn/3Pza//////8o7Rr/FusH/xbrB/8j7BX//////9P70P8b6wz/mvaT////
-        //////////////////+O9Yb/G+sM/9r82P//////Ke0b/xbrB/9H7zz/FusH/7r5tv//////////////
-        ////////////////////////////////////////wvq+/xbrB/8/7zP/yfrG/xbrB/8W6wf/lPaN/9n8
-        1v/Y/NX/1fvS/9X70v/V+9L/1fvS/9j81f/Z/Nb/mfaS/xbrB/8W6wf/w/q///////+c95b/FusH/xbr
-        B/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/FusH/xbrB/8W6wf/lvaP/////////////////9v8
-        2f+E9Hz/XPFS/1rxT/9a8U//WvFP/1rxT/9a8U//WvFP/1vxUf+C9Hr/2PzV////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////////////
-        ////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAACMuAAAjLgAAAAAAAAAA
+        AAD/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+VAOH/lQDh/5UA4f+V
+        AOL/lQDH/5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQD//5UA4f+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQD//5UA//+VAOH/lQD//5UA//+VAP//lQD//5UA//+VAP//lAD//5cG//+cEf//mgv//5QB//+V
+        AP//lQD//5UA//+VAP//lQDh/5UA//+VAP//lQD//5cF//+YCP//lwX//7BB///Dbv//wm3//8Nv//+6
+        Wv//nBP//5QA//+VAP//lQD//5UA4f+VAP//lQD//5UA//+9YP//y4P//7VN//+8X///nhX//5YC//+Z
+        C///sEH//8Rx//+bEP//lQD//5UA//+VAOH/lQD//5UA//+XBv//y4L//9ii//+mKf//lQP//5wT//+o
+        L///lAH//5MA//+yR///t1L//5QA//+VAP//lQDh/5UA//+VAP//qjP//82G///SlP//tUz//5YD//+n
+        K///68///8Fp//+XBf//nRT//8Nu//+XBf//lQD//5UA4f+VAP//mg3//7ZO//+0Sv//ulr//7NH//+k
+        JP//pin///Xn///Wnv//mg3//5oN///Db///mAj//5UA//+VAOH/lQD//5oM//+2UP//mQr//5YC//+v
+        P///oyP//6Ed//+/ZP//mg7//5MA//+mKv//v2T//5UA//+VAP//lQDh/5UA//+VAP//qTH//7VO//+y
+        Rf//u1z//6Yp//+UAf//kwH//5MA//+cEv//w2///6Yq//+UAP//lQD//5UA4f+VAP//lQD//5UB//+d
+        Ev//nxf//6Ab///Cbf//vWD//7FE//+2UP//xXP//607//+VAP//lQD//5UA//+VAOH/lQD//5UA//+V
+        AP//lQD//5QA//+UAP//mAn//6kw//+yRv//rjz//50V//+UAP//lQD//5UA//+VAP//lQDh/5UA//+V
+        AP//lQD//5UA//+VAP//lQD//5UA//+UAP//kwD//5QA//+VAP//lQD//5UA//+VAP//lQD//5UA4f+V
+        AP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AOH/lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+VAP//lQD//5UA//+V
+        AP//lQDhAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         AAAAAAAAAAAAAA==
 </value>
   </data>

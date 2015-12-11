@@ -63,9 +63,9 @@ namespace Microsoft.MicroBit.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap logo480 {
+        internal static System.Drawing.Bitmap MSFT_logo_png {
             get {
-                object obj = ResourceManager.GetObject("logo480", resourceCulture);
+                object obj = ResourceManager.GetObject("MSFT_logo_png", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -123,7 +123,7 @@ namespace Microsoft.MicroBit
                 {
 
                     this.setBackgroundColor(Color.Yellow);
-                    var drives = getMicrobitDrive();
+                    var drives = getMicrobitDrives();
                     if (drives.Length == 0)
                     {
                         this.updateStatus("no board found");
@@ -170,12 +170,12 @@ namespace Microsoft.MicroBit
         static DriveInfo[] getMicrobitDrives()
         {
             var drives = System.IO.DriveInfo.GetDrives();
-            var r = new List<DriveInfo>();
+            var r = new System.Collections.Generic.List<DriveInfo>();
             foreach (var di in drives)
             {
                 var label = getVolumeLabel(di);
                 if (label.StartsWith("MICROBIT", StringComparison.Ordinal))
-                    r.add(di);
+                    r.Add(di);
             }
             return r.ToArray();
         }
