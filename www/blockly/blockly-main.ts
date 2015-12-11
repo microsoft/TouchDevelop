@@ -26,6 +26,21 @@ module TDev {
   var currentVersion: string;
   var inMerge: boolean = false;
 
+  function debounce(func : () => void, wait : number, immediate : boolean) : () => void {
+    var timeout : any;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
+  }
+
   window.addEventListener("message", (event) => {
     if (!isAllowedOrigin(event.origin)) {
       console.error("[inner message] not from the right origin!", event.origin);
@@ -300,10 +315,13 @@ module TDev {
     popup.css("top", Math.round(y + h + 10 + 5)+"px");
   }
 
+  var debouncedSave = debounce(doSave, 5000, false);
+ 
   function markLocalChanges() {
     statusMsg("✎ local changes", External.Status.Ok);
     statusIcon("pencil");
     dirty = true;
+    debouncedSave();
   }
 
   // Called once at startup
@@ -396,10 +414,6 @@ module TDev {
       }
     });
 
-    window.setInterval(() => {
-      doSave();
-    }, 5000);
-
     setupPopup($("#link-log"), $("#popup-log"));
     setupPopups();
 
@@ -423,8 +437,10 @@ module TDev {
   }
 
   function doSave(force = false) {
-    if (!dirty && !force)
+    if (!dirty && !force) {
+      console.log('nothing to save...')
       return;
+    }
 
     var text = saveBlockly();
     console.log("[saving] on top of: ", currentVersion);
@@ -548,7 +564,7 @@ module TDev {
       onlyIfSplit: auto
     });
   }
-
+  
   function setupButtons() {
     $("#command-quit").click(() => {
       doSave();
