@@ -52,7 +52,7 @@ var blockColors = {
     pins: 351,
     music: 52,
     game: 176,
-    comments: 156,
+    //comments: 156,
     images:45,
 }
 
