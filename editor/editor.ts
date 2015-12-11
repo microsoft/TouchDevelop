@@ -1979,18 +1979,9 @@ module TDev
 
         private currentCompilationModalDialog: ModalDialog;
 
-        private showCompilationDialog(inBrowser: boolean) {
+        private showCompilationDialog(inBrowser: boolean, uploader:boolean) {
             
             this.currentCompilationModalDialog = new ModalDialog();
-            /*
-            var hideKey = "compileDialogHide";
-            if (inBrowser && !!window.localStorage.getItem(hideKey)) {
-                if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
-                    this.currentCompilationModalDialog.dismiss();
-                this.currentCompilationModalDialog = undefined;
-                return undefined;
-            }
-            */
             if (!inBrowser) {
                 var progress = HTML.mkProgressBar(); progress.start();
                 this.currentCompilationModalDialog.add(progress);
@@ -2010,10 +2001,10 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
             
-            if (TDev.dbg && Browser.isDesktop && Browser.isWindows) {
+            if (uploader, Browser.isDesktop && Browser.isWindows) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
                     lf("Tired of copying the .hex file? "),
-                    HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader app!")))
+                    HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader!")))
                 );
             }
             
@@ -2035,11 +2026,11 @@ module TDev
             this.currentCompilationModalDialog.show();
         }
 
-        public bytecodeCompileWithUi(app: AST.App, showSource: boolean) {
+        public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean } = {}) {
             tick(Ticks.coreNativeCompile);
-            if (!showSource) this.showCompilationDialog(true);
-            Hex.compile(app, showSource);
-            if (!showSource)
+            if (!options.showSource) this.showCompilationDialog(true, !!options.uploader);
+            Hex.compile(app, !!options.showSource);
+            if (!options.showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
                             this.currentCompilationModalDialog.dismiss();
@@ -2051,7 +2042,7 @@ module TDev
         // information. Returns a promise with the JSON returned from the cloud
         // (structure unknown).
         public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
-            this.showCompilationDialog(false);
+            this.showCompilationDialog(false, false);
             if (btn) {
                 btn.setFlag("working", true);
                 btn.classList.add("disabledItem");
@@ -2136,7 +2127,7 @@ module TDev
             if (useNative)
                 this.compileWithUi(ScriptEditorWorldInfo.guid, Embedded.compile(AST.Json.dump(Script)), Script.getName(), debug, btn).done();
             else
-                this.bytecodeCompileWithUi(Script, debug);
+                this.bytecodeCompileWithUi(Script, { showSource: debug, uploader: true });
         }
 
         public setupPlayButton()
