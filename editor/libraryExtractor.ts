@@ -148,11 +148,11 @@ module TDev
 
             if (theRest.length > 0) {
                 m.add(
-                    div("wall-dialog-header", "moving",
+                    div("wall-dialog-header", lf("moving"),
                         DeclRender.mkBox(toMove.decl),
-                        "to library",
+                        lf("to library"),
                         DeclRender.mkBox(this.split.getLib()),
-                        "requires moving",
+                        lf("requires moving"),
                         theRest.map(dd => DeclRender.mkBox(dd.decl))
                         )
                     );
@@ -241,7 +241,7 @@ module TDev
                 if (tc.length > 10) {
                     var more = tc.length - 10;
                     // TODO: make a button to expose the rest of the list
-                    rest.push(div("smallDecl", "load (" + more.toString() + " more)"));
+                    rest.push(div("smallDecl", lf("load ({0} more)", more.toString())));
                 }
                 rest.push(div("smallDecl", " "));
             }

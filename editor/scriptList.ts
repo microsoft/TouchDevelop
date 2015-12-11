@@ -4903,7 +4903,7 @@
             if (!this.script()) return r;
             var j = this.script().jsonScript
             if (j && j.positivereviews != getScriptHeartCount(j))
-                r.push(div("sdTabTileSubtitle", j.positivereviews + " for this version"))
+                r.push(div("sdTabTileSubtitle", lf("{0} for this version", j.positivereviews)))
             return r
         }
 
@@ -10266,7 +10266,7 @@
                             HTML.showWarningNotification("missing {template:empty} in the tutorial")
                         text.done((t) => {
                             if (!t) {
-                                ModalDialog.info("template missing", "the script template /" + m[1] + " couldn't be retrieved");
+                                ModalDialog.info("template missing", lf("the script template /{0} couldn't be retrieved",m[1]));
                                 return;
                             }
 

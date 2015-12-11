@@ -191,7 +191,7 @@ module TDev.RT.Wab {
 
         export function mkAudioInput(allowEmpty: boolean, maxMb: number): HTML.IInputElement {
             var dataUri: string = null;
-            var statusDiv = div('', div('validation-error', 'no sound selected'));
+            var statusDiv = div('', div('validation-error', lf("no sound selected")));
             return <HTML.IInputElement>{
                 element: div("",
                     HTML.mkButton(lf("record sound"), () => {

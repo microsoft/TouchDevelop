@@ -57,7 +57,7 @@ module TDev
             if (!upd && window.localStorage["appUpdated"]) {
                 window.localStorage.removeItem("appUpdated");
                 if (dbg)
-                    upd = div("app-updated", lf("The TouchDevelop app has been updated."));
+                    upd = div("app-updated", lf("The Touch Develop app has been updated."));
             }
 
             if (upd) {
@@ -427,8 +427,7 @@ module TDev
             if (updateCnt >= 30) {
                 ProgressOverlay.hide()
                 window.localStorage["lastForcedUpdate"] = Date.now()
-                ModalDialog.info("couldn't connect to cloud services",
-                                 msg + " failed; we are now using offline mode; make sure your internet connection working")
+                ModalDialog.info("couldn't connect to cloud services",lf("{0} failed; we are now using offline mode;\n make sure your internet connection is working",msg))
             } else {
                 Util.setTimeout(1000, checkUpdate)
             }

@@ -632,8 +632,8 @@ module TDev
                     TheEditor.goToLocation(loc)
                 } else {
                     var m = ModalDialog.info("error in library",
-                      "it appears that the error is in fact in a library. " +
-                      "you need to locate the relevant library reference and tap on [edit library].")
+                      lf("it appears that the error is in fact in a library. ") +
+                      lf("you need to locate the relevant library reference and tap on [edit library]."))
                     m.addHTML("<b>message:</b> " + Util.formatText(error))
                     loc = new CodeLocation(<AST.Decl>Script.libraries()[0]||Script)
                     TheEditor.goToLocation(loc)
@@ -1703,7 +1703,7 @@ module TDev
             var missing = this.currentRt.compiled.missingApis;
             if (!this.complainedAboutMissingAPIs && missing.length > 0) {
                 ProgressOverlay.hide();
-                ModalDialog.ask("the following APIs are not implemented on the current device: " +
+                ModalDialog.ask(lf("the following APIs are not implemented on the current device: ") +
                                 missing.join(", "),
                                 lf("run anyway"),
                                 () => {
@@ -4231,8 +4231,8 @@ module TDev
             var progressBar = HTML.mkProgressBar();
             progressDialog.add(progressBar);
             progressDialog.add(div("wall-dialog-header", div("", lf("signing out"))));
-            progressDialog.add(div("wall-dialog-body", div('', "cleaning up browser data...")));
-            progressDialog.add(div("wall-dialog-body", div('', "(please wait, it can take up to a minute)")));
+            progressDialog.add(div("wall-dialog-body", div('', lf("cleaning up browser data..."))));
+            progressDialog.add(div("wall-dialog-body", div('', lf("(please wait, it can take up to a minute)"))));
             progressDialog.show();
             progressBar.start();
 
@@ -4287,7 +4287,7 @@ module TDev
             var progressBar = HTML.mkProgressBar();
             progressDialog.add(progressBar);
             progressDialog.add(div("wall-dialog-header", div("", lf("sign out"))));
-            progressDialog.add(div("wall-dialog-body", div('', "checking status...")));
+            progressDialog.add(div("wall-dialog-body", div('', lf("checking status..."))));
             progressDialog.show();
             progressBar.start();
 
@@ -4346,7 +4346,7 @@ module TDev
                 Editor.mkHelpLink("beta"),
                 Browser.isWP8app ? div(null, lf("Using cloud services ") + relId)
                 : HTML.mkCheckBox(
-                    lf("always use beta version of TouchDevelop"),
+                    lf("always use beta version of Touch Develop"),
                     Editor.setAlwaysBeta, Editor.isAlwaysBeta()),
                 div("clear"));
             if (World.switchToChannel) {
@@ -4387,7 +4387,7 @@ module TDev
 
 
             m.add([
-                div("wall-dialog-header", lf("TouchDevelop settings")),
+                div("wall-dialog-header", lf("Touch Develop settings")),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("access and use your location"),
                     (v) => RuntimeSettings.setLocation(v), RuntimeSettings.location())),
                 div("wall-dialog-body", HTML.mkCheckBox(lf("play sounds and music"),
@@ -4404,7 +4404,7 @@ module TDev
             if (TDev.dbg) {
                 var chaosOfflineEdit = HTML.mkCheckBox(lf("chaos offline mode"), (v) => Cloud.setChaosOffline(v), Cloud.isChaosOffline());
                 m.add([
-                    div("wall-dialog-body", "under the hood (dbg): ",
+                    div("wall-dialog-body", lf("under the hood (dbg): "),
                         HTML.mkButton(lf("throw"), () => {
                             throw new Error("fake error, " + Util.guidGen())
                         })),
@@ -4427,7 +4427,7 @@ module TDev
                                 HTML.mkButton(lf("save offline caches"), () =>
                                     LocalProxy.saveCachesAsync().done())
                             ),
-                        div("wall-dialog-body", HTML.mkCheckBox("enable new intelli prediction",
+                        div("wall-dialog-body", HTML.mkCheckBox(lf("enable new intelli prediction"),
                             (v) => { TheEditor.calculator.enableNewPredictor = v; }, TheEditor.calculator.enableNewPredictor)),
                         (Util.localTranslationTracking ? HTML.mkButtonTick(lf("translations"), Ticks.hubShowcaseMgmt, () => { ModalDialog.showText(Util.dumpTranslationFreqs()) }) : null),
                         (dbg ? HTML.mkButton(lf("show internal icons"), () => { ScriptProperties.showIcons(); }) : null),

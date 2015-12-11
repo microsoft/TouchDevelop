@@ -2685,7 +2685,7 @@ function main()
         console.error("  --port NUMBER     -- port to listen to (-p)")
         console.error("  --scriptid ID     -- fetch newest version of /ID and run it (-s)")
         console.error("  --cli             -- don't start the browser")
-        console.error("  --latest          -- use latest (potentially unstable) TouchDevelop version")
+        console.error("  --latest          -- use latest (potentially unstable) Touch Develop version")
         console.error("  --internet        -- allow connections from outside localhost")
         console.error("  --usehome         -- write all cached files to the user home folder")
         console.error("  --workers NUMBER  -- number of worker servers to start (-w); negative to multiply by number of cores")
@@ -2914,7 +2914,7 @@ function main()
         }
 
         if (shouldStart) openUrl(startUrl)
-        info.log('touchdevelop local started...')
+        info.log('touch develop local started...')
     }
 
     var reload = () => {

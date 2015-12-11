@@ -1409,7 +1409,7 @@ module TDev.AST.Diff {
         var allowedStrings:any = {};
 
         ([
-        "TouchDevelop is cool!", "tap to create bubbles", "hello", "hello world", "hello world!"
+        "Touch Develop is cool!", "tap to create bubbles", "hello", "hello world", "hello world!"
         ]).forEach(s => {
             allowedStrings[quote(s)] = 1
         })
