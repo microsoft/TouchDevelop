@@ -1826,35 +1826,6 @@ module TDev.Browser {
                         if (auth) this.createGroup();
                     });
                     break;
-                case "androidgcm":
-                    var regid = h[2];
-                    var versionMinor = parseInt(h[3]);
-                    var versionMajor = parseInt(h[4]);
-                    Util.log('androidgcm: registering ' + regid + ':' + versionMinor + ':' + versionMajor);
-                    HistoryMgr.instance.setHash(this.screenId() + ":androidgcm:" + regid + ':' + versionMinor + ':' + versionMajor, null)
-                    localStorage["gcm"] = 1;
-                    if (Cloud.isOffline()) {
-                        Util.log('androidgcm: cancelled, offline');
-                    } else {
-                        Cloud.authenticateAsync(lf("receive Android notifications"), false, true)
-                            .done((auth) => {
-                            if (auth) {
-                                Cloud.postNotificationChannelAsync({
-                                    subscriptionuri: 'androidgcm:' + regid,
-                                    versionminor: versionMinor,
-                                    versionmajor: versionMajor
-                                }).done(() => {
-                                    Util.log('androidgcm: registered');
-                                    Browser.Hub.askToEnableNotifications();
-                                }, e => {
-                                        Cloud.handlePostingError(e, "android notifications");
-                                    });
-                            } else {
-                                Util.log('androidgcm: cancelled, offline or not authenticated');
-                            }
-                        });
-                    }
-                    break;
                 case "pub": // redirect to list
                     Util.setHash("#list:installed-scripts:pub:" + h[2], true);    
                     return;
@@ -2049,7 +2020,7 @@ module TDev.Browser {
                 fetchId(templateId);
             }
         }
-
+        
         // Start a tutorial, with an (optional) header that represents progress,
         // along with an optional function.
         private startTutorial(top: HelpTopic, header: Cloud.Header = null) {
@@ -2165,7 +2136,7 @@ module TDev.Browser {
             return tileOuter
         }
 
-        private startTutorialButton(t:Ticks)
+        private startTutorialButton(t: Ticks)
         {
             var elt = this.mkFnBtn(lf("Tutorials"),() => {
                 var topic = "tutorials";
@@ -2234,13 +2205,13 @@ module TDev.Browser {
                 this.tileClick(t, () => {
                     this.hide();
                     if (s == "recent") this.browser().showList("installed-scripts", { item: item });
-                    else if (s == "myart") {
-                        if (Cloud.getUserId()) this.browser().showList("myart", { item: item });
-                    } else if (s == "art") this.browser().showList("art", { item: item });
+                    else if (s == "myart") this.browser().showList(Cloud.getUserId() ? "myart" : "art", { item: item });
+                    else if (s == "art") this.browser().showList("art", { item: item });
                     else if (s == "social") this.browser().showList("groups", { item: item } );
                     else if (s == "users") this.browser().showList("users", { item: item });
                     else if (s == "channels") this.browser().showList("channels", { item: item });
                     else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid + "/scripts", { item: item, header: lf("showcase") });    
+                    else if (s == "tutorials") this.browser().showList(Cloud.config.tutorialsid + "/scripts", { item: item, header: lf("tutorials") });    
                     else this.browser().showList(s + "-scripts", { item: item });
                 });
                 elements.push(t);
@@ -2365,6 +2336,10 @@ module TDev.Browser {
             } else if (s == "showcase") {
                 addFnBtn(lf("See More"), Ticks.hubSeeMoreShowcase,
                 () => { this.hide(); this.browser().showList(Cloud.config.showcaseid + "/scripts", { header : lf("showcase")}) });
+                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));                
+            } else if (s == "tutorials") {
+                addFnBtn(lf("See More"), Ticks.hubSeeMoreTutorials,
+                () => { this.hide(); this.browser().showList(Cloud.config.tutorialsid + "/scripts", { header : lf("tutorials")}) });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));                
             } else {
                 //if (items.length > 5)
@@ -2859,81 +2834,7 @@ module TDev.Browser {
         }
 
         static showAbout() {
-            if (Browser.isWP8app)
-                EditorSettings.showFeedbackBox();
-            else
-                Util.navigateInWindow(Cloud.config.rootUrl);
-        }
-
-        // Takes care of the painful, non-trivial task of fetching all the
-        // tutorials. For each tutorial found, we call [k] with it.
-        private fetchAllTutorials(helpTopic: HelpTopic, k: (t: ITutorial) => void) {
-            helpTopic.initAsync().then(() => {
-                // The list of tutorials is represented as an app, with a single
-                // action, whose body is a list of comments...
-                var comments = <AST.Comment[]> helpTopic.app.actions()[0].body.stmts;
-                // Each comment has a special Markdown structure that can be
-                // inspected using regular expressions. Essentially, we match the
-                // syntax {macro:argument} where macro is the string "follow" and
-                // argument is the title of the corresponding tutorial.
-                comments.forEach((c: AST.Comment) => {
-                    // Copied from [help.ts]
-                    var m = c.text.match(/\{(\w+)(:([^{}]*))?\}/);
-                    if (m && m[1] == "follow") {
-                        var id = MdComments.shrink(m[3]);
-                        // Copied from [tutorialTitle], and (hopefully) simplified.
-                        this.findTutorial(id, (res, topic: HelpTopic) => {
-                            var key = topic.updateKey();
-                            var header = res.headers[key]; // may be null or undefined
-                            k({
-                                title: topic.json.name.replace(/ (tutorial|walkthrough)$/i, ""),
-                                header: header,
-                                topic: topic,
-                                app: res.app,
-                            });
-                        });
-                    }
-                });
-            })
-        }
-
-        private showSimplifiedLearn(container: HTMLElement) {
-            var buttons = [];
-            var tutorials: ITutorial[] = []; // TODO
-            
-            tutorials.slice(0, 6).forEach((tutorial: ITutorial) => {
-                // We just listen for the first eight tutorials.
-                if (buttons.length > 6)
-                    return;
-
-                var btn = this.mkFnBtn("", () => {
-                    this.startTutorial(tutorial.topic, tutorial.header);
-                }, Ticks.noEvent, false, Math.max(3 - buttons.length, 1));
-                btn.appendChild(div("hubTileTitleBar", div("hubTileTitle", tutorial.title)));
-                if (!Browser.lowMemory)
-                    if (tutorial.topic.json.screenshot) {
-                        btn.style.backgroundImage = HTML.cssImage(HTML.proxyResource(tutorial.topic.json.screenshot));
-                        btn.style.backgroundSize = "cover";
-                        btn.style.backgroundPosition = 'center';
-                    } else {
-                        TheApiCacheMgr.getAnd(tutorial.topic.json.id + "/screenshots?count=1", (res: JsonList) => {
-                            var sc = res.items[0];
-                            if (sc) {
-                                btn.style.backgroundImage = Cloud.artCssImg(sc.id, true);
-                                btn.style.backgroundSize = "cover";
-                                btn.style.backgroundPosition = 'center';
-                            }
-                        });
-                    }
-
-                ScriptInfo.addTutorialProgress(btn, tutorial.header);
-                buttons.push(btn);
-            });
-
-            buttons.push(this.createSkillButton());
-            buttons.push(this.mkFnBtn(lf("All tutorials"), () => this.browser().showList(Cloud.config.tutorialsid + "/scripts", { header: lf("tutorials") }), Ticks.noEvent, false, 1));
-            this.layoutTiles(container, buttons);
-
+            Util.navigateInWindow(Cloud.config.rootUrl);
         }
 
         private createSkillButton(): HTMLElement {
@@ -3121,7 +3022,7 @@ module TDev.Browser {
                     posLeft += sectWidth(s) + 4;
 
                 if (s == "tutorials")
-                    this.showSimplifiedLearn(c);
+                    this.browser().getLocationList(Cloud.config.tutorialsid + "/scripts/?count=6",(items, cont) => this.addPageTiles(s, c, items));
                 else if (s == "learn")
                     this.showLearn(c);
                 else if (s == "myart") {

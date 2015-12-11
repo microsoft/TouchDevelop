@@ -397,6 +397,7 @@ module TDev {
         hubSeeMoreUsers,
         hubSeeMoreCloudOther,
         hubSeeMoreShowcase,
+        hubSeeMoreTutorials,
         hubSeeMoreTopScripts,
         hubSeeMoreDocs,
         hubSeeMoreCloud,
