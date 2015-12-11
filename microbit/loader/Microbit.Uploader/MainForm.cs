@@ -124,7 +124,8 @@ namespace Microsoft.MicroBit
                         return;
                     }
 
-                    this.trayIcon.ShowBalloonTip(3000, "uploading...", "transferring .hex file", ToolTipIcon.None);
+                    this.updateStatus("uploading .hex file");
+                    this.trayIcon.ShowBalloonTip(3000, "uploading...", "uploading .hex file", ToolTipIcon.None);
                     
                     // copy to all boards
                     foreach(var drive in drives) {                                                
