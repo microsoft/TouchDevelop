@@ -131,6 +131,55 @@
           </value>
         </block>
       </category>
+      <category name="Input" colour="300">
+        <block type="device_button_event"></block>
+        <block type="device_shake_event"></block>
+        <block type="device_pin_event"></block>
+        <block type="device_get_button2"></block>
+        <block type="device_heading"></block>
+        <block type="device_temperature"></block>
+        <block type="device_get_acceleration"></block>
+        <block type="device_get_running_time"></block>
+      </category>
+      <category name="Loops" colour="120">
+        <block type="controls_repeat_ext">
+          <value name="TIMES">
+            <shadow type="math_number">
+              <field name="NUM">4</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="device_while"></block>
+        <block type="controls_simple_for">
+          <value name="TO">
+            <shadow type="math_number">
+              <field name="NUM">4</field>
+            </shadow>
+          </value>
+        </block>
+      </category>      
+      <category name="Logic" colour="210">
+        <block type="controls_if"></block>
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="logic_negate"></block>
+        <block type="logic_boolean"></block>
+      </category>
+      <category name="Variables" colour="330">
+        <block type="variables_set"></block>
+        <block type="variables_get"></block>
+      </category>      
+      <category name="Math" colour="230">
+        <block type="math_arithmetic"></block>
+        <block type="math_op2"></block>
+        <block type="math_op3"></block>
+        <block type="math_number">
+          <field name="NUM">0</field>
+        </block>
+        <block type="device_random">
+          <field name="limit">4</field>
+        </block>
+      </category>      
       <category name="LED" colour="3">
         <block type="device_plot">
           <value name="x">
@@ -179,6 +228,45 @@
         </block>
 
       </category>
+      <category name="Music" colour="52">
+        <block type="device_play_note">
+          <value name="note">
+            <shadow type="device_note"></shadow>
+          </value>
+          <value name="duration">
+            <shadow type="device_duration_1/4">
+            </shadow>
+          </value>
+        </block>
+        <block type="device_ring">
+          <value name="note">
+            <shadow type="device_note"></shadow>
+          </value>
+        </block>
+        <block type="device_duration_1"></block>
+        <block type="device_duration_1/2"></block>
+        <block type="device_duration_1/4"></block>
+        <block type="device_duration_1/8"></block>
+        <block type="device_duration_1/16"></block>
+      </category>      
+      <category name="Game" colour="176">
+        <block type="game_add_score">
+          <value name="points">
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_score"></block>
+        <block type="game_start_countdown">
+          <value name="duration">
+            <shadow type="math_number">
+              <field name="NUM">10000</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_game_over"></block>
+      </category>
       <category name="Images" colour="45">
         <block type="device_show_image_offset">
           <value name="offset">
@@ -202,90 +290,6 @@
         <block type="device_build_image"></block>
         <block type="device_build_big_image"></block>
       </category>
-      <category name="Input" colour="300">
-        <block type="device_button_event"></block>
-        <block type="device_shake_event"></block>
-        <block type="device_pin_event"></block>
-        <block type="device_get_button2"></block>
-        <block type="device_heading"></block>
-        <block type="device_temperature"></block>
-        <block type="device_get_acceleration"></block>
-        <block type="device_get_running_time"></block>
-      </category>
-      <category name="Logic" colour="210">
-        <block type="controls_if"></block>
-        <block type="logic_compare"></block>
-        <block type="logic_operation"></block>
-        <block type="logic_negate"></block>
-        <block type="logic_boolean"></block>
-      </category>
-      <category name="Loops" colour="120">
-        <block type="controls_repeat_ext">
-          <value name="TIMES">
-            <shadow type="math_number">
-              <field name="NUM">4</field>
-            </shadow>
-          </value>
-        </block>
-        <block type="device_while"></block>
-        <block type="controls_simple_for">
-          <value name="TO">
-            <shadow type="math_number">
-              <field name="NUM">4</field>
-            </shadow>
-          </value>
-        </block>
-      </category>
-      <category name="Math" colour="230">
-        <block type="math_arithmetic"></block>
-        <block type="math_op2"></block>
-        <block type="math_op3"></block>
-        <block type="math_number">
-          <field name="NUM">0</field>
-        </block>
-        <block type="device_random">
-          <field name="limit">4</field>
-        </block>
-      </category>
-      <category name="Game" colour="176">
-        <block type="game_add_score">
-          <value name="points">
-            <shadow type="math_number">
-              <field name="NUM">1</field>
-            </shadow>
-          </value>
-        </block>
-        <block type="game_score"></block>
-        <block type="game_start_countdown">
-          <value name="duration">
-            <shadow type="math_number">
-              <field name="NUM">10000</field>
-            </shadow>
-          </value>
-        </block>
-        <block type="game_game_over"></block>
-      </category>
-      <category name="Music" colour="52">
-        <block type="device_play_note">
-          <value name="note">
-            <shadow type="device_note"></shadow>
-          </value>
-          <value name="duration">
-            <shadow type="device_duration_1/4">
-            </shadow>
-          </value>
-        </block>
-        <block type="device_ring">
-          <value name="note">
-            <shadow type="device_note"></shadow>
-          </value>
-        </block>
-        <block type="device_duration_1"></block>
-        <block type="device_duration_1/2"></block>
-        <block type="device_duration_1/4"></block>
-        <block type="device_duration_1/8"></block>
-        <block type="device_duration_1/16"></block>
-      </category>      
       <category name="Pins" colour="351">
           <block type="device_get_digital_pin"></block>
           <block type="device_set_digital_pin">
@@ -310,10 +314,6 @@
               </shadow>
             </value>
           </block>
-      </category>
-      <category name="Variables" colour="330">
-        <block type="variables_set"></block>
-        <block type="variables_get"></block>
       </category>
       <category name="Comments" colour="156">
         <block type="device_comment2"></block>
