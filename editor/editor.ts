@@ -4344,27 +4344,21 @@ module TDev
 
             betaDiv = div("wall-dialog-body",
                 Editor.mkHelpLink("beta"),
-                Browser.isWP8app ? div(null, lf("Using cloud services ") + relId)
-                : HTML.mkCheckBox(
+                HTML.mkCheckBox(
                     lf("always use beta version of TouchDevelop"),
                     Editor.setAlwaysBeta, Editor.isAlwaysBeta()),
                 div("clear"));
             if (World.switchToChannel) {
                 if ((<any>window).betaFriendlyId) {
                     betaDiv.appendChild(HTML.mkButton(
-                        Browser.isWP8app ?
-                            lf("stop cloud services beta testing") :
-                            lf("stop beta testing"),
+                        lf("stop beta testing"),
                         () => {
                             Editor.setAlwaysBeta(false);
                             World.switchToChannel("current");
                             m.dismiss();
                         }))
                 } else {
-                    betaDiv.appendChild(HTML.mkButton(
-                        Browser.isWP8app ?
-                            lf("start cloud services beta testing") :
-                            lf("start beta testing"),
+                    betaDiv.appendChild(HTML.mkButton(lf("start beta testing"),
                     () => {
                         World.switchToChannel("beta");
                         m.dismiss();
@@ -4614,13 +4608,8 @@ module TDev
 
             this.setupTopButtons();
 
-            if (Browser.webAppBooster) {
-                api.core.currentPlatform = PlatformCapabilityManager.current(); // based on supported features
-                api.core.currentPlatformImpl = ImplementationStatus.Wab;
-            } else {
-                api.core.currentPlatform = PlatformCapabilityManager.current();
-                api.core.currentPlatformImpl = ImplementationStatus.Web;
-            }
+            api.core.currentPlatform = PlatformCapabilityManager.current();
+            api.core.currentPlatformImpl = ImplementationStatus.Web;
 
             if (Cloud.lite) {
                 var incoming = false;

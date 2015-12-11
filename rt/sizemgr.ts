@@ -189,8 +189,6 @@ module TDev {
             rootClass += " rootClass";
             if (Browser.brokenColumns)
                 rootClass += " brokenColumns";
-            if (Browser.isWP8app)
-                rootClass += " wp8app";
             elt("root").className = rootClass;
 
             var rootStyle = elt("root").style;

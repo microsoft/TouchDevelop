@@ -1125,8 +1125,6 @@ module TDev.HTML {
 
     export function fixWp8Links(...elts:HTMLElement[])
     {
-        // if (!Browser.isWP8app) return;
-
         elts.forEach((elt) => {
             var ch = elt.getElementsByTagName("A");
             for (var i = 0; i < ch.length; ++i) (() => {

@@ -1777,7 +1777,7 @@ module TDev
         static handleUserError(err: any) {
             var rt = Runtime.theRuntime
             if (rt && rt.state != RtState.Stopped && !rt.handlingException) {
-                if (err.isUserError || err.wabStatus) {
+                if (err.isUserError) {
                     rt.handleException(err, rt.current);
                     return true;
                 }

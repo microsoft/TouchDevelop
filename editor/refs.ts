@@ -3,7 +3,6 @@
 ///<reference path='../build/rt.d.ts'/>
 ///<reference path='../build/ast.d.ts'/>
 ///<reference path='../build/storage.d.ts'/>
-///<reference path='../build/libwab.d.ts'/>
 ///<reference path='../build/libcordova.d.ts'/>
 ///<reference path='../build/embedded.d.ts'/>
 ///<reference path='../typings/ace/ace.d.ts'/>

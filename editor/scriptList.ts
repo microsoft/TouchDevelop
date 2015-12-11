@@ -1065,12 +1065,9 @@
                             if (!Editor.isAlwaysBeta()) Editor.setAlwaysBeta(false);
                             m.add([
                                 div("wall-dialog-header", lf("Stay at the bleeding edge!")),
-                                div("wall-dialog-body",
-                                    Util.fmt("Run the beta version of Touch Develop {0}.",
-                                        Browser.isWP8app ? "cloud services" : "web app")),
+                                div("wall-dialog-body", lf("Run the beta version of Touch Develop.")),
                                 div("wall-dialog-body", lf("See upcoming features first, and help us debug.")),
                                 div("wall-dialog-body", lf("You can always go back to the regular version (from 'Settings' in the hub).")),
-                                Browser.isWP8app ? null :
                                 div("wall-dialog-body", HTML.mkCheckBox(lf("from now on always use beta"), Editor.setAlwaysBeta, Editor.isAlwaysBeta())),
                                 div("wall-dialog-buttons",
                                     HTML.mkButton(lf("try out beta"), () => {
@@ -6804,9 +6801,7 @@
             var pinB = null
             var updateB = null
             var editB = mkBtn(Ticks.browseEdit, "svg:edit,white", lf("edit"), null, () => { this.edit() });
-            if (TDev.RT.Wab && this.getGuid() && TDev.RT.Wab.isSupportedAction(TDev.RT.Wab.Action.UPDATE_TILE)) {
-                pinB = mkBtn(Ticks.browsePin, "svg:pushpin,white", lf("pin to start"), null, () => { this.pinAsync().done(); });
-            } else if (TDev.RT.App.env().has_host() && this.publicId) {
+            if (TDev.RT.App.env().has_host() && this.publicId) {
                 pinB = mkBtn(Ticks.browsePin, "svg:arrowdownl,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });               
             }
             if (World.updateFor(this.cloudHeader)) {

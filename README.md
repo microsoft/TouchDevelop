@@ -177,7 +177,6 @@ The `client.js` is built by default.
 * `lib`: the libraries exposed to Touch Develop scripts, written in TypeScript
 * `libcordova`: Apache Cordova specific implementations
 * `libnode`: Node.JS specific implementations
-* `libwab`: WebAppBooster implementations, used by the Windows Phone client
 * `libwinRT`: (deprecated) WinRT specific implementations
 * `mc`: Minecraft bindings
 * `noderunner`: runs in the cloud, and parses Touch Develop scripts / compiles

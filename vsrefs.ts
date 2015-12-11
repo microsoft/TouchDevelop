@@ -3,7 +3,6 @@
 ///<reference path='storage/refs.ts'/>
 ///<reference path='lib/refs.ts'/>
 ///<reference path='rt/refs.ts'/>
-///<reference path='libwab/refs.ts'/>
 ///<reference path='libcordova/refs.ts'/>
 ///<reference path='libnode/refs.ts'/>
 ///<reference path='runner/refs.ts'/>

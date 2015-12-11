@@ -839,11 +839,6 @@ module TDev {
                 if (/^bitvm/.test(ctx))
                     r.exceptionConstructor = "BITVM " + r.exceptionConstructor;
 
-                if (err.wabCrashInfo) {
-                    r.stackTrace = err.wabCrashInfo + "\nJavaScript:\n" + r.stackTrace;
-                    r.exceptionConstructor = "WAB " + r.exceptionConstructor;
-                }
-
                 if (r.exceptionMessage && /\[object /.test(r.exceptionMessage)) {
                     var msg = r.exceptionMessage;
                     var errorInfo = Util.getErrorInfo(err);

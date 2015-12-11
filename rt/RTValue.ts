@@ -244,8 +244,6 @@ module TDev.RT {
                 this.copySpecificImpls("Node")
             else if (Browser.inCordova)
                 this.copySpecificImpls("Cordova")
-            else if (Browser.webAppBooster)
-                this.copySpecificImpls("Wab")
         }
     }
 

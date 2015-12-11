@@ -172,12 +172,6 @@ mkSimpleTask('build/ast.js', [
     'build/rt.d.ts',
     'ast'
 ], "ast/refs.ts");
-mkSimpleTask('build/libwab.js', [
-    'build/rt.d.ts',
-    'rt/typings.d.ts',
-    'build/browser.d.ts',
-    'libwab'
-], "libwab/refs.ts");
 mkSimpleTask('build/libnode.js', [
     'build/rt.d.ts',
     'rt/typings.d.ts',
@@ -195,7 +189,6 @@ mkSimpleTask('build/editor.js', [
     'build/rt.d.ts',
     'build/ast.d.ts',
     'build/storage.d.ts',
-    'build/libwab.d.ts',
     'build/libcordova.d.ts',
     'build/embedded.d.ts',
     'intellitrain',
@@ -226,7 +219,6 @@ mkSimpleTask('build/runner.js', [
     'rt/typings.d.ts',
     'build/rt.d.ts',
     'build/storage.d.ts',
-    'build/libwab.d.ts',
     'build/libnode.d.ts',
     'build/libcordova.d.ts',
     'runner'
@@ -292,7 +284,6 @@ var concatMap = {
     "build/runtime.js": [
         "build/rt",
         "build/storage",
-        "build/libwab",
         "build/libnode",
         "build/libcordova",
         "build/runner",
@@ -303,7 +294,6 @@ var concatMap = {
         "build/api.js",
         "generated/langs.js",
         "build/storage",
-        "build/libwab",
         "build/libcordova",
         "build/pkgshell.js",
         "build/embedded",

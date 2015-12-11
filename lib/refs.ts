@@ -89,7 +89,6 @@
 ///<reference path='UserMediaManager.ts'/>
 ///<reference path='CanvasChart.ts'/>
 ///<reference path='ApiManager.ts'/>
-///<reference path='AdManager.ts'/>
 ///<reference path='Matrix.ts'/>
 ///<reference path='artCache.ts'/>
 ///<reference path='OAuthResponse.ts'/>

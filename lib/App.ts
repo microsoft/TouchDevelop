@@ -543,7 +543,7 @@ module TDev.RT {
         public operating_system() : string
         {
             if (Browser.isAndroid) return "android";
-            if (Browser.isWP8app || (Browser.isTrident && Browser.isCellphone)) return "wp";
+            if (Browser.isTrident && Browser.isCellphone) return "wp";
             if (Browser.isMobileSafari) return "ios";
             if (Browser.isMacOSX) return "osx";
 

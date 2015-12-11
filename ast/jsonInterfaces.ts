@@ -444,7 +444,6 @@ module TDev.AST.Json
         pausesInterpreter?: boolean;  // is this a potentially-async operation
         usesStackFrame?: boolean;     // is the implementation passed IStackFrame object
         missingWeb?: boolean;         // is the implementation missing from the general web version
-        missingWab?: boolean;         // .... from web version running with WebAppBooster
         capabilities?: string;     // comma-separated list of required platform capabilities (if any)
         result: JPropertyParameter;
         parameters: JPropertyParameter[];

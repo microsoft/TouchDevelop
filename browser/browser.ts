@@ -40,7 +40,6 @@ module TDev {
         export var isWindows8plus = false;
         export var isRaspberryPiDebian = false;
         export var isCompiledApp = false;
-        export var isWP8app = false;
         export var isHosted = false;
         export var browser = BrowserSoftware.unknown;
         export var browserVersion = 0;
@@ -60,7 +59,6 @@ module TDev {
         export var touchStart = false;
         export var webRunner = false;
         export var webAppImplicit = false;
-        export var webAppBooster = false;
         export var inCordova = false;
         export var inEditor = false;
         export var builtinTouchToPan = false;
@@ -248,12 +246,6 @@ module TDev {
                 browser = BrowserSoftware.nodeJS;
                 useConsoleLog = true;
             }
-            if (isTrident && !inCordova) {
-                if (/^x-wmapp/.test(document.URL)) {
-                    isWP8app = true;
-                    addCap("wp8app");
-                }
-            }
 
             if (inCordova)
                 addCap("cordova")
@@ -339,8 +331,7 @@ module TDev {
             }
 
             browserShortName = browserName(browser);
-            if (isWP8app) browserShortName += ".wp8app";
-            else if (isCellphone) browserShortName += ".phone";
+            if (isCellphone) browserShortName += ".phone";
             else if (isTablet) browserShortName += ".tablet";
             else browserShortName += ".desktop";
             if (inCordova) browserShortName += ".cordova";
@@ -358,7 +349,6 @@ module TDev {
             if (/Windows NT 5.1/.test(userAgent)) { addCap("win"); addCap("winXP"); }
             if (/Windows NT 6.0/.test(userAgent)) { addCap("win"); addCap("winVista"); }
             if (/Windows NT 6.1/.test(userAgent)) { addCap("win"); addCap("win7"); }
-            if (webAppBooster) { addCap("webAppBooster"); }
             if (isMobileSafari || (isMobile && (browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11))) { audioDataUrls = false; }
 
             if (mobileWebkit)
@@ -376,12 +366,6 @@ module TDev {
                         window.localStorage.removeItem("test");
                     }
                 } catch (e) { } // observed to fail in "Private Browsing" of (mobile) Safari
-
-            if (isWP8app) {
-                audioDataUrls = true; // through wab
-                screenshots = true; // through wab
-                audioWav = true;
-            }
 
             dragAndDrop = !isNodeJS && !Browser.isMobile && document && document.createElement && 'draggable' in document.createElement('span');
             // compiler policies from cloud performance benchmarks
@@ -518,7 +502,7 @@ module TDev {
 
             // note that on WP8, if Internet Explorer is configured to disallow "storing files", then IndexedDB is not available --- however, this does not actually matter for the Windows Phone app, as it uses its own database backend
             // in some configrations, we will use an in-memory database instead
-            if (!canWebSql && !canIndexedDB && !isWP8app && !canMemoryTable) {
+            if (!canWebSql && !canIndexedDB && !canMemoryTable) {
                 if (browser == BrowserSoftware.ie10 || browser == BrowserSoftware.ie11)
                     return genericMessage("<p>You are running Internet Explorer in the InPrivate mode. " + what + " does not support this mode, as " + what + " needs to maintain a database of installed scripts, but the InPrivate mode does not allow the use of databases.</p>",
                         "a regular Internet Explorer window");

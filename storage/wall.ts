@@ -32,7 +32,6 @@ module TDev {
         public wallVisible = false;
 
         public copyrightHeight = 26;
-        public showCopyright = !Browser.isWP8app;
         private keyState: any = null;
         public localProxyAsync : (path: string, data: any) => Promise = undefined;
 
@@ -43,7 +42,7 @@ module TDev {
 
         public fullWallHeight() {
             this.computeCopyrightHeight()
-            return SizeMgr.windowHeight - (this.showCopyright ? this.copyrightHeight : 0);
+            return SizeMgr.windowHeight - this.copyrightHeight;
         }
 
         private computeCopyrightHeight()
@@ -54,7 +53,7 @@ module TDev {
         public userWallHeight() {
             if (!this.currentRt.getCurrentPage().chromeVisible) return this.fullWallHeight();
             this.computeCopyrightHeight()
-            return SizeMgr.windowHeight - 4 * SizeMgr.topFontSize - (this.showCopyright ? this.copyrightHeight : 0);
+            return SizeMgr.windowHeight - 4 * SizeMgr.topFontSize - this.copyrightHeight;
         }
 
         public fullWallWidth() {
@@ -430,9 +429,9 @@ module TDev {
             var wall = elt("wallOverlay");
             this.titleContainer.setChildren([this.scriptTitleDiv, this.titleDiv, this.subtitleDiv]);
             this.topBtnRow = divId("wallBtns", "wallBtnRow",
-                    this.backBtnDiv, this.titleContainer, this.cloudContainer,
-                    this.additionalButtons()
-                    );
+                this.backBtnDiv, this.titleContainer, this.cloudContainer,
+                this.additionalButtons()
+            );
             this.fullScreenBtnRow = divId("wallFullScreenBtns", "", this.additionalFullScreenButtons());
             this.bottomBtnsDiv = divId("wallBottomBtns", "bottomButtons");
             var logoDiv: HTMLElement;
@@ -453,18 +452,12 @@ module TDev {
                 legalDiv,
                 logoDiv
             ]);
-            if (this.currentRt.compiled.showAd) {
-                wall.appendChildren([this.adContainer]);
-                TDev.RT.AdManager.initialize(this.adContainer);
-            }
-            if (this.showCopyright) {
-                this.computeCopyrightHeight()
-                this.wallContainer.style.bottom = this.copyrightHeight + "px";
-                var copyright = this.copyrightElement();
-                if (copyright) {
-                    // copyright.style.height = this.copyrightHeight + "px";
-                    wall.appendChild(copyright);
-                }
+            this.computeCopyrightHeight()
+            this.wallContainer.style.bottom = this.copyrightHeight + "px";
+            var copyright = this.copyrightElement();
+            if (copyright) {
+                // copyright.style.height = this.copyrightHeight + "px";
+                wall.appendChild(copyright);
             }
             this.applyWallStyle();
             wall.style.display = "block";

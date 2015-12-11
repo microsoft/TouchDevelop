@@ -333,7 +333,6 @@ module TDev.AST.Json
                     pausesInterpreter: optBool(p._implStatus & ImplementationStatus.Pauses),
                     usesStackFrame: optBool(p._implStatus & ImplementationStatus.UsesStackFrame),
                     missingWeb: optBool(!(p._implStatus & ImplementationStatus.Web)),
-                    missingWab: optBool(!(p._implStatus & ImplementationStatus.Wab)),
                     capabilities: App.capabilityString(p.getCapability()) || undefined,
 
                     result: doParam(p.getResult()),

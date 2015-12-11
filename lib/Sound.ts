@@ -102,18 +102,6 @@ module TDev.RT {
             return streamed();
         }
 
-        public toWabRequestAsync(): Promise {
-            return this.createUrlAsync()
-                .then(url => {
-                    return {
-                        uri : url,
-                        pan : this._pan,
-                        pitch : this._pitch,
-                        volume : this._volume
-                    };
-                });
-        }
-
         public initAsync() : Promise
         {
             if (this._buffer || this._audio) return Promise.as(this);
