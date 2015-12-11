@@ -3022,6 +3022,14 @@ module TDev{
         return <T>JSON.parse(JSON.stringify(obj))
     }
 
+    export function jsonCopyFrom(trg:{}, src:{})
+    {
+        var v = jsonClone(src)
+        Object.keys(src).forEach(k => {
+            trg[k] = v[k]
+        })
+    }
+
     export function clone<T>(obj:T):T
     {
         var r = new (<any>obj).constructor
