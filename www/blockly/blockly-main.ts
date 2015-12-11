@@ -185,21 +185,17 @@ module TDev {
     };
     var mineText = saveBlockly();
     var mineName = getName();
-    var mineDescription = getDescription();
     var mineButton = mkButton("🔍", "see mine", () => {
       loadBlockly(mineText);
       setName(mineName);
-      setDescription(mineDescription);
     });
     var theirsButton = mkButton("🔍", "see theirs", () => {
       loadBlockly(merge.theirs.scriptText);
       setName(merge.theirs.metadata.name);
-      setDescription(merge.theirs.metadata.comment);
     });
     var baseButton = mkButton("🔍", "see base", () => {
       loadBlockly(merge.base.scriptText);
       setName(merge.base.metadata.name);
-      setDescription(merge.base.metadata.comment);
     });
     var mergeButton = mkButton("👍", "finish merge", () => {
       inMerge = false;
@@ -259,16 +255,8 @@ module TDev {
     return text;
   }
 
-  function setDescription(x: string) {
-    $("#script-description").val(x);
-  }
-
   function setName(x: string) {
     $("#script-name").val(x);
-  }
-
-  function getDescription() {
-    return $("#script-description").val();
   }
 
   function getName() {
@@ -375,14 +363,9 @@ module TDev {
     $("#script-name").on("input keyup blur", () => {
       markLocalChanges();
     });
-    $("#script-description").on("input keyup blur", () => {
-      markLocalChanges();
-    });
 
     setName(message.script.metadata.name);
-    setDescription(message.script.metadata.comment);
     if (!message.script.baseSnapshot && !message.script.metadata.comment) {
-      setDescription("");
       markLocalChanges();
     }
 
@@ -458,7 +441,7 @@ module TDev {
         baseSnapshot: currentVersion,
         metadata: {
           name: getName(),
-          comment: getDescription()
+          comment: ''
         }
       },
     });
@@ -478,7 +461,7 @@ module TDev {
     try {
       ast = compile(Blockly.mainWorkspace, {
         name: getName() + (appendSuffix ? " (converted)" : ""),
-        description: getDescription()
+        description: ''
       });
     } catch (e) {
       statusMsg("⚠ compilation error: "+e, External.Status.Error);

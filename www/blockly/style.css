@@ -80,14 +80,10 @@ body, input {
   height: 3rem !important;
 }
 
-#script-name, #script-description, #script-wrapper, #script-icons {
+#script-name, #script-wrapper, #script-icons {
   background-color: transparent;
   border: 0;
   width: 100%;
-}
-
-#script-description {
-  text-overflow: ellipsis;
 }
 
 #script-icons > *:not(:first-child) {
@@ -237,10 +233,6 @@ a.command:hover {
 /* Very low-height displays: hide the icons, just keep the text (e.g. "run").
  * Hide script name, flatten icons. */
 @media (max-height: 600px) {
-  #script-description {
-    display: none !important;
-  }
-  
   .roundbutton > .roundlabel {
     display: none !important;    
   }
@@ -325,7 +317,7 @@ a.command:hover {
 
 /* Very narrow displays: get rid of the script name and description */
 @media (max-width: 800px) {
-  #script-name, #script-description {
+  #script-name {
     display: none;
   }
 }
