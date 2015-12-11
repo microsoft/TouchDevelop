@@ -89,12 +89,6 @@ namespace Microsoft.MicroBit
             this.handleFile(e.FullPath);
         }
 
-        void setBackgroundColor(Color c)
-        {
-            Callback cb = () => this.BackColor = c;
-            this.Invoke(cb);
-        }
-
         volatile int copying;
         void handleFile(string fullPath)
         {
@@ -122,7 +116,6 @@ namespace Microsoft.MicroBit
                 try
                 {
 
-                    this.setBackgroundColor(Color.Yellow);
                     var drives = getMicrobitDrives();
                     if (drives.Length == 0)
                     {
@@ -157,7 +150,6 @@ namespace Microsoft.MicroBit
                 }
                 finally
                 {
-                    this.setBackgroundColor(Color.White);
                     Interlocked.Exchange(ref this.copying, 0);
                 }
             }
