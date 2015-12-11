@@ -46,8 +46,8 @@ var notesDropdown = Object.keys(notes).map(function (note) { return [note, note]
 
 var blockColors = {
     basic: 190,
-    led: 300,
-    input: 3,
+    led: 3,
+    input: 300,
     loops: 120,
     pins: 351,
     music: 52,
@@ -270,7 +270,7 @@ Blockly.Blocks['device_get_brightness'] = {
 Blockly.Blocks['device_set_brightness'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/set-brightness');
-        this.setColour(300);
+        this.setColour(blockColors.led);
         this.appendDummyInput()
             .appendField("set brightness");
         this.appendValueInput("value")
@@ -367,7 +367,7 @@ Blockly.Blocks['device_unplot'] = {
 Blockly.Blocks['device_point'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/functions/point');
-    this.setColour(300);
+    this.setColour(blockColors.led);
     this.appendDummyInput()
         .appendField("point");
     this.appendValueInput("x")
