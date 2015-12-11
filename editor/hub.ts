@@ -3074,14 +3074,6 @@ module TDev.Browser {
         {
             var md = new ModalDialog();
 
-            /* CORS issues
-            var getTopicsAsync = () => 
-                (this.docTopics ? 
-                    Promise.as(this.docTopics) : 
-                    Util.httpGetJsonAsync("https://www.touchdevelop.com/api/doctopics")
-                        .then(resp => this.docTopics = resp))
-            */
-
             var getTopicsAsync = () => Promise.as(TDev.HelpTopic.getAll().map(t => t.json))
 
             var btns = div("wall-dialog-buttons",

@@ -6023,9 +6023,8 @@ module TDev
                         break;
                     case "topic":
                     case "topic-tile":
-                        hs = ["list", "topics", "topic", hs[1], "overview"];
-                        inEditor = true;
-                        break;
+                        Util.navigateNewWindow(Cloud.config.topicPath + hs[1]);
+                        return;
                     case "notifications":
                         hs = ["list", "installed-scripts", "notifications", "me", "notifications"];
                         break;

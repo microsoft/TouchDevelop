@@ -580,7 +580,7 @@
                 if (this.apiPath == "help") {
                     lst = this.helpLocations;
                     allHelpBtn = HTML.mkButton(lf("table of contents"), () => {
-                        this.loadHash(["list", "topics", "topic", "contents", "overview"]);
+                        Util.navigateInWindow(Cloud.config.helpPath);
                     })
                 } else if (this.topLocationsOverride) {
                     lst = this.topLocationsOverride
@@ -933,7 +933,6 @@
                     this.autoUpdate.keypress();
                 }
                 searchDiv.setChildren([]);
-               // HTML.mkButton(lf("search online"), this.searchOnline)]);
                 this.listDivs.push(direct);
                 this.listDivs.push(searchDiv);
             }
@@ -1544,7 +1543,9 @@
                     this.reloadHelpTopic();
                     return;
                 } else {
-                    h = ["list", "topics", "topic", "contents", "overview"]
+                    Util.navigateNewWindow(Cloud.config.helpPath);
+                    Util.setHash("");
+                    return;
                 }
             }
 
@@ -1554,7 +1555,6 @@
             this.updateScroll()
             var skipSync = this.visible;
             // do not sync for help
-            if (h.length >=2 && h[0] === "list" && h[1] === "topics") skipSync = true;
             this.clearAsync(skipSync).done(() => {
                 this.emphInstall = this.firstLoad;
                 this.firstLoad = false;
@@ -1675,10 +1675,6 @@
                     header = lf("my scripts");
                     if (EditorSettings.widgets().hideMyScriptHeader)
                         hideHeader = true;
-                    break;
-                case "topics":
-                    tick(Ticks.browseListDocs);
-                    header = lf("docs");
                     break;
                 case "top":
                     tick(Ticks.browseListTop);
@@ -9944,9 +9940,6 @@
                 allBottomDiv.style.display = viewBottom ? "block" : "none";
                 noChromeDiv.style.display = !viewBottom ? "block" : "none";
 
-                //if (allBottomDiv.style.display != "none")
-                //    this.renderRelatedTopics(docsList);
-
                 if (/[^`]\{template:(\w+)\}/.test(this.topic.json.text)) {
                     var d = div("sdBottomButtons", [
                         HTML.mkButton(lf("follow tutorial in editor"), () => {
@@ -10054,89 +10047,6 @@
         static isWorthwhile(e:JsonScript)
         {
             return getScriptHeartCount(e) * 20 + e.userscore >= 60;
-        }
-
-        private renderRelatedTopics(target:HTMLElement)
-        {
-            if (this.topic.hashTags().length == 0) {
-                target.setChildren([div("sdLoadingMore", lf("no #tags; this is strange"))]);
-                return;
-            }
-
-            var apiPath = "scripts?applyupdates=true&etagsmode=includeetags&count=100&q=" + encodeURIComponent("~@jeiv ");
-            apiPath += encodeURIComponent(this.topic.hashTags().join(" "));
-
-            TheApiCacheMgr.getAndEx(apiPath, (lst:JsonList, opts:DataOptions) => {
-                var isDefinitive = !opts || opts.isDefinitive;
-
-                var ch = []
-                var numTotal = 0;
-                var hidden:JsonScript[] = []
-                var shown:JsonScript[] = []
-                var ignored = 0;
-
-                lst.items.forEach((e:JsonScript, i:number) => {
-                    var etag = lst.etags ? lst.etags[i].ETag : ""
-                    TheApiCacheMgr.store(e.id, e, etag);
-                    if (etag && isDefinitive) TheApiCacheMgr.validate(e.id, etag);
-
-                    // same script?
-                    if (e.id == this.topic.id) return;
-                    if (e.id == this.topic.json.id) return;
-
-                    numTotal++;
-
-                    if (!TopicInfo.isWorthwhile(e)) {
-                        hidden.push(e);
-                    } else {
-                        shown.push(e);
-                    }
-                });
-
-                var cmpTopic = (a:JsonScript, b:JsonScript) => getScriptHeartCount(b) - getScriptHeartCount(a) || b.runs - a.runs;
-                shown.sort(cmpTopic);
-                hidden.sort(cmpTopic);
-
-                var maxTopics = 5;
-                if (shown.length > maxTopics) {
-                    hidden = shown.slice(maxTopics).concat(hidden);
-                    shown = shown.slice(0, maxTopics);
-                }
-
-                var showMore = () => {
-                    this.browser().searchFor(this.topic.hashTags().join(" "));
-                }
-
-                var render = (e:JsonScript) => {
-                    var ti = TopicInfo.mk(HelpTopic.fromJsonScript(e))
-                    return ti.renderExample(this);
-                }
-
-                var searchRelated = div(null,
-                    HTML.mkButton(lf("search all related"), () => {
-                        this.browser().searchFor(this.topic.hashTags().join(" "));
-                    }))
-
-                ch.pushRange(shown.map(render));
-
-                if (hidden.length > 0) {
-                    ch.push(div("sdLoadingMore", lf("unrated topics found; give them hearts to expand them by default!")));
-                    var moreDiv = div("sdMoreDiv",
-                        HTML.mkButton(lf("show unrated topics"), () => {
-                            var ch = hidden.map(render);
-                            ch.push(searchRelated);
-                            moreDiv.setChildren(ch)
-                        }))
-                    ch.push(moreDiv)
-                } else if (numTotal == 0) {
-                    ch.push(div("sdLoadingMore", lf("nothing here yet; you can add some yourself!")))
-                } else {
-                    ch.push(searchRelated);
-                }
-
-                target.setChildren(ch);
-                // lst.continuation
-            })
         }
 
         static attachCopyHandlers(e:HTMLElement):void
