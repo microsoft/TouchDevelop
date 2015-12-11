@@ -58,9 +58,9 @@ module TDev.Hex
         return Util.httpGetTextAsync(hexurl + ".hex")
             .then(text => text,
                   e => Cloud.postPrivateApiAsync("compile/extension", { data: extInfo.compileData })
-                    .then(() => {
+                    .then(ret => {
                         var r = new PromiseInv();
-                        var tryGet = () => Util.httpGetJsonAsync(hexurl + ".json")
+                        var tryGet = () => Util.httpGetJsonAsync(ret.hex.replace(/\.hex/, ".json"))
                             .then(json => {
                                 if (!json.success)
                                     ModalDialog.showText(JSON.stringify(json, null, 1), lf("Compilation error"));
