@@ -563,7 +563,7 @@ module TDev {
                 code.then((ast: AST.App) => {
                   try {
                     ast.localGuid = this.guid;
-                    TheEditor.bytecodeCompileWithUi(ast, { debug: false, uploader: this.editor.name == "blocks" });
+                    TheEditor.bytecodeCompileWithUi(ast, { showSource: false, uploader: this.editor.name == "blocks" });
                     this.post(<Message_CompileAck>{
                       type: MessageType.CompileAck,
                       status: Status.Ok
