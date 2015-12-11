@@ -2139,11 +2139,7 @@ module TDev.Browser {
         private startTutorialButton(t: Ticks)
         {
             var elt = this.mkFnBtn(lf("Tutorials"),() => {
-                var topic = "tutorials";
-                var theme = EditorSettings.currentTheme;
-                if (theme && theme.tutorialsTopic)
-                    topic = theme.tutorialsTopic;
-                Util.setHash('#topic:' + topic);
+                this.browser().showList(Cloud.config.tutorialsid + "/scripts", { header: lf("tutorials") });
             }, t, true, 3, dirAuto(div("hubTileOver", lf("Create your own apps"))));
 
             if (!Browser.lowMemory) {
