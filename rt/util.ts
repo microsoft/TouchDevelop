@@ -929,7 +929,7 @@ module TDev{
     export function notSupported(s:IStackFrame, apiName:string) : any
     {
         if (s.rt.devMode)
-            Util.userError(apiName + " is not supported in this version of Touch Develop");
+            Util.userError(apiName + " is not supported in this version of TouchDevelop");
         return undefined;
     }
 

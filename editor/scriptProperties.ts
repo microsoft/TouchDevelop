@@ -494,7 +494,7 @@ module TDev
                         function doFail() {
                             m0.canDismiss = true;
                             m0.dismiss();
-                            ModalDialog.info(lf("no can do"), lf("no base script"))
+                            ModalDialog.info("no can do", "no base script")
                         }
 
                     })))
@@ -672,7 +672,7 @@ module TDev
                 var name = div("md-caption", path)
                 name.style.fontSize = "0.5em";
                 var d = div("selectableIcon", img, name).withClick(() => {
-                    ModalDialog.info(path, lf("was the icon"))
+                    ModalDialog.info(path, "was the icon")
                 });
                 d.style.border = "1px dotted #ccc"; // for transparent images
                 return d;

@@ -788,7 +788,7 @@ module TDev.HTML {
             
         if (options && options.els) info.appendChildren(options.els);        
         if (options && options.details) {
-            msg.appendChild(div('info link', lf("learn more...")));
+            msg.appendChild(div('info link', 'learn more...'));
             msg.withClick(() => {
                 tick(Ticks.warningNotificationTap);
                 ModalDialog.info(msgText, options.details);

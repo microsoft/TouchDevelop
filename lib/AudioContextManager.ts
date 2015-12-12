@@ -118,7 +118,7 @@ module TDev.RT {
 
                         var wav = undefined;
                         var m = new ModalDialog();
-                        m.add(div('wall-dialog-header', lf("recording microphone...")));
+                        m.add(div('wall-dialog-header', 'recording microphone...'));
                         m.add(div('wall-dialog-buttons', HTML.mkButton('done', () => {
                             source.disconnect();
                             source = null;

@@ -481,13 +481,13 @@ module TDev {
                 var s = AstSession;
                 AstSession.log("discard cache because it is marooned");
                 Script.editorState.collabSessionId = undefined;
-                ModalDialog.infoAsync("Project Discontinued", lf("This project has been discontinued. You can continue to edit the script, but it will no longer synchronize with other team members."))
+                ModalDialog.infoAsync("Project Discontinued", "This project has been discontinued. You can continue to edit the script, but it will no longer synchronize with other team members.")
                     .thenalways(() => TDev.TheEditor.goToHubAsync()).done();
                 astSessionSlot.disconnect(true, "project discontinued"); // deletes the file from disk
             }
             else if (AstSession.faulted) {
                 AstSession.log("local cache is corrupted - deleting");
-                ModalDialog.infoAsync("Cache Corrupted", lf("Sorry... we encountered a problem with the stored project state. Please try again to get the latest state from the server."))
+                ModalDialog.infoAsync("Cache Corrupted", "Sorry... we encountered a problem with the stored project state. Please try again to get the latest state from the server.")
                     .thenalways(() => TDev.TheEditor.goToHubAsync()).done();
                 return astSessionSlot.disconnect(true, "cache corrupted"); // deletes the file from disk
             }

@@ -232,9 +232,9 @@ module TDev.RT {
 
             var res = "";
             var m = new ModalDialog();
-            var status = div('wall-dialog-body', lf("initializing..."));
+            var status = div('wall-dialog-body', 'initializing...');
             var btns;
-            m.add(div('wall-dialog-header', lf("recording text")));
+            m.add(div('wall-dialog-header', 'recording text'));
             m.add(status);
             m.onDismiss = () => r.resumeVal("");
 

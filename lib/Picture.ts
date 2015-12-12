@@ -611,7 +611,7 @@ module TDev.RT {
         static errorPic(): HTMLElement {
             // Util.log("onerror")
             var frowny = div(null, ":(");
-            var msg = div(null, lf("picture failed to load"));
+            var msg = div(null, "picture failed to load");
             var rect = div(null, frowny, document.createElement("br"), msg);
             rect.style.background = "lightgray";
             rect.style.fontFamily = "sans-serif";
