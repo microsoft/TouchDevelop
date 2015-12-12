@@ -597,7 +597,7 @@ module TDev.RT {
                             var title = createTitle.textarea.value;
                             if (!title) {
                                 createMsgDiv.removeAllChildren();
-                                createMsgDiv.appendChildren(div(null, "must specify title"));
+                                createMsgDiv.appendChildren(div(null, lf("must specify title")));
                                 return;
                             }
                             rt.sessions.createCustomSessionAsync(createTitle.textarea.value, type).then(session => {

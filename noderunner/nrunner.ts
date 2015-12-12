@@ -578,7 +578,7 @@ var deployHandlers = {
         var req = '<?xml version="1.0" encoding="utf-8"?>' +
                   '<CreateStorageServiceInput xmlns="http://schemas.microsoft.com/windowsazure">' +
                   '<ServiceName>' + ar.data.name + '</ServiceName>' +
-                  '<Description>Created for TouchDevelop website.</Description>' +
+                  '<Description>Created for Touch Develop website.</Description>' +
                   '<Label>' + new Buffer(ar.data.name, "utf8").toString("base64") + '</Label>' +
                   '<Location>' + wsGeo + '</Location>' +
                   '</CreateStorageServiceInput>';
@@ -1050,14 +1050,14 @@ var apiHandlers = {
                 "Encoding=UTF-8\n" +
                 "Version=1.0\n" +
                 "Name=TouchDevelop\n" +
-                "GenericName=Microsoft TouchDevelop\n" +
+                "GenericName=Microsoft Touch Develop\n" +
                 "Path=/home/pi/TouchDevelop\n" +
                 "Exec=touchdevelop --cli --internet\n" +
                 "Terminal=true\n" +
                 "Icon=/home/pi/TouchDevelop/TouchDevelop.png\n" +
                 "Type=Application\n" +
                 "Categories=Programming;Games\n" +
-                "Comment=Code your Pi using TouchDevelop!");
+                "Comment=Code your Pi using Touch Develop!");
             break;
 
         default:

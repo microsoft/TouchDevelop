@@ -312,7 +312,7 @@ module TDev.RT {
                     var d = new ModalDialog();
                     d.onDismiss = () => onSuccess(undefined);
                     d.add(div("wall-dialog-header", lf("web browsing...")));
-                    d.add(div("wall-dialog-body", "We tried to open the following web page: " + url + "."))
+                    d.add(div("wall-dialog-body", lf("We tried to open the following web page: {0}",url)))
                     d.add(div("wall-dialog-body", lf("If the page did not open, tap the 'open' button below, otherwise tap 'done'.")))
                     d.add(div("wall-dialog-buttons",
                             HTML.mkA("button wall-button", url, "_blank", "open"),
@@ -950,9 +950,9 @@ module TDev.RT {
             var woptions = 'menubar=no,toolbar=no';
             oauthWindow = window.open(url, '_blank', woptions);
 
-            m.add(div('wall-dialog-header', 'authenticating...'));
-            m.add(div('wall-dialog-body', 'A separate window with the sign in dialog has opened, please sign in in that window.'));
-            m.add(div('wall-dialog-body', "Can't see any window? Try tapping the button below to log in manually."));
+            m.add(div('wall-dialog-header', lf("authenticating...")));
+            m.add(div('wall-dialog-body', lf("A separate window with the sign in dialog has opened, please sign in in that window.")));
+            m.add(div('wall-dialog-body', lf("Can't see any window? Try tapping the button below to log in manually.")));
             m.add(div('wall-dialog-buttons', HTML.mkA("button wall-button", url, "_blank", "log in")));
             m.onDismiss = () => { dismiss(); };
 

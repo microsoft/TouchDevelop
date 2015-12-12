@@ -414,7 +414,7 @@ module TDev {
         export function showPrivacyStatementDialog()
         {
             var m = new ModalDialog();
-            m.add(div('wall-dialog-header', 'privacy statement'));
+            m.add(div('wall-dialog-header', lf("privacy statement")));
             m.add(div('wall-dialog-body', RunnerSettings.privacyStatement));
             m.setScroll()
             m.addOk();
@@ -424,7 +424,7 @@ module TDev {
         export function showTermsOfUseDialog()
         {
             var m = new ModalDialog();
-            m.add(div('wall-dialog-header', 'terms of use'));
+            m.add(div('wall-dialog-header', lf("terms of use")));
             m.add(div('wall-dialog-body', RunnerSettings.termsOfUse));
             m.setScroll()
             m.addOk();
@@ -433,9 +433,9 @@ module TDev {
 
         export function showAboutDialog() {
             var m = new ModalDialog();
-            m.add(div('wall-dialog-header', 'about'));
+            m.add(div('wall-dialog-header', lf("about")));
             m.add(div('wall-dialog-body', RunnerSettings.title));
-            m.add(div('wall-dialog-body', 'by ' + RunnerSettings.author));
+            m.add(div('wall-dialog-body', lf("by {0}", RunnerSettings.author)));
             m.add(div('wall-dialog-body', RunnerSettings.description));
             m.setScroll()
             m.addOk();
@@ -530,7 +530,7 @@ module TDev {
                     return;
                 }
 
-                var leaderboardDiv = div('item', [div('item-title', 'leaderboards')]);
+                var leaderboardDiv = div('item', [div('item-title', lf("leaderboards"))]);
 
                 var rt = r.rt;
                 if (window.navigator.onLine) {

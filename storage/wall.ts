@@ -237,14 +237,14 @@ module TDev {
                 m.fullWhite();
                 m.add(div("wall-dialog-header", Util.htmlUnescape(appName)));
 
-                m.addHTML(lf("This web app was created {0} using TouchDevelop.", author));
-                m.addHTML(lf("The TouchDevelop platform - Copyright © 2015 Microsoft Corporation. All rights reserved."));
+                m.addHTML(lf("This web app was created {0} using Touch Develop.", author));
+                m.addHTML(lf("The Touch Develop platform - Copyright © 2015 Microsoft Corporation. All rights reserved."));
                 m.addHTML(lf("<b>DISCLAIMER:</b> This web app is not endorsed by Microsoft."));
 
                 if (!Browser.inEditor)
                     m.add(div("wall-dialog-buttons",
                         link("more by " + userName, "/" + userId),
-                        link("try touchdevelop", "")));
+                        link("try touch develop", "")));
 
                 m.add(div("wall-dialog-buttons",
                     Cloud.config.legalButtons.map(b => link(b.name, b.url))
@@ -768,7 +768,7 @@ module TDev {
                     })) : undefined;
 
                 var dial = ModalDialog.buttons(
-                    "TouchDevelop crashed",
+                    "Touch Develop crashed",
                     this.canDebugCode() ? "do you want do debug the script?" : null,
                     null, null,
                     this.canDebugCode() ? HTML.mkButton(lf("debug"), () => { dial.dismiss(); this.attachDebuggingInfo(runMap, stack, msg); debugAction(); }) : null,

@@ -2649,7 +2649,7 @@ module TDev.AST {
             { cap: PlatformCapability.Tiles,          id: "tiles",          name: lf("Tiles") },
             { cap: PlatformCapability.Npm,            id: "npm",            name: lf("Node Package Manager") },
             { cap: PlatformCapability.Cordova,        id: "cordova",        name: lf("Cordova Plugin Manager") },
-            { cap: PlatformCapability.Shell,          id: "shell",          name: lf("TouchDevelop Local Shell") },
+            { cap: PlatformCapability.Shell,          id: "shell",          name: lf("Touch Develop Local Shell") },
         ];
 
         static capabilityName(p:PlatformCapability)

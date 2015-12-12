@@ -184,10 +184,10 @@ module TDev.RT {
                 };
                 var imgDiv = div('wall-dialog-body');
                 pic.getUrlAsync().done(url => imgDiv.setChildren([HTML.mkImg(url, 'wall-picture-preview')]));
-                m.add(div('wall-dialog-header', 'upload to OneDrive'));
-                m.add(div('wall-dialog-body', 'Would you like to upload this picture to "', folderName, '" your OneDrive?'));
+                m.add(div('wall-dialog-header', lf("upload to OneDrive")));
+                m.add(div('wall-dialog-body', lf("Would you like to upload this picture to {0} your OneDrive?", folderName)));
                 if (shared)
-                    m.add(div('wall-dialog-body', '!!! This picture will be shared with everyone.'));
+                    m.add(div('wall-dialog-body', lf("!!! This picture will be shared with everyone.")));
                 m.add(div('wall-dialog-body', imgDiv));
                 m.add(div('wall-dialog-buttons', [
                     HTML.mkButton('cancel', () => {
@@ -276,7 +276,7 @@ module TDev.RT {
                     pic.getUrlAsync().done(url => imgDiv.setChildren([HTML.mkImg(url, 'wall-picture-preview')]));
                     var m = new ModalDialog();
                     m.canDismiss = false;
-                    m.add(div('wall-dialog-header', 'uploading picture...'));
+                    m.add(div('wall-dialog-header', lf("uploading picture...")));
                     m.add(imgDiv);
                     m.add(progress);
                     progress.start();

@@ -724,7 +724,7 @@ module TDev.Browser {
                             lf("Number of codes: "), count,
                             lf("Credit for each code: "), credit,
                             lf("Number of uses for each code: "), numuses,
-                            lf("Code description (purpouse): "), desc,
+                            lf("Code description (purpose): "), desc,
                             lf("Groups to join: "), groups,
                             HTML.mkAsyncButton(lf("generate"), () => {
                                 var data = {
@@ -1717,7 +1717,7 @@ module TDev.Browser {
             TipManager.update();
             if (h[1] == "logout") {
                 // we may be hosed enough that ModalDialog.ask doesn't work anymore
-                if (window.confirm("Do you really want to sign out?\nAll your script data and any unsynchronized script changes will be lost.") == true) {
+                if (window.confirm(lf("Do you really want to sign out?\nAll your script data and any unsynchronized script changes will be lost.")) == true) {
                     TheEditor.logoutAsync(false).done();
                     return;
                 }
@@ -2436,8 +2436,8 @@ module TDev.Browser {
                 this.showingTemporarySignin = true;
                 var d = new ModalDialog();
                 d.add(div('wall-dialog-header', lf("Sign in to avoid losing your scripts!")));
-                d.add(div('wall-dialog-body', lf("Your browser does not allow TouchDevelop to store web site data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage.")));
-                d.add(div('wall-dialog-body', lf("When you sign in, TouchDevelop will save your scripts in the cloud.")));
+                d.add(div('wall-dialog-body', lf("Your browser does not allow Touch Develop to store web site data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage.")));
+                d.add(div('wall-dialog-body', lf("When you sign in, Touch Develop will save your scripts in the cloud.")));
                 d.add(div("wall-dialog-buttons",
                     HTML.mkButton(lf("skip this"), () => {
                         this.showingTemporarySignin = false;
@@ -2608,7 +2608,7 @@ module TDev.Browser {
                     yearofbirth = <HTMLSelectElement>textEntry(lf("year of birth"), HTML.mkComboBox([HTML.mkOption("0", "")].concat(settings.yearofbirthoptions.map(year => HTML.mkOption(year + "", year + "", settings.yearofbirth == year)))));
 
                     howfound = <HTMLSelectElement>textEntry(lf("how found"), HTML.mkComboBox([HTML.mkOption("", "")].concat(settings.howfoundoptions.map(s => HTML.mkOption(s, s, settings.howfound == s)))),
-                        lf("How did you discover TouchDevelop?"));
+                        lf("How did you discover Touch Develop?"));
 
                     programmingknowledge = <HTMLSelectElement>textEntry(lf("programming knowledge"), HTML.mkComboBox([HTML.mkOption("", "")].concat(settings.programmingknowledgeoptions.map(s => HTML.mkOption(s, s, settings.programmingknowledge == s)))),
                         lf("What is your level of programming knowledge?"));
@@ -2617,7 +2617,7 @@ module TDev.Browser {
                         lf("What is your occupation?"));
 
                     school = <HTMLInputElement>textEntry(lf("school"), HTML.mkTextInput("text", lf("school")),
-                        lf("Enter your school affiliation if any."));
+                        lf("Enter your school affiliation, if any."));
                 }
 
                 dialogBody.appendChild(div("form-title", lf("email and push notifications")));
@@ -2637,7 +2637,7 @@ module TDev.Browser {
                 var t = settings.emailnewsletter2;
                 if (notificationsOnly && !t) t = "yes";
                 emailnewsletter = <HTMLSelectElement>textEntry(lf("receive email newsletters"), HTML.mkComboBox([HTML.mkOption("", "")].concat(settings.emailnewsletter2options.map(s => HTML.mkOption(s, s, t == s)))),
-                    lf("Do you want to receive informational TouchDevelop-related newsletters, e.g. about new features and upcoming events?"));
+                    lf("Do you want to receive informational Touch Develop-related newsletters, e.g. about new features and upcoming events?"));
                 emailnewsletterDiv = lastDiv;
 
                 var u = settings.emailfrequency;
@@ -2659,7 +2659,7 @@ module TDev.Browser {
                     emailfrequencyDiv.style.display = "none";
                     if (pushNotificationsDiv) pushNotificationsDiv.style.display = "none";
                     var summary = div("formHint",
-                        t == "yes" ? lf("You will get TouchDevelop newsletters.") : lf("You will not get TouchDevelop newsletters."),
+                        t == "yes" ? lf("You will get Touch Develop newsletters.") : lf("You will not get Touch Develop newsletters."),
                         "You will get a ", span("emph", u), " email notification digest ", pushNotifications  ? <any[]>["and ", span("emph", v == "yes" ? "mobile" : "no"), " push notifications"] : [], " when users engage with your publications or posts. ",
                         span("emph", lf("Change settings...")));
                     summary.onclick = () => {
