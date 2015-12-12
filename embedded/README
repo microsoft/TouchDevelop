@@ -1,7 +1,7 @@
 The embedded target.
 
-A series of transformation passes that convert a Touch Develop script into a C++
+A series of transformation passes that convert a TouchDevelop script into a C++
 program suitable for targeting embedded platforms. These are self-contained and
-do not depend on the rest of the Touch Develop codebase. There is a driver that
-performs Touch Develop-specific operations (e.g. load required libraries prior to
+do not depend on the rest of the TouchDevelop codebase. There is a driver that
+performs TouchDevelop-specific operations (e.g. load required libraries prior to
 translating into C++); this driver is contained in [editor/embedded.ts].

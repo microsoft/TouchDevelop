@@ -2,11 +2,11 @@
 // full docs: https://labsjs.blob.core.windows.net/sdk/LabsJS-1.0.4/labs.html
 // use http://labsjs.blob.core.windows.net/sdk/LabsJS-1.0.4/labshost.html for testing
 /*
-This host acts as a proxy between the labs APIs and 2 Touch Develop web apps: the editor web app and the view web app.
+This host acts as a proxy between the labs APIs and 2 TouchDevelop web apps: the editor web app and the view web app.
 
 # Editor App
 
-The editor app provides a way to pick the web app to execute. This app is provided by Touch Develop.
+The editor app provides a way to pick the web app to execute. This app is provided by TouchDevelop.
 
     * script selected, IScriptMessage
 
@@ -22,7 +22,7 @@ Each request, and optional response, has the following shape,
 
       { kind : string, data : any }
 
-The view app may be any Touch Develop app. Additionally some apps may also decide to store state.
+The view app may be any TouchDevelop app. Additionally some apps may also decide to store state.
 
     * 'connect' : returns 'mode' as 'edit' or 'view'.
 

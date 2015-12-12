@@ -309,7 +309,7 @@ module TDev {
             .then((r) => r, (e) => {
                 if (e.status == 400) {
                     ModalDialog.info("cannot publish",
-                        lf("Your script '{0}' cannot be published. Error message: {1:not available}", header.name, e.errorMessage))
+                        "Your script '" + header.name + "' cannot be published. Error message: " + (e.errorMessage || "not available"))
                     getInstalledHeaderAsync(header.guid).then((header:Cloud.Header) => {
                         if (header.status == "tobepublished") {
                             header.status = "unpublished";
@@ -812,13 +812,13 @@ module TDev {
                 else if (status == 403 ||
                     (!Cloud.lite && Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
                     {
-                    HTML.showSaveNotification(lf("could not save - you are not signed in ({0:500})",status));
+                    HTML.showSaveNotification("could not save - you are not signed in (" + status + ")", 500);
                     if (status == 403)
                         Cloud.accessTokenExpired();
                     if (onNotLoggedIn) onNotLoggedIn();
                 }
                 else
-                    HTML.showSaveNotification(lf("cannot back up to cloud - you appear to be offline"));
+                    HTML.showSaveNotification("cannot back up to cloud - you appear to be offline");
             });
         }
         function uninstall(header: Cloud.Header) {

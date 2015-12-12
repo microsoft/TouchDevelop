@@ -3961,7 +3961,7 @@ var sectBeginners = lf("beginners");
 var sectCordova = lf("apps");
 var sectAzure = lf("web apps");
 var sectMakers = lf("makers");
-var sectTouchDevelop = lf("touch develop");
+var sectTouchDevelop = lf("touchdevelop");
 var sectOthers = lf("others");
 var sectMinecraft = "Minecraft";
 

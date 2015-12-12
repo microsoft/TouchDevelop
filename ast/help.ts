@@ -422,7 +422,7 @@ module TDev {
         }, {
             id: "videoptr",
             name: "TouchDevelop Video",
-            description: lf("Touch Develop video (/td/videos/...)"),
+            description: lf("TouchDevelop video (/td/videos/...)"),
             parseIds: (text, ismeta)  => {
                 var pref = Cloud.getServiceUrl().replace(/(test|stage|live)/, "www")
                 var m = /^(https:\/\/[^\/]+)\/(\S+)/.exec(text) 
@@ -2372,7 +2372,7 @@ module TDev {
                 w.document.write(html);
                 w.document.close();
             } catch(e) {
-                ModalDialog.info(":( can't print from here", lf("Your browser might have blocked the print page or try to print from another device..."));
+                ModalDialog.info(":( can't print from here", "Your browser might have blocked the print page or try to print from another device...");
             }
         }
 

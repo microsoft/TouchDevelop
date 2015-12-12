@@ -993,7 +993,7 @@ module TDev.RT {
                     if (!Cloud.hasPermission("post-raw"))
                         onSuccess(undefined)
                     Runtime.theRuntime.host.askSourceAccessAsync(lf("your private access token"),
-                        lf("your Touch Develop access token. The script will be able to upload web content as you."), false, true)
+                        lf("your TouchDevelop access token. The script will be able to upload web content as you."), false, true)
                         .done((allow :boolean) => {
                             if (!allow) onSuccess(undefined)
                             else onSuccess(Cloud.getServiceUrl() + "/?access_token=" + Cloud.getAccessToken())

@@ -168,7 +168,7 @@ module TDev.RT {
                     }
                     else {
                         var m = new ModalDialog();
-                        m.add(div('wall-dialog-header', lf("take a picture")));
+                        m.add(div('wall-dialog-header', 'take a picture'));
                         var v = <HTMLVideoElement>createElement('video');
                         v.src = url;
                         v.controls = false;

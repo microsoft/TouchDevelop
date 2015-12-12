@@ -38,7 +38,7 @@ module TDev.Meta {
                     if (allowedAsts[key] || rt.runningPluginOn == name || rt.tutorialObject == name) return text;
                     var app = AST.Parser.parseScript(text)
                     var r = new PromiseInv();
-                    var m = ModalDialog.ask(lf("Script '{0}' is trying to read the source code of script", libs.scriptName) +
+                    var m = ModalDialog.ask("Script '" + libs.scriptName + "' is trying to read the source code of script '" +
                                                 app.getName() + "'", "allow source access",
                                                 () => {
                                                     allowedAsts[key] = true;
@@ -323,7 +323,7 @@ module TDev.Meta {
 
         options.header = [div(null, topHd),
                           div("small", message),
-                          div("small", lf("Current script: {0}",scriptName))]
+                          div("small", "Current script: " + scriptName)]
 
         return chooseScriptAsync(options).then((s:Browser.ScriptInfo) => {
             if (!s) return undefined;

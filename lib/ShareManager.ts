@@ -20,8 +20,8 @@ module TDev.RT {
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 m.onDismiss = () => onSuccess(undefined);
-                m.add(div('wall-dialog-header', lf("share picture")));
-                m.add(div('wall-dialog-body', lf("Copy this picture or save it on your device.")));
+                m.add(div('wall-dialog-header', "share picture"));
+                m.add(div('wall-dialog-body', "Copy this picture or save it on your device."));
                 var canvas = pic.getViewCanvasClone();
                 canvas.style.maxWidth = '100%';
                 canvas.style.maxHeight = '100%';
@@ -79,7 +79,7 @@ module TDev.RT {
                 });
             }
             if (!options.justButtons) {
-                m.add(div('wall-dialog-header', options.header || lf("share")));
+                m.add(div('wall-dialog-header', options.header || "share"));
                 m.add(div('wall-dialog-body', tweetify(link.name())));
                 var txtAddress = HTML.mkTextInput('text', lf("url"));
                 txtAddress.value = link.address();
@@ -159,7 +159,7 @@ module TDev.RT {
                     default:
                         // implemented in seperate platforms
                         var m = new ModalDialog();
-                        m.add(div('wall-dialog-header', lf("share")));
+                        m.add(div('wall-dialog-header', "share"));
                         m.add(div('wall-dialog-body', tweetify(text)));
                         m.add(div('wall-dialog-body',
                             HTML.mkButton('email', () => {
