@@ -35,6 +35,7 @@
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.versionLabel = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
+            this.SettingsLabel = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.backgroundPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -89,12 +90,24 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "Automatic upload of .hex files.";
             // 
+            // SettingsLabel
+            // 
+            this.SettingsLabel.AutoSize = true;
+            this.SettingsLabel.Location = new System.Drawing.Point(321, 9);
+            this.SettingsLabel.Name = "SettingsLabel";
+            this.SettingsLabel.Size = new System.Drawing.Size(45, 13);
+            this.SettingsLabel.TabIndex = 4;
+            this.SettingsLabel.TabStop = true;
+            this.SettingsLabel.Text = "Settings";
+            this.SettingsLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.SettingsLabel_LinkClicked);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(388, 143);
+            this.Controls.Add(this.SettingsLabel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.versionLabel);
             this.Controls.Add(this.statusLabel);
@@ -121,6 +134,7 @@
         private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.LinkLabel versionLabel;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.LinkLabel SettingsLabel;
     }
 }
 

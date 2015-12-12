@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -12,6 +13,7 @@ namespace Microsoft.MicroBit
     internal partial class MainForm : Form
     {
         FileSystemWatcher watcher;
+        private string customcopypath="";
 
         public MainForm()
         {
@@ -23,6 +25,7 @@ namespace Microsoft.MicroBit
         private void MainForm_Load(object sender, EventArgs e)
         {
             this.initializeFileWatch();
+            customcopypath=(string)Application.UserAppDataRegistry.GetValue("CustomDirectory","");
             if (DateTime.Now > new DateTime(2016, 8, 1))
                 this.backgroundPictureBox.Visible = false;
         }
@@ -116,8 +119,17 @@ namespace Microsoft.MicroBit
                 try
                 {
 
-                    var drives = getMicrobitDrives();
-                    if (drives.Length == 0)
+                    var driveletters = getMicrobitDrives();
+                    List<String>drives = new List<String>();
+                    foreach (var d in driveletters)
+                    {
+                        drives.Add(d.RootDirectory.FullName);
+                    }
+                    if (!String.IsNullOrEmpty(customcopypath) && Directory.Exists(customcopypath))
+                    {
+                        drives.Add(customcopypath);
+                    }
+                    if (drives.Count == 0)
                     {
                         this.updateStatus("no board found");
                         this.trayIcon.ShowBalloonTip(3000, "cancelled uploading...", "no board found", ToolTipIcon.None);
@@ -129,7 +141,7 @@ namespace Microsoft.MicroBit
                     
                     // copy to all boards
                     foreach(var drive in drives) {                                                
-                        var trg = System.IO.Path.Combine(drive.RootDirectory.FullName, "firmware.hex");
+                        var trg = System.IO.Path.Combine(drive, "firmware.hex");
                         File.Copy(info.FullName, trg, true);
                     }
                     
@@ -204,6 +216,14 @@ namespace Microsoft.MicroBit
             try {
                 Process.Start("https://www.touchdevelop.com/microbit");
             } catch (IOException) { }
+        }
+
+        private void SettingsLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var settings = new Settings(customcopypath);
+            settings.ShowDialog();
+            customcopypath = settings.CustomCopyPath;
+            Application.UserAppDataRegistry.SetValue("CustomDirectory", customcopypath, RegistryValueKind.String);
         }
     }
 }
