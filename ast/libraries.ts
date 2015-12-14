@@ -598,8 +598,10 @@ module TDev.AST {
                         if (!this.extensions.hasOwnProperty(ns))
                             this.extensions[ns] = { actions: {}, actionList: [] }
                         var e = this.extensions[ns];
-                        e.actionList.push(<LibraryRefAction>a);
-                        e.actions[a.getName()] = <LibraryRefAction>a;
+                        if (!e.actions[a.getName()]) {
+                            e.actionList.push(<LibraryRefAction>a);
+                            e.actions[a.getName()] = <LibraryRefAction>a;
+                        }    
                     })
                 })
             })
