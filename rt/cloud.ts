@@ -878,9 +878,8 @@ module TDev.Cloud {
                 err => Util.setTimeout(1000, poll))
         }
 
-        var config = isFota() ? "ws-fota" : "ws";
         Util.httpPostJsonAsync(getPrivateApiUrl("me/installed/" + guid + "/compile"), {
-            config: config,
+            config: "ws",
             source: cppSource,
             meta: meta,
             repohash: microbitGitTag,

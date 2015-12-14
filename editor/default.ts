@@ -77,6 +77,7 @@ module TDev
             });
 
             handleChromeSerial();            
+            Hex.preCacheEmptyExtensionAsync().done();
         });
     }
     
@@ -211,7 +212,7 @@ module TDev
 
         if ((<any>window.navigator).standalone) Util.log("standalone");
         statusMsg("page loaded, initializing");
-        return init2Async();
+        return init2Async()
     }
 
     function init2Async(): Promise {
@@ -485,6 +486,10 @@ module TDev
             var cfg = (<any>window).tdConfig
             if (cfg) Object.keys(cfg).forEach(k => Cloud.config[k] = cfg[k])
         }
+
+        mx = /microbit=(\w+)/.exec(document.URL)
+        if (mx)
+            Cloud.microbitGitTag = mx[1]
 
         if (Cloud.lite) (<any>window).rootUrl = Cloud.config.rootUrl;
 

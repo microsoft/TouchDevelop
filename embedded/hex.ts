@@ -87,6 +87,14 @@ module TDev.Hex
         if (AST.Bytecode.isSetupFor(extInfo))
             return Promise.as(null)
 
+        if (Cloud.microbitGitTag == "local") {
+            if (extInfo.hasExtension)
+                throw new Error("?microbit=local not allowed when compiling with extensions");
+            if (!(<any>TDev).bytecodeInfo)
+                throw new Error("?microbit=local requires bytecode.js file");
+            return Promise.as((<any>TDev).bytecodeInfo)
+        }
+
         Util.log("get hex info: " + extInfo.sha)
 
         return loadHexInfoAsync(extInfo.sha)
@@ -108,6 +116,16 @@ module TDev.Hex
                                     .then(() => meta)
                         })
             })
+    }
+
+    export function preCacheEmptyExtensionAsync()
+    {
+        if (!Cloud.isRestricted())
+            return Promise.as()
+
+        var extInfo = AST.Bytecode.getExtensionInfo(null);
+        if (extInfo.errors) throw new Error(extInfo.errors)
+        return getHexInfoAsync(extInfo)
     }
 
     export function cliCompileAsync(app:AST.App)

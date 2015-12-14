@@ -16,6 +16,7 @@ module TDev.AST.Bytecode
         errors:string;
         sha:string;
         compileData:string;
+        hasExtension:boolean;
     }
 
     var funcInfo:StringMap<FuncInfo>;
@@ -54,7 +55,7 @@ module TDev.AST.Bytecode
         currentSetup = extInfo.sha;
 
         var jsinf = bytecodeInfo || (<any>TDev).bytecodeInfo
-        hex = Cloud.isFota() ? jsinf.fotahex : jsinf.hex;
+        hex = jsinf.hex;
 
         var i = 0;
         var upperAddr = "0000"
@@ -1796,6 +1797,7 @@ module TDev.AST.Bytecode
             errors: "",
             sha: "",
             compileData: "",
+            hasExtension: false,
         }
     }
 
@@ -1843,10 +1845,9 @@ module TDev.AST.Bytecode
         var thisErrors = ""
         var err = (s) => thisErrors += "   " + s + "\n";
         var cfginc = ""
-        var hasExt = false
 
         function parseCpp(src:string) {
-            hasExt = true
+            res.hasExtension = true
             var currNs = ""
             src.split(/\r?\n/).forEach(ln => {
                 var m = /^\s*namespace\s+(\w+)/.exec(ln)
@@ -1919,7 +1920,7 @@ module TDev.AST.Bytecode
             var json = <GlueJson>parsed.value();
             if (!json) return;
 
-            hasExt = true
+            res.hasExtension = true
 
             if (json.dependencies)
                 Util.jsonCopyFrom(totalConfig.dependencies, json.dependencies)
