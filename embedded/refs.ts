@@ -7,3 +7,4 @@
 ///<reference path='bytecode.ts'/>
 ///<reference path='thumb.ts'/>
 ///<reference path='driver.ts'/>
+///<reference path='hex.ts'/>

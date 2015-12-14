@@ -110,15 +110,35 @@ module TDev.Hex
             })
     }
 
+    export function cliCompileAsync(app:AST.App)
+    {
+        var guid = app.localGuid
+
+        var extInfo = AST.Bytecode.getExtensionInfo(app);
+        if (extInfo.errors) throw new Error(extInfo.errors)
+
+        return getHexInfoAsync(extInfo)
+        .then(meta => {
+            AST.Bytecode.setupFor(extInfo, meta)
+
+            var c = new AST.Bytecode.Compiler(app)
+            c.run()
+            var res = c.serialize(false, null, null);
+
+            if (!res.data)
+                throw new Error("no hex data")
+        })
+    }
+
     var firstTime = true;
-    export function compile(app : AST.App, showSource = false)
+    export function compile(app : AST.App, compilationStartTime:number, saveStateAsync:()=>Promise, showSource = false)
     {
         var times = ""
         var startTime = Util.now();
 
-        times += Util.fmt("; type check before compile {0}ms\n", startTime - TheEditor.compilationStartTime);
+        times += Util.fmt("; type check before compile {0}ms\n", startTime - compilationStartTime);
         var guid = app.localGuid
-        var st = TheEditor.saveStateAsync()
+        var st = saveStateAsync()
             .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
             .then(r => {
                 var hd:Cloud.Header = r[1]
