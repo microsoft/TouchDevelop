@@ -24,6 +24,7 @@ microbit/loader/Microbit.Uploader/obj
 backend/built
 build/locales
 data
+microbit/bytecode.js
 
 # visual studio
 *.suo
