@@ -681,6 +681,9 @@ module TDev.RT.Node {
         TDev.Util.initGenericExtensions();
         TDev.RT.RTValue.initApis();
 
+        global.btoa = str => new Buffer(str, "binary").toString("base64")
+        global.atob = str => new Buffer(str, "base64").toString("binary")
+
         window = <any>{};
         window.removeEventListener = () => {};
         window.setTimeout = setTimeout;
