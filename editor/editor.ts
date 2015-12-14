@@ -2029,7 +2029,7 @@ module TDev
         public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean } = {}) {
             tick(Ticks.coreNativeCompile);
             if (!options.showSource) this.showCompilationDialog(true, !!options.uploader);
-            Hex.compile(app, !!options.showSource);
+            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource);
             if (!options.showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)

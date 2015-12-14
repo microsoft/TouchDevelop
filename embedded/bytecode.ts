@@ -910,7 +910,11 @@ module TDev.AST.Bytecode
             } else {
                 this.binary.serialize()
             }
-            var lenSrc = this.binary.addSource(metainfo, blob);
+            var lenSrc = 0
+
+            if (metainfo != null && blob != null)
+                lenSrc = this.binary.addSource(metainfo, blob);
+
             var sourceSaved = lenSrc > 0;
             this.binary.assemble()
 
@@ -1931,28 +1935,29 @@ module TDev.AST.Bytecode
                 })
         }
 
-        app.librariesAndThis().forEach(l => {
-            thisErrors = ""
-            l.resolved.resources().forEach(r => {
-                if (r.getName() != "glue.cpp" && r.getName() != "glue.json") return;
-                var src = r.stringResourceValue()
-                if (src == null) {
-                    err(lf("'{0}' isn't a string resource", r.getName()))
-                    return
+        if (app)
+            app.librariesAndThis().forEach(l => {
+                thisErrors = ""
+                l.resolved.resources().forEach(r => {
+                    if (r.getName() != "glue.cpp" && r.getName() != "glue.json") return;
+                    var src = r.stringResourceValue()
+                    if (src == null) {
+                        err(lf("'{0}' isn't a string resource", r.getName()))
+                        return
+                    }
+
+                    if (r.getName() == "glue.cpp")
+                        parseCpp(src)
+                    else
+                        parseJson(src)
+
+                })
+                if (thisErrors) {
+                    res.errors += lf("Library {0}:\n", l.getName()) + thisErrors
                 }
-
-                if (r.getName() == "glue.cpp")
-                    parseCpp(src)
-                else
-                    parseJson(src)
-
             })
-            if (thisErrors) {
-                res.errors += lf("Library {0}:\n", l.getName()) + thisErrors
-            }
-        })
 
-        if (res.errors || !hasExt)
+        if (res.errors)
             return res;
 
         if (cfginc)
