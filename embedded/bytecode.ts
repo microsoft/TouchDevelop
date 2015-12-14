@@ -1359,8 +1359,6 @@ module TDev.AST.Bytecode
                 // this.proc.emit("push {r0}");
             })
 
-            Util.assert(inl.inParameters.length == 0)
-
             this.finals.push(() => {
                 this.proc = inlproc
 
@@ -1382,8 +1380,15 @@ module TDev.AST.Bytecode
                 this.proc.emit(".short 0xffff, 0x0000   ; action literal");
                 this.proc.emit("@stackmark inlfunc");
                 this.proc.emit("push {r5, lr}");
-                this.proc.emit("adds r5, r1, #0");
+                this.proc.emit("mov r5, r1");
                 this.proc.pushLocals();
+
+                inl.inParameters.forEach((loc, i) => {
+                    Util.assert(i < 2)
+                    var l = this.localIndex(loc, true)
+                    this.proc.emit("push {r" + (i + 2) + "}")
+                    l.emitStore(this.proc)
+                })
 
                 var ret = this.proc.mkLabel("inlret")
                 inl._compilerBreakLabel = ret;
