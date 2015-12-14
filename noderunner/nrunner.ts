@@ -1902,6 +1902,17 @@ function getScriptAsync(id:string)
 // each script.
 // It also exercises the bitvm compiler (once) for each script.
 function compilerTest() {
+    var tdUplKey = process.env['TD_UPLOAD_KEY'] || process.env['TD_UPLOAD_LITE_KEY']
+    if (/touchdevelop/.test(apiEndpoint) && tdUplKey) {
+        var mm = /^(http.*\/)(\?access_token=.*)/.exec(tdUplKey)
+        if (mm) {
+            apiEndpoint = mm[1] + "api/"
+            accessToken = mm[2]
+            liteStorage = "yes"
+        }
+    }
+    TDev.Cloud.config.primaryCdnUrl = "https://microbit0.blob.core.windows.net"
+
     console.log("COMPILER TEST");
     var tests = {
         bqutuo: {}, // pac man runaway
@@ -1912,6 +1923,7 @@ function compilerTest() {
     var nruns = 1;
     window.localStorage.setItem("access_token", accessToken.replace("?access_token=", ""));
     TDev.Cloud.config.rootUrl = apiEndpoint.replace("/api/", "");
+    var theApp:TDev.AST.App;
     Object.keys(tests).forEach((pubId: string) => {
         var name;
         var displayId = pubId;
@@ -1925,15 +1937,17 @@ function compilerTest() {
             return TDev.Embedded.parseScript(text);
         }).then((a: TDev.AST.App) => {
             name = a.getName();
+            theApp = a;
             console.log(logMsg("parsing → touchdevelop ✓"));
             if (tests[pubId].skipBitVm) {
                 console.log(logMsg("skipping bitvm"));
+                return TDev.Promise.as();
             } else {
-                (new TDev.AST.Bytecode.Compiler(a)).run();
                 console.log(logMsg("touchdevelop → hex (bitvm) ✓"));
+                return TDev.Hex.cliCompileAsync(theApp);
             }
-
-            return TDev.Embedded.compile(TDev.AST.Json.dump(a))
+        }).then(() => {
+            return TDev.Embedded.compile(TDev.AST.Json.dump(theApp))
         }).then((cpp: string) => {
             console.log(logMsg("touchdevelop → cpp ✓"));
 
@@ -2023,7 +2037,7 @@ export function globalInit()
         }
     }
 
-    TDev.Cloud.lite = !!liteStorage;
+    //TDev.Cloud.lite = !!liteStorage;
 
     TDev.AST.Lexer.init();
     TDev.HelpTopic.getScriptAsync = getScriptAsync;
