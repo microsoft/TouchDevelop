@@ -3717,6 +3717,7 @@ module TDev
             var addTopic = (id:string) => {
                 if (!id) return;
                 var t = HelpTopic.findById(id)
+                if (!t) t = HelpTopic.justHelpPath(id);
                 if (t) topics.push(t);
             }
 
@@ -3736,6 +3737,7 @@ module TDev
                     if (libAct.parentLibrary().resolved)
                         topics.push(HelpTopic.forLibraryAction(libAct))
                 }
+
                 addTopic(r.property.helpTopic())
                 if (r.property.getFlags() & PropertyFlags.IsObsolete)
                     addTopic("obsolete")
@@ -3768,7 +3770,7 @@ module TDev
             if (!didIt) setHelp("")
 
             addTopic(this.stmt.helpTopic());
-            HelpTopic.contextTopics = topics;
+            HelpTopic.contextTopics = topics.filter(t => !!t);
         }
 
         private bindIntelliButtons(offset:number)

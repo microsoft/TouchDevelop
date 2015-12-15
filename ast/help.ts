@@ -1765,6 +1765,41 @@ module TDev {
             return t;
         }
 
+        static lookupHelpPath(topic:string)
+        {
+            topic = topic.toLowerCase().replace(/^#/, "")
+
+            var paths = Cloud.config.specHelpPaths;
+            if (paths)
+                for (var i = topic.length; i >= 2; --i)
+                    if (paths.hasOwnProperty(topic.slice(0, i)))
+                        return paths[topic.slice(0, i)]
+            return null
+        }
+
+        static justHelpPath(topic:string)
+        {
+            if (!topic) return null;
+            var path = HelpTopic.lookupHelpPath(topic)
+            if (!path) return null;
+
+            var t = new HelpTopic({
+                name: path,
+                id: "",
+                description: "",
+                icon: "Recycle",
+                iconbackground: "#008800",
+                text: "",
+                rootid: "none",
+                priority: 20000,
+                helpPath: path,
+            })
+
+            t.id = path
+
+            return t;
+        }
+
         static forLibraryAction(act:AST.LibraryRefAction)
         {
             var t = new HelpTopic({

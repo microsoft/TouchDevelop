@@ -203,6 +203,7 @@ module TDev.Cloud {
         translateApiUrl: string;
         hashtag: string;
         helpPath: string;
+        specHelpPaths: StringMap<string>;
         topicPath: string;
         legalButtons: { name: string; url: string; }[];
         doNothingText: string;
@@ -249,6 +250,7 @@ module TDev.Cloud {
         hashtag:"#TouchDevelop",
         liteVersion: null,
         helpPath: "/docs",
+        specHelpPaths: { },
         topicPath: "/docs/",
         legalButtons: [
             { name: "terms of use", url: "/terms-of-use" },
