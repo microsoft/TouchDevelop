@@ -69,7 +69,10 @@ function execCallback(task) {
   return function (error, stdout, stderr) {
     if (stdout) console.log(stdout.toString());
     if (stderr) console.error(stderr.toString());
-    if (error) task.fail(error);
+    if (error) {
+      console.error(error);
+      task.fail(error);
+    }
     else task.complete();
   }
 }
@@ -488,7 +491,7 @@ task('update-lang', [ 'build/client.js', 'default' ], { async: true }, function(
 task('azure', [ 'build/shell.js' ], { async: true }, function() {
   jake.mkdirP("build/azure")
   child_process.execFile(
-    "C:/Program Files/Microsoft SDKs/Azure/.NET SDK/v2.5/bin/cspack.exe",
+    "C:/Program Files/Microsoft SDKs/Azure/.NET SDK/v2.8/bin/cspack.exe",
     [ "tdshell.csdef",
       "/out:../../build/azure/tdshell.cspkg",
       "/roleFiles:ShellRole;files.txt" ], { cwd: 'shell/azure' }, execCallback(this))
