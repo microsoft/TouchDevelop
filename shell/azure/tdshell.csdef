@@ -3,7 +3,7 @@
   xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-  schemaVersion="2014-06.2.4"
+  schemaVersion="2015-04.2.6"
   name="tdshell" 
   >
   <WorkerRole name="ShellRole">
