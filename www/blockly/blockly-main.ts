@@ -149,10 +149,10 @@ module TDev {
           statusMsg(prefix(message.where) + " successfully saved", message.status);
         }
 
-        if (message.changed) {
-          statusMsg("changes detected, running...", message.status);
-          doRun(true);
-        }        
+        // if (message.changed) {
+        //  statusMsg("changes detected, running...", message.status);
+        //  doRun(true);
+        // }        
         break;
     }
   }
