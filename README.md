@@ -58,7 +58,7 @@ There are many ways to [contribute](https://github.com/Microsoft/TouchDevelop/bl
 
 If you're not a developer but still would like to help, we've got more tasks for you!
 
-* [help translate the user inferface](https://touchdeveloptranslator.azurewebsites.net): do you use Touch Develop and speak a foreign language? You can help!
+* [help translate the user interface](https://touchdeveloptranslator.azurewebsites.net): do you use Touch Develop and speak a foreign language? You can help!
 
 ## Setup
 
