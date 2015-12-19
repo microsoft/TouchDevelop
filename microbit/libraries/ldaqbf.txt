@@ -141,7 +141,7 @@ action add_score(#upNGyw2apMaUcvQC points: Number) {
   #vZtX1RcjDdWohAtr control[lib micro\u003abit] →in_background;
   #xTmfOuxYEEZU8RZo where `implicit` \_body\_() {
     #EmMB4oUWOSOSrs2Q led[lib micro\u003abit] →stop_animation;
-    #TpoevJbyuENBzDRz basic[lib micro\u003abit] →show_animation("0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0", 60);
+    #TpoevJbyuENBzDRz basic[lib micro\u003abit] →show_animation("0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0", 40);
   }
   meta sync;
 }
@@ -207,6 +207,12 @@ action game_over() {
       }
     }
   }
+  else {
+    #n67cH9pIKxKFcdQ6 // already in game over mode in another fiber
+    #YJW4X4vqAVwdgZoD while true do {
+      #wYMn2vN7Y4h0bBFe basic[lib micro\u003abit] →pause(10000);
+    }
+  }
 }
 #PdPR9cpJ2YKm2EYO
 action current_time() returns(#fsGwyKm0OLECbz4I ms: Number) {
@@ -230,6 +236,11 @@ action remove_life(#wSxIkWFhDMvo9sOL life: Number) {
   #V6pwIi2V2K411YlU // {weight:10}
   #j6t4SWxNJyZalsQ6 // {help:td/game-library}
   #DokzagqHlchXTHmB code→set_life(data→\_life - $life);
+  #xRYStStywBAPdax9 control[lib micro\u003abit] →in_background;
+  #DtJ9rlrZWMIkx4xF where `implicit` \_body\_() {
+    #UvYuL7St3J40m5LQ led[lib micro\u003abit] →stop_animation;
+    #XqehW2sAtG2xOYXE basic[lib micro\u003abit] →show_animation("1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0\n0 1 0 1 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0\n0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0\n0 1 0 1 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0\n1 0 0 0 1 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0", 40);
+  }
 }
 #xsC75ma2TcxelNNG
 var \_is_game_over : Boolean {
