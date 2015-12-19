@@ -326,9 +326,10 @@ var translationHelpStrings = {}
 
 function processLf(filename:string)
 {
-    if (!/\.ts$/.test(filename)) return
+    if (!/\.(ts|html)$/.test(filename)) return
     if (/\.d\.ts$/.test(filename)) return
 
+    console.log('extracting strings from %s', filename);    
     loadText(filename).split('\n').forEach((line:string, idx:number) => {
         function err(msg:string) {
             console.log("%s(%d): %s", filename, idx, msg);
@@ -369,7 +370,7 @@ export function genStubs()
         processFile(path.join(libPath, fn));
     })
 
-    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libnode"]
+    var srcPaths = ["lib", "rt", "storage", "ast", "editor", "libcordova", "libnode", "embedded", "microbit/overrideupload"]
     srcPaths.forEach(pth => {
         fs.readdirSync(pth).forEach((fn) => {
             fileCnt++;
@@ -388,6 +389,7 @@ export function genStubs()
         }
     })
     */
+    console.log('strings: ' + tr.length);
     fs.writeFileSync("build/localization.json", JSON.stringify({ strings: tr }, null, 1))
 
     helpDefinitions += "TDev.AST.Json.docs = " + JSON.stringify(loadText("ast/jsonInterfaces.ts").replace(/\r/g, "")) + ";\n";

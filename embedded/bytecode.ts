@@ -799,7 +799,7 @@ module TDev.AST.Bytecode
                         var no = parseInt(m[1])
                         var proc = this.procs.filter(p => p.seqNo == no)[0]
                         if (proc && proc.action)
-                            userErrors += lf("At function " + proc.action.getName() + ":\n")
+                            userErrors += lf("At function {0}:\n", proc.action.getName())
                         else
                             userErrors += lf("At inline assembly:\n")
                         userErrors += e.message
