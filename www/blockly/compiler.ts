@@ -840,7 +840,7 @@ function compileVariableGet(e: Environment, b: B.Block): J.JExpr {
   var name = b.getFieldValue("VAR");
   var binding = lookup(e, name);
   assert(binding != null && binding.type != null);
-  return isCompiledAsLocal(binding) ? H.mkLocalRef(name) : H.mkGlobalRef(name);
+  return H.mkLocalRef(name);
 }
 
 function compileText(e: Environment, b: B.Block): J.JExpr {
@@ -887,9 +887,9 @@ function compileNote(e: Environment, b: B.Block): J.JExpr {
 function compileDuration(e: Environment, b: B.Block): J.JExpr {
   var matches = b.type.match(/^device_duration_1\/(\d+)/);
   if (matches)
-    return H.mkSimpleCall("/", [ H.mkGlobalRef("whole note"), H.mkNumberLiteral(parseInt(matches[1])) ]);
+    return H.mkSimpleCall("/", [ H.mkLocalRef("whole note"), H.mkNumberLiteral(parseInt(matches[1])) ]);
   else
-    return H.mkGlobalRef("whole note");
+    return H.mkLocalRef("whole note");
 }
 
 // [t] is the expected type; we assume that we never null block children
@@ -958,7 +958,7 @@ interface Binding {
   incompatibleWithFor?: boolean;
 }
 
-function isCompiledAsLocal(b: Binding) {
+function isCompiledAsForIndex(b: Binding) {
   return b.usedAsForIndex && !b.incompatibleWithFor;
 }
 
@@ -1047,7 +1047,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
     e = extend(e, local, Type.Number);
     var eLocal = H.mkLocalRef(local);
     var eTo = compileExpression(e, bTo);
-    var eVar = H.mkGlobalRef(bVar);
+    var eVar = H.mkLocalRef(bVar);
     var eBy = H.mkNumberLiteral(1);
     var eFrom = H.mkNumberLiteral(0);
     // Fallback to a while loop followed by an assignment to
@@ -1077,7 +1077,7 @@ function compileControlsFor(e: Environment, b: B.Block): J.JStmt[] {
 function compileControlsRepeat(e: Environment, b: B.Block): J.JStmt {
   var bound = compileExpression(e, b.getInputTargetBlock("TIMES"));
   var body = compileStatements(e, b.getInputTargetBlock("DO"));
-  var valid = (x: string) => !lookup(e, x) || !isCompiledAsLocal(lookup(e, x));
+  var valid = (x: string) => !lookup(e, x) || !isCompiledAsForIndex(lookup(e, x));
   var name = "i";
   for (var i = 0; !valid(name); i++)
     name = "i"+i;
@@ -1109,7 +1109,7 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
   var bExpr = b.getInputTargetBlock("VALUE");
   var binding = lookup(e, bVar);
   var expr = compileExpression(e, bExpr);
-  var ref = isCompiledAsLocal(binding) ? H.mkLocalRef(bVar) : H.mkGlobalRef(bVar);
+  var ref = H.mkLocalRef(bVar);
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, expr])));
 }
 
@@ -1542,6 +1542,24 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
     var e = mkEnv(w);
     infer(e, w);
 
+    // All variables in this script are compiled as locals within main.
+    var stmtsVariables: J.JStmt[] = [];
+    e.bindings.forEach((b: Binding) => {
+      if (!isCompiledAsForIndex(b)) {
+        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(b.type)));
+      }
+    });
+
+    // It's magic! The user can either assign to "whole note" (and everything
+    // works out), or not do it, and if they need it, the variable will be
+    // declared and assigned to automatically.
+    var foundWholeNote = e.bindings.filter(x => x.name == "whole note").length > 0;
+    var needsWholeNote = w.getAllBlocks().filter(x => !!x.type.match(/^device_duration_/)).length > 0;
+    if (!foundWholeNote && needsWholeNote) {
+      stmtsVariables.push(H.mkDefAndAssign("whole note", toTdType(Type.Number), H.mkNumberLiteral(2000)));
+      e = extend(e, "whole note", Type.Number);
+    }
+
     // [stmtsHandlers] contains calls to register event handlers. They must be
     // executed before the code that goes in the main function, as that latter
     // code may block, and prevent the event handler from being registered.
@@ -1554,26 +1572,7 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
         append(stmtsMain, compileStatements(e, b));
     });
 
-    // It's magic! The user can either assign to "whole note" (and everything
-    // works out), or not do it, and if they need it, the variable will be
-    // declared and assigned to automatically.
-    var foundWholeNote = e.bindings.filter(x => x.name == "whole note").length > 0;
-    var needsWholeNote = w.getAllBlocks().filter(x => !!x.type.match(/^device_duration_/)).length > 0;
-    if (!foundWholeNote && needsWholeNote) {
-      stmtsMain.unshift(
-        H.mkExprStmt(
-          H.mkExprHolder([],
-            H.mkSimpleCall(":=", [H.mkGlobalRef("whole note"), H.mkNumberLiteral(2000)]))));
-        e = extend(e, "whole note", Type.Number);
-    }
-
-    decls.push(H.mkAction("main", stmtsHandlers.concat(stmtsMain), [], []));
-
-    e.bindings.forEach((b: Binding) => {
-      if (!isCompiledAsLocal(b)) {
-        decls.unshift(H.mkVarDecl(b.name, toTdType(find(b.type).type)));
-      }
-    });
+    decls.push(H.mkAction("main", stmtsVariables.concat(stmtsHandlers).concat(stmtsMain), [], []));
   } finally {
     removeAllPlaceholders(w);
   }
