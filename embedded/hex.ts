@@ -51,8 +51,15 @@ module TDev.Hex
         .then((table:Storage.Table) => table.getValueAsync(key))
     }
 
-
+    var downloadCache:StringMap<Promise> = {};
     function downloadHexInfoAsync(extInfo:AST.Bytecode.ExtensionInfo)
+    {
+        if (downloadCache.hasOwnProperty(extInfo.sha))
+            return downloadCache[extInfo.sha]
+        return (downloadCache[extInfo.sha] = downloadHexInfoCoreAsync(extInfo))
+    }
+
+    function downloadHexInfoCoreAsync(extInfo:AST.Bytecode.ExtensionInfo)
     {
         var hexurl = Cloud.config.primaryCdnUrl + "/compile/" + extInfo.sha
         return Util.httpGetTextAsync(hexurl + ".hex")
@@ -118,7 +125,7 @@ module TDev.Hex
             })
     }
 
-    export function preCacheEmptyExtensionAsync()
+    export function preCacheEmptyExtensionAsync(fromEditor = false)
     {
         if (!Cloud.isRestricted())
             return Promise.as()
@@ -126,6 +133,7 @@ module TDev.Hex
         var extInfo = AST.Bytecode.getExtensionInfo(null);
         if (extInfo.errors) throw new Error(extInfo.errors)
         return getHexInfoAsync(extInfo)
+            .then(meta => { if (meta && fromEditor) AST.Bytecode.setupFor(extInfo, meta) })
     }
 
     export function cliCompileAsync(app:AST.App)
