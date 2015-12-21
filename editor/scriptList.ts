@@ -3651,7 +3651,7 @@
                     div("sdHeader",
                         icon,
                         div("sdHeaderInner",
-                            div("sdNameBlock", div("sdName", spanDirAuto(it.scriptname + (it.entryNo === undefined ? "" : " #" + it.entryNo)))),
+                            div("sdNameBlock", div("sdName", spanDirAuto((it.entryNo === undefined ? "" : "#" + it.entryNo + " ") + it.scriptname))),
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
                                     Util.timeSince(it.time)
