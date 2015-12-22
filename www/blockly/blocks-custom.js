@@ -603,7 +603,7 @@ Blockly.Blocks['math_op3'] = {
 
 Blockly.Blocks['device_while'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/while');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/while');
     this.setColour(blockColors.loops);
     this.appendValueInput("COND")
         .setCheck("Boolean")
@@ -631,7 +631,7 @@ Blockly.Blocks['device_random'] = {
 
 Blockly.Blocks['game_start_countdown'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendValueInput("duration")
         .setCheck("Number")
@@ -647,7 +647,7 @@ Blockly.Blocks['game_start_countdown'] = {
 
 Blockly.Blocks['game_score'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendDummyInput()
         .appendField("score");
@@ -659,7 +659,7 @@ Blockly.Blocks['game_score'] = {
 
 Blockly.Blocks['game_add_score'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendValueInput("points")
         .setCheck("Number")
@@ -675,7 +675,7 @@ Blockly.Blocks['game_add_score'] = {
 
 Blockly.Blocks['game_game_over'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendDummyInput()
         .appendField("game over");
@@ -692,7 +692,7 @@ Blockly.Blocks['controls_simple_for'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl("https://www.microbit.co.uk/td/for");
+    this.setHelpUrl("https://www.microbit.co.uk/blocks/for");
     this.setColour(Blockly.Blocks.loops.HUE);
     this.appendDummyInput()
         .appendField("for")
