@@ -2419,6 +2419,7 @@ action stop_animation() {
   #d4LAQbEUe7uRZJAS // {namespace:led}
   #Ix2qKgTtbnPMed6L // {weight:10}
   #xbNtuxocqqClsImw // {shim:uBit.display.stopAnimation}
+  #PNe2ZX3bc32uAfMh // {help:functions/stop-animation}
   #BDAdp8kwFZFXSYHu data→current_animation := data→current_animation + 1;
   #gQ12sQ2hZdAouv1m records→Animation_table→clear;
   meta sync;
