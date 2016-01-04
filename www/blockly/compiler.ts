@@ -694,6 +694,7 @@ function infer(e: Environment, w: B.Workspace) {
           break;
 
         case "variables_set":
+        case "variables_change":
           var x = b.getFieldValue("VAR");
           var p1 = lookup(e, x).type;
           attachPlaceholderIf(b, "VALUE");
@@ -707,7 +708,7 @@ function infer(e: Environment, w: B.Workspace) {
             }
           }
           break;
-
+              
         case "device_comment":
           unionParam(e, b, "comment", ground(Type.String));
           break;
@@ -1113,6 +1114,15 @@ function compileSet(e: Environment, b: B.Block): J.JStmt {
   return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, expr])));
 }
 
+function compileChange(e: Environment, b: B.Block): J.JStmt {
+  var bVar = b.getFieldValue("VAR");
+  var bExpr = b.getInputTargetBlock("VALUE");
+  var binding = lookup(e, bVar);
+  var expr = compileExpression(e, bExpr);
+  var ref = H.mkLocalRef(bVar);
+  return H.mkExprStmt(H.mkExprHolder([], H.mkSimpleCall(":=", [ref, H.mkSimpleCall("+", [ref, expr])])));
+}
+
 function compileStdCall(e: Environment, b: B.Block, func: StdFunc) {
   var args = func.args.map((p: StdArg) => {
     var lit : any = p.literal;
@@ -1390,6 +1400,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileSet(e, b));
           break;
 
+        case 'variables_change':
+          stmts.push(compileChange(e, b));
+          break;
+              
         case 'device_comment2':
           stmts.push(compileComment2(e, b));
           break;
@@ -1510,7 +1524,7 @@ function mkEnv(w: B.Workspace): Environment {
   // set block, 1) make sure that the variable is bound, then 2) mark the
   // variable if needed.
   w.getAllBlocks().forEach((b: B.Block) => {
-    if (b.type == "variables_set") {
+    if (b.type == "variables_set" || b.type == "variables_change") {
       var x = b.getFieldValue("VAR");
       if (lookup(e, x) == null)
         e = extend(e, x, null);

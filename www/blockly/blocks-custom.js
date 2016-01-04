@@ -53,7 +53,8 @@ var blockColors = {
     music: 52,
     game: 176,
     //comments: 156,
-    images:45,
+    images: 45,
+    variables: 330,
 }
 
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
@@ -824,6 +825,23 @@ Blockly.Blocks['device_ring'] = {
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Rings a given note on P0. You can also provide a specific frequency.');
+  }
+};
+
+Blockly.Blocks['variables_change'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("change")
+        .appendField(new Blockly.FieldVariable("item"), "VAR");
+    this.appendValueInput("VALUE")
+        .setCheck("Number")
+        .appendField("by");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Changes the value of the variable by this amount');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/assign');
+    this.setColour(blockColors.variables);
   }
 };
 
