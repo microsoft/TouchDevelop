@@ -664,11 +664,9 @@ Blockly.Blocks['game_add_score'] = {
     this.setColour(blockColors.game);
     this.appendValueInput("points")
         .setCheck("Number")
-        .appendField("add");
-    this.appendDummyInput()
-        .appendField("points to score");
+        .appendField("change score by");
     this.setInputsInline(true);
-    this.setTooltip('Add points to the user score.');
+    this.setTooltip('Change score by the given amount of points.');
     this.setPreviousStatement(true);
     this.setNextStatement(true);
   }
