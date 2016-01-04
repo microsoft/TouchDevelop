@@ -436,7 +436,7 @@ Blockly.Blocks['device_build_image'] = {
         this.appendDummyInput().appendField("2").appendField(new Blockly.FieldCheckbox("FALSE"), "LED02").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED12").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED22").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED32").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED42");
         this.appendDummyInput().appendField("3").appendField(new Blockly.FieldCheckbox("FALSE"), "LED03").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED13").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED23").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED33").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED43");
         this.appendDummyInput().appendField("4").appendField(new Blockly.FieldCheckbox("FALSE"), "LED04").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED14").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED24").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED34").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED44");
-        this.setOutput(true, 'sprite');
+        this.setOutput(true, 'image');
         this.setTooltip('An image that fits on the LED array.');
         this.setHelpUrl("https://www.microbit.co.uk/functions/create-image");
     }
@@ -465,7 +465,7 @@ Blockly.Blocks['device_build_big_image'] = {
             .appendField("   ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED54").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED64").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED74").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED84").appendField(" ").appendField(new Blockly.FieldCheckbox("FALSE"), "LED94");
 
 
-        this.setOutput(true, 'sprite');
+        this.setOutput(true, 'image');
         this.setTooltip("A larger image that will be scrolled across the LED display.");
         this.setHelpUrl("https://www.microbit.co.uk/functions/create-image");
     }
@@ -477,7 +477,7 @@ Blockly.Blocks['device_show_image_offset'] = {
     this.setColour(blockColors.images);
     this.appendDummyInput()
         .appendField("show image");
-    this.appendValueInput("sprite").setCheck('sprite');
+    this.appendValueInput("sprite").setCheck('image');
     this.appendValueInput("offset")
         .setCheck("Number")
         .appendField("at offset");
@@ -494,8 +494,7 @@ Blockly.Blocks['device_scroll_image'] = {
     this.setColour(blockColors.images);
     this.appendDummyInput()
         .appendField("scroll image");
-    this.appendValueInput("sprite")
-      .setCheck("sprite")
+    this.appendValueInput("sprite").setCheck('image')
         .setAlign(Blockly.ALIGN_RIGHT);
 //        .appendField("image");
     this.appendValueInput("frame offset")

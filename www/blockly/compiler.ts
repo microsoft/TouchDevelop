@@ -456,8 +456,8 @@ function toType(t: string): Type {
       return Type.String;
     case "Number":
       return Type.Number;
-    case "sprite":
-      return Type.Image;
+    case "image":
+        return Type.Image;
     case "Boolean":
       return Type.Boolean;
     default:
