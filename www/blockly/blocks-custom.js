@@ -603,7 +603,7 @@ Blockly.Blocks['math_op3'] = {
 
 Blockly.Blocks['device_while'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/while');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/while');
     this.setColour(blockColors.loops);
     this.appendValueInput("COND")
         .setCheck("Boolean")
@@ -631,7 +631,7 @@ Blockly.Blocks['device_random'] = {
 
 Blockly.Blocks['game_start_countdown'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendValueInput("duration")
         .setCheck("Number")
@@ -647,7 +647,7 @@ Blockly.Blocks['game_start_countdown'] = {
 
 Blockly.Blocks['game_score'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendDummyInput()
         .appendField("score");
@@ -659,7 +659,7 @@ Blockly.Blocks['game_score'] = {
 
 Blockly.Blocks['game_add_score'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendValueInput("points")
         .setCheck("Number")
@@ -675,7 +675,7 @@ Blockly.Blocks['game_add_score'] = {
 
 Blockly.Blocks['game_game_over'] = {
   init: function() {
-    this.setHelpUrl('https://www.microbit.co.uk/td/game-library');
+    this.setHelpUrl('https://www.microbit.co.uk/blocks/game-library');
     this.setColour(blockColors.game);
     this.appendDummyInput()
         .appendField("game over");
@@ -692,7 +692,7 @@ Blockly.Blocks['controls_simple_for'] = {
    * @this Blockly.Block
    */
   init: function() {
-    this.setHelpUrl("https://www.microbit.co.uk/td/for");
+    this.setHelpUrl("https://www.microbit.co.uk/blocks/for");
     this.setColour(Blockly.Blocks.loops.HUE);
     this.appendDummyInput()
         .appendField("for")
@@ -842,13 +842,13 @@ function monkeyPatchBlock(name, url) {
     };
 }
 
-monkeyPatchBlock("controls_if", "https://www.microbit.co.uk/td/if");
-// monkeyPatchBlock("controls_repeat_ext", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("variables_set", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("variables_get", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("math_number", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_compare", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_operation", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_negate", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_boolean", "https://www.microbit.co.uk/blocks/contents");
-// monkeyPatchBlock("logic_arithmetic", "https://www.microbit.co.uk/blocks/contents");
+monkeyPatchBlock("controls_if", "https://www.microbit.co.uk/blocks/if");
+monkeyPatchBlock("controls_repeat_ext", "https://www.microbit.co.uk/blocks/repeat");
+monkeyPatchBlock("variables_set", "https://www.microbit.co.uk/blocks/assign");
+//monkeyPatchBlock("variables_get", "https://www.microbit.co.uk/blocks/number");
+monkeyPatchBlock("math_number", "https://www.microbit.co.uk/blocks/number");
+monkeyPatchBlock("logic_compare", "https://www.microbit.co.uk/blocks/boolean");
+monkeyPatchBlock("logic_operation", "https://www.microbit.co.uk/blocks/boolean");
+monkeyPatchBlock("logic_negate", "https://www.microbit.co.uk/blocks/boolean");
+monkeyPatchBlock("logic_boolean", "https://www.microbit.co.uk/blocks/boolean");
+monkeyPatchBlock("logic_arithmetic", "https://www.microbit.co.uk/blocks/boolean");

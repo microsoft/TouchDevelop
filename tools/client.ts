@@ -3863,7 +3863,7 @@ function concattdlibs() {
     var txt = "\nvar TDev; if(!TDev) TDev = {}; TDev.shippedLibraryCache = " + 
         JSON.stringify(meta, null, 1) + ";\n"
     
-    txt += "TDev.scriptTemplates = " + JSON.stringify(templates, null, 1) + ";n";
+    txt += "TDev.scriptTemplates = " + JSON.stringify(templates, null, 1) + ";\n";
      
     console.log("create td library cache file; " + txt.length + " bytes")
     fs.writeFileSync("build/tdlibraries.js", txt)

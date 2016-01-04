@@ -3170,6 +3170,7 @@ module TDev
 
             TDev.RT.App.clearLogs();
             Util.log("loadScriptAsync: " + header.guid);
+            var hex = Hex.preCacheEmptyExtensionAsync(true)
             return World.getInstalledHeaderAsync(header.guid)
             .then(resp => {
                 if (!resp) {
@@ -3183,6 +3184,7 @@ module TDev
                 if (!header) Util.oops(lf("script not installed"));
                 return this.saveStateAsync({ forReal: true });
             })
+            .then(() => hex)
             .then(() => {
                 this.undoMgr.clear();
                 Ticker.dbg("Editor.loadScriptAsync.getHeader");
