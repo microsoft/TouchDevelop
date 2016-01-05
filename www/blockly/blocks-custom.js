@@ -790,6 +790,21 @@ Blockly.Blocks['game_sprite_touching_sprite'] = {
     }
 };
 
+Blockly.Blocks['game_sprite_touching_edge'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendValueInput("sprite")
+            .setCheck("sprite");
+        this.appendDummyInput()
+            .appendField("touching edge?");
+        this.setOutput(true, 'Boolean');
+        this.setInputsInline(true);
+        this.setTooltip('Reports true if the sprite is on the edge of the screen.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
 Blockly.Blocks['game_sprite_property'] = {
     init: function()
     {

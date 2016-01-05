@@ -256,23 +256,7 @@
         <block type="device_duration_1/16"></block>
       </category>      
       <category name="Game" colour="176">
-        <block type="game_add_score" gap="12">
-          <value name="points">
-            <shadow type="math_number">
-              <field name="NUM">1</field>
-            </shadow>
-          </value>
-        </block>
-        <block type="game_score"></block>
-        <block type="game_start_countdown" gap="12">
-          <value name="duration">
-            <shadow type="math_number">
-              <field name="NUM">10000</field>
-            </shadow>
-          </value>
-        </block>
-        <block type="game_game_over"></block>
-        <block type="game_create_sprite" gap="12">
+        <block type="game_create_sprite">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">2</field>
@@ -284,7 +268,7 @@
             </shadow>
           </value>            
         </block>
-        <block type="game_move_sprite" gap="12">
+        <block type="game_move_sprite" gap="8">
           <value name="leds">
             <shadow type="math_number">
               <field name="NUM">1</field>
@@ -298,14 +282,14 @@
             </shadow>
           </value>            
         </block>
-        <block type="game_sprite_change_xy" gap="12">
+        <block type="game_sprite_change_xy" gap="8">
           <value name="value">
             <shadow type="math_number">
               <field name="NUM">1</field>
             </shadow>
           </value>            
         </block>
-        <block type="game_sprite_set_xy" gap="12">
+        <block type="game_sprite_set_xy" gap="8">
           <value name="value">
             <shadow type="math_number">
               <field name="NUM">0</field>
@@ -313,8 +297,25 @@
           </value>            
         </block>
         <block type="game_sprite_property"></block>
-        <block type="game_sprite_touching_sprite"></block>
+        <block type="game_sprite_touching_sprite" gap="12"></block>
+        <block type="game_sprite_touching_edge" gap="12"></block>
         <block type="game_sprite_bounce"></block>
+        <block type="game_add_score" gap="8">
+          <value name="points">
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_score" gap="8"></block>
+        <block type="game_start_countdown" gap="8">
+          <value name="duration">
+            <shadow type="math_number">
+              <field name="NUM">10000</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="game_game_over"></block>
       </category>
       <category name="Images" colour="45">
         <block type="device_show_image_offset">
