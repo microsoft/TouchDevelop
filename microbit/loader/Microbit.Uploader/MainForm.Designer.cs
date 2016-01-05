@@ -93,12 +93,12 @@
             // SettingsLabel
             // 
             this.SettingsLabel.AutoSize = true;
-            this.SettingsLabel.Location = new System.Drawing.Point(321, 9);
+            this.SettingsLabel.Location = new System.Drawing.Point(138, 121);
             this.SettingsLabel.Name = "SettingsLabel";
-            this.SettingsLabel.Size = new System.Drawing.Size(45, 13);
+            this.SettingsLabel.Size = new System.Drawing.Size(43, 13);
             this.SettingsLabel.TabIndex = 4;
             this.SettingsLabel.TabStop = true;
-            this.SettingsLabel.Text = "Settings";
+            this.SettingsLabel.Text = "settings";
             this.SettingsLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.SettingsLabel_LinkClicked);
             // 
             // MainForm

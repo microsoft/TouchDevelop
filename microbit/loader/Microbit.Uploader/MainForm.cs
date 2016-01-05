@@ -116,6 +116,7 @@ namespace Microsoft.MicroBit
                 // already copying?
                 if (Interlocked.Exchange(ref this.copying, 1) == 1)
                     return;
+
                 try
                 {
 
@@ -138,12 +139,9 @@ namespace Microsoft.MicroBit
 
                     this.updateStatus("uploading .hex file");
                     this.trayIcon.ShowBalloonTip(3000, "uploading...", "uploading .hex file", ToolTipIcon.None);
-                    
+
                     // copy to all boards
-                    foreach(var drive in drives) {                                                
-                        var trg = System.IO.Path.Combine(drive, "firmware.hex");
-                        File.Copy(info.FullName, trg, true);
-                    }
+                    copyFirmware(info.FullName, drives);
                     
                     // move away hex file
                     var temp = System.IO.Path.ChangeExtension(info.FullName, ".uploaded.hex");
@@ -170,6 +168,33 @@ namespace Microsoft.MicroBit
             catch (NotSupportedException) { }
             catch (UnauthorizedAccessException) { }
             catch (ArgumentException) { }
+        }
+
+        static void copyFirmware(string file, List<string> drives)
+        {
+            var waitHandles = new List<WaitHandle>();
+            foreach (var drive in drives)
+            {
+                var ev = new AutoResetEvent(false);
+                waitHandles.Add(ev);
+                ThreadPool.QueueUserWorkItem((state) =>
+                {
+                    try
+                    {
+                        var trg = System.IO.Path.Combine(drive, "firmware.hex");
+                        File.Copy(file, trg, true);
+                    }
+                    catch (IOException) { }
+                    catch (NotSupportedException) { }
+                    catch (UnauthorizedAccessException) { }
+                    catch (ArgumentException) { }
+                    ev.Set();
+                }, ev);
+            }
+
+            //waits for all the threads (waitHandles) to call the .Set() method
+            //and inform that the execution has finished.
+            WaitHandle.WaitAll(waitHandles.ToArray());
         }
 
         static DriveInfo[] getMicrobitDrives()
