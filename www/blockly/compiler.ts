@@ -1560,7 +1560,7 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
     var stmtsVariables: J.JStmt[] = [];
     e.bindings.forEach((b: Binding) => {
       if (!isCompiledAsForIndex(b)) {
-        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(b.type)));
+        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(find(b.type))));
       }
     });
 
