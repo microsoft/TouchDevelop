@@ -1424,6 +1424,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "set y to",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
+  game_sprite_set_direction: {
+      isExtensionMethod: true,
+      f: "set direction to",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
   game_sprite_bounce: {
       isExtensionMethod: true,
       f: "if on edge, bounce",
@@ -1531,7 +1536,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         case 'game_sprite_property':
             stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]));
             break;
-        case 'game_sprite_set_xy':
+        case 'game_sprite_set_property':
             stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_set_" + b.getFieldValue("property")]));
             break;
         case 'game_sprite_change_xy':

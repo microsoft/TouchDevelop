@@ -842,13 +842,13 @@ Blockly.Blocks['game_sprite_change_xy'] = {
     }
 };
 
-Blockly.Blocks['game_sprite_set_xy'] = {
+Blockly.Blocks['game_sprite_set_property'] = {
     init: function()
     {
         this.setColour(blockColors.game);
         this.appendDummyInput().appendField("set");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(xyDropdown), "property");
+            .appendField(new Blockly.FieldDropdown(spritePropertyDropdown), "property");
         this.appendValueInput("sprite")
             .setCheck("sprite")
             .appendField("of");
