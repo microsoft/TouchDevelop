@@ -104,14 +104,14 @@
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <block type="device_show_number">
+        <block type="device_show_number" gap="12">
           <value name="number">
             <shadow type="math_number">
               <field name="NUM">2</field>
             </shadow>
           </value>
         </block>
-        <block type="device_show_leds">
+        <block type="device_show_leds" gap="12">
         </block>
         <block type="device_print_message">
           <value name="message">
@@ -121,7 +121,7 @@
           </value>
         </block>
         <block type="device_clear_display"></block>
-        <block type="device_forever"></block>
+        <block type="device_forever" gap="12"></block>
         <block type="device_pause">
           <value name="pause">
             <shadow type="math_number">
@@ -134,11 +134,11 @@
         <block type="device_button_event"></block>
         <block type="device_shake_event"></block>
         <block type="device_pin_event"></block>
-        <block type="device_get_button2"></block>
-        <block type="device_heading"></block>
-        <block type="device_temperature"></block>
-        <block type="device_get_acceleration"></block>
-        <block type="device_get_running_time"></block>
+        <block type="device_get_button2" gap="12"></block>
+        <block type="device_heading" gap="12"></block>
+        <block type="device_temperature" gap="12"></block>
+        <block type="device_get_acceleration" gap="12"></block>
+        <block type="device_get_running_time" gap="12"></block>
       </category>
       <category name="Loops" colour="120">
         <block type="controls_repeat_ext">
@@ -187,7 +187,7 @@
         </block>
       </category>      
       <category name="LED" colour="3">
-        <block type="device_plot">
+        <block type="device_plot" gap="12">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">0</field>
@@ -199,7 +199,7 @@
             </shadow>
           </value>
         </block>
-        <block type="device_unplot">
+        <block type="device_unplot" gap="12">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">0</field>
@@ -224,7 +224,7 @@
           </value>
         </block>
 
-        <block type="device_get_brightness"></block>
+        <block type="device_get_brightness"  gap="12"></block>
         <block type="device_set_brightness">
             <value name="value">
                 <shadow type="math_number">
@@ -256,7 +256,7 @@
         <block type="device_duration_1/16"></block>
       </category>      
       <category name="Game" colour="176">
-        <block type="game_add_score">
+        <block type="game_add_score" gap="12">
           <value name="points">
             <shadow type="math_number">
               <field name="NUM">1</field>
@@ -264,7 +264,7 @@
           </value>
         </block>
         <block type="game_score"></block>
-        <block type="game_start_countdown">
+        <block type="game_start_countdown" gap="12">
           <value name="duration">
             <shadow type="math_number">
               <field name="NUM">10000</field>
@@ -272,7 +272,7 @@
           </value>
         </block>
         <block type="game_game_over"></block>
-        <block type="game_create_sprite">
+        <block type="game_create_sprite" gap="12">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">2</field>
@@ -284,14 +284,14 @@
             </shadow>
           </value>            
         </block>
-        <block type="game_move_sprite">
+        <block type="game_move_sprite" gap="12">
           <value name="leds">
             <shadow type="math_number">
               <field name="NUM">1</field>
             </shadow>
           </value>            
         </block>
-        <block type="game_turn_sprite">
+        <block type="game_turn_sprite" gap="12">
           <value name="angle">
             <shadow type="math_number">
               <field name="NUM">45</field>
@@ -323,7 +323,7 @@
         <block type="device_build_big_image"></block>
       </category>
       <category name="Pins" colour="351">
-          <block type="device_get_digital_pin"></block>
+          <block type="device_get_digital_pin" gap="12"></block>
           <block type="device_set_digital_pin">
             <value name="value">
               <shadow type="math_number">
@@ -331,8 +331,8 @@
               </shadow>
             </value>
           </block>
-          <block type="device_get_analog_pin"></block>
-          <block type="device_set_analog_pin">
+          <block type="device_get_analog_pin" gap="12"></block>
+          <block type="device_set_analog_pin" gap="12">
             <value name="value">
               <shadow type="math_number">
                 <field name="NUM">1024</field>
