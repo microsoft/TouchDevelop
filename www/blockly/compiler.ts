@@ -479,7 +479,7 @@ function toTdType(t: Type) {
     case Type.Image:
         return H.mkLTypeRef("Image");
     case Type.Sprite:
-        return H.mkLTypeRef("Sprite");          
+        return H.mkLTypeRef("Led Sprite");          
     default:
       throw new Error("Cannot convert unit");
   }
@@ -884,7 +884,9 @@ function defaultValueForType(t: Point): J.JExpr {
     case Type.String:
       return H.mkStringLiteral("");
     case Type.Image:
-      return H.namespaceCall("image", "create image", [H.mkStringLiteral("")]);
+        return H.namespaceCall("image", "create image", [H.mkStringLiteral("")]);
+    case Type.Sprite:
+        return H.namespaceCall("game", "create sprite", [H.mkNumberLiteral(2), H.mkNumberLiteral(2)]);     
   }
   throw new Error("No default value for type");
 }
@@ -1577,9 +1579,12 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
 
     // All variables in this script are compiled as locals within main.
     var stmtsVariables: J.JStmt[] = [];
-    e.bindings.forEach((b: Binding) => {
-      if (!isCompiledAsForIndex(b)) {
-        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(b.type)));
+    e.bindings.forEach((b: Binding) => {        
+        var btype = find(b.type);
+        if (!isCompiledAsForIndex(b)
+            && btype.type != Type.Sprite
+            && btype.type != Type.Image) {
+        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(btype.type), defaultValueForType(b.type)));
       }
     });
 
