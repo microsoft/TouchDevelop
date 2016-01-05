@@ -1404,19 +1404,39 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "turn right",
       args: [{ field: "sprite" } ,{ field: "angle" }]
   },
+  game_sprite_change_x: {
+      isExtensionMethod: true,
+      f: "change x by",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_change_y: {
+      isExtensionMethod: true,
+      f: "change y by",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_set_x: {
+      isExtensionMethod: true,
+      f: "set x to",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_set_y: {
+      isExtensionMethod: true,
+      f: "set y to",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
   game_sprite_bounce: {
       isExtensionMethod: true,
       f: "if on edge, bounce",
       args: [{ field: "sprite" }]
   },
-  game_sprite_x_position: {
+  game_sprite_x: {
       isExtensionMethod: true,
-      f: "x position",
+      f: "x",
       args: [{ field: "sprite" }]
   },
-  game_sprite_y_position: {
+  game_sprite_y: {
       isExtensionMethod: true,
-      f: "y position",
+      f: "y",
       args: [{ field: "sprite" }]
   },
   game_sprite_direction: {
@@ -1500,6 +1520,12 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
             break;
         case 'game_sprite_property':
             stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]));
+            break;
+        case 'game_sprite_set_xy':
+            stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_set_" + b.getFieldValue("property")]));
+            break;
+        case 'game_sprite_change_xy':
+            stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_change_" + b.getFieldValue("property")]));
             break;
         default:
           if (b.type in stdCallTable)

@@ -32,9 +32,14 @@ var leftRightDropdown = [
   ["left", "left"],
 ];
 
+var xyDropdown = [
+  ["x", "x"],
+  ["y", "y"],
+];
+
 var spritePropertyDropdown = [
-  ["x position", "x_position"],
-  ["y position", "y_position"],
+  ["x", "x"],
+  ["y", "y"],
   ["direction", "direction"]
 ];
 
@@ -780,6 +785,48 @@ Blockly.Blocks['game_sprite_property'] = {
         this.setInputsInline(true);
         this.setOutput(true, 'Number');
         this.setTooltip('Reports the property of the sprite');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
+Blockly.Blocks['game_sprite_change_xy'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("change");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(xyDropdown), "property");
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+            .appendField("of");
+        this.appendValueInput("value")
+            .setCheck("Number")
+            .appendField("by");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Change the property of the sprite by the given amount');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
+Blockly.Blocks['game_sprite_set_xy'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("set");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(xyDropdown), "property");
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+            .appendField("of");
+        this.appendValueInput("value")
+            .setCheck("Number")
+            .appendField("to");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sets the property of the sprite');
         this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
     }
 };

@@ -252,14 +252,14 @@ action point_in_direction(#W6XOHR7W7H5Uhce5 @this: * Led_Sprite, #GlUGqspXS7qUZZ
   meta sync;
 }
 #NSHCEK6bQ8swNBmM
-action x_position(#xgToVMvrrAswoUeH @this: * Led_Sprite) returns(#xXVHwibH1jpjLEIs r: Number) {
+action x(#xgToVMvrrAswoUeH @this: * Led_Sprite) returns(#xXVHwibH1jpjLEIs r: Number) {
   #O7hb0e8vT223tnC9 // Reports the ``x`` position of a sprite on the LED screen
   #u9TO3yP69u3yQHq2 // {action:ignoreReturn}
   #lbdc1f64posFgGUT `return` $@this→\_x;
   meta sync;
 }
 #JDrz7o89TGTxeK2w
-action y_position(#rnfi71evZY42LLnW @this: * Led_Sprite) returns(#j7qseMNIfdD5bZk2 r: Number) {
+action y(#rnfi71evZY42LLnW @this: * Led_Sprite) returns(#j7qseMNIfdD5bZk2 r: Number) {
   #OL72oZm0MjSHeGPi // Reports the ``y`` position of a sprite on the LED screen
   #JChevy7MIzqvI44L // {action:ignoreReturn}
   #XyGKpV2bxAm2MSb3 `return` $@this→\_y;

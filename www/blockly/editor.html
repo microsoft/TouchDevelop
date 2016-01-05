@@ -291,15 +291,29 @@
             </shadow>
           </value>            
         </block>
-        <block type="game_turn_sprite" gap="12">
+        <block type="game_turn_sprite">
           <value name="angle">
             <shadow type="math_number">
               <field name="NUM">45</field>
             </shadow>
           </value>            
         </block>
-        <block type="game_sprite_bounce"></block>
+        <block type="game_sprite_change_xy" gap="12">
+          <value name="value">
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
+          </value>            
+        </block>
+        <block type="game_sprite_set_xy" gap="12">
+          <value name="value">
+            <shadow type="math_number">
+              <field name="NUM">0</field>
+            </shadow>
+          </value>            
+        </block>
         <block type="game_sprite_property"></block>
+        <block type="game_sprite_bounce"></block>
       </category>
       <category name="Images" colour="45">
         <block type="device_show_image_offset">
