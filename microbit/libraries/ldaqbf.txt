@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // A #microbit game library.
 #FICjbNZc86cUSakA meta import micro\u003abit {
-  pub "rbgelh"
+  pub "hdkwlu"
   usage {
     type Image
     action `sync` \_libinit()
@@ -273,7 +273,7 @@ action level_up() {
   #wA1EjK6AQ9iPKEOh // {help:td/game-library}
   #yDIMepChMEyFFv40 code→init;
   #D4nHKjh53QC7yfsA data→\_level := data→\_level + 1;
-  #X6J8Jattms0PGdqt basic[lib micro\u003abit] →show_string("level:", 150);
+  #X6J8Jattms0PGdqt basic[lib micro\u003abit] →show_string("LEVEL:", 150);
   #bmP28eYirxu2XvYe basic[lib micro\u003abit] →show_number(data→\_level, 150);
 }
 #XWIbW8F1TScZL6cH

@@ -7,7 +7,8 @@ meta platform "current";
 meta parentIds "";
 #YTCiBQqlEqAR6hEl
 action example() {
-  #xI5Psei4MCSWWUAO skip;
+  #OKmzT6pzf1C5mDmh // This library simple sprites for the  **BBC micro:bit** screen. [read more...](/td/sprites-library)
+  #xPbBQ4T5AZXIhcZ6 // {shim:}
   meta private;
 }
 #fzxa4xOS5OcSs43F meta import micro\u003abit {
@@ -122,7 +123,9 @@ action plot() {
   #Q5smeV7QsSwvEXau data→img→clear;
   #sUh5ANmEJC9YzA6C for 0 ≤ i < data→sprites→count do {
     #cngEXkIoZe8PB6iQ $ps := data→sprites→at($i);
-    #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+    #xvfBtyPgxfnWShil if $ps→\_brightness > 0 then {
+      #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+    }
   }
   #xMy88FrS4AY8GpKp data→img→plot_image(0);
   meta private;
@@ -226,7 +229,7 @@ action if_on_edge\u002c_bounce(#HV4x3j8JF159462w @this: * Led_Sprite) {
 action turn_right(#WQo2rhrkQWxkzPrA @this: * Led_Sprite, #TBC5hHn9AJYGofW7 degrees: Number) {
   #xLjBzHVtkZc5wTsM // Turn to the right (clockwise)
   #Dy8wBzFcytw4i4WD // {hints:degrees:45,90,135,180}
-  #STogS6X5S10pdm5j $@this→point_in_direction($@this→\_dir + $degrees);
+  #STogS6X5S10pdm5j $@this→set_direction($@this→\_dir + $degrees);
   meta sync;
 }
 #nhl5mQt24x0S6udm
@@ -237,7 +240,7 @@ action turn_left(#AkNxX24d83P2lJb4 @this: * Led_Sprite, #xaEEUGTEPf0CLnfJ degree
   meta sync;
 }
 #FCflZPrXxubdYEHq
-action point_in_direction(#W6XOHR7W7H5Uhce5 @this: * Led_Sprite, #GlUGqspXS7qUZZkh degrees: Number) {
+action set_direction(#W6XOHR7W7H5Uhce5 @this: * Led_Sprite, #GlUGqspXS7qUZZkh degrees: Number) {
   #rkSAHKmBYqJ6uZYF // Set the direction of the current sprite, rounded to the nearest multiple of 45
   #xLskSxLQcPhG5Eh8 // {hints:degrees:0,45,90,135,180,-45,-90,-135}
   #Rkf7OLg8OLcS1BQd $@this→\_dir := math→mod($degrees / 45, 8) * 45;
@@ -268,17 +271,18 @@ action y(#rnfi71evZY42LLnW @this: * Led_Sprite) returns(#j7qseMNIfdD5bZk2 r: Num
 #xSFJWYkhHm25gCC6
 action direction(#qmTmS7h27Sd6jvdE @this: * Led_Sprite) returns(#GMfjMqXduoLFMgVJ r: Number) {
   #oqasR6pvP2QH5Yit // Reports the current direction of a sprite
+  #e1J4Gl2GjYDo4AhP // {action:ignoreReturn}
   #qKryag4qEHbjmkOS `return` $@this→\_dir;
   meta sync;
 }
 #xd5Cnqhvdot8v0I2
-action set_x_to(#YRkB4B07f1TFpmc5 @this: * Led_Sprite, #IwppOWKsNf246cvq x: Number) {
+action set_x(#YRkB4B07f1TFpmc5 @this: * Led_Sprite, #IwppOWKsNf246cvq x: Number) {
   #xtgkapSjxReCIzks // Set the ``x`` position of a sprite
   #xBmG31Tos70NHkfZ $@this→go_to($x, $@this→\_y);
   meta sync;
 }
 #cjf3G44aBhLdgBM4
-action set_y_to(#xe00Eqd2Sye76CcK @this: * Led_Sprite, #xUIp4QMLCBopDvKT y: Number) {
+action set_y(#xe00Eqd2Sye76CcK @this: * Led_Sprite, #xUIp4QMLCBopDvKT y: Number) {
   #rt34m9v71RciQ1LM // Set the ``y`` position of a sprite
   #xz0cSa4iDTY741jP $@this→go_to($@this→\_x, $y);
   meta sync;
@@ -312,14 +316,33 @@ action is_touching_edge(#xvVZ9ABfZXXspLlY @this: * Led_Sprite) returns(#K8ObBSXJ
 #bkOzd2UzwbDSbLgu
 action on(#rj7tjF50krHRwt6J @this: * Led_Sprite) {
   #ydvX567DaEZLqO7K // Turns on the sprite (on by default)
-  #BWyXDgThTBSKzHLo $@this→\_brightness := 255;
-  #xb4MxFWf7F7dfdPx code→plot;
+  #lJ22kxYhvlqhft3U $@this→set_brightness(255);
   meta sync;
 }
 #u9iUpHzn26Cdfona
 action off(#e0lGhx7xf1e7IUCX @this: * Led_Sprite) {
   #Xb7Yx3vYM4ShEFUe // Turns off the sprite (on by default)
-  #Nkr0AnaOW4zAOH64 $@this→\_brightness := 0;
-  #xX4tlOFK7KMcXEoG code→plot;
+  #REB5VhZtw3YUYSxh $@this→set_brightness(0);
+  meta sync;
+}
+#DJ445YFffVfKDqHs
+action set_brightness(#ylG8SOIydgxxfeSy @this: * Led_Sprite, #DQWYvEEkEzaPMwlC brightness: Number) {
+  #CYsmrKQxad2dO63G // Set the ``brightness`` of a sprite
+  #FLAXXGWNwLg24o2J // {hints:brightness:255,0,127}
+  #lGQZxBxH4pi0khw3 $@this→\_brightness := math→clamp(0, 255, $brightness);
+  #bGzkRMdTHUH0BhYx code→plot;
+  meta sync;
+}
+#MMokZ8utTeSrEPEE
+action brightness(#x7Z3c9xE3t1SbCOb @this: * Led_Sprite) returns(#xUzQbOrOfDuvpEGp r: Number) {
+  #Sz7DkrDPcD4YpGJG // Reports the ``brightness` of a sprite on the LED screen
+  #FNuHpZoWtcvzcx0R // {action:ignoreReturn}
+  #Xb1aqKrgPqLtjVoj `return` $@this→brightness;
+  meta sync;
+}
+#CflgTntqHhWbxHlW
+action change_brightness_by(#YOnjOM5Dijox14bO @this: * Led_Sprite, #XChQ7dKtgcDBImGc value: Number) {
+  #QS0H5xTlm0sn0Unq // Changes the ``y`` position by the given amount
+  #Jk6fyOIwYdZoztd0 $@this→set_brightness($@this→\_brightness + $value);
   meta sync;
 }
