@@ -180,7 +180,7 @@ action go_to(#abaqqKrsGOA41iFy @this: * Led_Sprite, #xcASpLlpX5koamEQ x: Number,
 }
 #EnFD76PbssiLD7vv
 action if_on_edge\u002c_bounce(#HV4x3j8JF159462w @this: * Led_Sprite) {
-  #mW2b4erDcZw45S3d // If touching the edge of the stage, then bounce away
+  #mW2b4erDcZw45S3d // If touching the edge of the stage, then bounce away.
   #WJvOYi3J0oQUfX7r if $@this→\_dir = 0 `and` $@this→\_y = 0 then {
     #ki7G5jxaq4oECrOa $@this→\_dir := 180;
   }
@@ -218,10 +218,22 @@ action if_on_edge\u002c_bounce(#HV4x3j8JF159462w @this: * Led_Sprite) {
       #Q3IgxEngGQNS1Y5t $@this→\_dir := 45;
     }
   }
-  else { #xXlWXaP45766gsVk if $@this→\_dir = - 90 then {
-    #xpKOVFoZAzm3xyS1 skip;
+  else { #xXlWXaP45766gsVk if $@this→\_dir = - 90 `and` $@this→\_x = 0 then {
+    #xpKOVFoZAzm3xyS1 $@this→\_dir := 90;
   }
-  else { } } } } } } } 
+  else { #I0kQuCXxWELaGOYh if $@this→\_dir = - 135 `and` ($@this→\_x = 0 `or` $@this→\_y = 4) then {
+    #xJ7N9Y3ZVXv8g7oI if $@this→\_x = 0 `and` $@this→\_y = 4 then {
+      #LmufIcTbWtVXHSLJ $@this→\_dir := 45;
+    }
+    else { #hkg4w2uDjtmf2ogC if $@this→\_y = 4 then {
+      #l2OvXKlH3du5wfxz $@this→\_dir := - 45;
+    }
+    else {
+      #xYQkGx2fAmR7kY90 $@this→\_dir := 135;
+    }
+    } 
+  }
+  else { } } } } } } } } 
   #Hwo8pD4s5eRV2By5 code→plot;
   meta sync;
 }
