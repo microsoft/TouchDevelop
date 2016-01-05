@@ -752,6 +752,22 @@ Blockly.Blocks['game_turn_sprite'] = {
     }
 };
 
+Blockly.Blocks['game_sprite_bounce'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+            .appendField("if");
+        this.appendDummyInput().appendField("on edge, bounce");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('If touching the edge of the screen, then bounce away');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
 Blockly.Blocks['game_sprite_property'] = {
     init: function()
     {
