@@ -3540,6 +3540,7 @@ function fetchlibraries(args) {
         'nmhibf' // adj script
         , 'vxwcfp' // micro:bit
         , 'ldaqbf' // micro:bit game
+        , 'vzkdcc' // micro:bit sprites
         , 'fdbsiw' // micro:bit serial
         , 'xnkmqj' // micro:bit senses
         , 'drdxps' // micro:bit screen

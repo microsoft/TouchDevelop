@@ -1,0 +1,325 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit sprites";
+meta rootId "IrNJbTSBupAi6m6b0w7EHBVL";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+#YTCiBQqlEqAR6hEl
+action example() {
+  #xI5Psei4MCSWWUAO skip;
+  meta private;
+}
+#fzxa4xOS5OcSs43F meta import micro\u003abit {
+  pub "hdkwlu"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `sync` remote_control(@event: String)
+    action `sync` camera(@event: String)
+    action `sync` microphone(@event: String)
+    action `sync` alert(@event: String)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring(frequency: Number)
+  }
+}
+#BVGhpbmca
+table Led_Sprite {
+  type = "Object";
+  persistent = false;
+  fields {
+    #iTImxC9YFcZqpWTT \_x : Number
+    #sdXbuHxH9qCkC7qR \_y : Number
+    #eTU9ge4joHCJTqwK \_dir : Number
+    #CLRbdVAs4KoUqa4G \_brightness : Number
+  }
+}
+#xbp2Y1F2yQjR1gEi
+action create_sprite(#KBVVgM8SyXDGuONt x: Number, #x1FLGt14bvabwz2I y: Number) returns(#ceYntRMw503qHIJo r: * Led_Sprite) {
+  #xMO3FUwzkNbdsVIL // Creates a new LED sprite pointing to the right.
+  #fZmCBJA8WJytdrrV // {hints:x:2}
+  #s8v5SPF4SgfsrprQ // {hints:y:2}
+  #ZLBODN0J98gjeOPM // {namespace:game}
+  #VJD4bKmxGOmnA4ZM // {weight:60}
+  #rfMC44aRImQUneP7 // {action:ignoreReturn}
+  #f2n8VK6qGoYNLbc9 code→init;
+  #cV1EFfm7xnOZnGv1 $p := records→Led_Sprite→create;
+  #gwBghdrsqah3tSYk $p→\_x := math→clamp(0, 4, $x);
+  #I7ebVJnUT5Tah5Co $p→\_y := math→clamp(0, 4, $y);
+  #N19lcNu2xirQysAJ $p→\_dir := 90;
+  #xf8sKvf6jZohgpgS $p→\_brightness := 255;
+  #FPHV1E3o5428zsUn data→sprites→add($p);
+  #ynsPu0nLmLOO9sHQ code→plot;
+  #oTUYBv5veHYOjR2U `return` $p;
+}
+#n03pjtVWhETO1iAd
+var img : ♻ micro\u003abit → Image {
+  transient = true;
+}
+#YXLJL2PruAqFVTws
+action init() {
+  #ORPuncsI5B4zWKsC if data→img→is_invalid then {
+    #xW1383xeJNO22s2z data→img := image[lib micro\u003abit] →create_image("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0");
+    #RhS9YdgJ5X2DrEy1 data→sprites := create→Collection_of→\u2339Led_Sprite;
+  }
+  meta private;
+  meta sync;
+}
+#xIV6UQzyvfSv2Km0
+var sprites : Collection[ * Led_Sprite] {
+  transient = true;
+}
+#mFH9LyIh4pa2Goe8
+action plot() {
+  #zMVFcsyhZHmabHaV // Plots the current sprites on the screen
+  #Q5smeV7QsSwvEXau data→img→clear;
+  #sUh5ANmEJC9YzA6C for 0 ≤ i < data→sprites→count do {
+    #cngEXkIoZe8PB6iQ $ps := data→sprites→at($i);
+    #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+  }
+  #xMy88FrS4AY8GpKp data→img→plot_image(0);
+  meta private;
+  meta sync;
+}
+#Ii223cRjT2ZfXMMv
+action move(#qvj22Zhu8Eo5aUG6 @this: * Led_Sprite, #f3DRVSobQuPZvt4O leds: Number) {
+  #xQHiOcGzhHb0Tx9t // Move a certain number of LEDs
+  #Ia0a2avS87ozapuc if $@this→\_dir = 0 then {
+    #xguNWSh6ozJhLDZm $@this→\_y := $@this→\_y - $leds;
+  }
+  else { #xkZp4VKKT4vlygml if $@this→\_dir = 45 then {
+    #BwF3Tum2fGAxOmhE $@this→\_x := $@this→\_x + $leds;
+    #WDUbDm4yNHaoKmvW $@this→\_y := $@this→\_y - $leds;
+  }
+  else { #fvsPfw4Q4C6D2L5Y if $@this→\_dir = 90 then {
+    #OAatiV4yZX34Lif9 $@this→\_x := $@this→\_x + $leds;
+  }
+  else { #To0PQ7s6rn3KGnK4 if $@this→\_dir = 135 then {
+    #hqnjllANuxMphiv2 $@this→\_x := $@this→\_x + $leds;
+    #xbrE4lOrDfgmt8HE $@this→\_y := $@this→\_y + $leds;
+  }
+  else { #UPLmWeTmHs3pWX1i if $@this→\_dir = 180 then {
+    #qpgQOY1wHfUd2VSE $@this→\_y := $@this→\_y + $leds;
+  }
+  else { #Dm3TvL4C2BDNYlpJ if $@this→\_dir = - 45 then {
+    #xLloUv2wDidasof7 $@this→\_x := $@this→\_x - $leds;
+    #Q4eMk8ku2tzRTWmV $@this→\_y := $@this→\_y + $leds;
+  }
+  else { #TkGM1qH4v7YjA3Dj if $@this→\_dir = - 90 then {
+    #wiV8WWkDvoYq47YZ $@this→\_x := $@this→\_x - $leds;
+  }
+  else {
+    #N5FS3aoL5x6Q8bg3 $@this→\_x := $@this→\_x - $leds;
+    #xkUwKZMYcfPxvNu6 $@this→\_y := $@this→\_y + $leds;
+  }
+  } } } } } } 
+  #hm8FZefbky33Z4HE $@this→\_x := math→clamp(0, 4, $@this→\_x);
+  #O4Eu78c4LTWcTZtE $@this→\_y := math→clamp(0, 4, $@this→\_y);
+  #x0H7hR67xz4euAeC code→plot;
+  meta sync;
+}
+#wquesHkwuYKkrRep
+action go_to(#abaqqKrsGOA41iFy @this: * Led_Sprite, #xcASpLlpX5koamEQ x: Number, #AEe12g4I9h5PTaxW y: Number) {
+  #I4EOQGLe35sjOJk6 // Go to this position on the screen
+  #PIpmUdNyvDkdBwrQ $@this→\_x := $x;
+  #fEF0IYx9kgSeOHkb $@this→\_y := $y;
+  #xWLn0kyHeQnWluNB $@this→\_x := math→clamp(0, 4, $@this→\_x);
+  #dtM7s4cG1zxXT7le $@this→\_y := math→clamp(0, 4, $@this→\_y);
+  #Cs4ula7JmM0HSolU code→plot;
+  meta sync;
+}
+#EnFD76PbssiLD7vv
+action if_on_edge\u002c_bounce(#HV4x3j8JF159462w @this: * Led_Sprite) {
+  #mW2b4erDcZw45S3d // If touching the edge of the stage, then bounce away
+  #WJvOYi3J0oQUfX7r if $@this→\_dir = 0 `and` $@this→\_y = 0 then {
+    #ki7G5jxaq4oECrOa $@this→\_dir := 180;
+  }
+  else { #Cqb5nUza82plXe5W if $@this→\_dir = 45 `and` ($@this→\_x = 4 `or` $@this→\_y = 0) then {
+    #xTNRwJttNNDMS4jH if $@this→\_x = 0 `and` $@this→\_y = 0 then {
+      #wNpbzp4QzSOBV6Uw $@this→\_dir := - 135;
+    }
+    else { #QIHjBGVMm3O7jKbg if $@this→\_y = 0 then {
+      #G4NfDqmzft2pZa0u $@this→\_dir := 135;
+    }
+    else {
+      #xv4hQ8ImkIWqbf40 $@this→\_dir := - 45;
+    }
+    } 
+  }
+  else { #eKc44OZTHanPb4ou if $@this→\_dir = 90 `and` $@this→\_x = 4 then {
+    #mhlBDRbCxrRN2GJh $@this→\_dir := - 90;
+  }
+  else { #y6QrCxoz5uQ2s6Xe if $@this→\_dir = 135 `and` ($@this→\_x = 4 `or` $@this→\_y = 4) then {
+    #xSXuex4eRZT5v1LQ if $@this→\_y = 4 then {
+      #E22lLCJn4ecoqZ29 $@this→\_dir := - 45;
+    }
+    else {
+      #OoLMy4bQlVjRfZeE $@this→\_dir := - 135;
+    }
+  }
+  else { #KO0B13gTd4WyOTav if $@this→\_dir = 180 `and` $@this→\_y = 4 then {
+    #HYmYAypV2ZRjwxjR $@this→\_dir := 0;
+  }
+  else { #TC5SNjX4AmPPzgIq if $@this→\_dir = - 45 `and` ($@this→\_x = 0 `or` $@this→\_y = 0) then {
+    #wNngfLmvyionXaDP if $@this→\_y = 0 then {
+      #DjbzNtzG2PEVhOVc $@this→\_dir := - 135;
+    }
+    else {
+      #Q3IgxEngGQNS1Y5t $@this→\_dir := 45;
+    }
+  }
+  else { #xXlWXaP45766gsVk if $@this→\_dir = - 90 then {
+    #xpKOVFoZAzm3xyS1 skip;
+  }
+  else { } } } } } } } 
+  #Hwo8pD4s5eRV2By5 code→plot;
+  meta sync;
+}
+#Qbs2pH7Z7ul3N272
+action turn_right(#WQo2rhrkQWxkzPrA @this: * Led_Sprite, #TBC5hHn9AJYGofW7 degrees: Number) {
+  #xLjBzHVtkZc5wTsM // Turn to the right (clockwise)
+  #Dy8wBzFcytw4i4WD // {hints:degrees:45,90,135,180}
+  #STogS6X5S10pdm5j $@this→point_in_direction($@this→\_dir + $degrees);
+  meta sync;
+}
+#nhl5mQt24x0S6udm
+action turn_left(#AkNxX24d83P2lJb4 @this: * Led_Sprite, #xaEEUGTEPf0CLnfJ degrees: Number) {
+  #q2Uw4nTyC4yxAhUV // Turn to the left (counter-clockwise)
+  #h2IwxNSyzoIrBCPo // {hints:degrees:45,90,135,180}
+  #aCF4f3u2PTKdbCBW $@this→turn_right( - $degrees);
+  meta sync;
+}
+#FCflZPrXxubdYEHq
+action point_in_direction(#W6XOHR7W7H5Uhce5 @this: * Led_Sprite, #GlUGqspXS7qUZZkh degrees: Number) {
+  #rkSAHKmBYqJ6uZYF // Set the direction of the current sprite, rounded to the nearest multiple of 45
+  #xLskSxLQcPhG5Eh8 // {hints:degrees:0,45,90,135,180,-45,-90,-135}
+  #Rkf7OLg8OLcS1BQd $@this→\_dir := math→mod($degrees / 45, 8) * 45;
+  #nCQbePGChgTQ2hm7 if $@this→\_dir ≤ - 180 then {
+    #xD2OY2tbKkgc4QFj $@this→\_dir := $@this→\_dir + 360;
+  }
+  else { #xxcX416s0eXg2Jb4 if $@this→\_dir > 180 then {
+    #YUQrsgErLV0isSaw $@this→\_dir := $@this→\_dir - 360;
+  }
+  else { } } 
+  #op5k2N9fbXY8HEWU code→plot;
+  meta sync;
+}
+#NSHCEK6bQ8swNBmM
+action x_position(#xgToVMvrrAswoUeH @this: * Led_Sprite) returns(#xXVHwibH1jpjLEIs r: Number) {
+  #O7hb0e8vT223tnC9 // Reports the ``x`` position of a sprite on the LED screen
+  #u9TO3yP69u3yQHq2 // {action:ignoreReturn}
+  #lbdc1f64posFgGUT `return` $@this→\_x;
+  meta sync;
+}
+#JDrz7o89TGTxeK2w
+action y_position(#rnfi71evZY42LLnW @this: * Led_Sprite) returns(#j7qseMNIfdD5bZk2 r: Number) {
+  #OL72oZm0MjSHeGPi // Reports the ``y`` position of a sprite on the LED screen
+  #JChevy7MIzqvI44L // {action:ignoreReturn}
+  #XyGKpV2bxAm2MSb3 `return` $@this→\_y;
+  meta sync;
+}
+#xSFJWYkhHm25gCC6
+action direction(#qmTmS7h27Sd6jvdE @this: * Led_Sprite) returns(#GMfjMqXduoLFMgVJ r: Number) {
+  #oqasR6pvP2QH5Yit // Reports the current direction of a sprite
+  #qKryag4qEHbjmkOS `return` $@this→\_dir;
+  meta sync;
+}
+#xd5Cnqhvdot8v0I2
+action set_x_to(#YRkB4B07f1TFpmc5 @this: * Led_Sprite, #IwppOWKsNf246cvq x: Number) {
+  #xtgkapSjxReCIzks // Set the ``x`` position of a sprite
+  #xBmG31Tos70NHkfZ $@this→go_to($x, $@this→\_y);
+  meta sync;
+}
+#cjf3G44aBhLdgBM4
+action set_y_to(#xe00Eqd2Sye76CcK @this: * Led_Sprite, #xUIp4QMLCBopDvKT y: Number) {
+  #rt34m9v71RciQ1LM // Set the ``y`` position of a sprite
+  #xz0cSa4iDTY741jP $@this→go_to($@this→\_x, $y);
+  meta sync;
+}
+#xCdoxKQ2PYO4sDeW
+action change_y_by(#GtmKdo2M0rB6Xoxp @this: * Led_Sprite, #xnOmlrhOk7cRHCIg y: Number) {
+  #nMbLdUu2E6HK3aod // Changes the ``y`` position by the given amount
+  #xaWt7GUOc2SDslvK $@this→go_to($@this→\_x, $@this→\_y + $y);
+  meta sync;
+}
+#vaus553SVioo4jJr
+action change_x_by(#BNyURA3lrR445XJ2 @this: * Led_Sprite, #GC5f2Y5myMXFJMuk x: Number) {
+  #Wa4DXXQfls07wwqI // Changes the ``x`` position by the given amount
+  #TE7whTqcF6AjYWvK $@this→go_to($@this→\_x + $x, $@this→\_y);
+  meta sync;
+}
+#NH3Z2IrvU21LuPGM
+action touching_\u003f(#NB942NQl923gi02T @this: * Led_Sprite, #UZ597zOwyA6568TK other: * Led_Sprite) returns(#zHEcCNsDmXzhUt9V r: Boolean) {
+  #w2haKF4w9cxEBYkc // Reports true if sprite is touching specified sprite
+  #EHJ2YBpvJAzd0Uqp // {action:ignoreReturn}
+  #bAQMgnnEUZqDGLyC `return` $@this→\_x = $other→\_x `and` $@this→\_y = $other→\_y;
+  meta sync;
+}
+#xD4uhANlxBIGS7OU
+action touching_edge\u003f(#xvVZ9ABfZXXspLlY @this: * Led_Sprite) returns(#K8ObBSXJ5ECbUdjN r: Boolean) {
+  #IvjKKKDIP3iKSHqb // Reports true if sprite is touching an edge
+  #zOe9JEEGfZjkRXVN // {action:ignoreReturn}
+  #B25GiX6KizWzqnHH `return` $@this→\_x = 0 `or` $@this→\_x = 4 `or` $@this→\_y = 0 `or` $@this→\_y = 4;
+  meta sync;
+}
+#bkOzd2UzwbDSbLgu
+action on(#rj7tjF50krHRwt6J @this: * Led_Sprite) {
+  #ydvX567DaEZLqO7K // Turns on the sprite (on by default)
+  #BWyXDgThTBSKzHLo $@this→\_brightness := 255;
+  #xb4MxFWf7F7dfdPx code→plot;
+  meta sync;
+}
+#u9iUpHzn26Cdfona
+action off(#e0lGhx7xf1e7IUCX @this: * Led_Sprite) {
+  #Xb7Yx3vYM4ShEFUe // Turns off the sprite (on by default)
+  #Nkr0AnaOW4zAOH64 $@this→\_brightness := 0;
+  #xX4tlOFK7KMcXEoG code→plot;
+  meta sync;
+}

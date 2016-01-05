@@ -447,7 +447,7 @@ module Errors {
 // undetermined as of yet, the type of the variable becomes the expected type.
 
 // Starts at 1, otherwise you can't write "if (type) ...".
-enum Type { Number = 1, Boolean, String, Image, Unit };
+enum Type { Number = 1, Boolean, String, Image, Unit, Sprite };
 
 // From a Blockly string annotation to a [Type].
 function toType(t: string): Type {
@@ -456,10 +456,12 @@ function toType(t: string): Type {
       return Type.String;
     case "Number":
       return Type.Number;
-    case "image":
-        return Type.Image;
     case "Boolean":
       return Type.Boolean;
+    case "image":
+        return Type.Image;
+    case "sprite":
+        return Type.Sprite;
     default:
       throw new Error("Unknown type");
   }
@@ -475,7 +477,9 @@ function toTdType(t: Type) {
     case Type.String:
       return H.mkTypeRef("String");
     case Type.Image:
-      return H.mkLTypeRef("Image");
+        return H.mkLTypeRef("Image");
+    case Type.Sprite:
+        return H.mkLTypeRef("Sprite");          
     default:
       throw new Error("Cannot convert unit");
   }
@@ -492,6 +496,8 @@ function typeToString(t: Type) {
       return "String";
     case Type.Image:
       return "Image";
+    case Type.Sprite:
+      return "Sprite";
     case Type.Unit:
       throw new Error("Should be forbidden by Blockly");
   }
@@ -533,6 +539,7 @@ var pBoolean = mkPoint(Type.Boolean);
 var pString = mkPoint(Type.String);
 var pImage = mkPoint(Type.Image);
 var pUnit = mkPoint(Type.Unit);
+var pSprite = mkPoint(Type.Sprite);
 
 function ground(t?: Type): Point {
   switch (t) {
@@ -544,6 +551,8 @@ function ground(t?: Type): Point {
       return pString;
     case Type.Image:
       return pImage;
+    case Type.Sprite:
+      return pSprite;      
     case Type.Unit:
       return pUnit;
     default:
@@ -1372,6 +1381,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     namespace: "game",
     f: "game over",
     args: []
+  },
+  game_create_sprite: {
+      namespace: "game",
+      f: "create sprite",
+      args: [{ field: "x" }, { field: "y"}]
+  },
+  game_move_sprite: {
+      isExtensionMethod: true,
+      f: "move",
+      args: [{ field: "sprite" } ,{ field: "leds" }]
   }
 }
 

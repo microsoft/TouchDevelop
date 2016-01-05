@@ -684,6 +684,42 @@ Blockly.Blocks['game_game_over'] = {
   }
 };
 
+Blockly.Blocks['game_create_sprite'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("create sprite");
+        this.appendValueInput("x")
+            .setCheck("Number")
+            .appendField("x:");
+        this.appendValueInput("y")
+            .setCheck("Number")
+            .appendField("y:");
+        this.setInputsInline(true);
+        this.setOutput(true, 'sprite');
+        this.setTooltip('An LED sprite.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+    }
+};
+
+Blockly.Blocks['game_move_sprite'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("move");
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+        this.appendValueInput("leds")
+            .setCheck("Number")
+            .appendField("by");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Moves the sprite by the given LEDs');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+    }
+};
+
 Blockly.Blocks['controls_simple_for'] = {
   /**
    * Block for 'for' loop.

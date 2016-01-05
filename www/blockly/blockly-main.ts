@@ -514,6 +514,11 @@ module TDev {
       depends: [ "micro:bit" ]
     },
 
+    "micro:bit sprites": {
+      pubId: "vzkdcc",
+      depends: [ "micro:bit" ]
+    },
+    
     "micro:bit screen": {
       pubId: "nzngii",
       depends: [ "micro:bit" ]

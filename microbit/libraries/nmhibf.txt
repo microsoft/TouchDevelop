@@ -7,10 +7,10 @@ meta platform "current";
 meta parentIds "";
 #sCBCojzbqNfj6sRA
 action main() {
-  #pJrejsN3lO4TPu3T skip;
+  #xP1meKgKx2EeA03s skip;
 }
 #SVXVucr3dRK4J6Y7 meta import micro\u003abit {
-  pub "lqzmez"
+  pub "hdkwlu"
   usage {
     type Image
     action `sync` \_libinit()
@@ -47,7 +47,7 @@ action main() {
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` remote_control(@event: String)
     action `sync` camera(@event: String)
-    action `sync` audio_recorder(@event: String)
+    action `sync` microphone(@event: String)
     action `sync` alert(@event: String)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
@@ -62,10 +62,15 @@ action main() {
     action `sync` note(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring(frequency: Number)
   }
 }
 #Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
-  pub "xrsbct"
+  pub "tulxtd"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -78,7 +83,7 @@ action main() {
   }
 }
 #x2LHHGswL451jMCn meta import micro\u003abit_game {
-  pub "pyfuaj"
+  pub "ryudev"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -87,15 +92,14 @@ action main() {
     action `sync` add_score(points: Number)
     action `async` add_life(lives: Number)
     action `async` start_countdown(ms: Number)
+    action `async` game_over()
     action `async` current_time() returns(ms: Number)
     action `async` remove_life(life: Number)
     action `async` level_up()
     action `async` level() returns(lv: Number)
-    action `async` test_countdown()
     action `async` start_stopwatch()
-    action `async` test_countdown_current_time()
-    action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
+    action `async` show_score()
   }
   #uTSBhGGRoLDgCI2N resolve micro\u003abit = ♻ micro\u003abit with {
   }
@@ -110,5 +114,31 @@ action main() {
     action `sync` on_logo_down(body: Action)
   }
   #BbNcU7atbNNbBQmr resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#F7U0eegUWemWOHIj meta import micro\u003abit_sprites {
+  pub "vzkdcc"
+  usage {
+    type Led_Sprite
+    action `async` create_sprite(x: Number, y: Number) returns(r: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` move(@this: ♻ micro\u003abit_sprites → Led_Sprite, leds: Number)
+    action `sync` go_to(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number, y: Number)
+    action `sync` if_on_edge\u002c_bounce(@this: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` turn_right(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
+    action `sync` turn_left(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
+    action `sync` point_in_direction(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
+    action `sync` x_position(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` y_position(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` direction(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` set_x_to(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number)
+    action `sync` set_y_to(@this: ♻ micro\u003abit_sprites → Led_Sprite, y: Number)
+    action `sync` change_y_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, y: Number)
+    action `sync` change_x_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number)
+    action `sync` touching_\u003f(@this: ♻ micro\u003abit_sprites → Led_Sprite, other: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
+    action `sync` touching_edge\u003f(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
+    action `sync` on(@this: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` off(@this: ♻ micro\u003abit_sprites → Led_Sprite)
+  }
+  #yf5JlXsz20jG8d7Y resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
