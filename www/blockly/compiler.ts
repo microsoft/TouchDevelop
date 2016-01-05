@@ -886,7 +886,7 @@ function defaultValueForType(t: Point): J.JExpr {
     case Type.Image:
         return H.namespaceCall("image", "create image", [H.mkStringLiteral("")]);
     case Type.Sprite:
-        return H.namespaceCall("game", "create sprite", [H.mkNumberLiteral(2), H.mkNumberLiteral(2)]);     
+        return H.namespaceCall("game", "invalid sprite", []);     
   }
   throw new Error("No default value for type");
 }
@@ -1677,7 +1677,7 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
     var stmtsVariables: J.JStmt[] = [];
     e.bindings.forEach((b: Binding) => {
         var btype = find(b.type);
-        if (!isCompiledAsForIndex(b) && btype.type != Type.Sprite)
+        if (!isCompiledAsForIndex(b))
             stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(find(b.type))));
     });   
     // It's magic! The user can either assign to "whole note" (and everything
@@ -1702,7 +1702,10 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
         append(stmtsMain, compileStatements(e, b));
     });
 
-    decls.push(H.mkAction("main", stmtsVariables.concat(stmtsHandlers).concat(stmtsMain), [], []));
+    decls.push(H.mkAction("main",
+        stmtsVariables
+        .concat(stmtsHandlers)
+        .concat(stmtsMain), [], []));
   } finally {
     removeAllPlaceholders(w);
   }

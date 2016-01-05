@@ -364,3 +364,12 @@ action change_direction_by(#x32MjNr12ofz2JYc @this: * Led_Sprite, #xuoTqBS6Ikir9
   #l2PLkh6uahGZEzIi $@this→turn_right($angle);
   meta sync;
 }
+#Xwzo4y2iATnX72lA
+action invalid_sprite() returns(#nr31Nq023HjQjvBc r: * Led_Sprite) {
+  #XWx7JR2mUvBQxhzD // Gets an invalid sprite; used to initialize locals.
+  #D04g2GnOmaLZtnRb // {weight:0}
+  #xja2b4gPwHB2dcd6 // {namespace:game}
+  #cxvKf4e0N6UEtGPL // {action:ignoreReturn}
+  #Naa3i2uT6RXc9lKZ `return` records→Led_Sprite→invalid;
+  meta sync;
+}
