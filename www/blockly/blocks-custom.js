@@ -27,6 +27,11 @@ var digitalPinsDropdown = [
   ["P2", "P2"],
 ];
 
+var leftRightDropdown = [
+  ["right", "right"],
+  ["left", "left"],
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -688,7 +693,7 @@ Blockly.Blocks['game_create_sprite'] = {
     init: function()
     {
         this.setColour(blockColors.game);
-        this.appendDummyInput().appendField("create sprite");
+        this.appendDummyInput().appendField("create sprite at");
         this.appendValueInput("x")
             .setCheck("Number")
             .appendField("x:");
@@ -698,7 +703,7 @@ Blockly.Blocks['game_create_sprite'] = {
         this.setInputsInline(true);
         this.setOutput(true, 'sprite');
         this.setTooltip('An LED sprite.');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
     }
 };
 
@@ -716,6 +721,46 @@ Blockly.Blocks['game_move_sprite'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Moves the sprite by the given LEDs');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
+Blockly.Blocks['game_turn_sprite'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("turn");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(leftRightDropdown), "direction");
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+        this.appendValueInput("angle")
+            .setCheck("Number")
+            .appendField("by");
+        this.appendDummyInput().appendField("degrees");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Turns the sprite by the given amount');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+    }
+};
+
+Blockly.Blocks['game_turn_left'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendDummyInput().appendField("turn left");
+        this.appendValueInput("sprite")
+            .setCheck("sprite")
+        this.appendValueInput("angle")
+            .setCheck("Number")
+            .appendField("by");
+        this.appendDummyInput().appendField("degrees");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Turns the sprite by the given amount');
         this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
     }
 };

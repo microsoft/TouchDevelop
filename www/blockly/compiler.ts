@@ -1393,7 +1393,17 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       isExtensionMethod: true,
       f: "move",
       args: [{ field: "sprite" } ,{ field: "leds" }]
-  }
+  },
+  game_turn_left: {
+      isExtensionMethod: true,
+      f: "turn left",
+      args: [{ field: "sprite" } ,{ field: "angle" }]
+  },
+  game_turn_right: {
+      isExtensionMethod: true,
+      f: "turn right",
+      args: [{ field: "sprite" } ,{ field: "angle" }]
+  },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -1464,6 +1474,12 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(H.mkExprStmt(H.mkExprHolder([],
             compileImage(e, b, false, "basic", "show leds", [ H.mkNumberLiteral(400) ]))));
           break;
+              
+        case 'game_turn_sprite':
+            stmts.push(compileStdBlock(e, b,
+              b.getFieldValue("direction") == "right"
+                ? stdCallTable["game_turn_right"] : stdCallTable["game_turn_left"]));
+            break;
 
         default:
           if (b.type in stdCallTable)
