@@ -346,3 +346,9 @@ action change_brightness_by(#YOnjOM5Dijox14bO @this: * Led_Sprite, #XChQ7dKtgcDB
   #Jk6fyOIwYdZoztd0 $@this→set_brightness($@this→\_brightness + $value);
   meta sync;
 }
+#fe4BUMNMHkLIbNKa
+action change_direction_by(#x32MjNr12ofz2JYc @this: * Led_Sprite, #xuoTqBS6Ikir95JL angle: Number) {
+  #VNIvix2ffUeRNdMx // Changes the ``direction`` position by the given amount by turning right
+  #l2PLkh6uahGZEzIi $@this→turn_right($angle);
+  meta sync;
+}
