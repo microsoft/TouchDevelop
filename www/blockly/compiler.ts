@@ -1416,17 +1416,22 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   game_sprite_set_x: {
       isExtensionMethod: true,
-      f: "set x to",
+      f: "set x",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
   game_sprite_set_y: {
       isExtensionMethod: true,
-      f: "set y to",
+      f: "set y",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
   game_sprite_set_direction: {
       isExtensionMethod: true,
-      f: "set direction to",
+      f: "set direction",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_set_brightness: {
+      isExtensionMethod: true,
+      f: "set brightness",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
   game_sprite_bounce: {
@@ -1457,6 +1462,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   game_sprite_direction: {
       isExtensionMethod: true,
       f: "direction",
+      args: [{ field: "sprite" }]
+  },
+  game_sprite_brightness: {
+      isExtensionMethod: true,
+      f: "brightness",
       args: [{ field: "sprite" }]
   },
 }
