@@ -250,7 +250,7 @@ module Helpers {
     return {
       nodeType: "comment",
       id: null,
-      text: text
+      text: text || ""
     };
   }
 
