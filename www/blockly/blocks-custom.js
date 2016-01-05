@@ -32,15 +32,11 @@ var leftRightDropdown = [
   ["left", "left"],
 ];
 
-var xyDropdown = [
-  ["x", "x"],
-  ["y", "y"],
-];
-
 var spritePropertyDropdown = [
   ["x", "x"],
   ["y", "y"],
-  ["direction", "direction"]
+  ["direction", "direction"],
+  ["brightness", "brightness"]
 ];
 
 var notes = {
@@ -827,7 +823,7 @@ Blockly.Blocks['game_sprite_change_xy'] = {
         this.setColour(blockColors.game);
         this.appendDummyInput().appendField("change");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(xyDropdown), "property");
+            .appendField(new Blockly.FieldDropdown(spritePropertyDropdown), "property");
         this.appendValueInput("sprite")
             .setCheck("sprite")
             .appendField("of");

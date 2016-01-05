@@ -1414,6 +1414,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "change y by",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
+  game_sprite_change_direction: {
+      isExtensionMethod: true,
+      f: "change direction by",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_change_brightness: {
+      isExtensionMethod: true,
+      f: "change brightness by",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
   game_sprite_set_x: {
       isExtensionMethod: true,
       f: "set x",
