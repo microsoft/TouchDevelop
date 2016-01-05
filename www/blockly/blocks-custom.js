@@ -947,4 +947,4 @@ monkeyPatchBlock("logic_compare", "https://www.microbit.co.uk/blocks/boolean");
 monkeyPatchBlock("logic_operation", "https://www.microbit.co.uk/blocks/boolean");
 monkeyPatchBlock("logic_negate", "https://www.microbit.co.uk/blocks/boolean");
 monkeyPatchBlock("logic_boolean", "https://www.microbit.co.uk/blocks/boolean");
-monkeyPatchBlock("logic_arithmetic", "https://www.microbit.co.uk/blocks/boolean");
+monkeyPatchBlock("math_arithmetic", "https://www.microbit.co.uk/blocks/boolean");

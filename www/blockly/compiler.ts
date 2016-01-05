@@ -1595,15 +1595,11 @@ function compileWorkspace(w: B.Workspace, options: CompileOptions): J.JApp {
 
     // All variables in this script are compiled as locals within main.
     var stmtsVariables: J.JStmt[] = [];
-    e.bindings.forEach((b: Binding) => {        
+    e.bindings.forEach((b: Binding) => {
         var btype = find(b.type);
-        if (!isCompiledAsForIndex(b)
-            && btype.type != Type.Sprite
-            && btype.type != Type.Image) {
-        stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(btype.type), defaultValueForType(b.type)));
-      }
-    });
-
+        if (!isCompiledAsForIndex(b) && btype.type != Type.Sprite)
+            stmtsVariables.push(H.mkDefAndAssign(b.name, toTdType(find(b.type).type), defaultValueForType(find(b.type))));
+    });   
     // It's magic! The user can either assign to "whole note" (and everything
     // works out), or not do it, and if they need it, the variable will be
     // declared and assigned to automatically.
