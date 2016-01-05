@@ -32,6 +32,12 @@ var leftRightDropdown = [
   ["left", "left"],
 ];
 
+var spritePropertyDropdown = [
+  ["x position", "x_position"],
+  ["y position", "y_position"],
+  ["direction", "direction"]
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -730,10 +736,10 @@ Blockly.Blocks['game_turn_sprite'] = {
     {
         this.setColour(blockColors.game);
         this.appendDummyInput().appendField("turn");
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(leftRightDropdown), "direction");
         this.appendValueInput("sprite")
             .setCheck("sprite")
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(leftRightDropdown), "direction");
         this.appendValueInput("angle")
             .setCheck("Number")
             .appendField("by");
@@ -742,26 +748,23 @@ Blockly.Blocks['game_turn_sprite'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Turns the sprite by the given amount');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
     }
 };
 
-Blockly.Blocks['game_turn_left'] = {
+Blockly.Blocks['game_sprite_property'] = {
     init: function()
     {
         this.setColour(blockColors.game);
-        this.appendDummyInput().appendField("turn left");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(spritePropertyDropdown), "property");
         this.appendValueInput("sprite")
             .setCheck("sprite")
-        this.appendValueInput("angle")
-            .setCheck("Number")
-            .appendField("by");
-        this.appendDummyInput().appendField("degrees");
+            .appendField("of");
         this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);            
-        this.setTooltip('Turns the sprite by the given amount');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/sprite-library");
+        this.setOutput(true, 'Number');
+        this.setTooltip('Reports the property of the sprite');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
     }
 };
 
