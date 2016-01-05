@@ -6,6 +6,21 @@ module TDev.RT {
     //@ robust
     export module Math_
     {
+        //? Maps an integer value from one range to another. Does not contrain the value.
+        //@ [result].writesMutable
+        //@ [in_max].defl(1024) [out_max].defl(4)
+        export function map(x: number, in_min: number, in_max: number, out_min: number, out_max: number): number {
+            return Bits.add_int32(out_min,
+                Bits.multiply_int32(
+                    Bits.subtract_int32(x, in_min),                
+                    Bits.divide_int32(
+                        Bits.subtract_int32(out_max, out_min),
+                        Bits.subtract_int32(in_max, in_min)
+                    )
+                )
+            );
+        }
+        
         //? Creates a matrix of zeros of a given size
         //@ [result].writesMutable
         //@ [rows].defl(3) [columns].defl(3)
