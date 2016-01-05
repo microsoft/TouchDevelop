@@ -296,14 +296,14 @@ action change_x_by(#BNyURA3lrR445XJ2 @this: * Led_Sprite, #GC5f2Y5myMXFJMuk x: N
   meta sync;
 }
 #NH3Z2IrvU21LuPGM
-action touching_\u003f(#NB942NQl923gi02T @this: * Led_Sprite, #UZ597zOwyA6568TK other: * Led_Sprite) returns(#zHEcCNsDmXzhUt9V r: Boolean) {
+action is_touching(#NB942NQl923gi02T @this: * Led_Sprite, #UZ597zOwyA6568TK other: * Led_Sprite) returns(#zHEcCNsDmXzhUt9V r: Boolean) {
   #w2haKF4w9cxEBYkc // Reports true if sprite is touching specified sprite
   #EHJ2YBpvJAzd0Uqp // {action:ignoreReturn}
   #bAQMgnnEUZqDGLyC `return` $@this→\_x = $other→\_x `and` $@this→\_y = $other→\_y;
   meta sync;
 }
 #xD4uhANlxBIGS7OU
-action touching_edge\u003f(#xvVZ9ABfZXXspLlY @this: * Led_Sprite) returns(#K8ObBSXJ5ECbUdjN r: Boolean) {
+action is_touching_edge(#xvVZ9ABfZXXspLlY @this: * Led_Sprite) returns(#K8ObBSXJ5ECbUdjN r: Boolean) {
   #IvjKKKDIP3iKSHqb // Reports true if sprite is touching an edge
   #zOe9JEEGfZjkRXVN // {action:ignoreReturn}
   #B25GiX6KizWzqnHH `return` $@this→\_x = 0 `or` $@this→\_x = 4 `or` $@this→\_y = 0 `or` $@this→\_y = 4;

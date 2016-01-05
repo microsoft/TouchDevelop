@@ -1429,6 +1429,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "if on edge, bounce",
       args: [{ field: "sprite" }]
   },
+  game_sprite_touching_sprite: {
+      isExtensionMethod: true,
+      f: "is touching",
+      args: [{ field: "sprite" }, {field: "other"}]      
+  },
   game_sprite_x: {
       isExtensionMethod: true,
       f: "x",

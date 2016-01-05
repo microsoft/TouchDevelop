@@ -773,6 +773,23 @@ Blockly.Blocks['game_sprite_bounce'] = {
     }
 };
 
+Blockly.Blocks['game_sprite_touching_sprite'] = {
+    init: function()
+    {
+        this.setColour(blockColors.game);
+        this.appendValueInput("sprite")
+            .setCheck("sprite");
+        this.appendValueInput("other")
+            .setCheck("sprite")
+            .appendField("touching");
+        this.appendDummyInput().appendField("?");
+        this.setOutput(true, 'Boolean');
+        this.setInputsInline(true);
+        this.setTooltip('Reports true if both sprites are touching.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
 Blockly.Blocks['game_sprite_property'] = {
     init: function()
     {
