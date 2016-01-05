@@ -943,6 +943,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
         return compileImage(e, b, false, "image", "create image");
     case 'device_build_big_image':
         return compileImage(e, b, true, "image", "create image");
+    case 'game_sprite_property':
+        return compileStdCall(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]);
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type]);
@@ -1552,9 +1554,6 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
               
         case 'game_turn_sprite':
             stmts.push(compileStdBlock(e, b, stdCallTable["game_turn_" + b.getFieldValue("direction")]));
-            break;
-        case 'game_sprite_property':
-            stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]));
             break;
         case 'game_sprite_set_property':
             stmts.push(compileStdBlock(e, b, stdCallTable["game_sprite_set_" + b.getFieldValue("property")]));
