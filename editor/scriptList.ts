@@ -8812,7 +8812,7 @@
                     start();
                     Meta.chooseScriptAsync(<TDev.Meta.ChooseScriptOptions>{
                         filter: function (si: ScriptInfo) {
-                            return !si.getCloudHeader().userId || si.getCloudHeader().userId == Cloud.getUserId();
+                            return si.getCloudHeader() && (!si.getCloudHeader().userId || si.getCloudHeader().userId == Cloud.getUserId());
                         }
                     })
                     .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
