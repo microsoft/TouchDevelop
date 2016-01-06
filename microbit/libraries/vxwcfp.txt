@@ -1855,8 +1855,8 @@ action on_message_received(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callb
   #e13mHRXUDt9X8SUj // {shim:micro_bit::on_event}
   #mc3m4mu0EMkFqfIo // {namespace:antenna}
   #x4sPBtRE9IMDXiSl // {enum:id:signal strength=MES_SIGNAL_STRENGTH_ID,play controller=MES_PLAY_CONTROLLER_ID,device info=MES_DEVICE_INFO_ID}
-  #Bux3nIa98lMeKv4u code→notify_event_registration("on event " ∥ $id);
-  meta private;
+  #Bux3nIa98lMeKv4u code→notify_event_registration("on message received " ∥ $id);
+  meta sync;
 }
 #xPty4Z96gEpPmXcC
 var counters : Json_Builder {
