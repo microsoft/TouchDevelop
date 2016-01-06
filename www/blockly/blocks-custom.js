@@ -39,6 +39,14 @@ var spritePropertyDropdown = [
   ["brightness", "brightness"]
 ];
 
+var accelerationEventDropdown = [
+  ["shake", "shake"],
+  ["screen up", "screen up"],
+  ["screen down", "screen down"],  
+  ["logo up", "logo up"],  
+  ["logo down", "logo down"],  
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -115,6 +123,22 @@ Blockly.Blocks['device_shake_event'] = {
         .appendField("do");
     this.setInputsInline(true);
     this.setTooltip('React to the device being shaken.');
+  }
+};
+
+Blockly.Blocks['device_gesture_event'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/on-shake');
+    this.setColour(blockColors.input);
+    this.appendDummyInput()
+        .appendField("on");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(accelerationEventDropdown), "NAME");        
+    this.appendStatementInput("HANDLER")
+        .setAlign(Blockly.ALIGN_RIGHT)
+        .appendField("do");
+    this.setInputsInline(true);
+    this.setTooltip('React to a gesture.');
   }
 };
 

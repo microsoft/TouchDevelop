@@ -1543,6 +1543,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileEvent(e, b, "on shake", []));
           break;
 
+        case 'device_gesture_event':
+          stmts.push(compileEvent(e, b, "on " + b.getFieldValue("NAME"), []));
+          break;
+              
         case 'device_pin_event':
           stmts.push(compileEvent(e, b, "on pin pressed", [ "NAME" ]));
           break;
@@ -1583,7 +1587,7 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-  return b.type == "device_button_event";
+  return /_event$/.test(b.type);
 }
 
 // Find the parent (as in "scope" parent) of a Block. The [parentNode_] property
