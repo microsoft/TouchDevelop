@@ -1481,6 +1481,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "brightness",
       args: [{ field: "sprite" }]
   },
+  ble_camera: {
+    namespace: "events",
+    f: "camera",
+    args: [{field:"property"}]
+  },
+  ble_microphone: {
+    namespace: "events",
+    f: "microphone",
+    args: [{field:"property"}]
+  },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {

@@ -47,6 +47,24 @@ var accelerationEventDropdown = [
   ["logo down", "logo down"],  
 ];
 
+var cameraEventDropdown = [
+    ["take photo", "take photo"],
+    ["start video capture", "start video capture"],
+    ["stop video capture", "stop video capture"],
+    ["toggle front - rear", "toggle front - rear"],
+    ["launch photo mode", "launch photo mode"],
+    ["launch video mode", "launch video mode"],
+    ["stop photo mode", "stop photo mode"],
+    ["stop video mode", "stop video mode"],
+];
+
+var microphoneEventDropdown = [
+    ["launch", "launch"],
+    ["start capture", "start capture"],
+    ["stop capture", "stop capture"],
+    ["stop", "stop"],
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -75,6 +93,7 @@ var blockColors = {
     //comments: 156,
     images: 45,
     variables: 330,
+    ble: 156,
 }
 
 Blockly.Variables.flyoutCategory = function(workspace) {
@@ -934,6 +953,36 @@ Blockly.Blocks['game_sprite_set_property'] = {
         this.setNextStatement(true);            
         this.setTooltip('Sets the property of the sprite');
         this.setHelpUrl("https://www.microbit.co.uk/functions/sprites-library");
+    }
+};
+
+Blockly.Blocks['ble_camera'] = {
+    init: function()
+    {
+        this.setColour(blockColors.ble);
+        this.appendDummyInput().appendField("tell camera to ");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(cameraEventDropdown), "property");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sends a camera event');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/ble-events");
+    }
+};
+
+Blockly.Blocks['ble_microphone'] = {
+    init: function()
+    {
+        this.setColour(blockColors.ble);
+        this.appendDummyInput().appendField("tell microphone to ");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(microphoneEventDropdown), "property");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sends a microphone event');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/ble-events");
     }
 };
 
