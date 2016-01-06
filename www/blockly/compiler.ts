@@ -1486,9 +1486,19 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "camera",
     args: [{field:"property"}]
   },
+  ble_remote_control: {
+    namespace: "events",
+    f: "remote control",
+    args: [{field:"property"}]
+  },
   ble_microphone: {
     namespace: "events",
     f: "microphone",
+    args: [{field:"property"}]
+  },
+  ble_alert: {
+    namespace: "events",
+    f: "alert",
     args: [{field:"property"}]
   },
 }

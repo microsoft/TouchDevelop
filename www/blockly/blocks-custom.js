@@ -47,7 +47,7 @@ var accelerationEventDropdown = [
   ["logo down", "logo down"],  
 ];
 
-var cameraEventDropdown = [
+var cameraMessageDropdown = [
     ["take photo", "take photo"],
     ["start video capture", "start video capture"],
     ["stop video capture", "stop video capture"],
@@ -58,11 +58,32 @@ var cameraEventDropdown = [
     ["stop video mode", "stop video mode"],
 ];
 
-var microphoneEventDropdown = [
+var microphoneMessageDropdown = [
     ["launch", "launch"],
     ["start capture", "start capture"],
     ["stop capture", "stop capture"],
     ["stop", "stop"],
+];
+
+var alertMessageDropdown = [
+    ["display toast", "display toast"],
+    ["vibrate", "vibrate"],
+    ["play sound", "play sound"],
+    ["play ringtone", "play ringtone"],
+    ["find my phone", "find my phone"],
+    ["ring alarm", "ring alarm 1"],
+];
+
+var remoteControlMessageDropdown = [
+    ["play","play"],
+    ["pause", "pause"],
+    ["stop", "stop"],
+    ["next track", "next track"],
+    ["previous track","previous track"],
+    ["forward", "forward"],
+    ["rewind","rewind"],
+    ["volume up","volume up"],
+    ["volume down", "volume down"]    
 ];
 
 var notes = {
@@ -962,12 +983,12 @@ Blockly.Blocks['ble_camera'] = {
         this.setColour(blockColors.ble);
         this.appendDummyInput().appendField("tell camera to ");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(cameraEventDropdown), "property");
+            .appendField(new Blockly.FieldDropdown(cameraMessageDropdown), "property");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends a camera event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/ble-events");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
     }
 };
 
@@ -977,14 +998,45 @@ Blockly.Blocks['ble_microphone'] = {
         this.setColour(blockColors.ble);
         this.appendDummyInput().appendField("tell microphone to ");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(microphoneEventDropdown), "property");
+            .appendField(new Blockly.FieldDropdown(microphoneMessageDropdown), "property");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends a microphone event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/ble-events");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
     }
 };
+
+Blockly.Blocks['ble_alert'] = {
+    init: function()
+    {
+        this.setColour(blockColors.ble);
+        this.appendDummyInput().appendField("raise alert to ");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(alertMessageDropdown), "property");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sends an alert event');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+    }
+};
+
+Blockly.Blocks['ble_remote_control'] = {
+    init: function()
+    {
+        this.setColour(blockColors.ble);
+        this.appendDummyInput().appendField("tell remote control to ");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(remoteControlMessageDropdown), "property");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sends an remote control event');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+    }
+};
+
 
 Blockly.Blocks['controls_simple_for'] = {
   /**
