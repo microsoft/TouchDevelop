@@ -21,9 +21,10 @@ module TDev.AST.Bytecode
 
     var funcInfo:StringMap<FuncInfo>;
     var hex:string[];
-    var hexStartAddr:number;
-    var hexStartIdx:number;
-    var dirtyLines = 0;
+    var jmpStartAddr:number;
+    var jmpStartIdx:number;
+    var bytecodeStartAddr:number;
+    var bytecodeStartIdx:number;
 
     function swapBytes(str:string)
     {
@@ -46,6 +47,17 @@ module TDev.AST.Bytecode
         return currentSetup == extInfo.sha
     }
 
+    function parseHexBytes(bytes:string):number[]
+    {
+        bytes = bytes.replace(/^[\s:]/, "")
+        if (!bytes) return []
+        var m = /^([a-f0-9][a-f0-9])/i.exec(bytes)
+        if (m)
+            return [parseInt(m[1], 16)].concat(parseHexBytes(bytes.slice(2)))
+        else
+            Util.oops("bad bytes " + bytes)
+    }
+
     var currentSetup = null;
     export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
     {
@@ -59,18 +71,42 @@ module TDev.AST.Bytecode
 
         var i = 0;
         var upperAddr = "0000"
+        var lastAddr = 0
+        var lastIdx = 0
+        bytecodeStartAddr = 0
         for (; i < hex.length; ++i) {
             var m = /:02000004(....)/.exec(hex[i])
-            if (m)
-                upperAddr = m[1]
-            m = /^:10(....)000108010842424242010801083ED8E98D/.exec(hex[i])
             if (m) {
-                hexStartAddr = parseInt(upperAddr + m[1], 16)
-                hexStartIdx = i
+                upperAddr = m[1]
+            }
+            m = /^:..(....)00/.exec(hex[i])
+            if (m) {
+                var newAddr = parseInt(upperAddr + m[1], 16)
+                if (!bytecodeStartAddr && newAddr >= 0x3C000) {
+                    var bytes = parseHexBytes(hex[lastIdx])
+                    if (bytes[0] != 0x10) {
+                        bytes.pop() // checksum
+                        bytes[0] = 0x10;
+                        while (bytes.length < 20)
+                            bytes.push(0x00)
+                        hex[lastIdx] = hexBytes(bytes)
+                    }
+                    Util.assert((bytes[2] & 0xf) == 0)
+
+                    bytecodeStartAddr = lastAddr + 16
+                    bytecodeStartIdx = lastIdx + 1
+                }
+                lastIdx = i
+                lastAddr = newAddr
+            }
+            m = /^:10....000108010842424242010801083ED8E98D/.exec(hex[i])
+            if (m) {
+                jmpStartAddr = lastAddr
+                jmpStartIdx = i
             }
         }
 
-        if (!hexStartAddr)
+        if (!jmpStartAddr)
             Util.oops("No hex start")
 
         funcInfo = {};
@@ -89,14 +125,10 @@ module TDev.AST.Bytecode
         addEnum(extInfo.enums)
         addEnum(jsinf.enums)
 
-        dirtyLines = 1;
-
-        for (var i = hexStartIdx + 1; i < hex.length; ++i) {
+        for (var i = jmpStartIdx + 1; i < hex.length; ++i) {
             var m = /^:10(....)00(.{16})/.exec(hex[i])
 
             if (!m) continue;
-
-            dirtyLines++;
 
             var s = hex[i].slice(9)
             while (s.length >= 8) {
@@ -140,7 +172,7 @@ module TDev.AST.Bytecode
     {
         var inf = lookupFunc(name)
         if (inf)
-            return inf.value - hexStartAddr
+            return inf.value - bytecodeStartAddr
         return null
     }
 
@@ -551,6 +583,15 @@ module TDev.AST.Bytecode
         }
     }
 
+    function hexBytes(bytes:number[]) {
+        var chk = 0
+        var r = ":"
+        bytes.forEach(b => chk += b)
+        bytes.push((-chk) & 0xff)
+        bytes.forEach(b => r += ("0" + b.toString(16)).slice(-2))
+        return r.toUpperCase();
+    }
+
     export class Binary
     {
         procs:Procedure[] = [];
@@ -572,59 +613,45 @@ module TDev.AST.Bytecode
 
         patchHex(shortForm:boolean)
         {
-            var myhex = hex.slice(0)
+            var myhex = hex.slice(0, bytecodeStartIdx)
 
             Util.assert(this.buf.length < 32000)
 
-            var minLen = (dirtyLines + 1) * 8;
-            while (this.buf.length < minLen)
-                this.buf.push(0);
-
-            var i = hexStartIdx;
             var ptr = 0
-            var togo = 32000 / 8;
-            while (ptr < this.buf.length) {
-                if (myhex[i] == null) Util.die();
-                var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
-                if (!m) { i++; continue; }
-                Util.assert(i <= hexStartIdx + dirtyLines || /^0+$/.test(m[3]))
 
-
-                var bytes = [0x10, parseInt(m[1], 16), parseInt(m[2], 16), 0]
+            function nextLine(buf:number[], addr:number)
+            {
+                var bytes = [0x10, (addr>>8)&0xff, addr&0xff, 0]
                 for (var j = 0; j < 8; ++j) {
-                    bytes.push((this.buf[ptr] || 0) & 0xff)
-                    bytes.push((this.buf[ptr] || 0) >>> 8)
+                    bytes.push((buf[ptr] || 0) & 0xff)
+                    bytes.push((buf[ptr] || 0) >>> 8)
                     ptr++
                 }
-
-                var chk = 0
-                var r = ":"
-                bytes.forEach(b => chk += b)
-                bytes.push((-chk) & 0xff)
-                bytes.forEach(b => r += ("0" + b.toString(16)).slice(-2))
-                myhex[i] = r.toUpperCase();
-                i++;
-                togo--;
+                return bytes
             }
 
-            if (shortForm) {
-                for (var j = 0; j < myhex.length; ++j) {
-                    if (!(hexStartIdx <= j && j <= i) && this.isDataRecord(myhex[j]))
-                        myhex[j] = "";
+            var hd = [0x4206, this.globals.length, bytecodeStartAddr & 0xffff, bytecodeStartAddr >>> 16, 0, 0, 0, 0]
+            myhex[jmpStartIdx] = hexBytes(nextLine(hd, jmpStartAddr))
+
+            ptr = 0
+
+            if (shortForm) myhex = []
+
+            var addr = bytecodeStartAddr;
+            var upper = (addr - 16) >> 16
+            while (ptr < this.buf.length) {
+                if ((addr >> 16) != upper) {
+                    upper = addr >> 16
+                    myhex.push(hexBytes([0x02, 0x00, 0x00, 0x04, upper >> 8, upper & 0xff]))
                 }
-            } else {
-                while (togo > 0) {
-                    if (myhex[i] == null) Util.die();
-                    var m = /^:10(..)(..)00(.*)(..)$/.exec(myhex[i])
-                    if (!m) { i++; continue; }
-                    Util.assert(/^0+$/.test(m[3]))
-                    myhex[i] = "";
-                    i++;
-                    togo--;
-                }
+
+                myhex.push(hexBytes(nextLine(this.buf, addr)))
+                addr += 16
             }
 
-            return myhex.filter(l => !!l);
+            hex.slice(bytecodeStartIdx).forEach(l => myhex.push(l))
+            
+            return myhex;
         }
 
         addProc(proc:Procedure)
@@ -683,10 +710,7 @@ module TDev.AST.Bytecode
         {
             Util.assert(this.csource == "");
 
-            this.emit("; start");
-            this.emit(".short 0x4205");
-            this.emit(".short " + this.globals.length);
-            this.emit(".space 12"); // future use and 16 byte alignment
+            this.emit("; start")
 
             this.procs.forEach(p => {
                 this.csource += "\n"
@@ -757,6 +781,7 @@ module TDev.AST.Bytecode
                     buf = <any>new Uint8Array(toGo)
                 } else if (toGo > 0) {
                     m = /^:10....00(.*)(..)$/.exec(ln)
+                    if (!m) return
                     var k = m[1]
                     while (toGo > 0 && k.length > 0) {
                         buf[ptr++] = parseInt(k[0] + k[1], 16)
