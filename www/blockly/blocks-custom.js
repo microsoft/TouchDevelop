@@ -114,7 +114,7 @@ var blockColors = {
     //comments: 156,
     images: 45,
     variables: 330,
-    ble: 156,
+    antenna: 156,
 }
 
 Blockly.Variables.flyoutCategory = function(workspace) {
@@ -977,10 +977,10 @@ Blockly.Blocks['game_sprite_set_property'] = {
     }
 };
 
-Blockly.Blocks['ble_camera'] = {
+Blockly.Blocks['antenna_camera'] = {
     init: function()
     {
-        this.setColour(blockColors.ble);
+        this.setColour(blockColors.antenna);
         this.appendDummyInput().appendField("tell camera to ");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown(cameraMessageDropdown), "property");
@@ -992,10 +992,10 @@ Blockly.Blocks['ble_camera'] = {
     }
 };
 
-Blockly.Blocks['ble_microphone'] = {
+Blockly.Blocks['antenna_microphone'] = {
     init: function()
     {
-        this.setColour(blockColors.ble);
+        this.setColour(blockColors.antenna);
         this.appendDummyInput().appendField("tell microphone to ");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown(microphoneMessageDropdown), "property");
@@ -1007,10 +1007,10 @@ Blockly.Blocks['ble_microphone'] = {
     }
 };
 
-Blockly.Blocks['ble_alert'] = {
+Blockly.Blocks['antenna_alert'] = {
     init: function()
     {
-        this.setColour(blockColors.ble);
+        this.setColour(blockColors.antenna);
         this.appendDummyInput().appendField("raise alert to ");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown(alertMessageDropdown), "property");
@@ -1022,10 +1022,10 @@ Blockly.Blocks['ble_alert'] = {
     }
 };
 
-Blockly.Blocks['ble_remote_control'] = {
+Blockly.Blocks['antenna_remote_control'] = {
     init: function()
     {
-        this.setColour(blockColors.ble);
+        this.setColour(blockColors.antenna);
         this.appendDummyInput().appendField("tell remote control to ");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown(remoteControlMessageDropdown), "property");

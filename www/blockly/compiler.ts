@@ -1481,24 +1481,24 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "brightness",
       args: [{ field: "sprite" }]
   },
-  ble_camera: {
-    namespace: "events",
-    f: "camera",
+  antenna_camera: {
+    namespace: "antenna",
+    f: "tell camera to",
     args: [{field:"property"}]
   },
-  ble_remote_control: {
-    namespace: "events",
-    f: "remote control",
+  antenna_remote_control: {
+    namespace: "antenna",
+    f: "tell remote control to",
     args: [{field:"property"}]
   },
-  ble_microphone: {
-    namespace: "events",
-    f: "microphone",
+  antenna_microphone: {
+    namespace: "antenna",
+    f: "tell microphone to",
     args: [{field:"property"}]
   },
-  ble_alert: {
-    namespace: "events",
-    f: "alert",
+  antenna_alert: {
+    namespace: "antenna",
+    f: "raise alert to",
     args: [{field:"property"}]
   },
 }
