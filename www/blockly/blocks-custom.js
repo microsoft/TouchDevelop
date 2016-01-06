@@ -77,6 +77,60 @@ var blockColors = {
     variables: 330,
 }
 
+Blockly.Variables.flyoutCategory = function(workspace) {
+  var variableList = Blockly.Variables.allVariables(workspace);
+  variableList.sort(goog.string.caseInsensitiveCompare);
+  // In addition to the user's variables, we also want to display the default
+  // variable name at the top.  We also don't want this duplicated if the
+  // user has created a variable of the same name.
+  goog.array.remove(variableList, Blockly.Msg.VARIABLES_DEFAULT_NAME);
+  variableList.unshift(Blockly.Msg.VARIABLES_DEFAULT_NAME);
+
+  var xmlList = [];
+  // variables getters first
+  for (var i = 0; i < variableList.length; i++) {
+      // <block type="variables_get" gap="24">
+      //   <field name="VAR">item</field>
+      // </block>
+      var block = goog.dom.createDom('block');
+      block.setAttribute('type', 'variables_get');
+      block.setAttribute('gap', 8);
+      var field = goog.dom.createDom('field', null, variableList[i]);
+      field.setAttribute('name', 'VAR');
+      block.appendChild(field);
+      xmlList.push(block);
+  }
+  xmlList[xmlList.length - 1].setAttribute('gap', 24);
+
+  for (var i = 0; i < Math.min(1,variableList.length); i++) {
+    {
+      // <block type="variables_set" gap="8">
+      //   <field name="VAR">item</field>
+      // </block>
+      var block = goog.dom.createDom('block');
+      block.setAttribute('type', 'variables_set');
+      block.setAttribute('gap', 8);
+      var field = goog.dom.createDom('field', null, variableList[i]);
+      field.setAttribute('name', 'VAR');
+      block.appendChild(field);
+      xmlList.push(block);
+    }
+    {
+      // <block type="variables_get" gap="24">
+      //   <field name="VAR">item</field>
+      // </block>
+      var block = goog.dom.createDom('block');
+      block.setAttribute('type', 'variables_change');
+      block.setAttribute('gap', 24);
+      var field = goog.dom.createDom('field', null, variableList[i]);
+      field.setAttribute('name', 'VAR');
+      block.appendChild(field);
+      xmlList.push(block);
+    }    
+  }
+  return xmlList;
+};
+
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
 Blockly.Blocks['device_print_message'] = {
   init: function() {
