@@ -691,6 +691,7 @@ action analog_write_pin(#Ij91JuDakdZUgyo4 name: String, #CeWgWOcwgRe0D5op value:
   #b4oneIlT9h82g7S4 // {namespace:pins}
   #M12kgf6X8FWgiE4P // {weight:46}
   #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #RXZASxwspuxN3AMn // {hints:value:1023,0}
   #AY2QBjk4JghxAoSU // {shim:micro_bit::analogWritePin}
   #NhjrLchqhj38jvVW $value := math→round($value);
   #VoXahNiX4SWBg3rH if $value < 0 `or` $value > 1023 then {
@@ -1246,7 +1247,7 @@ action create_pin(#xwnvtwXoIoa22y4Z color: Color, #IVU23UfeIRgACC6Q left: Number
   #IRReqhZX8YsLhC44 $pin→left := $left;
   #xgbiNSJLlb6Ct3Xf $pin→on_touch_down($touch_down);
   #dnm1P3MFrEzgk7ZV where touch_down(x: Number, y: Number) {
-    #gQ2vyq2Jd7fOV7g6 $pin→mass := 1025;
+    #gQ2vyq2Jd7fOV7g6 $pin→mass := 1024;
     #ELw1bdG72zYVtFzz code→update_pin($pin);
   }
   #x5e0KdFm44Im64AZ $pin→on_touch_up($touch_up);
