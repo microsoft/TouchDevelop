@@ -363,7 +363,7 @@ Blockly.Blocks['device_get_analog_pin'] = {
             .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('Read an analog value on a pin (between 0 and 1024).');
+        this.setTooltip('Read an analog value on a pin (between 0 and 1023).');
     }
 };
 
@@ -381,7 +381,7 @@ Blockly.Blocks['device_set_analog_pin'] = {
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);
-        this.setTooltip('Set an analog value on a pin (between 0 and 1024).');
+        this.setTooltip('Set an analog value on a pin (between 0 and 1023).');
     }
 };
 
