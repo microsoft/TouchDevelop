@@ -22,7 +22,7 @@ module TDev.RT {
         }
         
         //? Plays a monotone note
-        //@ [gain].defl(1) [frequency].defl(440) [seconds].defl(1)
+        //@ [gain].defl(1) [frequency].defl(440) [seconds].defl(1) async
         export function play_note(frequency: number, gain: number, seconds: number, r: ResumeCtx) {    
             if (Math_.is_nan(frequency) || Math_.is_nan(gain) || Math_.is_nan(seconds) || seconds <= 0) return;
             
