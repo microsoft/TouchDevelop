@@ -25,6 +25,9 @@ var digitalPinsDropdown = [
   ["P0", "P0"],
   ["P1", "P1"],
   ["P2", "P2"],
+  ["P8", "P8"],
+  ["P12", "P12"],
+  ["P16", "P16"]
 ];
 
 var leftRightDropdown = [
