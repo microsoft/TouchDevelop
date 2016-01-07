@@ -1679,7 +1679,7 @@ action tell_remote_control_to(#YHC4x4CkZEExgxbM @event: String) {
   #x1PrhNFlEq2OGzf4 // Sends a ``remote control`` command to the parent device.
   #rbUtYPflzpn05UMQ // {namespace:antenna}
   #gYfUlslCDE6vhjL6 // {weight:20}
-  #gVLt30TqwCk2lK9U // {help:functions/antenna}
+  #gVLt30TqwCk2lK9U // {help:functions/raise-alert-to}
   #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
   #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
   #dZcr8rQkL9cXHWOt code→show_event_notification("remote control", $@event);
@@ -1750,7 +1750,7 @@ action tell_camera_to(#p3kEX3EqeufdJmG1 @event: String) {
   #wY3y0ASAfRrgGtG2 // Sends a ``camera`` command to the parent device.
   #T9jxpLbgaFQwkQy8 // {namespace:antenna}
   #w2wLNoci3MafdcN6 // {weight:19}
-  #eeF0Fl9hopb7V9WB // {help:functions/antenna}
+  #eeF0Fl9hopb7V9WB // {help:functions/tell-camera-to}
   #Iqur1M60Xd5273Xa // {shim:micro_bit::events::camera}
   #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
   #yDtIYowWcPuh4mNt code→show_event_notification("camera", $@event);
@@ -1761,7 +1761,7 @@ action tell_microphone_to(#WUexw2vVrC2OMEa2 @event: String) {
   #xC6rDXBdCS9ZzGrs // Sends an ``microphone`` command to the parent device.
   #M5eNr22OwVuxNpiN // {namespace:antenna}
   #Iq35kOhdrf12OXdN // {weight:18}
-  #cMVTVS0CCRPPOY9u // {help:functions/antenna}
+  #cMVTVS0CCRPPOY9u // {help:functions/tell-microphone-to}
   #gf80RSjq2euipiOS // {shim:micro_bit::events::audio_recorder}
   #QKzBOXeC241gkrof // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
   #E8b0BafTGID7UDpl code→show_event_notification("microphone", $@event);
@@ -1855,6 +1855,7 @@ action on_message_received(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callb
   #e13mHRXUDt9X8SUj // {shim:micro_bit::on_event}
   #mc3m4mu0EMkFqfIo // {namespace:antenna}
   #x4sPBtRE9IMDXiSl // {enum:id:signal strength=MES_SIGNAL_STRENGTH_ID,play controller=MES_PLAY_CONTROLLER_ID,device info=MES_DEVICE_INFO_ID}
+  #m2Y4FjpJXWArRpT0 // {help:functions/on-message-received}
   #Bux3nIa98lMeKv4u code→notify_event_registration("on message received " ∥ $id);
   meta sync;
 }
