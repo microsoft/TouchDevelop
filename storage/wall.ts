@@ -238,7 +238,8 @@ module TDev {
                 m.add(div("wall-dialog-header", Util.htmlUnescape(appName)));
 
                 m.addHTML(lf("This web app was created {0} using Touch Develop.", author));
-                m.addHTML(lf("The Touch Develop platform - Copyright © 2015 Microsoft Corporation. All rights reserved."));
+                m.addHTML(lf("The Touch Develop platform - Copyright © {0} Microsoft Corporation. All rights reserved.",
+                                new Date().getFullYear()));
                 m.addHTML(lf("<b>DISCLAIMER:</b> This web app is not endorsed by Microsoft."));
 
                 if (!Browser.inEditor)

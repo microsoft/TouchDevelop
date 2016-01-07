@@ -1065,11 +1065,13 @@ module TDev.Browser {
             var beta = div("beta-note");
             var versionId = (<any>window).betaFriendlyId || Cloud.config.tdVersion;
             var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";
+
+            var copy = lf("© Copyright {0} {1}", new Date().getFullYear(), Runtime.companyCopyright)
             
             var copyrights = "<div class='beta-legal'>" + 
                 Cloud.config.legalButtons.map(b => Util.fmt("<span class='beta-underline'>{0:q}</span>", lf_static(b.name, true))).join("&nbsp;|&nbsp;") +
                 "&nbsp;&nbsp;" + versionNote +
-                "<span class='beta-black'>© Copyright 2015 " + Runtime.companyCopyright + "</span>&nbsp;&nbsp;" +
+                "<span class='beta-black'>" + copy + "</span>&nbsp;&nbsp;" +
                 "</div>";
 
             Browser.setInnerHTML(beta, copyrights);
