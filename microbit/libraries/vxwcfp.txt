@@ -1675,72 +1675,72 @@ action test_pin_pressed() {
   meta test;
 }
 #rkug3fCgxwEKcECZ
-action tell_remote_control_to(#YHC4x4CkZEExgxbM @event: String) {
+action remote_control(#YHC4x4CkZEExgxbM @event: String) {
   #x1PrhNFlEq2OGzf4 // Sends a ``remote control`` command to the parent device.
-  #rbUtYPflzpn05UMQ // {namespace:antenna}
-  #gYfUlslCDE6vhjL6 // {weight:20}
-  #gVLt30TqwCk2lK9U // {help:functions/raise-alert-to}
+  #rbUtYPflzpn05UMQ // {namespace:events}
+  #gYfUlslCDE6vhjL6 // {weight:0}
+  #gVLt30TqwCk2lK9U // {help:td/events}
   #ihtG0ZW4384GTotc // {shim:micro_bit::events::remote_control}
   #DDVMKgbFOD8mZIOv // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
   #dZcr8rQkL9cXHWOt code→show_event_notification("remote control", $@event);
   meta sync;
 }
 #xfEzD2r0WjZppPTL
-action test_events() {
+action test_antenna() {
   #xM2V2HK64vD5CCP6 // {shim:}
   #SF8Y7AzLVf79J9Hv code→\_libinit;
-  #xYsvR3f5jJsVfu8P code→tell_remote_control_to("play");
-  #VXZ2fZLriKdH5o25 code→pause(500);
-  #VHKRZyj11yrItaeA code→tell_remote_control_to("pause");
-  #iuTCLYFn24YBEBAV code→pause(500);
-  #NFjU8XLb5qH4qi0s code→tell_remote_control_to("stop");
-  #oizDycRjQI2sU0fO code→pause(500);
-  #x6tXtLrOjbyLj71J code→tell_remote_control_to("next track");
-  #AaGU8mHo0WmDNVGm code→pause(500);
-  #x9ptNjJbOEhQzr2G code→tell_remote_control_to("previous track");
-  #hM89M5NlZSA5aZes code→pause(500);
-  #m2qkS2n4QlIgr8rU code→tell_remote_control_to("forward");
-  #gH1nNlcw62Yd6tF5 code→pause(500);
-  #YC9iNYuSkosLnOiS code→tell_remote_control_to("rewind");
-  #xmbSINcx1jnrao3s code→pause(500);
-  #S4fvdbVeCn1mU7N5 code→tell_remote_control_to("volume up");
-  #xpPB2ugK28IXwA4W code→pause(500);
-  #c6mF6g3EZsN9kyMH code→tell_remote_control_to("volume down");
-  #yr5uOJyqn6aV8Ge0 code→pause(500);
+  #xYsvR3f5jJsVfu8P code→remote_control("play");
+  #VXZ2fZLriKdH5o25 code→pause(1000);
+  #VHKRZyj11yrItaeA code→remote_control("pause");
+  #iuTCLYFn24YBEBAV code→pause(1000);
+  #NFjU8XLb5qH4qi0s code→remote_control("stop");
+  #oizDycRjQI2sU0fO code→pause(1000);
+  #x6tXtLrOjbyLj71J code→remote_control("next track");
+  #AaGU8mHo0WmDNVGm code→pause(1000);
+  #x9ptNjJbOEhQzr2G code→remote_control("previous track");
+  #hM89M5NlZSA5aZes code→pause(1000);
+  #m2qkS2n4QlIgr8rU code→remote_control("forward");
+  #gH1nNlcw62Yd6tF5 code→pause(1000);
+  #YC9iNYuSkosLnOiS code→remote_control("rewind");
+  #xmbSINcx1jnrao3s code→pause(1000);
+  #S4fvdbVeCn1mU7N5 code→remote_control("volume up");
+  #xpPB2ugK28IXwA4W code→pause(1000);
+  #c6mF6g3EZsN9kyMH code→remote_control("volume down");
+  #yr5uOJyqn6aV8Ge0 code→pause(1000);
   #yb0esPi6Iy51trEl code→tell_camera_to("launch photo mode");
-  #NzJXZ4xVLRd4Ejyg code→pause(500);
+  #NzJXZ4xVLRd4Ejyg code→pause(1000);
   #hCY4GTQ592HR6MDS code→tell_camera_to("launch video mode");
-  #w00LIesoogGZI3SX code→pause(500);
+  #w00LIesoogGZI3SX code→pause(1000);
   #q7dc4Ems5bX8bUjw code→tell_camera_to("start video capture");
-  #w1XPyVxyf4I43cxv code→pause(500);
+  #w1XPyVxyf4I43cxv code→pause(1000);
   #Ig5RtNNeoA2RR4Vp code→tell_camera_to("stop video capture");
-  #VTD5jpdXtP0RSz4w code→pause(500);
+  #VTD5jpdXtP0RSz4w code→pause(1000);
   #xbMlLP406gUHPHdg code→tell_camera_to("stop photo mode");
-  #x7UpsxVmiuAKf2O2 code→pause(500);
+  #x7UpsxVmiuAKf2O2 code→pause(1000);
   #mji2VTG8pklTAlZT code→tell_camera_to("stop video mode");
-  #xzqQy9QuYzBSFcU4 code→pause(500);
+  #xzqQy9QuYzBSFcU4 code→pause(1000);
   #osyLpvx7y5Rqez47 code→raise_alert_to("display toast");
-  #xgMtYE2VyuuK0SUh code→pause(500);
+  #xgMtYE2VyuuK0SUh code→pause(1000);
   #vplr1SUmLrtoEKw1 code→raise_alert_to("ring alarm");
-  #mLMYnQoFZOYU4bBv code→pause(500);
+  #mLMYnQoFZOYU4bBv code→pause(1000);
   #Ti16hcwPzBwmNNj8 code→raise_alert_to("ring alarm 2");
-  #nrJs9EsvqT9kFj7T code→pause(500);
+  #nrJs9EsvqT9kFj7T code→pause(1000);
   #abtVG7M5AmVIebxk code→raise_alert_to("ring alarm 2");
-  #CuUOhQyH7q1POsMW code→pause(500);
+  #CuUOhQyH7q1POsMW code→pause(1000);
   #wM3rylf47Mzw2D1I code→raise_alert_to("ring alarm 3");
-  #hpxVivTxxOSR8Pqr code→pause(500);
+  #hpxVivTxxOSR8Pqr code→pause(1000);
   #c15239nr9VsPiIo9 code→raise_alert_to("ring alarm 4");
-  #xI4HNzsLpPpgty82 code→pause(500);
+  #xI4HNzsLpPpgty82 code→pause(1000);
   #N76wkVa5Gu9l3vAc code→raise_alert_to("ring alarm 5");
-  #rS2fSXiqIn63Nape code→pause(500);
+  #rS2fSXiqIn63Nape code→pause(1000);
   #AXiIgG5uqhZfftXK code→raise_alert_to("ring alarm 6");
-  #dnOMZGp6VT48T3g9 code→pause(500);
+  #dnOMZGp6VT48T3g9 code→pause(1000);
   #lQfV8k1SdXdWnQyy code→raise_alert_to("find my phone");
-  #u4p6kOo9s73HoGoD code→pause(500);
+  #u4p6kOo9s73HoGoD code→pause(1000);
   #r4nWD2K8jmaMjfI0 code→raise_alert_to("play ringtone");
-  #KzEts7e3LbwEb2bL code→pause(500);
+  #KzEts7e3LbwEb2bL code→pause(1000);
   #Llmpr8UCY4YttCbj code→raise_alert_to("play sound");
-  #TKfJJ60q6Z52Y2Zs code→pause(500);
+  #TKfJJ60q6Z52Y2Zs code→pause(1000);
   #NmGpttcHIFb2l2NP code→raise_alert_to("vibrate");
   meta private;
   meta test;
@@ -1772,7 +1772,7 @@ action raise_alert_to(#pHqCn0ZWIdyNQSVu @event: String) {
   #vUmqTLUCj4fjFygl // Sends an ``alert`` command to the parent device.
   #etLJqyeZ8q3eRTtj // {namespace:antenna}
   #gv2Lztj0odNeIJvt // {weight:18}
-  #ZCcDnTF7ZiSNaNNA // {help:functions/antenna}
+  #ZCcDnTF7ZiSNaNNA // {help:functions/raise-alert-to}
   #oq6L8Lgvq4qKxsZb // {shim:micro_bit::events::alert}
   #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,ring alarm=MES_ALERT_EVT_ALARM1,ring alarm 2=MES_ALERT_EVT_ALARM2,ring alarm 3=MES_ALERT_EVT_ALARM3,ring alarm 4=MES_ALERT_EVT_ALARM4,ring alarm 5=MES_ALERT_EVT_ALARM5,ring alarm 6=MES_ALERT_EVT_ALARM6}
   #feboFmM8Q6SZnWuH code→show_event_notification("alert", $@event);
@@ -2661,12 +2661,17 @@ action clear_pin_handler(#RSL4xscVGqj094dJ name: String) {
 action show_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K3d msg: String) {
   #xw5ZOUW8EPnesEjC // {shim:}
   #xBsth8WKFROreEm2 code→\_libinit;
-  #ONnRJZP4a5MRHgD4 code→warning("pair a device with the BBC app to use this event");
-  #xGdYFwSAjkS6aGY3 $sprite := data→board→create_text(100, 40, 28, $family→concat("\n")→concat($msg));
+  #ONnRJZP4a5MRHgD4 code→warning("pair your micro:bit with another device to use this function");
+  #xGdYFwSAjkS6aGY3 $sprite := data→board→create_text(100, 40, 24, $family→concat("\n")→concat($msg));
+  #FYwPad2E8AYpRN4N $sprite→set_color(colors→white);
   #x4iM24484ozaNTeT $sprite→fit_text;
-  #xFqNWnjtZC3yheXG $sprite→set_shadow(20, colors→gray, 5, 5);
-  #QtVpY5jaqI0b24vT $sprite→speed_y := - 50;
-  #tDWv6PeAjgT9jDRp $sprite→acceleration_y := - 100;
+  #MGAALd5sucnheK34 $sprite→set_text_baseline("top");
+  #xFqNWnjtZC3yheXG $sprite→set_shadow(20, colors→white, 5, 5);
+  #QtVpY5jaqI0b24vT $sprite→speed_y := math→random_range( - 50, 10);
+  #tDWv6PeAjgT9jDRp $sprite→acceleration_y := math→random_range(100, 150);
+  #PA5DC8rDbWD8HJvR $sprite→speed_x := math→random_range(20, 30);
+  #eYo2fK83t5tPyZbI $sprite→left := 10;
+  #x25Duph4hxkI6ShK $sprite→@top := 0;
   #IeqEh6CZBPBArsjt $anim := $sprite→create_animation;
   #G4m04OrWzinA52eZ $anim→fade_in(0.5, "cubic");
   #DfAyWezJ686P96Mc $anim→sleep(0.5);
@@ -2681,5 +2686,49 @@ action on_event(#kySP97827ymTbBMl event_id: Number, #aPDIztP288WoRSCP body: Acti
   #TF50qzTvXjRfFa4p // {shim:touch_develop::micro_bit::on_event}
   #isiu39I2ESn2wgHm // {namespace:control}
   #t0CHnmCjLeJghHV2 // {weight:0}
+  meta sync;
+}
+#HZBi90fp24kp7KBP
+action camera(#h83i7anjNBXQCQ8h @event: String) {
+  #Sq29ncqpJibgWlMD // Sends a ``camera`` command to the parent device.
+  #zhNFPgYBupsD3zhD // {namespace:events}
+  #xlU1weoz7XLp4LV4 // {weight:0}
+  #wcAJhDq2uOqsUCd1 // {help:td/events}
+  #xa7oZx9X3J9uzoIQ // {shim:micro_bit::events::camera}
+  #UZqUzDEVznxOcfaH // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
+  #u4zgQzfQpB4HxyKS code→show_event_notification("camera", $@event);
+  meta sync;
+}
+#UlY28hqzv4rs2qit
+action microphone(#YQlb6GiyaZq5rvKX @event: String) {
+  #i4fDs6uNXeuVUa73 // Sends an ``microphone`` command to the parent device.
+  #QuKMDv6xVgtEDULd // {namespace:events}
+  #Gw5rinNK4nUOXmwY // {weight:0}
+  #PcEp9p0yVDrCgrn4 // {help:td/events}
+  #IN2RXzJ1JcJtT8Xl // {shim:micro_bit::events::audio_recorder}
+  #mPR7TF4TLTBoBCCg // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
+  #Xr5IqYJT5Zq4KRtH code→show_event_notification("microphone", $@event);
+  meta sync;
+}
+#Q2wIeZtEgXQN64rb
+action alert(#H5jD92DipDo4RJFO @event: String) {
+  #cjY7k4bMLOhYMah0 // Sends an ``alert`` command to the parent device.
+  #x5ZwJLbh76mQsM04 // {namespace:events}
+  #cd3XXj1RGauSVTPM // {weight:0}
+  #aXkun0Dqze4Ny59G // {help:td/events}
+  #J8msRC0piL6z9kYp // {shim:micro_bit::events::alert}
+  #auQQBheqIXOENWJt // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,ring alarm=MES_ALERT_EVT_ALARM1,ring alarm 2=MES_ALERT_EVT_ALARM2,ring alarm 3=MES_ALERT_EVT_ALARM3,ring alarm 4=MES_ALERT_EVT_ALARM4,ring alarm 5=MES_ALERT_EVT_ALARM5,ring alarm 6=MES_ALERT_EVT_ALARM6}
+  #xd2k6gCQiPzdTKk9 code→show_event_notification("alert", $@event);
+  meta sync;
+}
+#fJ4pOnEOqU3eUD2k
+action tell_remote_control_to(#ct4m4Kjn25Ui4zdx @event: String) {
+  #xBtYsIZTUHfWmXCq // Sends a ``remote control`` command to the parent device.
+  #pUWFx7Xrhvhdfd36 // {namespace:antenna}
+  #znsH3tl5GMatL1uD // {weight:20}
+  #tYPnukasH2fTz7ef // {help:functions/tell-remote-control-to}
+  #K8Z19s2gUUoEo7hY // {shim:micro_bit::events::remote_control}
+  #KA5hsujGsAGoxW2v // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
+  #DWxu9anbEMzicq8T code→show_event_notification("remote control", $@event);
   meta sync;
 }

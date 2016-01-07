@@ -1004,7 +1004,7 @@ Blockly.Blocks['antenna_camera'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends a camera event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-camera-to");
     }
 };
 
@@ -1019,7 +1019,7 @@ Blockly.Blocks['antenna_microphone'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends a microphone event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-microphone-to");
     }
 };
 
@@ -1034,7 +1034,7 @@ Blockly.Blocks['antenna_alert'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends an alert event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/raise-alert-to");
     }
 };
 
@@ -1049,7 +1049,7 @@ Blockly.Blocks['antenna_remote_control'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Sends an remote control event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/messages");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-remote-control-to");
     }
 };
 
