@@ -717,7 +717,7 @@ module TDev.Browser {
                         var numuses = HTML.mkTextInput("text", "")
                         perm.value = "preview"
                         count.value = "1"
-                        credit.value = "100"
+                        credit.value = "1"
                         numuses.value = "1"
                         m.add(div("wall-dialog-body",
                             lf("Permissions (preview, educator, moderator, staff): "), perm,
