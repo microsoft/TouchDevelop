@@ -1,7 +1,6 @@
 meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
 meta name "micro:bit profile";
 meta rootId "jNYxMIKZwmM1Tt2iLWl9Hvzs";
-meta allowExport "yes";
 meta hasIds "yes";
 meta splitScreen "yes";
 meta platform "current";
@@ -18,7 +17,7 @@ action main() {
   #SNTTZp3SXz6JkWWX pins[lib micro\u003abit];
   #xVSeqKOnHOk6JFR2 music[lib micro\u003abit];
   #w9qtFNmNqcWH4xF9 game[lib micro\u003abit_game];
-  #cxm5ZRGniZuabbsH events[lib micro\u003abit];
+  #bD2m5z3BbloyYsFN antenna[lib micro\u003abit];
   #FbxqDG6K9icP69Mq control[lib micro\u003abit];
   #xSn8t2IaNKG1wYPa bits;
   #iBKCrFATYjJq1exg create;
@@ -103,7 +102,7 @@ action main() {
   #lY4IxiRSVHUv1prz data→img := @\u267b→micro\u003abit→create_image("");
 }
 #G0lH23nax1Sltq2S meta import micro\u003abit {
-  pub "jnjqgc"
+  pub "fsrbza"
   usage {
     type Image
     action `sync` \_libinit()
@@ -138,10 +137,11 @@ action main() {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `sync` remote_control(@event: String)
-    action `sync` camera(@event: String)
-    action `sync` audio_recorder(@event: String)
-    action `sync` alert(@event: String)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` tell_microphone_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `sync` on_message_received(id: String, callback: Action1[Number])
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -158,6 +158,8 @@ action main() {
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring(frequency: Number)
   }
 }
 #Wc1pO4N99lJnJtZj
@@ -207,7 +209,7 @@ var img : ♻ micro\u003abit → Image {
   }
 }
 #nxBsrWkksKmQnONy meta import micro\u003abit_game {
-  pub "pyfuaj"
+  pub "zibjkk"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -216,15 +218,14 @@ var img : ♻ micro\u003abit → Image {
     action `sync` add_score(points: Number)
     action `async` add_life(lives: Number)
     action `async` start_countdown(ms: Number)
+    action `async` game_over()
     action `async` current_time() returns(ms: Number)
     action `async` remove_life(life: Number)
     action `async` level_up()
     action `async` level() returns(lv: Number)
-    action `async` test_countdown()
     action `async` start_stopwatch()
-    action `async` test_countdown_current_time()
-    action `async` test_current_time()
     action `sync` is_running() returns(running: Boolean)
+    action `async` show_score()
   }
   #iFGAT33WIPN92bpo resolve micro\u003abit = ♻ micro\u003abit with {
   }
@@ -238,7 +239,7 @@ table Thing {
   }
 }
 #DGIsFkv2N6nOcw2l meta import micro\u003abit_serial {
-  pub "dwiebl"
+  pub "lohjia"
   usage {
     action `sync` write_line(text: String)
     action `sync` write_number(value: Number)

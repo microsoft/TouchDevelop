@@ -2674,3 +2674,11 @@ action show_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K
   meta private;
   meta sync;
 }
+#LGnypetzwpDuCCTq
+action on_event(#kySP97827ymTbBMl event_id: Number, #aPDIztP288WoRSCP body: Action) {
+  #ER4HkQf6x99SoIDg // Registers an handler for a particular event. Allows to listen to custom events, not supported in the simulator.
+  #TF50qzTvXjRfFa4p // {shim:touch_develop::micro_bit::on_event}
+  #isiu39I2ESn2wgHm // {namespace:control}
+  #t0CHnmCjLeJghHV2 // {weight:0}
+  meta sync;
+}
