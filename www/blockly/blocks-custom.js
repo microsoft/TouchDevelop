@@ -162,9 +162,25 @@ Blockly.Variables.flyoutCategory = function(workspace) {
       var block = goog.dom.createDom('block');
       block.setAttribute('type', 'variables_change');
       block.setAttribute('gap', 24);
-      var field = goog.dom.createDom('field', null, variableList[i]);
-      field.setAttribute('name', 'VAR');
-      block.appendChild(field);
+      var value = goog.dom.createDom('value');
+      value.setAttribute('name', 'VALUE');
+      var shadow = goog.dom.createDom('shadow');
+      shadow.setAttribute("type", "math_number");
+      value.appendChild(shadow);
+      var field = goog.dom.createDom('field');
+      field.setAttribute('name', 'NUM');
+      field.innerText = 1;
+      shadow.appendChild(field);
+      block.appendChild(value);
+      
+      /*
+          <value name="value">
+            <shadow type="math_number">
+              <field name="NUM">1</field>
+            </shadow>
+          </value>            
+      
+       */
       xmlList.push(block);
     }    
   }
