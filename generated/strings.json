@@ -1280,6 +1280,7 @@
   "Makes a lighter color by a delta between 0 and 1.": "Makes a lighter color by a delta between 0 and 1.",
   "Makes picture monochromatic (black and white)": "Makes picture monochromatic (black and white)",
   "Maps": "Maps",
+  "Maps an integer value from one range to another. Does not contrain the value.": "Maps an integer value from one range to another. Does not contrain the value.",
   "Maps, location to address, address to location": "Maps, location to address, address to location",
   "Math goodness, abs, max, ...": "Math goodness, abs, max, ...",
   "Maybe it has been removed?": "Maybe it has been removed?",
@@ -2055,7 +2056,7 @@
   "Test if the senses→heading is invalid instead": "Test if the senses→heading is invalid instead",
   "Test if the senses→motion is invalid instead.": "Test if the senses→motion is invalid instead.",
   "The Touch Develop app has been updated.": "The Touch Develop app has been updated.",
-  "The Touch Develop platform - Copyright © 2015 Microsoft Corporation. All rights reserved.": "The Touch Develop platform - Copyright © 2015 Microsoft Corporation. All rights reserved.",
+  "The Touch Develop platform - Copyright © {0} Microsoft Corporation. All rights reserved.": "The Touch Develop platform - Copyright © {0} Microsoft Corporation. All rights reserved.",
   "The access token issued by the authorization server.": "The access token issued by the authorization server.",
   "The document url": "The document url",
   "The encoded screenshot is too big.": "The encoded screenshot is too big.",
@@ -3769,5 +3770,6 @@
   "{0}% text zoom": "{0}% text zoom",
   "{asm:{0}} already defined in runtime": "{asm:{0}} already defined in runtime",
   "{box:avatar:avatar}\n": "{box:avatar:avatar}\n",
+  "© Copyright {0} {1}": "© Copyright {0} {1}",
   "● Sign in": "● Sign in"
 }
