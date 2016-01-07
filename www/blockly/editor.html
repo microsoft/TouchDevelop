@@ -104,14 +104,14 @@
         <!--     </block> -->
         <!--   </value> -->
         <!-- </block> -->
-        <block type="device_show_number" gap="12">
+        <block type="device_show_number" gap="8">
           <value name="number">
             <shadow type="math_number">
               <field name="NUM">2</field>
             </shadow>
           </value>
         </block>
-        <block type="device_show_leds" gap="12">
+        <block type="device_show_leds" gap="8">
         </block>
         <block type="device_print_message">
           <value name="message">
@@ -121,7 +121,7 @@
           </value>
         </block>
         <block type="device_clear_display"></block>
-        <block type="device_forever" gap="12"></block>
+        <block type="device_forever" gap="8"></block>
         <block type="device_pause">
           <value name="pause">
             <shadow type="math_number">
@@ -134,11 +134,11 @@
         <block type="device_button_event"></block>
         <block type="device_gesture_event"></block>
         <block type="device_pin_event"></block>
-        <block type="device_get_button2" gap="12"></block>
-        <block type="device_heading" gap="12"></block>
-        <block type="device_temperature" gap="12"></block>
-        <block type="device_get_acceleration" gap="12"></block>
-        <block type="device_get_running_time" gap="12"></block>
+        <block type="device_get_button2" gap="8"></block>
+        <block type="device_heading" gap="8"></block>
+        <block type="device_temperature" gap="8"></block>
+        <block type="device_get_acceleration" gap="8"></block>
+        <block type="device_get_running_time" gap="8"></block>
       </category>
       <category name="Loops" colour="120">
         <block type="controls_repeat_ext">
@@ -159,10 +159,53 @@
       </category>      
       <category name="Logic" colour="210">
         <block type="controls_if"></block>
-        <block type="logic_compare"></block>
-        <block type="logic_operation"></block>
+        <block type="logic_compare" gap="8">
+            <field name="OP">LT</field>                        
+            <value name="A">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                        
+            <value name="B">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                        
+        </block>
+        <block type="logic_compare" gap="8">
+            <value name="A">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                        
+            <value name="B">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                                    
+        </block>
+        <block type="logic_compare" >
+            <field name="OP">GT</field>                        
+            <value name="A">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                        
+            <value name="B">
+                <shadow type="math_number">
+                <field name="NUM">0</field>
+                </shadow>
+            </value>                        
+        </block>
+        <block type="logic_operation" gap="8"></block>
+        <block type="logic_operation" gap="8">
+            <field name="OP">OR</field>            
+        </block>
         <block type="logic_negate"></block>
-        <block type="logic_boolean"></block>
+        <block type="logic_boolean" gap="8"></block>
+        <block type="logic_boolean">
+            <field name="BOOL">FALSE</field>                        
+        </block>
       </category>
       <category name="Variables"  colour="330" custom="VARIABLE"></category>
       <category name="Maths" colour="230">
@@ -259,7 +302,7 @@
         </block>
       </category>      
       <category name="LED" colour="3">
-        <block type="device_plot" gap="12">
+        <block type="device_plot" gap="8">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">0</field>
@@ -271,7 +314,7 @@
             </shadow>
           </value>
         </block>
-        <block type="device_unplot" gap="12">
+        <block type="device_unplot" gap="8">
           <value name="x">
             <shadow type="math_number">
               <field name="NUM">0</field>
@@ -296,7 +339,7 @@
           </value>
         </block>
 
-        <block type="device_get_brightness"  gap="12"></block>
+        <block type="device_get_brightness"  gap="8"></block>
         <block type="device_set_brightness">
             <value name="value">
                 <shadow type="math_number">
@@ -413,7 +456,7 @@
         <block type="device_build_big_image"></block>
       </category>
       <category name="Pins" colour="351">
-          <block type="device_get_digital_pin" gap="12"></block>
+          <block type="device_get_digital_pin" gap="8"></block>
           <block type="device_set_digital_pin">
             <value name="value">
               <shadow type="math_number">
@@ -421,8 +464,8 @@
               </shadow>
             </value>
           </block>
-          <block type="device_get_analog_pin" gap="12"></block>
-          <block type="device_set_analog_pin" gap="12">
+          <block type="device_get_analog_pin" gap="8"></block>
+          <block type="device_set_analog_pin" gap="8">
             <value name="value">
               <shadow type="math_number">
                 <field name="NUM">1024</field>
