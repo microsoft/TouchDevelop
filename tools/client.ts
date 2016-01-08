@@ -312,6 +312,21 @@ export function test(args:string[])
 {
     if (args.length == 0) {
         getScript("");
+        [
+            "anmxa", "brng", "cjep", "etbm",
+            "hgcc", "hpjq", "mcrl", "pyqya",
+            "qubz", "tozq", "wpfi", "wmrn",
+            "xeid", "xxrc", "ywvc", "juwc",
+            "juwy", "nwqba", "drdw", "qstd",
+            "zfzv", "mbcb", "fqcy", "xylk",
+            "mxjr", "mxjr", "osdurmos", "ekwbwjnw",
+            "ahzh", "rfgn", "kehh", "tpjra",
+            "abxe", "pcojyqpe", "lqgfmjdf", "fnwna",
+            "jhrx", "nykob", "zzni", "ajnsa",
+            "wfwujpwu", "qrki", "skuw", "jvkg",
+            "nhkja"
+        ].forEach(id => delete scriptsCache[id]);
+
         args = Object.keys(scriptsCache);
     }
 
