@@ -230,6 +230,7 @@ module TDev.Cloud {
         cachedScripts?: string[];
         userVoice?: string;
         tickFilter?: StringMap<number>;
+        primaryLocale: string;
     }
 
     export var config: ClientConfig = {
@@ -261,7 +262,8 @@ module TDev.Cloud {
         hintLevel: "full",
         userVoice: "touchdevelop",
         tutorialsid: "vjsseqks",
-        showcaseid: "njigpnyj"
+        showcaseid: "njigpnyj",
+        primaryLocale: "en-US",
     }
 
     export function isArtUrl(url : string) : boolean {

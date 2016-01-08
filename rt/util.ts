@@ -3373,6 +3373,10 @@ module TDev{
             else ln = "zh-CHS";
         }
 
+        if (Cloud.config.primaryLocale.slice(0, 2) == ln) {
+            ln = Cloud.config.primaryLocale;
+        }
+
         sForPlural = ln2 == "en" || ln2 == "es" || ln2 == "pt" || ln2 == "de" || ln2 == "fr";
 
         translations = {}
