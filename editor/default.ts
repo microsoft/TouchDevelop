@@ -261,13 +261,19 @@ module TDev
             Storage.temporary = true;
         }
 
+
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
         if (m) {
             Util.setTranslationLanguage(m[1])
         } else if (!Util.loadUserLanguageSetting()) {
-            var lang = window.navigator.language || window.navigator.userLanguage
-            if (lang)
-                Util.setTranslationLanguage(lang)
+            m = /TD_LANG=([\w\-]+)/.exec(document.cookie)
+            if (m)
+                Util.setTranslationLanguage(m[1])
+            else {
+                var lang = window.navigator.language || window.navigator.userLanguage
+                if (lang)
+                    Util.setTranslationLanguage(lang)
+            }
         }
 
         if (Math.random() < 0.05 || /translationTracking/.test(url))
