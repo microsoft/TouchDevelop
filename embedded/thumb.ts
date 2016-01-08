@@ -317,7 +317,7 @@ module TDev.AST.Thumb
             m = /^(\d+)$/i.exec(s)
             if (m) v = parseInt(m[1], 10)
 
-            m = /^(\w+)@(\d+)$/.exec(s)
+            m = /^(\w+)@(-?\d+)$/.exec(s)
             if (m) {
                 if (mul != 1)
                     this.directiveError(lf("multiplication not supported with saved stacks"));
@@ -846,6 +846,11 @@ module TDev.AST.Thumb
                                lnNext2.clobbersReg(ln.numArgs[0])) {
                         // RULE: movs rX, #V; mov rY, rX; clobber rX -> movs rY, #V
                         ln.update("movs r" + lnNext.numArgs[0] + ", #" + ln.numArgs[1])
+                        lnNext.update("")
+                    } else if (lnop == "pop" && ln.singleReg() >= 0 && lnNext.getOp() == "push" &&
+                               ln.singleReg() == lnNext.singleReg()) {
+                        // RULE: pop {rX}; push {rX} -> ldr rX, [sp, #0]
+                        ln.update("ldr r" + ln.singleReg() + ", [sp, #0]")
                         lnNext.update("")
                     } else if (lnNext2 && lnop == "push" && ln.singleReg() >= 0 && lnNext.preservesReg(ln.singleReg()) &&
                                lnNext2.getOp() == "pop" && ln.singleReg() == lnNext2.singleReg()) {

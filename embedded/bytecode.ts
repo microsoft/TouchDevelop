@@ -345,38 +345,6 @@ module TDev.AST.Bytecode
             return l
         }
 
-        peepHole()
-        {
-            /* TODO
-               TODO remember that used labels are instructions, push{r0} lbl: pop{r0} cannot be eliminated
-            var res = []
-            for (var i = 0; i < this.body.length; ++i) {
-                var op = this.body[i]
-                var op2 = this.body[i + 1]
-
-                if (op2) {
-                    if (op.name == "push {r0}" && op2.name == "pop {r0}") {
-                        i++;
-                        continue
-                    }
-
-                    if (op.name == "B" && op.arg0 == op2) {
-                        continue; // skip B to next instruction
-                    }
-                }
-
-                res.push(op)
-            }
-
-            this.body = res
-            */
-        }
-
-        expandOpcodes()
-        {
-            this.peepHole()
-        }
-
         emitClrs(omit:LocalDef, inclArgs = false)
         {
             var lst = this.locals
@@ -400,7 +368,6 @@ module TDev.AST.Bytecode
 
             Util.assert(inf.args <= 4)
 
-            // TODO check on the order, optimize?
             if (inf.args >= 4)
                 this.emit("pop {r3}");
             if (inf.args >= 3)
@@ -410,32 +377,25 @@ module TDev.AST.Bytecode
             if (inf.args >= 1)
                 this.emit("pop {r0}");
 
-            var numMask = 0
+            var reglist:string[] = []
+
+            for (var i = 0; i < 4; ++i) {
+                if (mask & (1 << i))
+                    reglist.push("r" + i)
+            }
+
+            var numMask = reglist.length
 
             if (inf.type == "F" && mask != 0) {
                 // reserve space for return val
-                // TODO use @startstack
-                this.emit("push {r0}");
-            }
-
-            if (mask & (1 << 0)) {
-                numMask++
-                this.emit("push {r0}");
-            }
-            if (mask & (1 << 1)) {
-                numMask++
-                this.emit("push {r1}");
-            }
-            if (mask & (1 << 2)) {
-                numMask++
-                this.emit("push {r2}");
-            }
-            if (mask & (1 << 3)) {
-                numMask++
-                this.emit("push {r3}");
+                reglist.push("r7")
+                this.emit("@stackmark retval")
             }
 
             Util.assert((mask & ~0xf) == 0)
+
+            if (reglist.length > 0)
+                this.emit("push {" + reglist.join(",") + "}")
 
             this.emit("bl " + name)
 
@@ -443,7 +403,7 @@ module TDev.AST.Bytecode
                 if (mask == 0)
                     this.emit("push {r0}");
                 else {
-                    this.emit("str r0, [sp, #4*" + numMask + "]")
+                    this.emit("str r0, [sp, retval@-1]")
                 }
             }
             else if (inf.type == "P") {
