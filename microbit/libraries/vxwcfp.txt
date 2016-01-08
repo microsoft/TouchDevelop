@@ -2733,3 +2733,13 @@ action tell_remote_control_to(#ct4m4Kjn25Ui4zdx @event: String) {
   #DWxu9anbEMzicq8T code→show_event_notification("remote control", $@event);
   meta sync;
 }
+#x4q8jp37FZ2yFjtH
+action map(#xDrpNVDYcOP4xPyM value: Number, #W7lLKHDJCBcfFWfx from_low: Number, #x51HWkuNwWc6CfRu from_high: Number, #UphF5VHccbBSprcV to_low: Number, #iODWbk9drmgB2ZBV to_high: Number) returns(#XiujfWmMGuAZueU8 r: Number) {
+  #MA0gRjAwdRLlCae7 // Re-maps a number from one range to another. That is, a value of ``from low`` would get mapped to ``to low``, a value of ``from high`` to ``to high``, values in-between to values in-between, etc.
+  #EUpjXk4q9Jn56eQe // {hints:from high:1023}
+  #zfwaGjKO4DVlsVTO // {hints:to high:4}
+  #Tft9hSpV4N3FKVO6 // {help:functions/map}
+  #xCn7AaB8RuB8qFVD // {namespace:pins}
+  #dnQlRSL4btf2ExhK // {weight:40}
+  #uc5IndedDZWZMEwV `return` ($value - $from_low) * ($to_high - $to_low) / ($from_high - $from_low) + $from_low;
+}

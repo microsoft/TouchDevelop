@@ -1341,6 +1341,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "analog set period",
     args: [{ field: "pin" } , { field: "micros" }]
   },
+  math_map: {
+    namespace: "pins",
+    f: "map",
+    args: [{ field: "value" } , { field: "fromLow" },{ field: "fromHigh" },{ field: "toLow" },{ field: "toHigh" }]
+  },
   device_get_brightness: {
     namespace: "led",
     f: "brightness",

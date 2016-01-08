@@ -406,6 +406,31 @@ Blockly.Blocks['device_set_analog_period'] = {
     }
 };
 
+Blockly.Blocks['math_map'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/map');
+        this.setColour(blockColors.pins);
+        this.appendValueInput("value")
+            .setCheck("Number")
+            .appendField("map");
+        this.appendValueInput("fromLow")
+            .setCheck("Number")
+            .appendField("from low");
+        this.appendValueInput("fromHigh")
+            .setCheck("Number")
+            .appendField("from high");
+        this.appendValueInput("toLow")
+            .setCheck("Number")
+            .appendField("to low");
+        this.appendValueInput("toHigh")
+            .setCheck("Number")
+            .appendField("to high");
+        this.setInputsInline(false);                                  
+        this.setOutput(true, "Number");
+        this.setTooltip("Re-maps a number from one range to another.");
+    }
+};
+
 Blockly.Blocks['device_get_brightness'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/brightness');
