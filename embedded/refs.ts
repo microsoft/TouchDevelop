@@ -8,3 +8,4 @@
 ///<reference path='thumb.ts'/>
 ///<reference path='driver.ts'/>
 ///<reference path='hex.ts'/>
+///<reference path='packager.ts'/>
