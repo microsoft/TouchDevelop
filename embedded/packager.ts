@@ -2,7 +2,9 @@
 ///<reference path='../typings/jszip/jszip.d.ts'/>
 module TDev {
     export module Embedded {
-        export function packageApp(name: string, sources : StringMap<string>): string { // datauri
+        export function packageApp(name: string, sources: StringMap<string>): string { // datauri
+            if (typeof(JSZip) === 'undefined') return undefined;
+            
             var zip = new JSZip();
 
             // IDE support                    
