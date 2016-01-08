@@ -2630,8 +2630,6 @@ module TDev.AST {
             { cap: PlatformCapability.Contacts,       id: "contacts",       name: lf("Contacts") },
             { cap: PlatformCapability.EditorOnly,     id: "editoronly",     name: lf("Editor only") },
             { cap: PlatformCapability.Gyroscope,      id: "gyroscope",      name: lf("Gyroscope") },
-            { cap: PlatformCapability.Hawaii,         id: "hawaii",         name: lf("Hawaii") },
-            { cap: PlatformCapability.Home,           id: "home",           name: lf("Home media devices") },
             { cap: PlatformCapability.Location,       id: "location",       name: lf("Location") },
             { cap: PlatformCapability.Maps,           id: "maps",           name: lf("Maps") },
             { cap: PlatformCapability.Media,          id: "media",          name: lf("Media libraries on device") },

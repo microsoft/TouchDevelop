@@ -1486,23 +1486,18 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "brightness",
       args: [{ field: "sprite" }]
   },
-  antenna_camera: {
-    namespace: "antenna",
+  devices_camera: {
+    namespace: "devices",
     f: "tell camera to",
     args: [{field:"property"}]
   },
-  antenna_remote_control: {
-    namespace: "antenna",
+  devices_remote_control: {
+    namespace: "devices",
     f: "tell remote control to",
     args: [{field:"property"}]
   },
-  antenna_microphone: {
-    namespace: "antenna",
-    f: "tell microphone to",
-    args: [{field:"property"}]
-  },
-  antenna_alert: {
-    namespace: "antenna",
+  devices_alert: {
+    namespace: "devices",
     f: "raise alert to",
     args: [{field:"property"}]
   },

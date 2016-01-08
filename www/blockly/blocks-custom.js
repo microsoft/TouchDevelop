@@ -61,13 +61,6 @@ var cameraMessageDropdown = [
     ["stop video mode", "stop video mode"],
 ];
 
-var microphoneMessageDropdown = [
-    ["launch", "launch"],
-    ["start capture", "start capture"],
-    ["stop capture", "stop capture"],
-    ["stop", "stop"],
-];
-
 var alertMessageDropdown = [
     ["display toast", "display toast"],
     ["vibrate", "vibrate"],
@@ -1021,7 +1014,7 @@ Blockly.Blocks['game_sprite_set_property'] = {
     }
 };
 
-Blockly.Blocks['antenna_camera'] = {
+Blockly.Blocks['devices_camera'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1036,22 +1029,7 @@ Blockly.Blocks['antenna_camera'] = {
     }
 };
 
-Blockly.Blocks['antenna_microphone'] = {
-    init: function()
-    {
-        this.setColour(blockColors.antenna);
-        this.appendDummyInput().appendField("tell microphone to ");
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(microphoneMessageDropdown), "property");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);            
-        this.setTooltip('Sends a microphone event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-microphone-to");
-    }
-};
-
-Blockly.Blocks['antenna_alert'] = {
+Blockly.Blocks['devices_alert'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1066,7 +1044,7 @@ Blockly.Blocks['antenna_alert'] = {
     }
 };
 
-Blockly.Blocks['antenna_remote_control'] = {
+Blockly.Blocks['devices_remote_control'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);

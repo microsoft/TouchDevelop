@@ -375,7 +375,7 @@ module TDev {
         Camera =                0x00000004,
         Compass =               0x00000008,
         Gyroscope =             0x00000010,
-        Home =                  0x00000020,
+
         Location =              0x00000040,
         Maps =                  0x00000080,
         Media =                 0x00000100,
@@ -391,7 +391,7 @@ module TDev {
         EditorOnly =            0x00040000,
         MusicAndSounds =        0x00080000,
         Network =               0x00100000,
-        Hawaii =                0x00200000,
+
         Tiles =                 0x00400000,
         Proximity =             0x00800000,
         Speech =                0x01000000,
@@ -414,7 +414,6 @@ module TDev {
            | EditorOnly
            | MusicAndSounds
            | Network
-           | Hawaii
            | CloudData
            | CloudServices
            ,
@@ -439,7 +438,6 @@ module TDev {
             | Tiles
             | MusicAndSounds
             | Network
-            | Hawaii
             ,
 
         iOS =
