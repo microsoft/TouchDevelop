@@ -1014,7 +1014,7 @@ Blockly.Blocks['game_sprite_set_property'] = {
     }
 };
 
-Blockly.Blocks['antenna_camera'] = {
+Blockly.Blocks['devices_camera'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1029,7 +1029,7 @@ Blockly.Blocks['antenna_camera'] = {
     }
 };
 
-Blockly.Blocks['antenna_alert'] = {
+Blockly.Blocks['devices_alert'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1044,7 +1044,7 @@ Blockly.Blocks['antenna_alert'] = {
     }
 };
 
-Blockly.Blocks['antenna_remote_control'] = {
+Blockly.Blocks['devices_remote_control'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
