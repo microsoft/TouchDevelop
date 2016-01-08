@@ -50,6 +50,7 @@ module TDev.Browser {
                     nextTutorialsList: true,
                     // hub
                     hubTutorials: true,
+                    hubLearn: true,
                     hubShowcase: true,
                     hubSocial: true,
                     publicationComments: true,
