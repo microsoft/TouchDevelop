@@ -117,45 +117,6 @@ module TDev.RT {
         //? Creates an invalid Xml Object instance
         export function xml_object() : XmlObject { return undefined; }
 
-        //? Creates an invalid Device instance
-        //@ cap(home) obsolete
-        export function device() : Device { return undefined; }
-
-        //? Creates an invalid Device Collection instance
-        //@ cap(home) obsolete
-        export function device_collection() : Collection<Device> { return undefined; }
-
-        //? Creates an invalid Printer instance
-        //@ cap(home) obsolete
-        export function printer() : Printer { return undefined; }
-
-        //? Creates an invalid Printer Collection instance
-        //@ cap(home) obsolete
-        export function printer_collection() : Collection<Printer> { return undefined; }
-
-        //? Creates an invalid Media Player instance
-        //@ cap(home) obsolete
-        export function media_player() : MediaPlayer { return undefined; }
-
-        //? Creates an invalid Media Player Collection instance
-        //@ cap(home) obsolete
-        export function media_player_collection() : Collection<MediaPlayer> { return undefined; }
-
-        //? Creates an invalid Media Server instance
-        //@ cap(home) obsolete
-        export function media_server() : MediaServer { return undefined; }
-
-        //? Creates an invalid Media Server Collection instance
-        //@ cap(home) obsolete
-        export function media_server_collection() : Collection<MediaServer> { return undefined; }
-
-        //? Creates an invalid Media Link instance
-        //@ cap(home) obsolete
-        export function media_link() : MediaLink { return undefined; }
-
-        //? Creates an invalid Media Link Collection instance
-        //@ cap(home) obsolete
-        export function media_link_collection() : Collection<MediaLink> { return undefined; }
 
         //? Creates an invalid Place instance
         export function place() : Place { return undefined; }

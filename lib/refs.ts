@@ -15,13 +15,11 @@
 ///<reference path='Colors.ts'/>
 ///<reference path='Contact.ts'/>
 ///<reference path='DateTime.ts'/>
-///<reference path='Device.ts'/>
 ///<reference path='DeviceMotion.ts'/>
 ///<reference path='DeviceOrientation.ts'/>
 ///<reference path='Docs.ts'/>
 ///<reference path='Enumerator.ts'/>
 ///<reference path='GeoLocation.ts'/>
-///<reference path='Home.ts'/>
 ///<reference path='Invalid.ts'/>
 ///<reference path='JsonObject.ts'/>
 ///<reference path='JsonBuilder.ts'/>
@@ -36,9 +34,6 @@
 ///<reference path='Maps.ts'/>
 ///<reference path='Math.ts'/>
 ///<reference path='Media.ts'/>
-///<reference path='MediaLink.ts'/>
-///<reference path='MediaPlayer.ts'/>
-///<reference path='MediaServer.ts'/>
 ///<reference path='Message.ts'/>
 ///<reference path='Motion.ts'/>
 ///<reference path='Number.ts'/>
@@ -55,7 +50,6 @@
 ///<reference path='Player.ts'/>
 ///<reference path='Playlist.ts'/>
 ///<reference path='Playlists.ts'/>
-///<reference path='Printer.ts'/>
 ///<reference path='Radio.ts'/>
 ///<reference path='Senses.ts'/>
 ///<reference path='Social.ts'/>

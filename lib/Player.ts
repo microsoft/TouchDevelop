@@ -296,20 +296,6 @@ module TDev.RT {
             r.resumeVal(_audio ? _audio.paused : false);
         }
 
-        //? Plays an audio/video file from the home network
-        //@ writesMutable cap(home)
-        export function play_home_media(media: MediaLink): void {
-            switch (media.kind()) {
-                case 'song':
-                    var s = Song.mk(media.url(), 'media', media.title());
-                    Player.play(s);
-                    break;
-                default:
-                    Web.play_media(media.url());
-                    break;
-            }
-        }
-
         //? Volume is no longer supported.
         //@ obsolete
         //@ readsMutable
