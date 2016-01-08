@@ -18,8 +18,6 @@ module TDev.RT {
         export var liveConnectRedirectDomainId: string;
         export var liveConnectUserId: string;
 
-        export var projectHawaiiKey: string;
-
         export var pubCenterApplicationId: string; // = 'd25517cb-12d4-4699-8bdc-52040c712cab'; // test mode
         export var pubCenterAdUnitId: string; // = '10043008'; // 500 x 130 ad
         export var keys = {};
