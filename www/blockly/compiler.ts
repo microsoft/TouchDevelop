@@ -1496,11 +1496,6 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "tell remote control to",
     args: [{field:"property"}]
   },
-  antenna_microphone: {
-    namespace: "antenna",
-    f: "tell microphone to",
-    args: [{field:"property"}]
-  },
   antenna_alert: {
     namespace: "antenna",
     f: "raise alert to",

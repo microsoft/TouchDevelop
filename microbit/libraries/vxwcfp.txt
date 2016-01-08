@@ -1757,17 +1757,6 @@ action tell_camera_to(#p3kEX3EqeufdJmG1 @event: String) {
   #yDtIYowWcPuh4mNt code→show_event_notification("camera", $@event);
   meta sync;
 }
-#CjI3CHq22D9YwGsN
-action tell_microphone_to(#WUexw2vVrC2OMEa2 @event: String) {
-  #xC6rDXBdCS9ZzGrs // Sends an ``microphone`` command to the parent device.
-  #M5eNr22OwVuxNpiN // {namespace:antenna}
-  #Iq35kOhdrf12OXdN // {weight:18}
-  #cMVTVS0CCRPPOY9u // {help:functions/tell-microphone-to}
-  #gf80RSjq2euipiOS // {shim:micro_bit::events::audio_recorder}
-  #QKzBOXeC241gkrof // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
-  #E8b0BafTGID7UDpl code→show_event_notification("microphone", $@event);
-  meta sync;
-}
 #CzqRWuR2SyiUNdAg
 action raise_alert_to(#pHqCn0ZWIdyNQSVu @event: String) {
   #vUmqTLUCj4fjFygl // Sends an ``alert`` command to the parent device.
@@ -2698,17 +2687,6 @@ action camera(#h83i7anjNBXQCQ8h @event: String) {
   #xa7oZx9X3J9uzoIQ // {shim:micro_bit::events::camera}
   #UZqUzDEVznxOcfaH // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
   #u4zgQzfQpB4HxyKS code→show_event_notification("camera", $@event);
-  meta sync;
-}
-#UlY28hqzv4rs2qit
-action microphone(#YQlb6GiyaZq5rvKX @event: String) {
-  #i4fDs6uNXeuVUa73 // Sends an ``microphone`` command to the parent device.
-  #QuKMDv6xVgtEDULd // {namespace:events}
-  #Gw5rinNK4nUOXmwY // {weight:0}
-  #PcEp9p0yVDrCgrn4 // {help:td/events}
-  #IN2RXzJ1JcJtT8Xl // {shim:micro_bit::events::audio_recorder}
-  #mPR7TF4TLTBoBCCg // {enum:event:launch=MES_AUDIO_RECORDER_EVT_LAUNCH,start capture=MES_AUDIO_RECORDER_EVT_START_CAPTURE,stop capture=MES_AUDIO_RECORDER_EVT_STOP_CAPTURE,stop=MES_AUDIO_RECORDER_EVT_STOP}
-  #Xr5IqYJT5Zq4KRtH code→show_event_notification("microphone", $@event);
   meta sync;
 }
 #Q2wIeZtEgXQN64rb

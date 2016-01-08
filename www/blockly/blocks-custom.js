@@ -61,13 +61,6 @@ var cameraMessageDropdown = [
     ["stop video mode", "stop video mode"],
 ];
 
-var microphoneMessageDropdown = [
-    ["launch", "launch"],
-    ["start capture", "start capture"],
-    ["stop capture", "stop capture"],
-    ["stop", "stop"],
-];
-
 var alertMessageDropdown = [
     ["display toast", "display toast"],
     ["vibrate", "vibrate"],
@@ -1033,21 +1026,6 @@ Blockly.Blocks['antenna_camera'] = {
         this.setNextStatement(true);            
         this.setTooltip('Sends a camera event');
         this.setHelpUrl("https://www.microbit.co.uk/functions/tell-camera-to");
-    }
-};
-
-Blockly.Blocks['antenna_microphone'] = {
-    init: function()
-    {
-        this.setColour(blockColors.antenna);
-        this.appendDummyInput().appendField("tell microphone to ");
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(microphoneMessageDropdown), "property");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);            
-        this.setTooltip('Sends a microphone event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-microphone-to");
     }
 };
 
