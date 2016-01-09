@@ -2067,6 +2067,8 @@ module TDev
             return cpp.then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);
+                    var zip = Embedded.packageApp(name, { "main.cpp": cpp });
+                    if (zip) HTML.browserDownload(zip, Util.toFileName("microbit-" + name + ".zip", "microbit-project.zip"));                    
                     notifyCompiled(cpp);
                     return;
                 }
