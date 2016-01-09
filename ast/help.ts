@@ -1467,11 +1467,6 @@ module TDev {
 
         public extractStmts(stmts:AST.Stmt[])
         {
-            function isEmptyComment(s:AST.Stmt)
-            {
-                return s.docText() == ""
-            }
-
             this.init();
 
             var output = "";
@@ -1499,11 +1494,11 @@ module TDev {
                         var bits = m[1];
                         output += "<div class='md-para'>" + this.renderer.renderBitmatrix(bits, { cls: 'docs', height:7 }) + "</div>";
                         i++;
-                    } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt)) != null) {
+                    } else if ((m = /^\s*(\{code\}|````)\s*$/.exec(cmt)) != null) {
                         var j = i + 1;
                         var seenStmt = false;
                         while (j < stmts.length) {
-                            if (/^\s*(\{\/code}|````)\s*$/.test(stmts[j].docText()))
+                            if (/^\s*(\{\/code\}|````)\s*$/.test(stmts[j].docText()))
                                 break;
                             j++;
                         }
