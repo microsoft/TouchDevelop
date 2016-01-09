@@ -25,3 +25,4 @@
 ///<reference path='apps.ts'/>
 ///<reference path='fixer.ts'/>
 ///<reference path='converter.ts'/>
+///<reference path='mddocs.ts'/>

@@ -5,7 +5,7 @@ module TDev { export module AST {
     export class TokenWriter
     {
         private buf = "";
-        private indentLevel = 0;
+        public indentLevel = 0;
         private newlinesPending = 0;
         public lastChar = " ";
         private lastBlockEnd = -1;
