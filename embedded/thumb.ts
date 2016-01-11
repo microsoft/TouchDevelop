@@ -507,6 +507,23 @@ module TDev.AST.Thumb
             }
         }
         
+        private emitHex(words:string[])
+        {
+            words.slice(1).forEach(w => {
+                if (w == ",") return
+                if (w.length % 4 != 0)
+                    this.directiveError(".hex needs an even number of bytes")
+                else if (!/^[a-f0-9]+$/i.test(w))
+                    this.directiveError(".hex needs a hex number")
+                else
+                    for (var i = 0; i < w.length; i += 4) {
+                        var n = parseInt(w.slice(i, i + 4), 16)
+                        n = ((n & 0xff) << 8) | ((n >> 8) & 0xff)
+                        this.emitShort(n)
+                    }
+            })
+        }
+        
         private handleDirective(l:Line)
         {
             var words = l.words;
@@ -550,6 +567,9 @@ module TDev.AST.Thumb
                     break;
                 case ".byte":
                     this.emitBytes(words);
+                    break;
+                case ".hex":
+                    this.emitHex(words);
                     break;
                 case ".hword":
                 case ".short":
