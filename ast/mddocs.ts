@@ -21,7 +21,12 @@ module TDev.AST.MdDocs {
         {
             return "\n```" + this.finalize(true) + "\n```\n\n";
         }
-        
+
+        public comment(s:string)
+        {
+            this.op("//").space().write(formatText(s).trim()).nl();
+            return this
+        }
     }
 
     function formatText(s:string)
@@ -31,7 +36,8 @@ module TDev.AST.MdDocs {
         {
             warnS += "WARN: " + m + "\n"
         }
-        
+
+        s = s.replace(/\s+/g, " ").trim()
         s = s.replace(/^\{([\w\*]+)(:([^{}]*))?\}/g, (full, macro, dummy, arg) => {
             if (macro == "sig") {
                 var m = arg.split(/->/);
@@ -48,10 +54,19 @@ module TDev.AST.MdDocs {
                     warn("cannot find lib action: " + arg)
                     return full;
                 }
-            } else if (macro == "fullsig" || macro == "decl") {
+            } else if (macro == "decl") {
+                var d = TDev.Script.things.filter(t => t.getName() == arg)[0]
+                if (!d) {
+                    warn("no such decl: " + arg)
+                    return full;
+                }
+                else
+                    return mkSnippet([d])
+            } else if (macro == "fullsig") {
                 warn("unsupported macro: " + macro)
                 return full;
             } else {
+                warnS += "MACRO: " + macro
                 return full;
             }
         })
