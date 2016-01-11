@@ -231,6 +231,7 @@ module TDev.Cloud {
         userVoice?: string;
         tickFilter?: StringMap<number>;
         primaryLocale: string;
+        uploader?: boolean;
     }
 
     export var config: ClientConfig = {
