@@ -547,14 +547,15 @@ module TDev {
     var ast = compileOrError(false, msgSel);
     if (!ast)
       return;
-    doSave();
     $("#command-compile > .roundsymbol").addClass("compiling");
+    doSave();
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
       text: ast,
       language: External.Language.TouchDevelop,
       name: getName(),
       libs: libs,
+      source: saveBlockly()
     });
   }
   

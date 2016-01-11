@@ -72,6 +72,7 @@ module TDev {
             language: Language;
             libs: { [libName: string]: LibEntry };
             name?: string; // Name of the script
+            source?: string; // Source of the script
         }
 
         export interface Message_CompileAck extends Message {

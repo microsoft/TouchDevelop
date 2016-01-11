@@ -157,7 +157,7 @@ module TDev.Hex
     }
 
     var firstTime = true;
-    export function compile(app : AST.App, compilationStartTime:number, saveStateAsync:()=>Promise, showSource = false)
+    export function compile(app : AST.App, compilationStartTime:number, saveStateAsync:()=>Promise, showSource : boolean, source: string)
     {
         var times = ""
         var startTime = Util.now();
@@ -165,10 +165,10 @@ module TDev.Hex
         times += Util.fmt("; type check before compile {0}ms\n", startTime - compilationStartTime);
         var guid = app.localGuid
         var st = saveStateAsync()
-            .then(() => Promise.join([World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
+            .then(() => Promise.join([source ||World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
             .then(r => {
-                var hd:Cloud.Header = r[1]
                 var text:string = r[0]
+                var hd:Cloud.Header = r[1]
 
                 var meta = JSON.stringify(World.stripHeaderForSave(hd))
 

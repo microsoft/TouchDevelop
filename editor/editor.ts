@@ -2026,10 +2026,10 @@ module TDev
             this.currentCompilationModalDialog.show();
         }
 
-        public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean } = {}) {
+        public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean; source?: string; } = {}) {
             tick(Ticks.coreNativeCompile);
             if (!options.showSource) this.showCompilationDialog(true, !!options.uploader);
-            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource);
+            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource, options.source);
             if (!options.showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
