@@ -1679,31 +1679,31 @@ action test_pin_pressed() {
 action test_devices() {
   #xM2V2HK64vD5CCP6 // {shim:}
   #SF8Y7AzLVf79J9Hv code→\_libinit;
-  #cTuQbNGhz19mZ9t8 code→on_device_notification("incoming call");
+  #cTuQbNGhz19mZ9t8 code→on_notified("incoming call");
   #GyS1jjevaGOtFn7t where `implicit` \_body\_() {
     #qV2L159TGxJqtFWY code→show_string("call", 150);
   }
-  #fDLKJmiUUW69SvE1 code→on_device_notification("display on");
+  #fDLKJmiUUW69SvE1 code→on_notified("display on");
   #xJ0TOWIoWn36b1L2 where `implicit` \_body\_() {
     #x3DQ6nvE2f4Rqd2h code→show_string("on", 150);
   }
-  #pzhqPTIc6apYk7pA code→on_device_notification("display off");
+  #pzhqPTIc6apYk7pA code→on_notified("display off");
   #tIPIEP27KGu6QXrc where `implicit` \_body\_() {
     #oPQrc25PShs2hY12 code→show_string("off", 150);
   }
-  #TN6fi4j2zlOS6ZZN code→on_device_notification("incoming message");
+  #TN6fi4j2zlOS6ZZN code→on_notified("incoming message");
   #xovkFszj0eJqEcde where `implicit` \_body\_() {
     #jJR01sQvfk3C30u4 code→show_string("msg", 150);
   }
-  #xlty8np4b3hGTffF code→on_device_notification("landscape");
+  #xlty8np4b3hGTffF code→on_notified("orientation landscape");
   #n0VbKITZgs222bFS where `implicit` \_body\_() {
     #z2ehI01nRsXB7Jri code→show_string("landscape", 150);
   }
-  #xo2CAyPVq82gihJv code→on_device_notification("portrait");
+  #xo2CAyPVq82gihJv code→on_notified("orientation portrait");
   #ANNOwYn5M8CNBLsx where `implicit` \_body\_() {
     #w3RcKVkf5ZwT0Yoy code→show_string("portrait", 150);
   }
-  #SP0ycUjbfsOKsd6J code→on_device_notification("shaken");
+  #SP0ycUjbfsOKsd6J code→on_notified("shaken");
   #yRyJSh232waGLyFz where `implicit` \_body\_() {
     #nQjSnZdNP45rtSYC code→show_string("shaken", 150);
   }
@@ -1857,13 +1857,13 @@ var button_a\u002bb_inner : Sprite {
   transient = true;
 }
 #xrHM168gvIqFDWL4
-action on_device_notification(#ja99pvTLEWszGU6R @event: String, #u92yApOZzhWqx4x9 body: Action) {
+action on_notified(#ja99pvTLEWszGU6R @event: String, #u92yApOZzhWqx4x9 body: Action) {
   #x3KDXHT4kdAt87Pj // Registers code to run when the device notifies about a particular event.
   #e13mHRXUDt9X8SUj // {shim:micro_bit::onDeviceInfo}
   #mc3m4mu0EMkFqfIo // {namespace:devices}
   #x4sPBtRE9IMDXiSl // {enum:event:incoming call=MES_DEVICE_INCOMING_CALL,incoming message=MES_DEVICE_INCOMING_MESSAGE,orientation landscape=MES_DEVICE_ORIENTATION_LANDSCAPE,orientation portrait=MES_DEVICE_ORIENTATION_PORTRAIT,shaken=MES_DEVICE_GESTURE_DEVICE_SHAKEN,display off=MES_DEVICE_DISPLAY_OFF,display on=MES_DEVICE_DISPLAY_ON}
-  #m2Y4FjpJXWArRpT0 // {help:functions/on-device-notification}
-  #Bux3nIa98lMeKv4u code→notify_event_registration("on device notification " ∥ $@event);
+  #m2Y4FjpJXWArRpT0 // {help:functions/on-notified}
+  #Bux3nIa98lMeKv4u code→notify_event_registration("on notified " ∥ $@event);
   #MDbRckoe8yhfH0Uw code→pairing_warning;
 }
 #xPty4Z96gEpPmXcC

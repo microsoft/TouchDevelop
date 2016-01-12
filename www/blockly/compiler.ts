@@ -1560,7 +1560,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;
           
         case 'devices_device_info_event':
-          stmts.push(compileEvent(e, b, "on device notification", [ "NAME" ], "devices"));
+          stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
           break;              
 
         case 'device_shake_event':
