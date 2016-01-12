@@ -58,7 +58,7 @@ module TDev.AST.Bytecode
             Util.oops("bad bytes " + bytes)
     }
 
-    var currentSetup = null;
+    var currentSetup:string = null;
     export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
     {
         if (isSetupFor(extInfo))
@@ -590,7 +590,11 @@ module TDev.AST.Bytecode
                 return bytes
             }
 
-            var hd = [0x4206, this.globals.length, bytecodeStartAddr & 0xffff, bytecodeStartAddr >>> 16, 0, 0, 0, 0]
+            var hd = [0x4207, this.globals.length, bytecodeStartAddr & 0xffff, bytecodeStartAddr >>> 16]
+            var tmp = hexTemplateHash()
+            for (var i = 0; i < 4; ++i)
+                hd.push(parseInt(swapBytes(tmp.slice(i * 4, i * 4 + 4)), 16))
+
             myhex[jmpStartIdx] = hexBytes(nextLine(hd, jmpStartAddr))
 
             ptr = 0
@@ -671,15 +675,24 @@ module TDev.AST.Bytecode
             Util.assert(this.csource == "");
 
             this.emit("; start")
+            this.emit(".hex 708E3B92C615A841C49866C975EE5197")
+            this.emit(".hex " + hexTemplateHash() + " ; hex template hash")
+            this.emit(".hex 0000000000000000 ; @SRCHASH@")
+            this.emit(".space 16 ; reserved")
 
             this.procs.forEach(p => {
-                this.csource += "\n"
-                this.csource += p.body
+                this.csource += "\n" + p.body
             })
 
             this.csource += this.stringsBody
 
             this.emit("_program_end:");
+        }
+
+        patchSrcHash()
+        {
+            var srcSha = Random.sha256buffer(Util.stringToUint8Array(Util.toUTF8(this.csource)))
+            this.csource = this.csource.replace(/\n.*@SRCHASH@\n/, "\n    .hex " + srcSha.slice(0, 16).toUpperCase() + " ; program hash\n")
         }
 
         addSource(meta:string, blob:Uint8Array)
@@ -692,10 +705,7 @@ module TDev.AST.Bytecode
             }
 
             this.emit(".balign 16");
-            this.emit(".short 0x1441");
-            this.emit(".short 0x2f0e");
-            this.emit(".short 0x2fb8");
-            this.emit(".short 0xbba2");
+            this.emit(".hex 41140E2FB82FA2BB");
             this.emit(".short " + metablob.length);
             this.emit(".short " + blob.length);
             this.emit(".short 0"); // future use
@@ -900,6 +910,8 @@ module TDev.AST.Bytecode
 
             if (metainfo != null && blob != null)
                 lenSrc = this.binary.addSource(metainfo, blob);
+
+            this.binary.patchSrcHash()
 
             var sourceSaved = lenSrc > 0;
             this.binary.assemble()
@@ -1777,6 +1789,13 @@ module TDev.AST.Bytecode
         if (!/(^\s)|(:$)/.test(s))
             s = "    " + s
         return s + "\n"
+    }
+
+    function hexTemplateHash()
+    {
+        var sha = currentSetup ? currentSetup.slice(0, 16) : ""
+        while (sha.length < 16) sha += "0"
+        return sha.toUpperCase()
     }
 
     function emptyExtInfo()

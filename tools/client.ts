@@ -35,6 +35,21 @@ var reqNo = 0
 http.globalAgent.maxSockets = 15;
 https.globalAgent.maxSockets = 15;
 
+function readRes(g, f) {
+    var bufs = []
+    g.on('data', (c) => {
+        if (typeof c === "string")
+            bufs.push(new Buffer(c, "utf8"))
+        else
+            bufs.push(c)
+    });
+
+    g.on('end', () => {
+        var total = Buffer.concat(bufs)
+        f(total)
+    })
+}
+
 function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, contentType = null)
 {
     var currReq = reqNo++;
@@ -87,6 +102,8 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     }
     if (contentType) {
         purl.headers = { 'content-type': contentType }
+        if (/urlencoded|multipart/.test(contentType))
+            purl.method = 'POST'
     }
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
@@ -3890,6 +3907,109 @@ function genid()
     return "#id" + Math.floor(Math.random()*100000000) + " "
 }
 
+function multipartPost(uri:string, data:any, fn:string, fc:string, cb)
+{
+    // tried and failed to use request module...
+
+    var boundry = "--------------------------0461489f461126c5"
+    var form = ""
+
+    function add(name:string, val:string)
+    {
+        form += boundry + "\r\n"
+        form += "Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n"
+        form += val + "\r\n"
+    }
+
+    function addF(name:string, val:string)
+    {
+        form += boundry + "\r\n"
+        form += "Content-Disposition: form-data; name=\"files[" + name + "]\"; filename=\"blah.json\"\r\n"
+        form += "\r\n"
+        form += val + "\r\n"
+    }
+
+    Object.keys(data).forEach(k => add(k, data[k]))
+    if (fn)
+        addF(fn, fc)
+
+    form += boundry + "--\r\n"
+
+    var purl:any = url.parse(uri)
+    purl.method = "POST"
+    purl.headers = {
+        "Content-Type": "multipart/form-data; boundary=" + boundry.slice(2)
+    }
+    var code = 0 
+    var r = https.request(purl, resp => {
+        code = resp.statusCode
+        readRes(resp, data => {
+            var s = JSON.parse(data.toString("utf8"))
+            cb(code, s)
+        })
+    })
+    r.end(form)
+}
+
+function uploadTranslation(fn:string, v:string, cb)
+{
+    var apiRoot = "https://api.crowdin.com/api/project/touchdevelop/"
+    var suff = "?key=" + process.env.CROWDIN_KEY
+    var cnt = 0
+
+    function createDir(name:string, cb)
+    {
+        multipartPost(apiRoot + "add-directory" + suff, { json: "", name: name },
+            null, null, (code, resp) => {
+                if (code == 200) {
+                    cb()
+                    return
+                }
+
+                if (code == 404 && resp.error.code == 17) {
+                    var par = name.replace(/\/[^\/]+$/, "")
+                    if (par != name) {
+                        createDir(par, () => createDir(name, cb))
+                        return
+                    }
+                }
+
+                console.log("Error: create dir", name, code, resp)
+            })
+    }
+
+    var handler = (code, resp) => {
+        if (cnt++ > 5)
+            return
+
+        if (code == 404 && resp.error.code == 8) {
+            console.log("create new translation file:", fn)
+            multipartPost(apiRoot + "add-file" + suff, { type: "auto", json: "" }, fn, v, handler)
+        }
+        else if (code == 404 && resp.error.code == 17)
+            createDir(fn.replace(/\/[^\/]+$/, ""), start)
+        else if (code == 200)
+            cb(null)
+        else {
+            console.log("Error, upload translation", fn, code, resp)
+        }
+    }
+
+    var start = () =>
+        multipartPost(apiRoot + "update-file" + suff, { type: "auto", json: "", update_option: "update_as_unapproved" },
+                        fn, v, handler)
+    start()
+}
+
+function translatedoc(ids:string[])
+{
+    var ff = JSON.stringify({
+                "str1": "Hello world how are you",
+                "str2": "Something nice and something",
+            })
+    uploadTranslation("/bar/baz/qux/foo.json", ff, () => {})
+}
+
 var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
@@ -3952,6 +4072,7 @@ var cmds = {
     "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
     "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
     "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
+    "translatedoc": {f:translatedoc, a:'id...', h:'upload doc scripts for translation in crowdin'},
 }
 
 export interface ScriptTemplate {
