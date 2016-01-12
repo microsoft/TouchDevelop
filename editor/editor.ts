@@ -1609,7 +1609,7 @@ module TDev
             TipManager.setTip(null); // clear any tip
             var run0 = () => {
                 this.spyManager.onRunAction(<AST.Action>a);
-                ProgressOverlay.lockAndShow(lf("compiling script"), () => {
+                ProgressOverlay.lockAndShow(lf("starting script"), () => {
                     if (!Script) {
                         ProgressOverlay.hide();
                         return;
