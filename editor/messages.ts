@@ -22,24 +22,30 @@ module TDev {
             Upgrade, Run,
             Resized,
             NewBaseVersion,
-            Load
+            Load,
+            TypeCheck, // errors while typechecking
         };
 
         export interface Message_Init extends Message {
-            type: MessageType; // == MessageType.Init
+            // type: MessageType == MessageType.Init
             script: SavedScript;
             merge?: PendingMerge;
             fota: boolean; // Are we flashing over the air?
             pubId: string; // The last known publication id for this script, if any.
         }
+        
+        export interface Message_TypeCheck extends Message {
+            // type: MessageType  == MessageType.TypeCheck
+            ast: any; // AST.Json.JApp
+        }
 
         export interface Message_Save extends Message {
-            type: MessageType; // == MessageType.Save
+            // type: MessageType  == MessageType.Save
             script: SavedScript;
         }
 
         export interface Message_SaveAck extends Message {
-            type: MessageType; // == MessageType.SaveAck
+            // type: MessageType == MessageType.SaveAck
             where: SaveLocation;
             status: Status;
             changed?: boolean; // true if changes were detected w.r.t. to previous version
@@ -52,7 +58,7 @@ module TDev {
         }
 
         export interface Message_Merge extends Message {
-            type: MessageType; // == MessageType.Merge
+            // type: MessageType == MessageType.Merge
             merge: PendingMerge;
         }
 

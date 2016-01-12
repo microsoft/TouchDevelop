@@ -86,6 +86,9 @@ module TDev {
       case External.MessageType.NewBaseVersion:
         newBaseVersion(<External.Message_NewBaseVersion> message);
         break;
+      case External.MessageType.TypeCheck:
+        typeCheckError(<External.Message_TypeCheck>message);
+        break;  
     }
   }
 
@@ -172,6 +175,10 @@ module TDev {
 
   var mergeDisabled = true;
 
+  function typeCheckError(msg: External.Message_TypeCheck) {      
+    statusMsg("! your script has errors", External.Status.Error);
+  }
+    
   function newBaseVersion(msg: External.Message_NewBaseVersion) {
     statusMsg("✎ got assigned our first base version", External.Status.Ok);
     // We've been assigned a base version number for the first time. All further

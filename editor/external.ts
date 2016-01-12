@@ -308,15 +308,19 @@ module TDev {
       }
     }
 
-    function typeCheckAndRun(text: string, mainName = "main") {
-      Embedded.parseScript(text).then((a: AST.App) => {
+    function typeCheckAndRunAsync(text: string, mainName = "main") : Promise {
+      return Embedded.parseScript(text).then((a: AST.App) => {
         J.setStableId(a);
         // The call to [tcApp] also has the desired side-effect of resolving
         // names.
+        // let editors deal with typeerrors
         if (AST.TypeChecker.tcApp(a) > 0) {
-            ModalDialog.info(lf("Type-checking error"),
-              lf("We received a script with errors and cannot run it. Try converting then fixing the errors manually."));
+            TheChannel.post(<Message_TypeCheck> {
+                type: MessageType.TypeCheck,
+                ast: AST.Json.dump(a),
+            });            
         }
+          
         // The compiler expects this global to be set. However, this is
         // dangerous, since the sync code might want to write the *translated*
         // script text to storage for us. Fortunately, the compiler is
@@ -596,9 +600,10 @@ module TDev {
             // the inner iframe.
             var ast: AST.Json.JApp = message3.ast;
             fixupLibs(message3.libs);
-            addLibraries(ast, message3.libs).then(() => {
+            addLibraries(ast, message3.libs)
+            .then(() => {
               var text = J.serialize(ast);
-              typeCheckAndRun(text);
+              return typeCheckAndRunAsync(text);
             }).done();
             break;
 
@@ -712,7 +717,7 @@ module TDev {
         // setup.
         pullLatestLibraryVersion(microbitScriptId)
         .then((pubId: string) => ScriptCache.getScriptAsync(pubId))
-        .then((s: string) => typeCheckAndRun(s, "_libinit"))
+        .then((s: string) => typeCheckAndRunAsync(s, "_libinit"))
         .done(() => {
           // Send the initialization message once the simulator is properly
           // setup.
