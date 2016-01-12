@@ -1283,15 +1283,11 @@ action test_plot_unplot() {
 }
 #xCn8l4L2PfqCeiNR
 action calibrate() {
-  #a592ki5YrzeI6a2X // Asks the user to calibrate the compass by rotating the board.
+  #a592ki5YrzeI6a2X // Obsolete, compass calibration is automatic.
   #jvwA9fcOAMuHgvd3 // {help:functions/calibrate}
   #K69mm2lCHD9ANu8u // {namespace:input}
-  #X1aQ0eg2hzWomqLI code→compass_calibrate_start;
-  #tRrZX9jRGFJOOkDW $img := code→create_image("0 0 0 1 0 0 1 1 0 0 0 0 0 1 0 0 1 0 0 0\n0 1 1 1 1 1 0 0 1 0 0 0 0 0 1 1 1 1 0 0\n1 0 0 1 0 0 0 0 1 0 0 1 0 0 1 0 1 0 0 0\n1 0 0 0 0 0 0 1 1 1 1 1 1 1 0 0 1 0 0 1\n0 1 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 0");
-  #znFPRJAgWJsNorGK for 0 ≤ i < 10 do {
-    #CzjIvjckeXwXsiQl $img→scroll_image(5, 400);
-  }
-  #xsgHZCEycvcwFvpX code→compass_calibrate_end;
+  #xodr3UlxL4wpG04K // {weight:0}
+  #ZJoAB7BFrtoAg633 // {shim:TD_NOOP}
 }
 #z4SoTUi3P30D33zG
 action compass_calibrate_start() {
