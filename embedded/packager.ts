@@ -14,7 +14,7 @@ module TDev {
                     "version": "0.1.0",
                     "command": "yotta",
                     "isShellCommand": true,
-                    "args": [],
+                    "args": ["--target","bbc-microbit-classic-gcc"],
                     "tasks": [
                         {
                             "taskName": "build",
