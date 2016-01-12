@@ -82,6 +82,16 @@ var remoteControlMessageDropdown = [
     ["volume down", "volume down"]    
 ];
 
+var deviceInfoEventDropdown = [
+    ["incoming call", "incoming call"],
+    ["incoming message", "incoming message"],
+    ["orientation landscape", "orientation landscape"],
+    ["orientation portrait", "orientation portrait"],
+    ["shaken", "shaken"],
+    ["display off", "display off"],
+    ["display on", "display on"]
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -1059,6 +1069,21 @@ Blockly.Blocks['devices_remote_control'] = {
     }
 };
 
+Blockly.Blocks['devices_device_info_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("on notified");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(deviceInfoEventDropdown), "NAME");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the micro:bit receives an event from the device');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-device-notification");
+    }
+};
 
 Blockly.Blocks['controls_simple_for'] = {
   /**

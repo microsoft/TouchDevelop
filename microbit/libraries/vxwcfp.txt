@@ -1679,6 +1679,34 @@ action test_pin_pressed() {
 action test_devices() {
   #xM2V2HK64vD5CCP6 // {shim:}
   #SF8Y7AzLVf79J9Hv code→\_libinit;
+  #cTuQbNGhz19mZ9t8 code→on_device_notification("incoming call");
+  #GyS1jjevaGOtFn7t where `implicit` \_body\_() {
+    #qV2L159TGxJqtFWY code→show_string("call", 150);
+  }
+  #fDLKJmiUUW69SvE1 code→on_device_notification("display on");
+  #xJ0TOWIoWn36b1L2 where `implicit` \_body\_() {
+    #x3DQ6nvE2f4Rqd2h code→show_string("on", 150);
+  }
+  #pzhqPTIc6apYk7pA code→on_device_notification("display off");
+  #tIPIEP27KGu6QXrc where `implicit` \_body\_() {
+    #oPQrc25PShs2hY12 code→show_string("off", 150);
+  }
+  #TN6fi4j2zlOS6ZZN code→on_device_notification("incoming message");
+  #xovkFszj0eJqEcde where `implicit` \_body\_() {
+    #jJR01sQvfk3C30u4 code→show_string("msg", 150);
+  }
+  #xlty8np4b3hGTffF code→on_device_notification("landscape");
+  #n0VbKITZgs222bFS where `implicit` \_body\_() {
+    #z2ehI01nRsXB7Jri code→show_string("landscape", 150);
+  }
+  #xo2CAyPVq82gihJv code→on_device_notification("portrait");
+  #ANNOwYn5M8CNBLsx where `implicit` \_body\_() {
+    #w3RcKVkf5ZwT0Yoy code→show_string("portrait", 150);
+  }
+  #SP0ycUjbfsOKsd6J code→on_device_notification("shaken");
+  #yRyJSh232waGLyFz where `implicit` \_body\_() {
+    #nQjSnZdNP45rtSYC code→show_string("shaken", 150);
+  }
   #xYsvR3f5jJsVfu8P code→tell_remote_control_to("play");
   #VXZ2fZLriKdH5o25 code→pause(1000);
   #VHKRZyj11yrItaeA code→tell_remote_control_to("pause");
@@ -1829,13 +1857,14 @@ var button_a\u002bb_inner : Sprite {
   transient = true;
 }
 #xrHM168gvIqFDWL4
-action on_message_received(#ja99pvTLEWszGU6R id: String, #u92yApOZzhWqx4x9 callback: Action1[Number]) {
-  #x3KDXHT4kdAt87Pj // Registers code to run when an event occurs in the parent device.
-  #e13mHRXUDt9X8SUj // {shim:micro_bit::on_event}
+action on_device_notification(#ja99pvTLEWszGU6R @event: String, #u92yApOZzhWqx4x9 body: Action) {
+  #x3KDXHT4kdAt87Pj // Registers code to run when the device notifies about a particular event.
+  #e13mHRXUDt9X8SUj // {shim:micro_bit::onDeviceInfo}
   #mc3m4mu0EMkFqfIo // {namespace:devices}
-  #x4sPBtRE9IMDXiSl // {enum:id:signal strength=MES_SIGNAL_STRENGTH_ID,device info=MES_DEVICE_INFO_ID}
-  #m2Y4FjpJXWArRpT0 // {help:functions/on-message-received}
-  #Bux3nIa98lMeKv4u code→notify_event_registration("on message received " ∥ $id);
+  #x4sPBtRE9IMDXiSl // {enum:event:incoming call=MES_DEVICE_INCOMING_CALL,incoming message=MES_DEVICE_INCOMING_MESSAGE,orientation landscape=MES_DEVICE_ORIENTATION_LANDSCAPE,orientation portrait=MES_DEVICE_ORIENTATION_PORTRAIT,shaken=MES_DEVICE_GESTURE_DEVICE_SHAKEN,display off=MES_DEVICE_DISPLAY_OFF,display on=MES_DEVICE_DISPLAY_ON}
+  #m2Y4FjpJXWArRpT0 // {help:functions/on-device-notification}
+  #Bux3nIa98lMeKv4u code→notify_event_registration("on device notification " ∥ $@event);
+  #MDbRckoe8yhfH0Uw code→pairing_warning;
 }
 #xPty4Z96gEpPmXcC
 var counters : Json_Builder {
@@ -2639,7 +2668,7 @@ action clear_pin_handler(#RSL4xscVGqj094dJ name: String) {
 action show_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K3d msg: String) {
   #xw5ZOUW8EPnesEjC // {shim:}
   #xBsth8WKFROreEm2 code→\_libinit;
-  #ONnRJZP4a5MRHgD4 code→warning("pair your micro:bit with another device to use this function");
+  #VHYJDnaGvLgvy0IS code→pairing_warning;
   #xGdYFwSAjkS6aGY3 $sprite := data→board→create_text(100, 40, 24, $family→concat("\n")→concat($msg));
   #FYwPad2E8AYpRN4N $sprite→set_color(colors→white);
   #x4iM24484ozaNTeT $sprite→fit_text;
@@ -2678,4 +2707,11 @@ action map(#xDrpNVDYcOP4xPyM value: Number, #W7lLKHDJCBcfFWfx from_low: Number, 
   #xCn7AaB8RuB8qFVD // {namespace:pins}
   #dnQlRSL4btf2ExhK // {weight:40}
   #uc5IndedDZWZMEwV `return` ($value - $from_low) * ($to_high - $to_low) / ($from_high - $from_low) + $from_low;
+}
+#g4a4jkTOoyzp82wv
+action pairing_warning() {
+  #XaJUgiqPPsF9LCfB // {shim:}
+  #ONnRJZP4a5MRHgD4 code→warning("pair your micro:bit with another device to use this function");
+  meta private;
+  meta sync;
 }

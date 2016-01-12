@@ -1179,13 +1179,13 @@ function mkCallWithCallback(e: Environment, n: string, f: string, args: J.JExpr[
       H.namespaceCall(n, f, args)));
 }
 
-function compileEvent(e: Environment, b: B.Block, event: string, args: string[]): J.JStmt {
+function compileEvent(e: Environment, b: B.Block, event: string, args: string[], ns : string = "input"): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var compiledArgs = args.map((arg: string) => {
     return H.mkStringLiteral(b.getFieldValue(arg));
   });
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "input", event, compiledArgs, body);
+  return mkCallWithCallback(e, ns, event, compiledArgs, body);
 }
 
 function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string, args?: J.JExpr[]): J.JCall {
@@ -1558,6 +1558,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         case 'device_button_event':
           stmts.push(compileEvent(e, b, "on button pressed", [ "NAME" ]));
           break;
+          
+        case 'devices_device_info_event':
+          stmts.push(compileEvent(e, b, "on device notification", [ "NAME" ], "devices"));
+          break;              
 
         case 'device_shake_event':
           stmts.push(compileEvent(e, b, "on shake", []));
