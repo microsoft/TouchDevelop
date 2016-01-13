@@ -12,6 +12,7 @@ shell/npm/bin/touchdevelop.js
 shell/npm/package.json
 results.html
 results.json
+errors.json
 build/
 temp/
 www/mbit.*

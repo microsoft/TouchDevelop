@@ -340,8 +340,8 @@ export function test(args:string[])
             "ahzh", "rfgn", "kehh", "tpjra",
             "abxe", "pcojyqpe", "lqgfmjdf", "fnwna",
             "jhrx", "nykob", "zzni", "ajnsa",
-            "wfwujpwu", "qrki", "skuw", "jvkg",
-            "nhkja"
+            "wfwujpwu", "qrki", "skuw", "jvkg", "nhkja",
+            "mpuj", "adic", "afnpa", "ajgo", "aeud", "aoek", "apmc", "bccm", "bfkxa", "bjxf", "blrna", "bllm", "bwsn", "byfw", "bxfh", "ckun", "bzhm", "cjcr", "clpl", "csbb", "cmni", "cqvda", "czrm", "dgjy", "dlsq", "dmdf", "dxwt", "dvyr", "dzsy", "eabr", "edhk", "emgla", "evar", "evai", "exaca", "fexj", "fccczsrg", "fjkqa", "fxvk", "ggzd", "gemt", "ggoe", "gjzj", "gjmy", "glay", "gmrx", "gyiz", "gbfoa", "haon", "hcov", "heyg", "hinx", "hjwb", "hspx", "htbp", "hztb", "iery", "igsha", "ilhma", "isng", "izgp", "jbyk", "jjeg", "jjiba", "juir", "kaip", "kcfe", "kctl", "khbb", "kmdsa", "krxg", "kstla", "kwhr", "kuyw", "kxjy", "lalxa", "lalh", "lbji", "lbre", "lebt", "lczi", "lvgu", "lsmt", "lyzb", "manx", "mizi", "mwhy", "mrrv", "mvswa", "mxxx", "nnrq", "nnfd", "nlwsxwgu", "nsem", "nyyw", "obrr", "orko", "osyh", "ovjx", "ovxi", "ozcl", "pcmea", "pjtc", "pqqh", "pugra", "prqv", "pvkc", "pwbd", "pwbla", "piwi", "pvyja", "pynz", "qcbx", "qerh", "qgsr", "qvnv", "qxas", "rgax", "rpvj", "rrhib", "sfjlb", "sbxc", "sldu", "slmo", "sreo", "sryh", "ssln", "suqkc", "sxwz", "tduo", "tigo", "tkdw", "tmjz", "tplja", "tqxy", "tuoq", "twkt", "uaif", "uabp", "ugqk", "uncq", "uytn", "uzjqajmk", "vcmv", "vdrva", "vfnl", "vgug", "vjxt", "vxzy", "vziza", "wbmba", "wdus", "wkhu", "wmbnsqtu", "wnuj", "wznb", "wpoj", "wsmj", "wwpv", "wxpfa", "xhnr", "xiwf", "xkcz", "xtgb", "xrfg", "xtwe", "xtmk", "xzbra", "ycmp", "ycpn", "ybas", "yelya", "ygswa", "yqabb", "yshr", "yvdu", "yyyfa", "zpiha", "zpty", "zrgf", "zzue", "aego", "ahcf", "anfc", "bliv", "brxe", "inww", "pdsp", "slji", "syyc", "wgri", "xbmw", "slvj", "bjkl", "zggfa", "syut", "kkqo", "fovb", "axbp", "sntk", "dijf", "sean", "ooyf", "umaxa", "ytuj", "advp", "kkso", "wjod", "rlyq", "rreyb", "gapm", "swcg", "jdwx", "kfddwdyd", "rxvya", "gtyl", "kpcw", "hrwi", "qmwm", "pqmg", "reetuiyr", "ufwv", "egysa", "bzlb", "bjdv", "vqnr", "pwxr", "njkn", "zhjh", "aetg", "jyaxa", "kbix", "ergz", "lykxa", "kmjn", "gpvi", "sspc", "bdvk", "igmfatzq", "dkue", "puzy", "bbel", "uygyxxwb", "tgre", "sbvxa", "kvad", "ewlu", "ivgr", "bdke", "ovkh", "vfwb", "emzf", "iimo", "xyyu", "jhqy", "ufon", "xrec", "pbyx", "moji", "fiol", "kxoh", "nvwh", "tmbv", "hwtc", "uykt", "bkxz", "eteg", "qzxua", "rxdb", "jhtd", "zmkw", "fdnp", "hhzx", "mmtf", "xrasa", "ugvc", "uhso", "nlgx", "sduw", "heuk", "isqq", "kanf", "ihap", "zxks", "daay", "kiwg", "dlpoa", "udlk", "jdjv", "hdxq", "wxsq", "wxjpa", "rgah", "cqbba", "jhgp", "pogpa", "hlhb", "ebvk", "nsrl", "otfe", "celpa", "wxbma", "gvxka", "gjzz", "qjroa", "izpua", "awsv", "dmhca", "abcva", "gdmktghk", "ghkj", "haop", "fsxda", "rwem", "pfqk", "isijadvo", "dxlz", "qnvdskvs", "sktz", "tvbpa", "gbqs", "wtrt", "thtf", "avcl", "akmxa", "qzar", "agnm", "imol", "rcnk", "mkbq", "olnx", "zkvo", "gimd", "wcwo", "mfzx", "czap", "ctwh", "rgny", "bipl", "nnbe", "whdlb", "vuyo", "ornu", "pnco", "oeqbc", "vjgo", "rjola", "lull", "ppfgrqsm", "aodq", "zsmvfpxz", "iebq", "queub", "bxtua", "giko", "icox", "alsq", "ujti", "bpur", "eyzu", "lmcgjiny", "qozr", "jcvw", "mypmmnjw", "wxoza", "aimo", "xuxo", "phfz", "skmm", "gdwxa", "pfcw", "dyob", "felo", "zkmu", "sohra", "ztsrb", "ikkn", "atnj", "xdswa", "ascb", "rfco", "atgpa", "atfc", "appla", "jxyib", "mtsm", "spmoa", "vzxl", "kuira", "nhre", "caon", "qjkm",
         ].forEach(id => delete scriptsCache[id]);
 
         args = Object.keys(scriptsCache);
@@ -497,6 +497,7 @@ function logParseResponse(id:string, resp:TDev.ParseResponse)
             resp2.prettyScript = "";
             resp2.status = "";
             fs.appendFileSync("results.json", JSON.stringify(resp2, null, 2))
+            fs.appendFileSync("errors.json", JSON.stringify(id) + ",");
         }
     }
 }
@@ -512,6 +513,7 @@ function writeResultsHeader(f:()=>void)
             "<!DOCTYPE html><html><head><meta charset='utf-8'/>\n" + d.css +
             "</head><body>", "utf-8");
         fs.writeFileSync("results.json", "", "utf-8");
+        fs.writeFileSync("errors.json", "", "utf-8");
         f();
     })
 }
