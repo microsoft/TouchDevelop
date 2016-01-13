@@ -232,6 +232,7 @@ module TDev.Cloud {
         tickFilter?: StringMap<number>;
         primaryLocale: string;
         uploader?: boolean;
+        cloudId: string;
     }
 
     export var config: ClientConfig = {
@@ -265,6 +266,7 @@ module TDev.Cloud {
         tutorialsid: "vjsseqks",
         showcaseid: "njigpnyj",
         primaryLocale: "en-US",
+        cloudId: "touchdevelop.com",
     }
 
     export function isArtUrl(url : string) : boolean {

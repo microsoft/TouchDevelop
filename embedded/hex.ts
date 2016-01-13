@@ -180,7 +180,8 @@ module TDev.Hex
                 var newMeta = {
                     compression: "LZMA",
                     headerSize: meta.length,
-                    textSize: text.length
+                    textSize: text.length,
+                    name: hd.name,
                 }
                 return lzmaCompressAsync(meta + text)
                     .then(cbuf => [JSON.stringify(newMeta), cbuf])
