@@ -415,6 +415,42 @@ Blockly.Blocks['device_set_analog_period'] = {
     }
 };
 
+Blockly.Blocks['device_set_servo_pin'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/servo-write-pin');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("servo write");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Sets the angle of the shaft of a servo in degrees between 0 and 180. For a continuous servo, will set the speed of the servo.');
+    }
+};
+
+Blockly.Blocks['device_set_servo_pulse'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/servo-set-pulse');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("servo set pulse");
+        this.appendValueInput("micros")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("(micros) to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "pin");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Configures the period to be 20ms and sets the pulse width, based on the value it is given.');
+    }
+};
+
 Blockly.Blocks['math_map'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/map');

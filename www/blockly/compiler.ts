@@ -1346,6 +1346,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "analog set period",
     args: [{ field: "pin" } , { field: "micros" }]
   },
+  device_set_servo_pin: {
+    namespace: "pins",
+    f: "servo write pin",
+    args: [{ field: "name" }, { field: "value" } ]
+  },
+  device_set_servo_pulse: {
+    namespace: "pins",
+    f: "servo set pulse",
+    args: [{ field: "pin" } , { field: "micros" }]
+  },
   math_map: {
     namespace: "pins",
     f: "map",

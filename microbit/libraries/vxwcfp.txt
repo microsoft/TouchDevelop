@@ -2735,3 +2735,29 @@ action test_magnetic_force() {
   meta private;
   meta test;
 }
+#CdzvoNQyYRK48OLL
+action servo_write_pin(#xAG1wlRgYVj9GlRk name: String, #gpDCTuJQs7tEJaYB value: Number) {
+  #D4Do6hAmoqG30qwT // Writes a value to the servo, controlling the shaft accordingly. On a standard servo, this will set the angle of the shaft (in degrees), moving the shaft to that orientation. On a continuous rotation servo, this will set the speed of the servo (with ``0`` being full-speed in one direction, ``180`` being full speed in the other, and a value near ``90`` being no movement).
+  #xRCcrcV8V4YBSRY4 // {help:functions/servo-write-pin}
+  #qzuvM5DmpVW5HnJV // {namespace:pins}
+  #xU4azu812RcdtEK0 // {weight:44}
+  #VAh8yBEk4isWMrPv // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #wb072FQSt0oUGTlW // {hints:value:180,90,0}
+  #Q5yrXRxd5OEeNIp4 // {shim:micro_bit::servoWritePin}
+  #r4JhdsGC9rWeysJv $value := math→round($value);
+  #PeRqtR86b2tatBWd if $value < 0 `or` $value > 180 then {
+    #R2SdD6mbOatEAbJ0 code→warning("value should be between 0 and 180.");
+  }
+  meta sync;
+}
+#xyjXPoUGVDbuKVxy
+action servo_set_pulse(#xrp9JurOyqwzOHfl pin: String, #PW24fYn4zEb79S8Z micros: Number) {
+  #zRdYAgRkve7OQ4L9 // Configures this IO pin as an analog/pwm output if it isn't already, configures the period to be 20 ms, and sets the pulse width, based on the value it is given **microseconds** or `1/1000` milliseconds.
+  #oSEIW9PKLCCG0hGx // {shim:micro_bit::setServoPulseUs}
+  #ZNqFhWfv389w4Kvb // {namespace:pins}
+  #IapMTP9dyJt46KX1 // {help:functions/serial-set-pulse}
+  #FPbnv4WqMjILi26F // {weight:10}
+  #dwQoy54QUKSce2jg // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #xWd9YrYWLq2zwBJL // {hints:micros:1000,1500,2000}
+  meta sync;
+}
