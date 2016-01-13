@@ -45,7 +45,6 @@
 ///<reference path='Picture.ts'/>
 ///<reference path='Place.ts'/>
 ///<reference path='Player.ts'/>
-///<reference path='Radio.ts'/>
 ///<reference path='Senses.ts'/>
 ///<reference path='Social.ts'/>
 ///<reference path='Song.ts'/>
@@ -55,9 +54,7 @@
 ///<reference path='SpriteSet.ts'/>
 ///<reference path='String.ts'/>
 ///<reference path='StringMap.ts'/>
-///<reference path='Tags.ts'/>
 ///<reference path='TextBox.ts'/>
-///<reference path='Tile.ts'/>
 ///<reference path='Time.ts'/>
 ///<reference path='Timer.ts'/>
 ///<reference path='Vector2.ts'/>
@@ -80,7 +77,6 @@
 ///<reference path='Actions.ts'/>
 ///<reference path='Contract.ts'/>
 ///<reference path='CloudSessions.ts'/>
-///<reference path='Tiles.ts'/>
 ///<reference path='Buffer.ts'/>
 ///<reference path='Bits.ts'/>
 ///<reference path='Task.ts'/>

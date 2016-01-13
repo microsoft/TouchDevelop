@@ -78,13 +78,8 @@ module TDev.RT {
         //? Creates an invalid Sprite Set instance
         export function sprite_set() : SpriteSet { return undefined; }
 
-        //? Creates an invalid Tile instance
-        //@ cap(tiles)
-        export function tile() : Tile { return undefined; }
-
         //? Creates an invalid Xml Object instance
         export function xml_object() : XmlObject { return undefined; }
-
 
         //? Creates an invalid Place instance
         export function place() : Place { return undefined; }
