@@ -355,15 +355,6 @@ module TDev.RT {
             r.resumeVal(battery ? battery.level : undefined);
         }
 
-        //? Get the list of Bluetooth widgets paired with your device.
-        //@ async returns(Collection<BluetoothDevice>) cap(bluetooth)
-        export function bluetooth_devices(r:ResumeCtx)
-        {
-            BluetoothDevice.getDevicesAsync().done(v => {
-                r.resumeVal(Collection.fromArray(v, BluetoothDevice));
-            })
-        }
-
         //? Indicates if the specified key is pressed.
         //@ [key].deflStrings('space', 'a', 'w', 's', 'd', 'enter', 'left', 'right', 'up', 'down')
         export function is_key_pressed(key: string, s : IStackFrame): boolean {

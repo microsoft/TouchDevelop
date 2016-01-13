@@ -82,7 +82,6 @@
 ///<reference path='Task.ts'/>
 ///<reference path='Collection.ts'/>
 ///<reference path='User.ts'/>
-///<reference path='BluetoothDevice.ts'/>
 ///<reference path='ref.ts'/>
 ///<reference path='AudioContextManager.ts'/>
 ///<reference path='SpriteSheet.ts'/>

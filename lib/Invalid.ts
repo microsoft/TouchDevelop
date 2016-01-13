@@ -166,10 +166,6 @@ module TDev.RT {
         //? Creates an invalid Form Builder instance
         export function form_builder(): FormBuilder { return undefined; }
 
-        //? Creates an invalid BlueTooth Device instance
-        //@ cap(bluetooth)
-        export function bluetooth_device() : BluetoothDevice { return undefined; }
-
         //? Creates an invalid User instance
         export function user(): User { return undefined; }
 
