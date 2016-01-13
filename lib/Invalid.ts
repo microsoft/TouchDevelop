@@ -26,40 +26,8 @@ module TDev.RT {
         //? Creates an invalid Picture instance
         export function picture() : Picture { return undefined; }
 
-        //? Creates an invalid Pictures instance
-        //@ cap(media)
-        export function pictures() : Pictures { return undefined; }
-
-        //? Creates an invalid Picture Album instance
-        //@ cap(media)
-        export function picture_album() : PictureAlbum { return undefined; }
-
-        //? Creates an invalid Picture Albums instance
-        //@ cap(media)
-        export function picture_albums() : PictureAlbums { return undefined; }
-
         //? Creates an invalid Song instance
         export function song() : Song { return undefined; }
-
-        //? Creates an invalid Songs instance
-        //@ cap(media)
-        export function songs() : Songs { return undefined; }
-
-        //? Creates an invalid Song Album instance
-        //@ cap(media)
-        export function song_album() : SongAlbum { return undefined; }
-
-        //? Creates an invalid Song Albums instance
-        //@ cap(media)
-        export function song_albums() : SongAlbums { return undefined; }
-
-        //? Creates an invalid Playlist instance
-        //@ cap(media)
-        export function playlist() : Playlist { return undefined; }
-
-        //? Creates an invalid Playlists instance
-        //@ cap(media)
-        export function playlists() : Playlists { return undefined; }
 
         //? Creates an invalid Location instance
         export function location() : Location_ { return undefined; }
@@ -110,13 +78,8 @@ module TDev.RT {
         //? Creates an invalid Sprite Set instance
         export function sprite_set() : SpriteSet { return undefined; }
 
-        //? Creates an invalid Tile instance
-        //@ cap(tiles)
-        export function tile() : Tile { return undefined; }
-
         //? Creates an invalid Xml Object instance
         export function xml_object() : XmlObject { return undefined; }
-
 
         //? Creates an invalid Place instance
         export function place() : Place { return undefined; }
@@ -132,18 +95,6 @@ module TDev.RT {
 
         //? Creates an invalid Contact Collection instance
         export function contact_collection() : Collection<Contact> { return undefined; }
-
-        //? Creates an invalid Appointment instance
-        //@ cap(calendar)
-        export function appointment() : Appointment { return undefined; }
-
-        //? Creates an invalid Appointment Collection instance
-        //@ cap(calendar)
-        export function appointment_collection() : Collection<Appointment> { return undefined; }
-
-        //? Creates an invalid Motion instance
-        //@ cap(motion)
-        export function motion() : Motion { return undefined; }
 
         //? Creates an invalid Camera instance
         export function camera() : Camera { return undefined; }
@@ -202,10 +153,6 @@ module TDev.RT {
 
         //? Creates an invalid Form Builder instance
         export function form_builder(): FormBuilder { return undefined; }
-
-        //? Creates an invalid BlueTooth Device instance
-        //@ cap(bluetooth)
-        export function bluetooth_device() : BluetoothDevice { return undefined; }
 
         //? Creates an invalid User instance
         export function user(): User { return undefined; }

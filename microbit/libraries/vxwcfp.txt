@@ -605,7 +605,7 @@ action acceleration(#xFFtxqCX93owGiup dimension: String) returns(#x6aaLDiJe51GV4
   #DoP0wrdqmS24eYbg // {help:functions/acceleration}
   #lYmOu5jwgh9COs0W // {namespace:input}
   #lmLkxkGRFp62YJly // {weight:57}
-  #LydMcPZr1SYTRbIt // {enum:dimension:x=0,y=1,z=2}
+  #LydMcPZr1SYTRbIt // {enum:dimension:x=0,y=1,z=2,strength=3}
   #x2JSA5b4r4dcAO9P // {shim:micro_bit::getAcceleration}
   #T4Ks27Pca5wQIBTz if data→acc_title→is_invalid then {
     #a5RQGCAqswXV6Eiq data→acc_title := data→board→create_text(100, 40, 20, "acceleration:");
@@ -2717,7 +2717,7 @@ action magnetic_force(#LsEFJSIvP0IbVrDx dimension: String) returns(#xHQcYMA6Plgw
   #s3Bnnawgp2VmtUO8 // {help:functions/magnetic force}
   #xCTDjLY5GkeF3sgN // {namespace:input}
   #BgprL13WBVpXrK9A // {weight:43}
-  #b4JHQry9Zdd486VW // {enum:dimension:x=0,y=1,z=2}
+  #b4JHQry9Zdd486VW // {enum:dimension:x=0,y=1,z=2,strength=3}
   #xF4wa42ef8c5X8lA // {shim:micro_bit::getMagneticForce}
   #havM3pnn4dudJ5gg `return` 0;
   meta sync;
@@ -2752,7 +2752,7 @@ action servo_write_pin(#xAG1wlRgYVj9GlRk name: String, #gpDCTuJQs7tEJaYB value: 
 }
 #xyjXPoUGVDbuKVxy
 action servo_set_pulse(#xrp9JurOyqwzOHfl pin: String, #PW24fYn4zEb79S8Z micros: Number) {
-  #zRdYAgRkve7OQ4L9 // Configures this IO pin as an analog/pwm output if it isn't already, configures the period to be 20 ms, and sets the pulse width, based on the value it is given **microseconds** or `1/1000` milliseconds.
+  #zRdYAgRkve7OQ4L9 // Configures this IO pin as an analog/pwm output, configures the period to be 20 ms, and sets the pulse width, based on the value it is given **microseconds** or `1/1000` milliseconds.
   #oSEIW9PKLCCG0hGx // {shim:micro_bit::setServoPulseUs}
   #ZNqFhWfv389w4Kvb // {namespace:pins}
   #IapMTP9dyJt46KX1 // {help:functions/serial-set-pulse}

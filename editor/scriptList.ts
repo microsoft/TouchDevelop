@@ -6282,15 +6282,6 @@
             this.edit();
         }
 
-        public pinAsync(): Promise {
-            var fragment = 'run%3A' + this.getGuid();
-            return TDev.RT.Tiles.updateTileAsync(fragment, <TDev.RT.ITileData>{
-                title: this.app.getName(),
-                background: this.app.htmlColor(),
-                pin: true
-            });
-        }
-
         public getRealJsonScriptPromise() : Promise
         {
             if (this.jsonScript) return Promise.as(this.jsonScript);
