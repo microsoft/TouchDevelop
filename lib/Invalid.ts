@@ -96,18 +96,6 @@ module TDev.RT {
         //? Creates an invalid Contact Collection instance
         export function contact_collection() : Collection<Contact> { return undefined; }
 
-        //? Creates an invalid Appointment instance
-        //@ cap(calendar)
-        export function appointment() : Appointment { return undefined; }
-
-        //? Creates an invalid Appointment Collection instance
-        //@ cap(calendar)
-        export function appointment_collection() : Collection<Appointment> { return undefined; }
-
-        //? Creates an invalid Motion instance
-        //@ cap(motion)
-        export function motion() : Motion { return undefined; }
-
         //? Creates an invalid Camera instance
         export function camera() : Camera { return undefined; }
 

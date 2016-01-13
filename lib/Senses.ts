@@ -308,17 +308,10 @@ module TDev.RT {
         export function has_motion() : boolean
         { return false; }
 
-        //? Gets the current motion that combines data from the accelerometer, compass and gyroscope if available.
-        //@ stub cap(motion)
-        //@ tandre
-        export function motion() : Motion
-        { return undefined; }
-
         //? Gets the current orientation in degrees if available. (x,y,z) is also called (pitch, roll, yaw) or (alpha, beta, gamma).
         //@ cap(orientation) returns(Vector3) quickAsync
         export function orientation(r : ResumeCtx)
         {
-
             DeviceOrientation.orientation(r);
         }
 

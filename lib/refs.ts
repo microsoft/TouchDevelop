@@ -1,6 +1,5 @@
 ///<reference path='../rt/refs.ts'/>
 ///<reference path='App.ts'/>
-///<reference path='Appointment.ts'/>
 ///<reference path='Event.ts'/>
 ///<reference path='Bazaar.ts'/>
 ///<reference path='Board.ts'/>
@@ -35,7 +34,6 @@
 ///<reference path='Math.ts'/>
 ///<reference path='Media.ts'/>
 ///<reference path='Message.ts'/>
-///<reference path='Motion.ts'/>
 ///<reference path='Number.ts'/>
 ///<reference path='NumberMap.ts'/>
 ///<reference path='Page.ts'/>
