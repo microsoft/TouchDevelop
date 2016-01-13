@@ -107,6 +107,12 @@ var notes = {
     "B": 494,
 };
 
+var dimensionDropdown = [
+    ["x", "x"],
+    ["y", "y"],
+    ["z", "z"],
+];
+
 var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
 
 var blockColors = {
@@ -467,14 +473,24 @@ Blockly.Blocks['device_get_acceleration'] = {
         this.appendDummyInput()
             .appendField("acceleration (mg)");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([
-                ["x", "x"],
-                ["y", "y"],
-                ["z", "z"],
-            ]), "NAME");
+            .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
         this.setTooltip('Get the acceleration on an axis (between -2048 and 2047).');
+    }
+};
+
+Blockly.Blocks['device_get_magnetic_force'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/magnetic-force');
+        this.setColour(blockColors.input);
+        this.appendDummyInput()
+            .appendField("magnetic force (nT)");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Get the magnetic force on an axis (in nano Tesla).');
     }
 };
 

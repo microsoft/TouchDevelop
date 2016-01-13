@@ -2711,3 +2711,27 @@ action pairing_warning() {
   meta private;
   meta sync;
 }
+#qPUtJwJ0TqvMC1KG
+action magnetic_force(#LsEFJSIvP0IbVrDx dimension: String) returns(#xHQcYMA6Plgw9L7T millig: Number) {
+  #hPENJP4Mk8DofQRm // Get the magnetic force value in ``nT`` (nano Tesla). This function is not supported in the simulator.
+  #s3Bnnawgp2VmtUO8 // {help:functions/magnetic force}
+  #xCTDjLY5GkeF3sgN // {namespace:input}
+  #BgprL13WBVpXrK9A // {weight:43}
+  #b4JHQry9Zdd486VW // {enum:dimension:x=0,y=1,z=2}
+  #xF4wa42ef8c5X8lA // {shim:micro_bit::getMagneticForce}
+  #havM3pnn4dudJ5gg `return` 0;
+  meta sync;
+}
+#w0az5rdjy9wEVnUV
+action test_magnetic_force() {
+  #ZWuupOD9Su55M1MQ // {shim:}
+  #wsYSu1daVvpWUeD3 code→\_libinit;
+  #SKnaR2nInQodK0CN while true do {
+    #yOEhUqmj5wpjX6RM $x := code→magnetic_force("x");
+    #RMNgHytGLoye4r3z $y := code→magnetic_force("y");
+    #yr82TE9I7LBUzNcE $z := code→magnetic_force("z");
+    #qvqzBO2R24y8D4I5 code→pause(100);
+  }
+  meta private;
+  meta test;
+}
