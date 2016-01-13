@@ -26,40 +26,8 @@ module TDev.RT {
         //? Creates an invalid Picture instance
         export function picture() : Picture { return undefined; }
 
-        //? Creates an invalid Pictures instance
-        //@ cap(media)
-        export function pictures() : Pictures { return undefined; }
-
-        //? Creates an invalid Picture Album instance
-        //@ cap(media)
-        export function picture_album() : PictureAlbum { return undefined; }
-
-        //? Creates an invalid Picture Albums instance
-        //@ cap(media)
-        export function picture_albums() : PictureAlbums { return undefined; }
-
         //? Creates an invalid Song instance
         export function song() : Song { return undefined; }
-
-        //? Creates an invalid Songs instance
-        //@ cap(media)
-        export function songs() : Songs { return undefined; }
-
-        //? Creates an invalid Song Album instance
-        //@ cap(media)
-        export function song_album() : SongAlbum { return undefined; }
-
-        //? Creates an invalid Song Albums instance
-        //@ cap(media)
-        export function song_albums() : SongAlbums { return undefined; }
-
-        //? Creates an invalid Playlist instance
-        //@ cap(media)
-        export function playlist() : Playlist { return undefined; }
-
-        //? Creates an invalid Playlists instance
-        //@ cap(media)
-        export function playlists() : Playlists { return undefined; }
 
         //? Creates an invalid Location instance
         export function location() : Location_ { return undefined; }

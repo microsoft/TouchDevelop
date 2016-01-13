@@ -43,78 +43,12 @@ module TDev.RT {
         //@ [width].defl(480) [height].defl(800)
         export function create_picture(width:number, height:number) : Picture { return Picture.mk(width, height); }
 
-        //? Searches the Windows Phone Store (type in applications or music)
-        //@ stub flow(SinkSafe) obsolete
-        //@ [type].defl("music")
-        export function search_marketplace(terms:string, type:string) : void
-        { }
-
-        export function askMusicAccessAsync(r : ResumeCtx): Promise { // boolean
-            return r.rt.host.askSourceAccessAsync("music", "your songs, song albums and playlists.", false);
-        }
-        export function askPictureAccessAsync(r : ResumeCtx): Promise { // boolean
-            return r.rt.host.askSourceAccessAsync("picture", "your pictures and picture albums.", false);
-        }
-
-        //? Gets the playlists on the phone
-        //@ cap(media) flow(SourceMusic) returns(Playlists)
-        //@ embedsLink("Playlists", "Playlist") async
-        export function playlists(r : ResumeCtx)  // : Playlists
-        {
-            askMusicAccessAsync(r)
-                .then(allow => r.resumeVal(undefined))
-                .done();
-        }
-
         export function pictureUriForMedia(uri: string, media: string) {
             return uri;
         }
 
         export function pictureDataUriAsync(uri: string): Promise { // string
             return Promise.as(undefined);
-        }
-
-        var _pictureUrls: string[] = undefined;
-        export function picturesAsync(uri : string) : Promise
-        {
-            if (!!_pictureUrls)
-                return Promise.as(Pictures.mk(_pictureUrls));
-            return BingServices.searchAsync("Images", "cat", null)
-                .then((results) => {
-                    _pictureUrls = results.map((r) => r.url).slice(0, 4);
-                    return Pictures.mk(_pictureUrls);
-                });
-        }
-
-        var _pictureAlbums: PictureAlbums = undefined;
-        export function pictureAlbumsAsync(uri : string) : Promise
-        {
-            if (_pictureAlbums) return Promise.as(_pictureAlbums);
-
-            return Media.picturesAsync(uri).then(pics => {
-                _pictureAlbums = PictureAlbums.mk([PictureAlbum.mk('cats', 'cats', pics)]);
-                return _pictureAlbums;
-            });
-        }
-
-        //? Gets the pictures on the phone
-        //@ async cap(media) flow(SourcePicture) returns(Pictures)
-        //@ embedsLink("Pictures", "Picture")
-        export function pictures(r: ResumeCtx) {
-            askPictureAccessAsync(r)
-                .then(allow => {
-                    if (!allow) return Promise.as(Pictures.mk([]));
-                    else return Media.picturesAsync('');
-                }).done(pics => r.resumeVal(pics));
-        }
-
-
-        //? Gets the saved pictures on the phone
-        //@ cap(media) flow(SourcePicture) returns(Pictures)
-        //@ embedsLink("Pictures", "Picture") async
-        export function saved_pictures(r: ResumeCtx) // : Pictures
-        {
-            pictures(r);
         }
 
         export function choosePictureAsync(title = 'choose a picture', description = ''): Promise {
@@ -167,61 +101,6 @@ module TDev.RT {
         export function choose_picture(r: ResumeCtx)
         {
             return choosePictureAsync().done(pic => r.resumeVal(pic));
-        }
-
-        //? Gets the picture albums
-        //@ cap(media) flow(SourcePicture) returns(PictureAlbums)
-        //@ embedsLink("Picture Albums", "Picture Album") async
-        export function picture_albums(r: ResumeCtx) //: PictureAlbums
-        {
-            askPictureAccessAsync(r)
-                .then(allow => {
-                    if (!allow) return Promise.as(PictureAlbums.mk([]));
-                    else return Media.pictureAlbumsAsync('');
-                }).done(albums => r.resumeVal(albums));
-        }
-
-        export function initSongAlbumAsync(album: SongAlbum): Promise { // must call init
-            album.init('', 0, null);
-            return Promise.as(undefined);
-        }
-
-        export function loadSongAlbumArtAsync(albumName: string): Promise { // string
-            return Promise.as(undefined);
-        }
-
-        export function songsAsync(album : string) : Promise // Songs
-        {
-            return Promise.as(Songs.mk([]));
-        }
-
-        export function songAlbumsAsync() : Promise // SongAlbums
-        {
-            return Promise.as(SongAlbums.mk([]));
-        }
-
-        //? Gets the songs on the phone
-        //@ cap(media) flow(SourceMusic) returns(Songs)
-        //@ embedsLink("Songs", "Song") async
-        export function songs(r: ResumeCtx)
-        {
-            askMusicAccessAsync(r)
-                .then(allow => {
-                    if (!allow) return Promise.as(Songs.mk([]));
-                    else return Media.songsAsync("");
-                }).done(s => r.resumeVal(s));
-        }
-
-        //? Gets the song albums on the phone
-        //@ cap(media) flow(SourceMusic) returns(SongAlbums)
-        //@ embedsLink("Song Albums", "Song Album") async
-        export function song_albums(r : ResumeCtx) // : SongAlbums
-        {
-            askMusicAccessAsync(r)
-                .then(allow => {
-                    if (!allow) return Promise.as(SongAlbums.mk([]));
-                    else return Media.songAlbumsAsync();
-                }).done(s => r.resumeVal(s));
         }
 
         //? Creates a new game board
