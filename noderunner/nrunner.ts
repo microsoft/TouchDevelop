@@ -840,6 +840,15 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
                 resources: cs.packageResources })
         break;
 
+    case "hexcompile":
+        TDev.Hex.cliCompileAsync(TDev.Script, r.id)
+        .done(v => {
+            v.name = TDev.Script.getName()
+            delete v.csource
+            ar.ok(v)
+        }, ar.errHandler())
+        break;
+
     case "webapp":
         TDev.Script.setStableNames();
         var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
@@ -1367,6 +1376,8 @@ function reportBug(ctx: string, err: any) {
         console.error(TDev.Ticker.bugReportToString(bug));
     bug.exceptionConstructor = "NJS " + bug.exceptionConstructor;
     bug.tdVersion = ccfg.tdVersion
+
+    console.log("POSTING CRASH", bug)
 
     TDev.Util.httpPostRealJsonAsync(apiEndpoint + "bug" + accessToken, bug)
         .done(() => {}, err => {

@@ -613,7 +613,8 @@ module TDev.AST.Bytecode
                 addr += 16
             }
 
-            hex.slice(bytecodeStartIdx).forEach(l => myhex.push(l))
+            if (!shortForm)
+                hex.slice(bytecodeStartIdx).forEach(l => myhex.push(l))
             
             return myhex;
         }
@@ -899,12 +900,14 @@ module TDev.AST.Bytecode
 
         public serialize(shortForm:boolean, metainfo:string, blob:Uint8Array)
         {
+            var compiled = false
             shortForm = false; // this doesn't work yet
 
             if (this.binary.procs.length == 0) {
                 shortForm = true // which is great in case there are errors in the program
             } else {
                 this.binary.serialize()
+                compiled = true
             }
             var lenSrc = 0
 
@@ -920,7 +923,8 @@ module TDev.AST.Bytecode
                 data: null,
                 contentType: "application/x-microbit-hex",
                 csource: this.binary.csource,
-                sourceSaved: sourceSaved
+                sourceSaved: sourceSaved,
+                compiled: compiled,
             }
 
             if (!this.binary.buf)

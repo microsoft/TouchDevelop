@@ -136,24 +136,54 @@ module TDev.Hex
             .then(meta => { if (meta && fromEditor) AST.Bytecode.setupFor(extInfo, meta) })
     }
 
-    export function cliCompileAsync(app:AST.App)
+    export function cliCompileAsync(app:AST.App, scriptId = "")
     {
         var guid = app.localGuid
 
         var extInfo = AST.Bytecode.getExtensionInfo(app);
         if (extInfo.errors) throw new Error(extInfo.errors)
 
-        return getHexInfoAsync(extInfo)
-        .then(meta => {
-            AST.Bytecode.setupFor(extInfo, meta)
+        var hd = {
+            meta: {
+                name: app.getName(),
+                comment: app.getDescription(),
+            },
+            status: scriptId ? "published" : "unpublished",
+            scriptId: scriptId,
+        }
+
+        return Promise.join([getHexInfoAsync(extInfo), compressSourceAsync(app.serialize(), <any>hd)])
+        .then(r => {
+            AST.Bytecode.setupFor(extInfo, r[0])
 
             var c = new AST.Bytecode.Compiler(app)
             c.run()
-            var res = c.serialize(false, null, null);
+            var res = c.serialize(false, r[1][0], r[1][1]);
 
             if (!res.data)
                 throw new Error("no hex data")
+
+            return res
         })
+    }
+
+    function compressSourceAsync(text:string, hd:Cloud.Header)
+    {
+        var meta = JSON.stringify(World.stripHeaderForSave(hd))
+
+        var lzma = (<any>window).LZMA;
+
+        if (!lzma)
+            return Promise.as([meta, Util.stringToUint8Array(Util.toUTF8(text))])
+
+        var newMeta = {
+            compression: "LZMA",
+            headerSize: meta.length,
+            textSize: text.length,
+            name: hd.name,
+        }
+        return lzmaCompressAsync(meta + text)
+            .then(cbuf => [JSON.stringify(newMeta), cbuf])
     }
 
     var firstTime = true;
@@ -166,26 +196,7 @@ module TDev.Hex
         var guid = app.localGuid
         var st = saveStateAsync()
             .then(() => Promise.join([source ||World.getInstalledScriptAsync(guid), World.getInstalledHeaderAsync(guid)]))
-            .then(r => {
-                var text:string = r[0]
-                var hd:Cloud.Header = r[1]
-
-                var meta = JSON.stringify(World.stripHeaderForSave(hd))
-
-                var lzma = (<any>window).LZMA;
-
-                if (!lzma)
-                    return [meta, Util.stringToUint8Array(Util.toUTF8(text))]
-
-                var newMeta = {
-                    compression: "LZMA",
-                    headerSize: meta.length,
-                    textSize: text.length,
-                    name: hd.name,
-                }
-                return lzmaCompressAsync(meta + text)
-                    .then(cbuf => [JSON.stringify(newMeta), cbuf])
-            })
+            .then(r => compressSourceAsync(r[0], r[1]))
             .then(r => {
                 var saveDone = Util.now()
                 times += Util.fmt("; save time {0}ms\n", saveDone - startTime);
