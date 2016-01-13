@@ -521,12 +521,12 @@ Blockly.Blocks['device_get_magnetic_force'] = {
         this.setHelpUrl('https://www.microbit.co.uk/functions/magnetic-force');
         this.setColour(blockColors.input);
         this.appendDummyInput()
-            .appendField("magnetic force (nT)");
+            .appendField("magnetic force (microT)");
         this.appendDummyInput()
             .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('Get the magnetic force on an axis (in nano Tesla).');
+        this.setTooltip('Get the magnetic force on an axis (in micro Tesla).');
     }
 };
 
