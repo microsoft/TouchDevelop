@@ -111,6 +111,7 @@ var dimensionDropdown = [
     ["x", "x"],
     ["y", "y"],
     ["z", "z"],
+    ["strength", "strength"]
 ];
 
 var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
