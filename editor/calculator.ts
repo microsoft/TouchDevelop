@@ -3611,7 +3611,7 @@ module TDev
             sig.unshift(find.property.getName())
 
             var resK = find.property.getResult().getKind();
-            if (resK != api.core.Nothing) {
+            if (resK != api.core.Nothing && !(resK instanceof MultiplexKind)) {
                 sig.push(" returns ");
                 sig.pushRange(resK.getHtmlName())
             }
