@@ -1431,8 +1431,6 @@ module TDev
 
         public inlineEdit(l:AST.Token)
         {
-            if (l instanceof AST.FieldName && (<AST.FieldName> l).isOut && Cloud.isRestricted())
-                return;
             this.unselect();
             if (this.checkNextDisplay()) return;
             this.inlineEditAt = this.expr.tokens.indexOf(l);
