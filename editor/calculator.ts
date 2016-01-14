@@ -1375,20 +1375,17 @@ module TDev
                     return
                 }
 
-                var v1 = l instanceof AST.LocalDef ? a.nameLocal(v0) : Script.freshName(v0)
-                var renamed = false
+                var v1 = v0
 
-                var finish = () => {
-                    renamed = true
-                    l.setName(v1)
-                    if (!(l instanceof AST.LocalDef))
-                        TheEditor.queueNavRefresh();
-                    this.fullDisplay()
-                }
+                if (l instanceof AST.LocalDef)
+                    v1 = AST.AstNode.freshNameCore(v0, n => api.getThing(n) != null);
+                else
+                    v1 = Script.freshName(v0)
 
-                if (v0 != v1 && l instanceof AST.LocalDef)
-                    v1 = v0;
-                finish()
+                l.setName(v1)
+                if (!(l instanceof AST.LocalDef))
+                    TheEditor.queueNavRefresh();
+                this.fullDisplay()
             };
 
             return inp;
