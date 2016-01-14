@@ -1353,7 +1353,7 @@ module TDev.AST {
         // into an editable statement.
         private exprHolder = new AST.ExprHolder();
 
-        constructor(public local:LocalDef, private isOut = false) {
+        constructor(public local:LocalDef, private isOut = false, public isClosure = false) {
             super();
 
             this.setupForEdit()

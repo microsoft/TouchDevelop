@@ -311,6 +311,8 @@ module TDev.AST.Bytecode
         {
             // Util.assert(!this.isarg)
             Util.assert(!(this.def instanceof GlobalDef))
+            if (this.isarg && this.isByRefLocal())
+                return // already handled by the local
             if (this.isRef() || this.isByRefLocal()) {
                 this.emitLoadCore(proc);
                 proc.emitCallRaw("bitvm::decr");
@@ -1672,23 +1674,32 @@ module TDev.AST.Bytecode
 
             this.proc.pushLocals();
 
+            var copyArgIntoLocal = (loc:LocalDef) => {
+                if (!loc) return
+                var idx = inparms.indexOf(loc)
+                if (idx >= 0) {
+                    var curr = this.localIndex(loc, true)
+                    if (!curr) {
+                        var l = this.proc.mkLocal(loc)
+
+                        if (loc.isByRef()) {
+                            this.proc.emitCallRaw("bitvm::mkloc" + l.refSuff())
+                            l.emitStoreCore(this.proc)
+                        }
+
+                        this.proc.args[idx].emitLoadLocal(this.proc)
+                        this.proc.emit("push {r0}")
+                        l.emitStoreByRef(this.proc)
+                    }
+                }
+            }
+
             visitStmts(a.body, s => {
 
                 if (s instanceof ExprStmt) {
                     var ai = (<ExprStmt>s).expr.assignmentInfo()
                     if (ai) {
-                        ai.targets.forEach(t => {
-                            var loc = t.referencedLocal()
-                            var idx = inparms.indexOf(loc)
-                            if (loc && idx >= 0) {
-                                var curr = this.localIndex(loc, true)
-                                if (!curr) {
-                                    var l = this.proc.mkLocal(loc)
-                                    this.proc.args[idx].emitLoad(this.proc)
-                                    l.emitStore(this.proc)
-                                }
-                            }
-                        })
+                        ai.targets.forEach(t => copyArgIntoLocal(t.referencedLocal()))
                     }
                 }
             })
