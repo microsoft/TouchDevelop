@@ -341,6 +341,7 @@ module TDev.AST.Bytecode
         mkLocal(def:LocalDef = null)
         {
             var l = new Location(this.locals.length, def)
+            //if (def) console.log("LOCAL: " + def.getName() + ": ref=" + def.isByRef() + " cap=" + def._isCaptured + " mut=" + def._isMutable)
             this.locals.push(l)
             return l
         }
@@ -1914,7 +1915,7 @@ module TDev.AST.Bytecode
                     var nm = m[1]
                     if (isEnum)
                         nm = currNs + "::" + nm
-                    console.log(nm, num, val)
+                    //console.log(nm, num, val)
                     if (val != null) {
                         res.enums[nm] = val
                         return;

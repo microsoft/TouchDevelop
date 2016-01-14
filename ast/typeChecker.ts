@@ -554,7 +554,8 @@ module TDev.AST
         {
             this.localScopes.peek().push(v);
             this.allLocals.push(v);
-            v._isByRef = false;
+            v._isMutable = false;
+            v._isCaptured = false;
             v.lastUsedAt = this.timestamp++;
             this.recordLocalRead(v);
         }
@@ -1522,8 +1523,10 @@ module TDev.AST
             inl.closure = [];
             inl.allLocals = [];
             this.readLocals.forEach(l => {
-               if (this.outsideScopeLocals.indexOf(l) >= 0)
+                if (this.outsideScopeLocals.indexOf(l) >= 0) {
                     inl.closure.push(l)
+                    l._isCaptured = true
+                }
                 inl.allLocals.push(l)
             })
         }
@@ -1651,6 +1654,7 @@ module TDev.AST
                         }
                     } else {
                         var loc = <LocalDef>thing;
+                        loc._isMutable = true;
                         if (this.readOnlyLocals.indexOf(loc) >= 0) {
                             if (!AST.writableLocalsInClosures && this.actionSection == ActionSection.Lambda) {
                                 this.markError(trg, lf("TD107: inline functions cannot assign to locals from outside like '{0}'", name));
@@ -1659,7 +1663,7 @@ module TDev.AST
                             }
                         } else {
                             if (this.outsideScopeLocals.indexOf(loc) >= 0)
-                                loc._isByRef = true;
+                                loc._isCaptured = true;
                             this.recordLocalWrite(loc)
                         }
                     }
