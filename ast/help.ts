@@ -921,7 +921,7 @@ module TDev {
                 var args = arg.split(':');
                 if (args.length != 2)
                     return MdComments.error(lf("missing script title: {hex:id:title}"));
-                return Util.fmt("<a href=\"{0:q}\" target=\"_blank\">{1:q}</a>", "/api/" + MdComments.shrink(args[0]) + "/hex", args[1]);                                
+                return Util.fmt("<a href=\"{0:q}\" target=\"_blank\">{1:q}</a>", "/api/" + MdComments.shrink(args[0]) + "/hex?applyupdates=true", args[1]);                                
             } else if (macro == "decl" || macro == "decl*") {
                 var decl = !Script ? null : !arg ? Script : Script.things.filter((t) => t.getName() == arg)[0];
                 if (this.currComment && this.currComment.mdDecl)
