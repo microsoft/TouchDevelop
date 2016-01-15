@@ -209,19 +209,6 @@ module TDev.RT {
             return pp;
         }
 
-        //? Adds a cloud picture pushpin on the map
-        //@ cap(network) flow(SinkWeb)
-        //@ readsMutable writesMutable ignoreReturnValue
-        //@ [background].deflExpr('colors->accent')
-        //@ embedsLink("Map", "CloudPicture")
-        public add_cloud_picture(location: Location_, picture: CloudPicture, background: Color): MapPushpin {
-            var pp = MapPushpin.mk(location, undefined, background, undefined, undefined, picture);
-            this._pushpins.push(pp);
-            pp.addToMap(this._map);
-            picture.toPictureUrlAsync('thumbnail').done(url => { pp.setPictureUrl(url); });
-            return pp;
-        }
-
         //? Adds a link pushpin on the map (ignored if the location if not set)
         //@ cap(network) flow(SinkWeb)
         //@ readsMutable writesMutable ignoreReturnValue

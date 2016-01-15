@@ -371,7 +371,6 @@ module TDev {
     {
         None = 0, // applies mapping for service capability
         Accelerometer =         0x00000001,
-        Calendar =              0x00000002,
         Camera =                0x00000004,
         Compass =               0x00000008,
         Gyroscope =             0x00000010,
@@ -396,8 +395,6 @@ module TDev {
         Proximity =             0x00800000,
         Speech =                0x01000000,
         CloudData =             0x02000000,
-        Bluetooth =             0x04000000,
-        CloudServices =         0x08000000,
 
         // Current
         Npm =                   0x20000000,
@@ -415,34 +412,10 @@ module TDev {
            | MusicAndSounds
            | Network
            | CloudData
-           | CloudServices
            ,
-
-        WindowsPhone =
-            Accelerometer
-            | Calendar
-            | CloudServices
-            | Compass
-            | Contacts
-            | Gyroscope
-            | Location
-            | Maps
-            | Media
-            | Microphone
-            | Motion
-            | Phone
-            | Radio
-            | Orientation
-            | Search
-            | Translation
-            | Tiles
-            | MusicAndSounds
-            | Network
-            ,
 
         iOS =
             Accelerometer
-            | CloudServices
             | Compass
             | Gyroscope
             | Location
@@ -457,7 +430,6 @@ module TDev {
         Android =
             Accelerometer
             | Camera
-            | CloudServices
             | Compass
             | Gyroscope
             | Location
@@ -488,8 +460,7 @@ module TDev {
             | Cordova,
 
         AnyClient =
-           CloudServices
-           | Location
+           Location
            | Maps
            | Search
            | Translation

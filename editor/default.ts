@@ -545,9 +545,6 @@ module TDev
 
         // init API keys
         TDev.RT.ApiManager.bingMapsKey = 'AsnQk63tYReqttLHcIL1RUsc_0h0BwCOib6j0Zvk8QjWs4FQjM9JRM9wEKescphX';
-        TDev.RT.ApiManager.liveConnectClientId = '0000000040118292';
-        TDev.RT.ApiManager.liveConnectRedirectDomainId = 'cloudservices';
-        TDev.RT.ApiManager.liveConnectUserId = 'touchdevelop';
 
         Browser.inEditor = true;
 

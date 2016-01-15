@@ -2623,11 +2623,8 @@ module TDev.AST {
         static platforms = [
             { cap: PlatformCapability.Current,        id: "current",        name: lf("Current device (overrides the rest)") },
             { cap: PlatformCapability.Accelerometer,  id: "accelerometer",  name: lf("Accelerometer") },
-            { cap: PlatformCapability.Bluetooth,      id: "bluetooth",      name: lf("Bluetooth") },
-            { cap: PlatformCapability.Calendar,       id: "calendar",       name: lf("Calendar") },
             { cap: PlatformCapability.Camera,         id: "camera",         name: lf("Camera") },
             { cap: PlatformCapability.CloudData,      id: "clouddata",      name: lf("Cloud Data") },
-            { cap: PlatformCapability.CloudServices,  id: "cloudservices",  name: lf("OneDrive, OneNote") },
             { cap: PlatformCapability.Compass,        id: "compass",        name: lf("Compass") },
             { cap: PlatformCapability.Contacts,       id: "contacts",       name: lf("Contacts") },
             { cap: PlatformCapability.EditorOnly,     id: "editoronly",     name: lf("Editor only") },

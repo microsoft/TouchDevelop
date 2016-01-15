@@ -8,7 +8,6 @@
 ///<reference path='BoxFlow.ts'/>
 ///<reference path='BoxFlows.ts'/>
 ///<reference path='Camera.ts'/>
-///<reference path='CloudPicture.ts'/>
 ///<reference path='Collections.ts'/>
 ///<reference path='Color.ts'/>
 ///<reference path='Colors.ts'/>
@@ -25,7 +24,6 @@
 ///<reference path='FormBuilder.ts'/>
 ///<reference path='Languages.ts'/>
 ///<reference path='Link.ts'/>
-///<reference path='LiveConnect.ts'/>
 ///<reference path='Location.ts'/>
 ///<reference path='Locations.ts'/>
 ///<reference path='BingMaps.ts'/>
