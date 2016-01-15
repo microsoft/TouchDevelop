@@ -5357,13 +5357,13 @@ module TDev.AST {
             return tok && tok.localCount + tok.globalCount > 0;
         }
 
-        public hasProperty(p:IProperty)
+        public hasProperty(p:IProperty, strict = false)
         {
             if (!this.properties) return true;
-            return this.hasTokenUsage(p)
+            return (!strict && this.hasTokenUsage(p))
                 || this.hasKey(p.usageKey())
                 || (this.allowAllLibraries && p instanceof LibraryRefAction)
-                || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)
+                || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)            
         }
 
         public hasFlag(flg:string)

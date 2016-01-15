@@ -2321,6 +2321,8 @@ module TDev
                 this.inPropertyPosition = true;
 
                 var s: IProperty[] = k.primaryKind.listProperties().slice(0);
+                if (TheEditor.intelliProfile)
+                    s = s.filter((p: IProperty) => TheEditor.intelliProfile.hasProperty(p, true));
                 var t = this.expr.tokens[this.cursorPosition-1];
                 if (k.primaryKind == api.core.String && t && t instanceof AST.Literal && ((<AST.Expr>t).enumVal || (<AST.Expr>t).languageHint)) {
                     // don't allow string editing on enum values
