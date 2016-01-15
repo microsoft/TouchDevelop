@@ -1656,7 +1656,6 @@ module TDev.AST
                         }
                     } else {
                         var loc = <LocalDef>thing;
-                        loc._isMutable = true;
                         if (this.readOnlyLocals.indexOf(loc) >= 0) {
                             if (!AST.writableLocalsInClosures && this.actionSection == ActionSection.Lambda) {
                                 this.markError(trg, lf("TD107: inline functions cannot assign to locals from outside like '{0}'", name));
@@ -1668,6 +1667,10 @@ module TDev.AST
                                 loc._isCaptured = true;
                             this.recordLocalWrite(loc)
                         }
+
+                        // if it wasn't captured yet anywhere, and we're not inside a loop, no reason to treat it as mutable just yet
+                        if (loc._isCaptured || this.currLoop)
+                            loc._isMutable = true;
                     }
                     this.typeCheckExpr(trg);
                 } else {
