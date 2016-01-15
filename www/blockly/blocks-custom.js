@@ -54,7 +54,7 @@ var cameraMessageDropdown = [
     ["take photo", "take photo"],
     ["start video capture", "start video capture"],
     ["stop video capture", "stop video capture"],
-    ["toggle front - rear", "toggle front - rear"],
+    ["toggle front-rear", "toggle front-rear"],
     ["launch photo mode", "launch photo mode"],
     ["launch video mode", "launch video mode"],
     ["stop photo mode", "stop photo mode"],
