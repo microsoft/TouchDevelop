@@ -5357,12 +5357,16 @@ module TDev.AST {
             return tok && tok.localCount + tok.globalCount > 0;
         }
 
-        public hasProperty(p:IProperty, strict = false)
-        {
+        public hasProperty(p: IProperty, strict = false) {
             if (!this.properties) return true;
             return (!strict && this.hasTokenUsage(p))
                 || this.hasKey(p.usageKey())
-                || (this.allowAllLibraries && p instanceof LibraryRefAction)
+                || (this.allowAllLibraries &&
+                    (
+                    p instanceof LibraryRefAction || 
+                    (p instanceof MultiplexProperty && (<MultiplexProperty>p).forKind instanceof LibraryRefAbstractKind)
+                    )
+                   )
                 || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)            
         }
 

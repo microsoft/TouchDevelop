@@ -1354,9 +1354,11 @@ module TDev {
             return this.topicCache;
         }
 
+        private usageKeyCache: string;        
         public usageKey()
         {
-            return this.helpTopic();
+            if (!this.usageKeyCache) this.usageKeyCache = Util.tagify(this._runtimeName || this.getName());
+            return this.usageKeyCache;
         }
 
         public canRename() { return false; }
