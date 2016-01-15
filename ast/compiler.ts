@@ -961,7 +961,7 @@ module TDev.AST
             inl.outParameters.forEach((p) => a.header.outParameters.push(new ActionParameter(p)))
 
             a.allLocals = inl.allLocals;
-            inl.closure.forEach((p) => a.header.inParameters.push(new ActionParameter(p)));
+            inl.closure.forEach((p) => a.header.inParameters.push(new ActionParameter(p, false, true)));
             this.innerActions.push(a);
 
             this.markLocation(inl);
@@ -2156,10 +2156,14 @@ module TDev.AST
                     this.wr("  s.results = [];\n");
                 a.allLocals.forEach((l) => {
                     this.wr("  " + this.localVarRef(l, true).toString() + " = ");
-                    if (a.getInParameters().some((p:ActionParameter) => p.local == l)) {
-                      this.wr(this.localVarName(l));
+                    var ap = a.getInParameters().filter((p:ActionParameter) => p.local == l)[0]
+                    if (ap) {
+                        if (l.isByRef() && !ap.isClosure)
+                            this.wr("{ref:" + this.localVarName(l) + "}");
+                        else
+                            this.wr(this.localVarName(l));
                     } else {
-                      this.wr("undefined");
+                        this.wr("undefined");
                     }
                     this.wr(";\n");
                 });

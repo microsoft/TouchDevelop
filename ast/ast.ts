@@ -1353,7 +1353,7 @@ module TDev.AST {
         // into an editable statement.
         private exprHolder = new AST.ExprHolder();
 
-        constructor(public local:LocalDef, private isOut = false) {
+        constructor(public local:LocalDef, private isOut = false, public isClosure = false) {
             super();
 
             this.setupForEdit()
@@ -2257,11 +2257,13 @@ module TDev.AST {
         public isSynthetic:boolean;
         public isHiddenOut:boolean;
         public isOut:boolean;
-        public _isByRef:boolean; // set by TypeChecker for locals written in closures
+        // if _isMutable && _isCaptured then the local needs to be captured by reference
+        public _isMutable:boolean; // set by TypeChecker for locals written after initialization
+        public _isCaptured:boolean; // set by TypeChecker for locals captured in closures
         public _lastWriteLocation:Stmt;
         public _converterAction:InlineAction;
 
-        public isByRef() { return this._isByRef }
+        public isByRef() { return this._isMutable && this._isCaptured }
         public writeWithType(app:App, tw:TokenWriter)
         {
             tw.id(this.getName()).op0(':').kind(app, this.getKind());
