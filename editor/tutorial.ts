@@ -1441,7 +1441,7 @@ module TDev
             var tip =
                div('tip tip-tl', div('tipInner',
                     div('tipTitle', lf("tap there")),
-                    div('tipDescr', lf("to continue coding"))))
+                    div('tipDescr', lf("to continue"))))
 
             tip.style.bottom = "calc(50% - 3em)";
             tip.style.right = "calc(50% - 3em)";
@@ -1573,13 +1573,13 @@ module TDev
                 TipManager.scheduleTip({
                     tick: Ticks.wallStop,
                     title: lf("tap there"),
-                    description: lf("to continue coding")
+                    description: lf("to continue")
                 })
              else
                 TipManager.scheduleTip({
                     tick: Ticks.wallBack,
                     title: lf("tap there"),
-                    description: lf("to continue coding")
+                    description: lf("to continue")
                 })
         }
 
