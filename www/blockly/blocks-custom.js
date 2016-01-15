@@ -67,7 +67,7 @@ var alertMessageDropdown = [
     ["play sound", "play sound"],
     ["play ringtone", "play ringtone"],
     ["find my phone", "find my phone"],
-    ["ring alarm", "ring alarm 1"],
+    ["ring alarm", "ring alarm"],
 ];
 
 var remoteControlMessageDropdown = [
