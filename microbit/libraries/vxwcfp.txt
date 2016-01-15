@@ -2714,7 +2714,7 @@ action pairing_warning() {
 #qPUtJwJ0TqvMC1KG
 action magnetic_force(#LsEFJSIvP0IbVrDx dimension: String) returns(#xHQcYMA6Plgw9L7T millig: Number) {
   #hPENJP4Mk8DofQRm // Get the magnetic force value in ``micro-Teslas`` (``µT``). This function is not supported in the simulator.
-  #s3Bnnawgp2VmtUO8 // {help:functions/magnetic force}
+  #s3Bnnawgp2VmtUO8 // {help:functions/magnetic-force}
   #xCTDjLY5GkeF3sgN // {namespace:input}
   #BgprL13WBVpXrK9A // {weight:43}
   #b4JHQry9Zdd486VW // {enum:dimension:x=0,y=1,z=2,strength=3}
