@@ -908,7 +908,6 @@ module TDev
         private typeCheckPending = false;
         private onRestore = () => {};
         private lastEditHash = "";
-        private libExtractor = new LibraryExtractor();
 
         public sideKeyFocus = false;
         private sideTabs: SideTab[];
@@ -2408,11 +2407,6 @@ module TDev
                 this.queueNavRefresh();
                 this.dismissSidePane();
             }
-        }
-
-        public moveDeclToLibrary(decl:AST.Decl)
-        {
-            this.libExtractor.moveDecl(decl);
         }
 
         public cutDecl(decl: AST.Decl, dontCopy = false) {
@@ -4120,7 +4114,6 @@ module TDev
 
             this.dismissSidePane();
             this.setLastScreenshotCanvas(null);
-            this.libExtractor.reset();
             Plugins.stopAllPlugins();
             return this.saveStateAsync({ forReal: true, clearScript: true });
         }

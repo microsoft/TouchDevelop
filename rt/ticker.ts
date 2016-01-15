@@ -300,7 +300,6 @@ module TDev {
         sideUpdateOne,
         sideActionAddInput,
         sideActionAddOutput,
-        sideMoveToLibrary,
         sideTutorialCancel,
         sideTutorialRedisplay,
 

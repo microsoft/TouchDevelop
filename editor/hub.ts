@@ -216,7 +216,6 @@ module TDev.Browser {
                     findReferences: true,
                     gotoNavigation: true,
                     // refactorings
-                    moveToLibrary: true,
                     stripBlock: true,
                     // debugging
                     toggleBreakpoint: true,
@@ -706,7 +705,6 @@ module TDev.Browser {
                     (Cloud.hasPermission("stats") ? HTML.mkButton(lf("stats"), () => { stats() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
                     (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
-                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()

@@ -28,7 +28,6 @@ module TDev.Cloud {
         splitScreen?: boolean; // split screen button
         splitScreenOnLoad?: boolean;
         simplify?: boolean;
-        moveToLibrary?: boolean;
         stripBlock?: boolean;
         tokenRefactoring?: boolean;
 
