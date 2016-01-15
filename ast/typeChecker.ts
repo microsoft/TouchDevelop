@@ -1232,6 +1232,8 @@ module TDev.AST
                 this.currentAnyAction = inl;
                 inl.inParameters.forEach((d) => this.declareLocal(d));
                 inl.outParameters.forEach((d) => this.declareLocal(d));
+                if (Cloud.isRestricted())
+                    this.readOnlyLocals.pushRange(inl.inParameters)
                 this.setOutLocals(inl.outParameters.slice(0))
                 this.reportedUnassigned = false;
                 this.typeCheck(inl.body);
