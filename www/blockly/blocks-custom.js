@@ -96,15 +96,16 @@ var notes = {
     "C": 262,
     "C#": 277,
     "D": 294,
-    "D#": 311,
+    "Eb": 311,
     "E": 330,
     "F": 349,
     "F#": 370,
     "G": 392,
     "G#": 415,
     "A": 440,
-    "A#": 466,
+    "Bb": 466,
     "B": 494,
+    "C5":523,
 };
 
 var dimensionDropdown = [
@@ -1276,6 +1277,21 @@ Blockly.Blocks['device_ring'] = {
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Rings a given note on P0. You can also provide a specific frequency.');
+  }
+};
+
+Blockly.Blocks['device_rest'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/rest');
+    this.setColour(blockColors.music);
+    this.appendDummyInput()
+        .appendField("rest for");
+    this.appendValueInput("duration")
+        .setCheck("Number");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Rests (plays nothing) for a specified time through pin P0.');
   }
 };
 
