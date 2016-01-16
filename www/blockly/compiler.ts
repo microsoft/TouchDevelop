@@ -1272,6 +1272,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "point",
     args: [{ field: "x" }, { field: "y" } ]
   },
+  device_plot_bar_graph: {
+    namespace: "led",
+    f: "plot bar graph",
+    args: [{ field: "value" }, { field: "high" } ]
+  },
   device_temperature: {
     namespace: "input",
     f: "temperature",

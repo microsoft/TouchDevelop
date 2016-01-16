@@ -576,6 +576,7 @@ Blockly.Blocks['device_plot'] = {
     this.setTooltip('Turns the LED at coordinates (x, y) on.');
   }
 };
+
 Blockly.Blocks['device_unplot'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/functions/unplot');
@@ -611,6 +612,24 @@ Blockly.Blocks['device_point'] = {
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
     this.setTooltip('Returns true if the LED at coordinates (x, y) is on, false otherwise.');
+  }
+};
+
+Blockly.Blocks['device_plot_bar_graph'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/plot-bar-graph');
+    this.setColour(blockColors.led);
+    this.appendDummyInput()
+        .appendField("plot bar graph of");
+    this.appendValueInput("value")
+        .setCheck("Number");
+    this.appendValueInput("high")
+        .setCheck("Number")
+        .appendField("up to");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Displays a bar graph of the value compared to high.');
   }
 };
 
