@@ -1631,7 +1631,7 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-  return /_event$/.test(b.type);
+  return /(forever|_event)$/.test(b.type);
 }
 
 // Find the parent (as in "scope" parent) of a Block. The [parentNode_] property
