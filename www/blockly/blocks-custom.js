@@ -115,6 +115,11 @@ var dimensionDropdown = [
     ["strength", "strength"]
 ];
 
+var rotationDropDown = [
+    ["pitch", "pitch"],
+    ["roll", "roll"],
+];
+
 var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
 
 var blockColors = {
@@ -514,7 +519,21 @@ Blockly.Blocks['device_get_acceleration'] = {
             .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('Get the acceleration on an axis (between -2048 and 2047).');
+        this.setTooltip('Returns the acceleration on an axis (between -2048 and 2047).');
+    }
+};
+
+Blockly.Blocks['device_get_rotation'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/rotation');
+        this.setColour(blockColors.input);
+        this.appendDummyInput()
+            .appendField("rotation (°)");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(rotationDropDown), "NAME");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Returns the rotation in degrees.');
     }
 };
 

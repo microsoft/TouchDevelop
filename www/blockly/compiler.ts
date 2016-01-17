@@ -1316,6 +1316,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "acceleration",
     args: [{ field: "NAME" } ]
   },
+  device_get_rotation: {
+    namespace: "input",
+    f: "rotation",
+    args: [{ field: "NAME" } ]
+  },
   device_get_magnetic_force: {
     namespace: "input",
     f: "magnetic force",
