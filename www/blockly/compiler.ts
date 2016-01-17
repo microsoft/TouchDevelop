@@ -899,9 +899,21 @@ function compileNote(e: Environment, b: B.Block): J.JExpr {
 function compileDuration(e: Environment, b: B.Block): J.JExpr {
   var matches = b.type.match(/^device_duration_1\/(\d+)/);
   if (matches)
-    return H.mkSimpleCall("/", [ H.mkLocalRef("whole note"), H.mkNumberLiteral(parseInt(matches[1])) ]);
+      return H.mkSimpleCall("/", [
+          H.namespaceCall("music", "tempo", []),
+          H.mkNumberLiteral(parseInt(matches[1]))]);
   else
-    return H.mkLocalRef("whole note");
+    return H.namespaceCall("music", "tempo", []);
+}
+
+function compileBeat(e: Environment, b: B.Block): J.JExpr {
+  var matches = b.getFieldValue("fraction").match(/^1\/(\d+)/);
+  if (matches)
+      return H.mkSimpleCall("/", [
+          H.namespaceCall("music", "beat", []),
+          H.mkNumberLiteral(parseInt(matches[1]))]);
+  else
+    return H.namespaceCall("music", "beat", []);
 }
 
 // [t] is the expected type; we assume that we never null block children
@@ -945,6 +957,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
         return compileImage(e, b, true, "image", "create image");
     case 'game_sprite_property':
         return compileStdCall(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]);
+    case 'device_beat':
+        return compileBeat(e, b);
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type]);
@@ -1383,12 +1397,12 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_play_note: {
     namespace: "music",
-    f: "play note",
+    f: "play tone",
     args: [{ field: "note" }, { field: "duration" } ]
   },
   device_ring: {
     namespace: "music",
-    f: "ring",
+    f: "ring tone",
     args: [{ field: "note" } ]
   },
   device_rest: {
@@ -1398,9 +1412,24 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_note: {
     namespace: "music",
-    f: "note",
+    f: "note frequency",
     args: [{ field: "note" } ]
   },
+  device_tempo: {
+      namespace: "music",
+      f: "tempo",
+      args: []
+  },  
+  device_change_tempo: {
+      namespace: "music",
+      f: "change tempo by",
+      args: [{ field: "value" }]
+  },  
+  device_set_tempo: {
+      namespace: "music",
+      f: "set tempo",
+      args: [{ field: "value" }]
+  },  
   game_start_countdown: {
     namespace: "game",
     f: "start countdown",

@@ -534,6 +534,11 @@ module TDev {
     "micro:bit senses": {
       pubId: "vkmzfe",
       depends: [ "micro:bit" ]
+    },
+    
+    "micro:bit music": {
+      pubId: "zbiwoq",
+      depends: [ "micro:bit" ]
     }
   };
 

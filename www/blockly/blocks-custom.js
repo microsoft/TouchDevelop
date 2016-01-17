@@ -120,6 +120,14 @@ var rotationDropDown = [
     ["roll", "roll"],
 ];
 
+var beatFractions = [
+    ["1", "1"],
+    ["1/2", "1/2"],
+    ["1/4", "1/4"],
+    ["1/8", "1/8"],
+    ["1/16", "1/16"],
+];
+
 var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
 
 var blockColors = {
@@ -1275,10 +1283,10 @@ Blockly.Blocks['device_note'] = {
         init: function () {
             this.setHelpUrl('https://www.microbit.co.uk/functions/note');
             this.setColour(blockColors.music);
-            this.appendDummyInput().appendField(x == "1" ? "one whole note" : x+" note");
+            this.appendDummyInput().appendField(x+" beat");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
-            this.setTooltip((x == "1" ? "A whole note." : "A "+x+"th note.") + " Set the variable \"whole note\" to change the default tempo.");
+            this.setTooltip("A duration in ms based on the current tempo.");
         }
     };
 });
@@ -1289,11 +1297,11 @@ Blockly.Blocks['device_play_note'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/play-note');
     this.setColour(blockColors.music);
     this.appendDummyInput()
-        .appendField("play");
+        .appendField("play tone (Hz)");
     this.appendValueInput("note")
-        .setCheck("Number");
+        .setCheck("Number")
     this.appendDummyInput()
-        .appendField("for");
+        .appendField("for (ms)");
     this.appendValueInput("duration")
         .setCheck("Number");
     this.setInputsInline(true);
@@ -1308,7 +1316,7 @@ Blockly.Blocks['device_ring'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/ring');
     this.setColour(blockColors.music);
     this.appendDummyInput()
-        .appendField("ring");
+        .appendField("ring tone (Hz)");
     this.appendValueInput("note")
         .setCheck("Number");
     this.setInputsInline(true);
@@ -1323,7 +1331,7 @@ Blockly.Blocks['device_rest'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/rest');
     this.setColour(blockColors.music);
     this.appendDummyInput()
-        .appendField("rest for");
+        .appendField("rest (ms)");
     this.appendValueInput("duration")
         .setCheck("Number");
     this.setInputsInline(true);
@@ -1331,6 +1339,66 @@ Blockly.Blocks['device_rest'] = {
     this.setNextStatement(true);
     this.setTooltip('Rests (plays nothing) for a specified time through pin P0.');
   }
+};
+
+Blockly.Blocks['device_beat'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(beatFractions), "fraction");
+        this.appendDummyInput()
+            .appendField("beat (ms)");
+        this.setOutput(true, "Number");
+        this.setInputsInline(true);
+        this.setTooltip('Gets the duration of a fraction of a beat from the current tempo (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("tempo (bpm)");
+        this.setOutput(true, "Number");
+        this.setInputsInline(true);
+        this.setTooltip('Gets the tempo (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_change_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("change tempo by (bpm)");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Change the tempo by the given amount');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_set_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("set tempo to (bpm)");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sets the tempo to the given amount of beats per minute (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
 };
 
 Blockly.Blocks['variables_change'] = {

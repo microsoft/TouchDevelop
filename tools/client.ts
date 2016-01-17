@@ -3578,6 +3578,7 @@ function fetchlibraries(args) {
         , 'fdbsiw' // micro:bit serial
         , 'xnkmqj' // micro:bit senses
         , 'drdxps' // micro:bit screen
+        , 'zbiwoq' // micro:bit music
         , 'lyusma' // micro:bit profile
         , 'xczaux' // blocks new
         , 'dceiba' // blocks blink

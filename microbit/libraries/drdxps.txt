@@ -189,7 +189,7 @@ action plot_bar_graph(#hpG4t1C3SqiqVFVZ value: Number, #ZCK5n2unSOxU42XY high: N
   #zOTs2HbFZSsGIcZt // Displays a vertical bar graph based on the ``value`` and ``high`` value.
   #xlNlnrVrytCbk5TQ // {hints:high:1024}
   #qS76fFIpRiOAJ9r7 // {namespace:led}
-  #PfHFzO6Dk5aRnuIz // {help:/functions/bar-graph}
+  #PfHFzO6Dk5aRnuIz // {help:/functions/plot-bar-graph}
   #xIIhHcSXRfTjjsGE // {weight:20}
   #xMI934nNAoZ2D22k $v := pins[lib micro\u003abit] →map(math→abs($value), 0, $high, 0, 4);
   #xVN6w2AP5InoeHt3 if $v < 0 then {
