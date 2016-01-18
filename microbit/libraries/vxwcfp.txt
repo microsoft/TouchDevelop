@@ -2793,3 +2793,21 @@ action rotation(#Hc1jGwhjaC7IKMYj kind: String) returns(#nybXv9g8UNYUVvLO angle:
   #C8bMftDsn2hjvQ5q $pitch := math→atan( - $x / ($y * math→sin($roll) + $z * math→cos($roll)));
   #uqPa5krZh97byvdt `return` math→floor(math→rad_to_deg($pitch));
 }
+#ko8AY4P56uQxR3Lx
+action note(#Y4tRTwLYNsq0niNH name: String) returns(#Shffo9ayK8aw62UV frequency: Number) {
+  #x2rK4VyqeesyxDoG // Gets the frequency of a note.
+  #j07ppvwZ0wXrU4MB // {enum:name:C=262,C#=277,D=294,Eb=311,E=330,F=349,F#=370,G=392,G#=415,A=440,Bb=466,B=494,C3=131,C#3=139,D3=147,Eb3=156,E3=165,F3=175,F#3=185,G3=196,G#3=208,A3=220,Bb3=233,B3=247,C4=262,C#4=277,D4=294,Eb4=311,E4=330,F4=349,F#4=370,G4=392,G#4=415,A4=440,Bb4=466,B4=494,C5=523,C#5=555,D5=587,Eb5=622,E5=659,F5=698,F#5=740,G5=784,G#5=831,A5=880,Bb5=932,B5=989}
+  #rBsuxzJQpYkPcNvY // {shim:TD_ID}
+  #x2imSmluVwjKgKJq // {namespace:music}
+  #R8VYGr4Htc42XPG2 // {weight:0}
+  #vZCz3CeHwrqlLi2V // {help:functions/note-frequency}
+  #C4Nk1CulhgpB34fw $f := art→note_table→number($name→to_upper_case→trim(" \t"));
+  #xM27VD6UJfPYh0hy if `not` $f→is_invalid then {
+    #xYh72XsEjmWTjxm6 `return` $f;
+  }
+  else {
+    #vpeBlf9Hrij34fp2 code→warning("Sorry, we don\'t know about this note.");
+    #IMF8844p2G43Esg8 `return` 0;
+  }
+  meta sync;
+}
