@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script type="application/javascript" src="../jquery-2.1.4.min.js"></script>
+    <script type="application/javascript" src="blockly_compressed.js"></script>
+    <script type="application/javascript" src="blocks_compressed.js"></script>
+    <script type="application/javascript" src="en.js"></script>
+    <!-- Use the lines below when working with a local checkout of blockly. -->
+    <!-- <script type="application/javascript" src="blockly/blockly_uncompressed.js"></script> -->
+    <!-- <script type="application/javascript" src="blockly/blocks_compressed.js"></script> -->
+    <!-- <script type="application/javascript" src="blockly/msg/js/en.js"></script> -->
+    <!-- device-specific blocks -->
+    <script type="application/javascript" src="blocks-custom.js"></script>
+    <!-- Compiled version of blockly-main.ts -->
+    <style>
+#blocklyDiv {
+    position:absolute;
+    top:0em;
+    left:0em;
+    width:100%;
+    height:100%;
+    overflow:auto;    
+}        
+    </style>
+  </head>
+  <body>
+        <div id="blocklyDiv" style=""></div>
+        <script type="application/javascript">    
+        var id = /id=([a-z]+)/i.exec(window.location.search)[1]    
+        $.get('https://www.microbit.co.uk/api/' + id + '/text', function(text) {
+            var blocklyDiv = document.getElementById('blocklyDiv');
+            var workspace = Blockly.inject(blocklyDiv);   
+            var xml = Blockly.Xml.textToDom(text);
+            Blockly.mainWorkspace.clear();
+            try {
+                Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
+            } catch (e) {
+                console.error(e);
+            }            
+        });
+        </script>
+  </body>
+</html>
+<!-- vim: set ts=2 sw=2 sts=2: -->
