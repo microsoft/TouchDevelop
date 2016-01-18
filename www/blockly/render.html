@@ -35,6 +35,7 @@
             Blockly.mainWorkspace.clear();
             try {
                 Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
+                blocklyDiv.setAttribute('data-ready', 'true');
             } catch (e) {
                 console.error(e);
             }            
