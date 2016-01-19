@@ -925,7 +925,7 @@ module TDev {
                 if (!renderer) return MdComments.error(lf("unknown editor"));
                 var scriptid = args[1];
                 var h = parseFloat(args[2]) || 1;
-                var r = Util.fmt('<div class="md-iframe-wrapper"><iframe class="md-snippet" src="{0}"  frameborder="0" sandbox="allow-modals allow-scripts allow-same-origin allow-popups" style="height:{1}em;"></iframe></div>', renderer(scriptid), h);
+                var r = Util.fmt('<div class="md-iframe-wrapper" style="height:{1}em;"><iframe src="{0}"  frameborder="0" sandbox="allow-scripts allow-same-origin" scrollbars="no" style="height:{1}em;"></iframe></div>', renderer(scriptid), h);
                 return r;                               
             } else if (macro == "hex") {
                 var args = arg.split(':');

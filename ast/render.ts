@@ -1186,8 +1186,8 @@ module TDev
                       ".greyed { color:#444; } .greyer { color: #555; }\n" +
                       ".api-kind { border: 1px dotted #BBB; padding: 0.4em; clear: both; font-size: 1.2em; margin-bottom: 0.6em; }\n" +
                       ".md-snippet { border: 1px dotted #bbb; padding: 0.4em 0; clear: both; line-height: 1.3em; page-break-inside:avoid; }\n" +
-                      "iframe.md-snippet { padding: 0;};\n"+
-                      ".md-iframe-wrapper { width:100%;};\n"+
+                      ".md-iframe-wrapper iframe { overflow: hidden; width: 100%; left: 0; top: 0; position: absolute; border: 1px dotted #bbb;}\n" +
+                      ".md-iframe-wrapper { width:100%;clear:both;display:block; overflow:hidden;}\n"+        
                       ".md-snippet .signature { padding:0em 0.2em 0em 0.2em; }\n" + 
                       ".md-snippet .name { font-weight: bold;}\n" +
                       ".md-img { margin:0.5em; clear:both; width:100%; text-align:center; position:relative; }\n" +

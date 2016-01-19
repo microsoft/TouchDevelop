@@ -5189,12 +5189,20 @@ h1.stepid > span {
   clear:both;
 }
 
-iframe.md-snippet {
-  padding: 0;
+.md-iframe-wrapper iframe {
+    overflow: hidden;
+    width: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    border: 1px dotted #bbb;
 }
 
 .md-iframe-wrapper {
     width:100%;
+    clear:both;
+    display:block;
+    overflow:hidden;
 }
 
 .md-snippet .signature {

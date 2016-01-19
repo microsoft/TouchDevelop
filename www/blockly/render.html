@@ -20,7 +20,7 @@
     left:0em;
     width:100%;
     height:100%;
-    overflow:auto;    
+    overflow:hidden;    
 }        
 .blocklyMainBackground {
     stroke:none !important;
@@ -34,7 +34,8 @@
         $.get('https://www.microbit.co.uk/api/' + id + '/text', function(text) {
             var blocklyDiv = document.getElementById('blocklyDiv');
             var workspace = Blockly.inject(blocklyDiv, {
-                readOnly: true
+                readOnly: true,
+                scrollbars: false
             });   
             var xml = Blockly.Xml.textToDom(text);
             Blockly.mainWorkspace.clear();
