@@ -255,11 +255,11 @@ module TDev.Cloud {
         specHelpPaths: { },
         topicPath: "/docs/",
         legalButtons: [
-            { name: "terms of use", url: "/terms-of-use" },
-            { name: "privacy and cookies", url: "/privacy"},
-            { name: "support", url:"https://touchdevelop.uservoice.com" }
+            { name: lf("terms of use"), url: "/terms-of-use" },
+            { name: lf("privacy and cookies"), url: "/privacy"},
+            { name: lf("support"), url:"https://touchdevelop.uservoice.com" }
         ],
-        doNothingText: "do nothing",
+        doNothingText: lf("do nothing"),
         hintLevel: "full",
         userVoice: "touchdevelop",
         tutorialsid: "vjsseqks",
@@ -594,7 +594,7 @@ module TDev.Cloud {
             window.localStorage.setItem('chaos_offline_mode',  "true")
     }
     export function offlineErrorAsync(): Promise {
-        var msg = isTouchDevelopOnline() ? "offline mode is on" : "force offline mode is on";
+        var msg = isTouchDevelopOnline() ? lf("offline mode is on") : lf("force offline mode is on");
         return new Promise((onSuccess, onError, onProgress) => {
             var e = new Error(msg);
             (<any>e).status = 502;

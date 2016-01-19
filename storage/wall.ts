@@ -225,8 +225,8 @@ module TDev {
                                 //"<span class='beta-underline'>share</span>&nbsp;&nbsp;" +
                                 //betaNote + "&nbsp;&nbsp;" +
                                 "©&nbsp;&nbsp;" +
-                                "<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;" +
-                                "<span class='beta-underline'>legal</span>"
+                                lf("<span class='beta-underline'>privacy and cookies</span>&nbsp;&nbsp;") +
+                                lf("<span class='beta-underline'>legal</span>")
                                 );
 
             var link = (text: string, lnk: string) =>
@@ -244,8 +244,8 @@ module TDev {
 
                 if (!Browser.inEditor)
                     m.add(div("wall-dialog-buttons",
-                        link("more by " + userName, "/" + userId),
-                        link("try touch develop", "")));
+                        link(lf("more by ") + userName, "/" + userId),
+                        link(lf("try touch develop"), "")));
 
                 m.add(div("wall-dialog-buttons",
                     Cloud.config.legalButtons.map(b => link(b.name, b.url))
