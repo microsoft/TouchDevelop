@@ -33,7 +33,9 @@
         var id = /id=([a-z]+)/i.exec(window.location.search)[1]    
         $.get('https://www.microbit.co.uk/api/' + id + '/text', function(text) {
             var blocklyDiv = document.getElementById('blocklyDiv');
-            var workspace = Blockly.inject(blocklyDiv);   
+            var workspace = Blockly.inject(blocklyDiv, {
+                readOnly: true
+            });   
             var xml = Blockly.Xml.textToDom(text);
             Blockly.mainWorkspace.clear();
             try {

@@ -5189,7 +5189,7 @@ h1.stepid > span {
   clear:both;
 }
 
-.md-snippet iframe {
+iframe.md-snippet {
   padding: 0;
 }
 
