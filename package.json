@@ -4,7 +4,6 @@
     "typescript": "1.4",
     "nw": "^0.12.2",
     "nw-builder": "latest",
-    "phantomjs2": "latest"
   },
   "dependencies": {
     "source-map": "^0.2.0",
