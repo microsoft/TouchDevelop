@@ -32,7 +32,7 @@ module TDev {
                     "version": "0.0.0",
                     "keywords": ["microbit"],
                     "dependencies": {
-                        "microbit-touchdevelop": "microsoft/microbit-touchdevelop#" + Cloud.microbitGitTag
+                        "microbit-touchdevelop": "microsoft/microbit-touchdevelop#" + Cloud.config.microbitGitTag
                     },
                     "bin": "./source",
                 }, null, 4))

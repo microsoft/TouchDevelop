@@ -495,7 +495,7 @@ module TDev
 
         mx = /microbit=(\w+)/.exec(document.URL)
         if (mx)
-            Cloud.microbitGitTag = mx[1]
+            Cloud.config.microbitGitTag = mx[1]
 
         if (Cloud.lite) (<any>window).rootUrl = Cloud.config.rootUrl;
 

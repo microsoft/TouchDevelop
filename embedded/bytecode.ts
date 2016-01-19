@@ -1992,7 +1992,7 @@ module TDev.AST.Bytecode
         fileRepl["/generated/extensions.inc"] = includesInc
         var creq = {
             config: "ws",
-            tag: Cloud.microbitGitTag,
+            tag: Cloud.config.microbitGitTag,
             replaceFiles: fileRepl,
             dependencies: totalConfig.dependencies,
         }

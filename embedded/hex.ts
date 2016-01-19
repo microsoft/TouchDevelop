@@ -94,7 +94,7 @@ module TDev.Hex
         if (AST.Bytecode.isSetupFor(extInfo))
             return Promise.as(null)
 
-        if (Cloud.microbitGitTag == "local") {
+        if (Cloud.config.microbitGitTag == "local") {
             if (extInfo.hasExtension)
                 throw new Error("?microbit=local not allowed when compiling with extensions");
             if (!(<any>TDev).bytecodeInfo)

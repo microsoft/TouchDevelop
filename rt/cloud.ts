@@ -4,7 +4,6 @@ module TDev.Cloud {
     export var lite = true;
     export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
-    export var microbitGitTag = "v54";
 
     export var _migrate: () => void;
 
@@ -232,6 +231,7 @@ module TDev.Cloud {
         primaryLocale: string;
         uploader?: boolean;
         cloudId: string;
+        microbitGitTag: string;
         
         scriptRenderers: StringMap<(scriptid: string) => string>;
     }
@@ -276,7 +276,8 @@ module TDev.Cloud {
                 if (/http:\/\/localhost/.test(origin)) origin += "/editor/local";
                 return origin + "/blockly/render.html?id=" + encodeURIComponent(id);
             }
-        }
+        },
+        microbitGitTag : "v55"
     }
 
     export function isArtUrl(url : string) : boolean {
@@ -899,7 +900,7 @@ module TDev.Cloud {
             config: "ws",
             source: cppSource,
             meta: meta,
-            repohash: microbitGitTag,
+            repohash: Cloud.config.microbitGitTag,
         })
         .done(resp => {
                 // HTML.showProgressNotification(lf("program accepted, compiling"));
