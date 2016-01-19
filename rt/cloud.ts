@@ -232,6 +232,8 @@ module TDev.Cloud {
         primaryLocale: string;
         uploader?: boolean;
         cloudId: string;
+        
+        scriptRenderers: StringMap<(scriptid: string) => string>;
     }
 
     export var config: ClientConfig = {
@@ -266,6 +268,15 @@ module TDev.Cloud {
         showcaseid: "njigpnyj",
         primaryLocale: "en-US",
         cloudId: "touchdevelop.com",
+        scriptRenderers: {
+            "blocks": (id) => {
+                var url = Ticker.mainJsName.replace(/main.js$/, "");
+                var match = url.match(/(https?:\/\/[^\/]+)(.*)/);
+                var origin = match[1];
+                if (/http:\/\/localhost/.test(origin)) origin += "/editor/local";
+                return origin + "/blockly/render.html?id=" + encodeURIComponent(id);
+            }
+        }
     }
 
     export function isArtUrl(url : string) : boolean {

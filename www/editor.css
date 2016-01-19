@@ -5189,6 +5189,14 @@ h1.stepid > span {
   clear:both;
 }
 
+.md-snippet iframe {
+  padding: 0;
+}
+
+.md-iframe-wrapper {
+    width:100%;
+}
+
 .md-snippet .signature {
   padding:0em 0.2em 0em 0.2em;
 }

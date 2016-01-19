@@ -917,6 +917,16 @@ module TDev {
                 if (!width) width = 2
                 var r = Util.fmt("<img class='md-img-inline' src='{0}' style='width:{1}em' alt='picture' />", Cloud.artUrl(artId), width);
                 return r;
+            } else if (macro == "snippet") {
+                var args = arg.split(/:/)
+                if (args.length != 3) return MdComments.error(lf("invalid snippet"));
+                var editor = args[0];
+                var renderer = Cloud.config.scriptRenderers[editor];
+                if (!renderer) return MdComments.error(lf("unknown editor"));
+                var scriptid = args[1];
+                var h = parseFloat(args[2]) || 1;
+                var r = Util.fmt('<div class="md-iframe-wrapper"><iframe class="md-snippet" src="{0}"  frameborder="0" sandbox="allow-modals allow-scripts allow-same-origin allow-popups" style="height:{1}em;"></iframe></div>', renderer(scriptid), h);
+                return r;                               
             } else if (macro == "hex") {
                 var args = arg.split(':');
                 if (args.length != 2)

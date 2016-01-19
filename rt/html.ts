@@ -1368,6 +1368,9 @@ module TDev.HTML {
         "fill-opacity": 2,
         "stroke-miterlimit": 2,
         "stroke-dasharray": 2,
+        
+        // iframe
+        "sandbox": 2,
     }
 
     function htmlOops(msg:string, html:string, other?:string)
