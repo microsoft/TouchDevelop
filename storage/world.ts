@@ -886,6 +886,7 @@ module TDev {
         export function stripHeaderForSave(hd:Cloud.Header): Cloud.Header
         {
             return <any>{
+                cloudId: Cloud.config.cloudId,
                 scriptId: hd.scriptId,
                 userId: Cloud.isRestricted() ? undefined : hd.userId,
                 status: hd.status,

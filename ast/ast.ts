@@ -1353,7 +1353,7 @@ module TDev.AST {
         // into an editable statement.
         private exprHolder = new AST.ExprHolder();
 
-        constructor(public local:LocalDef, private isOut = false) {
+        constructor(public local:LocalDef, private isOut = false, public isClosure = false) {
             super();
 
             this.setupForEdit()
@@ -2257,11 +2257,13 @@ module TDev.AST {
         public isSynthetic:boolean;
         public isHiddenOut:boolean;
         public isOut:boolean;
-        public _isByRef:boolean; // set by TypeChecker for locals written in closures
+        // if _isMutable && _isCaptured then the local needs to be captured by reference
+        public _isMutable:boolean; // set by TypeChecker for locals written after initialization
+        public _isCaptured:boolean; // set by TypeChecker for locals captured in closures
         public _lastWriteLocation:Stmt;
         public _converterAction:InlineAction;
 
-        public isByRef() { return this._isByRef }
+        public isByRef() { return this._isMutable && this._isCaptured }
         public writeWithType(app:App, tw:TokenWriter)
         {
             tw.id(this.getName()).op0(':').kind(app, this.getKind());
@@ -2621,17 +2623,12 @@ module TDev.AST {
         static platforms = [
             { cap: PlatformCapability.Current,        id: "current",        name: lf("Current device (overrides the rest)") },
             { cap: PlatformCapability.Accelerometer,  id: "accelerometer",  name: lf("Accelerometer") },
-            { cap: PlatformCapability.Bluetooth,      id: "bluetooth",      name: lf("Bluetooth") },
-            { cap: PlatformCapability.Calendar,       id: "calendar",       name: lf("Calendar") },
             { cap: PlatformCapability.Camera,         id: "camera",         name: lf("Camera") },
             { cap: PlatformCapability.CloudData,      id: "clouddata",      name: lf("Cloud Data") },
-            { cap: PlatformCapability.CloudServices,  id: "cloudservices",  name: lf("OneDrive, OneNote") },
             { cap: PlatformCapability.Compass,        id: "compass",        name: lf("Compass") },
             { cap: PlatformCapability.Contacts,       id: "contacts",       name: lf("Contacts") },
             { cap: PlatformCapability.EditorOnly,     id: "editoronly",     name: lf("Editor only") },
             { cap: PlatformCapability.Gyroscope,      id: "gyroscope",      name: lf("Gyroscope") },
-            { cap: PlatformCapability.Hawaii,         id: "hawaii",         name: lf("Hawaii") },
-            { cap: PlatformCapability.Home,           id: "home",           name: lf("Home media devices") },
             { cap: PlatformCapability.Location,       id: "location",       name: lf("Location") },
             { cap: PlatformCapability.Maps,           id: "maps",           name: lf("Maps") },
             { cap: PlatformCapability.Media,          id: "media",          name: lf("Media libraries on device") },
@@ -5360,13 +5357,17 @@ module TDev.AST {
             return tok && tok.localCount + tok.globalCount > 0;
         }
 
-        public hasProperty(p:IProperty)
-        {
+        public hasProperty(p: IProperty, strict = false) {
             if (!this.properties) return true;
-            return this.hasTokenUsage(p)
+            return (!strict && this.hasTokenUsage(p))
                 || this.hasKey(p.usageKey())
-                || (this.allowAllLibraries && p instanceof LibraryRefAction)
-                || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)
+                || (this.allowAllLibraries &&
+                    (
+                    p instanceof LibraryRefAction || 
+                    (p instanceof MultiplexProperty && (<MultiplexProperty>p).forKind instanceof LibraryRefAbstractKind)
+                    )
+                   )
+                || (p instanceof RecordCtorProperty && !(<RecordCtorProperty>p).from_json)            
         }
 
         public hasFlag(flg:string)

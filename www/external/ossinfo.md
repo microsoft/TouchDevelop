@@ -1,15 +1,5 @@
 # Information about external OSS components
 
-## File Saver
-
-* id: 27248
-* project: https://github.com/eligrey/FileSaver.js
-* commit: https://github.com/eligrey/FileSaver.js/commits/54c04285aedaec973f5f725f18c624a3fb12cf63
-
-### files:
-
-* FileSaver.min.js
-
 ## LZMA JS
 
 * id: 27102
@@ -19,3 +9,13 @@
 ### files:
 
 * lzma_worker-min.js 
+
+### JSZIP
+
+* id: 
+* project: https://github.com/Stuk/jszip
+* commit: https://github.com/Stuk/jszip/commit/9ab3ed85da96700f32f50e01b87f2a4bde010390
+
+### files:
+
+jszip_min.js

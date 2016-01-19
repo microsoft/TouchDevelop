@@ -86,6 +86,9 @@ module TDev {
       case External.MessageType.NewBaseVersion:
         newBaseVersion(<External.Message_NewBaseVersion> message);
         break;
+      case External.MessageType.TypeCheck:
+        typeCheckError(<External.Message_TypeCheck>message);
+        break;  
     }
   }
 
@@ -172,6 +175,10 @@ module TDev {
 
   var mergeDisabled = true;
 
+  function typeCheckError(msg: External.Message_TypeCheck) {      
+    statusMsg("! your script has errors", External.Status.Error);
+  }
+    
   function newBaseVersion(msg: External.Message_NewBaseVersion) {
     statusMsg("✎ got assigned our first base version", External.Status.Ok);
     // We've been assigned a base version number for the first time. All further
@@ -527,6 +534,11 @@ module TDev {
     "micro:bit senses": {
       pubId: "vkmzfe",
       depends: [ "micro:bit" ]
+    },
+    
+    "micro:bit music": {
+      pubId: "zbiwoq",
+      depends: [ "micro:bit" ]
     }
   };
 
@@ -547,14 +559,15 @@ module TDev {
     var ast = compileOrError(false, msgSel);
     if (!ast)
       return;
-    doSave();
     $("#command-compile > .roundsymbol").addClass("compiling");
+    doSave();
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
       text: ast,
       language: External.Language.TouchDevelop,
       name: getName(),
       libs: libs,
+      source: saveBlockly()
     });
   }
   

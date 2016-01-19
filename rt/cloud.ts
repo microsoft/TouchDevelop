@@ -4,7 +4,7 @@ module TDev.Cloud {
     export var lite = true;
     export var fullTD = true;
     export var litePermissions:StringMap<boolean> = {};
-    export var microbitGitTag = "v38";
+    export var microbitGitTag = "v54";
 
     export var _migrate: () => void;
 
@@ -28,7 +28,6 @@ module TDev.Cloud {
         splitScreen?: boolean; // split screen button
         splitScreenOnLoad?: boolean;
         simplify?: boolean;
-        moveToLibrary?: boolean;
         stripBlock?: boolean;
         tokenRefactoring?: boolean;
 
@@ -230,6 +229,9 @@ module TDev.Cloud {
         cachedScripts?: string[];
         userVoice?: string;
         tickFilter?: StringMap<number>;
+        primaryLocale: string;
+        uploader?: boolean;
+        cloudId: string;
     }
 
     export var config: ClientConfig = {
@@ -261,7 +263,9 @@ module TDev.Cloud {
         hintLevel: "full",
         userVoice: "touchdevelop",
         tutorialsid: "vjsseqks",
-        showcaseid: "njigpnyj"
+        showcaseid: "njigpnyj",
+        primaryLocale: "en-US",
+        cloudId: "touchdevelop.com",
     }
 
     export function isArtUrl(url : string) : boolean {

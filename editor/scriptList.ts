@@ -6282,15 +6282,6 @@
             this.edit();
         }
 
-        public pinAsync(): Promise {
-            var fragment = 'run%3A' + this.getGuid();
-            return TDev.RT.Tiles.updateTileAsync(fragment, <TDev.RT.ITileData>{
-                title: this.app.getName(),
-                background: this.app.htmlColor(),
-                pin: true
-            });
-        }
-
         public getRealJsonScriptPromise() : Promise
         {
             if (this.jsonScript) return Promise.as(this.jsonScript);
@@ -7140,11 +7131,16 @@
                             // Not sure if we want it
                             // if (Cloud.hasPermission("custom-ptr"))
                             //    this.docPath = "users/" + Cloud.getUserId() + "/" + path
+                            
+                            if (!Cloud.hasPermission("post-pointer"))
+                                return Promise.as()
 
                             return TheApiCacheMgr.getAsync(this.publicId, true)
                                 .then((js:JsonScript) => {
                                     this.docPath = "usercontent/" + js.updateroot
                                 })
+                                /* This stuff (/usercontent/scriptid) needs more thought; disable for now
+                                   It can still be accessed from the share dialog.
                                 .then(() => {
                                     if (isPublish && !Cloud.hasPermission("root-ptr")) {
                                         return Cloud.postPrivateApiAsync("pointers", {
@@ -7155,9 +7151,12 @@
                                     }
                                     else return Promise.as()
                                 })
+                                */
                         }
                     })
-                    .then(() => Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")).then(v => v, e => null))
+                    .then(() => this.docPath ? 
+                        Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")) : Promise.as())
+                    .then(v => v, e => null)
                     .then(resp => {
                         if (resp)
                             this.docPathCurrent = resp.scriptid == this.publicId
@@ -7385,7 +7384,7 @@
                                                 return Cloud.postPrivateApiAsync(mid + "/comments", req);
                                             })).done(() => {}, (e) => {}); // swallow error
                                         }
-                                        if (Cloud.lite && baseId) {
+                                        if (Cloud.lite && baseId && Cloud.hasPermission("post-script-meta")) {
                                             var baseMeta = undefined;
                                             Cloud.getPrivateApiAsync(baseId)
                                                 .then((baseJson: JsonScript) => {

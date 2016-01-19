@@ -840,6 +840,15 @@ function handleQuery(ar:ApiRequest, tcRes:TDev.AST.LoadScriptResult) {
                 resources: cs.packageResources })
         break;
 
+    case "hexcompile":
+        TDev.Hex.cliCompileAsync(TDev.Script, r.id)
+        .done(v => {
+            v.name = TDev.Script.getName()
+            delete v.csource
+            ar.ok(v)
+        }, ar.errHandler())
+        break;
+
     case "webapp":
         TDev.Script.setStableNames();
         var cs = TDev.AST.Compiler.getCompiledScript(TDev.Script, {
@@ -1368,6 +1377,8 @@ function reportBug(ctx: string, err: any) {
     bug.exceptionConstructor = "NJS " + bug.exceptionConstructor;
     bug.tdVersion = ccfg.tdVersion
 
+    console.log("POSTING CRASH", bug)
+
     TDev.Util.httpPostRealJsonAsync(apiEndpoint + "bug" + accessToken, bug)
         .done(() => {}, err => {
             console.error("cannot post bug: " + err.message);
@@ -1734,6 +1745,19 @@ function ts(files:string[])
     console.log("out.ts and apis.json written")
 }
 
+function mddocs(files:string[])
+{
+    files.forEach(f => {
+        var t = fs.readFileSync(f, "utf8")
+        TDev.AST.reset();
+        TDev.AST.loadScriptAsync((s) => TDev.Promise.as(s == "" ? t : null));
+        var md = TDev.AST.MdDocs.toMD(TDev.Script)
+        var mdF = f.replace(/\.td$/, "").replace(/$/, ".md")
+        fs.writeFileSync(mdF, md)
+        console.log("written", mdF)
+    })
+}
+
 function featureize(dirs:string[])
 {
     libroots = JSON.parse(fs.readFileSync("libroots.json", "utf-8"))
@@ -2069,6 +2093,8 @@ export function globalInit()
         compilerTest();
     } else if (process.argv[2] == "ts") {
         ts(process.argv.slice(3))
+    } else if (process.argv[2] == "mddocs") {
+        mddocs(process.argv.slice(3))
     } else {
         console.log("invalid usage")
     }

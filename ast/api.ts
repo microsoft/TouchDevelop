@@ -371,11 +371,10 @@ module TDev {
     {
         None = 0, // applies mapping for service capability
         Accelerometer =         0x00000001,
-        Calendar =              0x00000002,
         Camera =                0x00000004,
         Compass =               0x00000008,
         Gyroscope =             0x00000010,
-        Home =                  0x00000020,
+
         Location =              0x00000040,
         Maps =                  0x00000080,
         Media =                 0x00000100,
@@ -391,13 +390,11 @@ module TDev {
         EditorOnly =            0x00040000,
         MusicAndSounds =        0x00080000,
         Network =               0x00100000,
-        Hawaii =                0x00200000,
+
         Tiles =                 0x00400000,
         Proximity =             0x00800000,
         Speech =                0x01000000,
         CloudData =             0x02000000,
-        Bluetooth =             0x04000000,
-        CloudServices =         0x08000000,
 
         // Current
         Npm =                   0x20000000,
@@ -414,37 +411,11 @@ module TDev {
            | EditorOnly
            | MusicAndSounds
            | Network
-           | Hawaii
            | CloudData
-           | CloudServices
            ,
-
-        WindowsPhone =
-            Accelerometer
-            | Calendar
-            | CloudServices
-            | Compass
-            | Contacts
-            | Gyroscope
-            | Location
-            | Maps
-            | Media
-            | Microphone
-            | Motion
-            | Phone
-            | Radio
-            | Orientation
-            | Search
-            | Translation
-            | Tiles
-            | MusicAndSounds
-            | Network
-            | Hawaii
-            ,
 
         iOS =
             Accelerometer
-            | CloudServices
             | Compass
             | Gyroscope
             | Location
@@ -459,7 +430,6 @@ module TDev {
         Android =
             Accelerometer
             | Camera
-            | CloudServices
             | Compass
             | Gyroscope
             | Location
@@ -490,8 +460,7 @@ module TDev {
             | Cordova,
 
         AnyClient =
-           CloudServices
-           | Location
+           Location
            | Maps
            | Search
            | Translation
@@ -1385,9 +1354,11 @@ module TDev {
             return this.topicCache;
         }
 
+        private usageKeyCache: string;        
         public usageKey()
         {
-            return this.helpTopic();
+            if (!this.usageKeyCache) this.usageKeyCache = Util.tagify(this._runtimeName || this.getName());
+            return this.usageKeyCache;
         }
 
         public canRename() { return false; }

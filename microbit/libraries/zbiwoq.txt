@@ -1,0 +1,125 @@
+meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync,upperplex";
+meta name "micro:bit music";
+meta rootId "zcZxuG7jlicmbnRC8t33m4Dy";
+meta isLibrary "yes";
+meta hasIds "yes";
+meta platform "current";
+meta parentIds "";
+// The music namespace #music
+#zYqnzT4hhd1sS9v5
+action tempo() returns(#CCovj83aLPTgGAt8 bpm: Number) {
+  #ueqedJC4g7ssLd5h // Returns the tempo in beats per minute. Tempo is the speed (bpm = beats per minute) at which notes play. The larger the tempo value, the faster the notes will play.
+  #NCyRjHyFCpsvUpgi // {namespace:music}
+  #Wwx0VF4pDf4tWbsx // {help:/functions/tempo}
+  #n5fWBFaxGoZn6a59 code→init;
+  #vvGXAa6I2U4YBHIg `return` data→beats_per_minute;
+  meta sync;
+}
+#r0rxopDDamerRRAb meta import micro\u003abit {
+  pub "nvzoiu"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `async` on_notified(@event: String, body: Action)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring_tone(frequency: Number)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
+  }
+}
+#kbBPLS46tSc5UOmQ
+var beats_per_minute : Number {
+  transient = true;
+}
+#O6C1DkeyUnBA2l2C
+action change_tempo_by(#lsfxpXD2FhXQxNGk bpm: Number) {
+  #aqr1yNGtOahiiS2R // Change the tempo by the specified amount
+  #gMMNZPis7E1V40q2 // {hints:bpm:20}
+  #fb1CjjSTrsgDAAe6 // {namespace:music}
+  #eIVK0pUebdvQ1PGh // {help:/functions/tempo}
+  #UniNu8bLkhBkzmrU code→init;
+  #TF63Rbt1L4Asccr7 code→set_tempo(data→beats_per_minute + $bpm);
+}
+#SpEP5yVzmHkAcJGN
+action set_tempo(#RCUKT2icKMepsL3y bpm: Number) {
+  #n3ai84JWePfIRLXL // Sets the tempo to the specified amount
+  #k9gfHliR4ZsJDHFl // {hints:bpm:20}
+  #bI6a1Z3412AeIhCW // {namespace:music}
+  #z94g44g2YR0CR5Vw // {help:/functions/tempo}
+  #xktYXztr5YSoG1yX code→init;
+  #hQgb0VsrX4z2v6Fn if $bpm > 0 then {
+    #xf5KgzllgkClaTp8 data→beats_per_minute := math→max(1, $bpm);
+  }
+}
+#G7S48gzm3ze1gc4v
+action beat() returns(#hoFA5AiMYyzd23g3 ms: Number) {
+  #xH2OnLBAgNzAOUQ3 // Returns the duration of a beat in milli-seconds
+  #Sv6x7jD1FTiy8ocP // {namespace:music}
+  #PAeXs8UzPlBGhlLC // {help:/functions/beat}
+  #l0rdN6YLCsWTq7Bc // {weight:20}
+  #xNDIQQ29ooZVioJS code→init;
+  #zTcTGCwspFfZ6VaA `return` 60000 / data→beats_per_minute;
+  meta sync;
+}
+#HVvqA47Svm2C8JMG
+action init() {
+  #Kd2J2Q8MiYpFm2Dm if data→beats_per_minute ≤ 0 then {
+    #wnFL1JNUeq88d3d9 data→beats_per_minute := 120;
+  }
+  meta private;
+  meta sync;
+}

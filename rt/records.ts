@@ -1669,7 +1669,6 @@ module TDev {
                     case "OAuth Response": return "oauthresponse";
                     case "Link": return "link";
                     case "Json Object": return "json";
-                    case "Cloud Picture": return "cloudpicture";
                     default: Util.oops("unhandled case for cloud codomain: " + (kind || "none"));
                 }
             }
@@ -1719,9 +1718,6 @@ module TDev {
                     case "json":
                         if (!val) return "";
                         return JSON.stringify((<RT.JsonObject> val).exportJson(null));
-                    case "cloudpicture":
-                        if (!val) return "";
-                        return JSON.stringify((<CloudPicture>val).exportJson(null));
                     default: //reference
                         Util.assert(kind[0] === "^");
                         return val || "";
@@ -1757,9 +1753,6 @@ module TDev {
                     case "json":
                         if (!val) return; // return undefined value
                         return JsonObject.wrap(JSON.parse(val));
-                    case "cloudpicture":
-                        if (!val) return;
-                        return new CloudPicture().importJson(new JsonImportCtx(null), JSON.parse(val));
                     case "string":
                         if (typeof (val) !== "string")
                             val = "";

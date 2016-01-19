@@ -138,6 +138,8 @@
         <block type="device_heading" gap="8"></block>
         <block type="device_temperature" gap="8"></block>
         <block type="device_get_acceleration" gap="8"></block>
+        <block type="device_get_rotation" gap="8"></block>
+        <block type="device_get_magnetic_force" gap="8"></block>
         <block type="device_get_running_time" gap="8"></block>
       </category>
       <category name="Loops" colour="120">
@@ -348,6 +350,19 @@
             </value>
         </block>
 
+        <block type="device_plot_bar_graph">
+            <value name="value">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+            <value name="high">
+                <shadow type="math_number">
+                    <field name="NUM">1023</field>
+                </shadow>
+            </value>
+        </block>
+
       </category>
       <category name="Music" colour="52">
         <block type="device_play_note" gap="8">
@@ -355,7 +370,7 @@
             <shadow type="device_note"></shadow>
           </value>
           <value name="duration">
-            <shadow type="device_duration_1/4">
+            <shadow type="device_beat">
             </shadow>
           </value>
         </block>
@@ -364,11 +379,27 @@
             <shadow type="device_note"></shadow>
           </value>
         </block>
-        <block type="device_duration_1" gap="8"></block>
-        <block type="device_duration_1/2" gap="8"></block>
-        <block type="device_duration_1/4" gap="8"></block>
-        <block type="device_duration_1/8" gap="8"></block>
-        <block type="device_duration_1/16" gap="8"></block>
+        <block type="device_rest">
+          <value name="duration">
+            <shadow type="device_beat">
+            </shadow>
+          </value>          
+        </block>
+        <block type="device_tempo" gap="8"></block>
+        <block type="device_set_tempo" gap="8">
+            <value name="value">
+                <shadow type="math_number">
+                    <field name="NUM">120</field>
+                </shadow>
+            </value>            
+        </block>
+        <block type="device_change_tempo" gap="8">
+            <value name="value">
+                <shadow type="math_number">
+                    <field name="NUM">20</field>
+                </shadow>
+            </value>                        
+        </block>
       </category>      
       <category name="Game" colour="176">
         <block type="game_create_sprite">
@@ -479,12 +510,53 @@
               </shadow>
             </value>
           </block>
+          <block type="device_set_servo_pin" gap="8">
+            <value name="value">
+              <shadow type="math_number">
+                <field name="NUM">180</field>
+              </shadow>
+            </value>
+          </block>          
+          <block type="device_set_servo_pulse">
+            <value name="micros">
+              <shadow type="math_number">
+                <field name="NUM">1500</field>
+              </shadow>
+            </value>
+          </block>
+          <block type="math_map">
+            <value name="value">
+              <shadow type="math_number">
+                <field name="NUM">0</field>
+              </shadow>
+            </value>
+            <value name="fromLow">
+              <shadow type="math_number">
+                <field name="NUM">0</field>
+              </shadow>
+            </value>            
+            <value name="fromHigh">
+              <shadow type="math_number">
+                <field name="NUM">1023</field>
+              </shadow>
+            </value>            
+            <value name="toLow">
+              <shadow type="math_number">
+                <field name="NUM">0</field>
+              </shadow>
+            </value>            
+            <value name="toHigh">
+              <shadow type="math_number">
+                <field name="NUM">4</field>
+              </shadow>
+            </value>            
+          </block>
       </category>
-      <category name="Antenna" colour="156">
-          <block type="antenna_camera" gap="8"></block>
-          <block type="antenna_remote_control" gap="8"></block>
-          <block type="antenna_microphone" gap="8"></block>
-          <block type="antenna_alert"></block>
+      <category name="Devices" colour="156">
+          <block type="devices_camera" gap="8"></block>
+          <block type="devices_remote_control" gap="8"></block>
+          <block type="devices_alert"></block>
+          <block type="devices_device_info_event"></block>
       </category>      
     </xml>
     <div class="popup hidden" id="popup-log">

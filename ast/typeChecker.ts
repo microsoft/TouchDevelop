@@ -554,7 +554,8 @@ module TDev.AST
         {
             this.localScopes.peek().push(v);
             this.allLocals.push(v);
-            v._isByRef = false;
+            v._isMutable = false;
+            v._isCaptured = false;
             v.lastUsedAt = this.timestamp++;
             this.recordLocalRead(v);
         }
@@ -1231,6 +1232,8 @@ module TDev.AST
                 this.currentAnyAction = inl;
                 inl.inParameters.forEach((d) => this.declareLocal(d));
                 inl.outParameters.forEach((d) => this.declareLocal(d));
+                if (Cloud.isRestricted())
+                    this.readOnlyLocals.pushRange(inl.inParameters)
                 this.setOutLocals(inl.outParameters.slice(0))
                 this.reportedUnassigned = false;
                 this.typeCheck(inl.body);
@@ -1522,8 +1525,10 @@ module TDev.AST
             inl.closure = [];
             inl.allLocals = [];
             this.readLocals.forEach(l => {
-               if (this.outsideScopeLocals.indexOf(l) >= 0)
+                if (this.outsideScopeLocals.indexOf(l) >= 0) {
                     inl.closure.push(l)
+                    l._isCaptured = true
+                }
                 inl.allLocals.push(l)
             })
         }
@@ -1659,9 +1664,13 @@ module TDev.AST
                             }
                         } else {
                             if (this.outsideScopeLocals.indexOf(loc) >= 0)
-                                loc._isByRef = true;
+                                loc._isCaptured = true;
                             this.recordLocalWrite(loc)
                         }
+
+                        // if it wasn't captured yet anywhere, and we're not inside a loop, no reason to treat it as mutable just yet
+                        if (loc._isCaptured || this.currLoop)
+                            loc._isMutable = true;
                     }
                     this.typeCheckExpr(trg);
                 } else {

@@ -216,7 +216,6 @@ module TDev.Browser {
                     findReferences: true,
                     gotoNavigation: true,
                     // refactorings
-                    moveToLibrary: true,
                     stripBlock: true,
                     // debugging
                     toggleBreakpoint: true,
@@ -706,7 +705,6 @@ module TDev.Browser {
                     (Cloud.hasPermission("stats") ? HTML.mkButton(lf("stats"), () => { stats() }) : null),
                     (Cloud.hasPermission("admin") ? HTML.mkButton(lf("mbedint"), () => { mbedintUpdate() }) : null),
                     (Cloud.hasPermission("global-list") ? HTML.mkButton(lf("pointer review"), () => { pointerReview() }) : null),
-                    (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("bump compiler"), () => Cloud.postPrivateApiAsync("config/compile", {})) : null),
                     (Cloud.hasPermission("root") ? HTML.mkAsyncButton(lf("clear videos"), () => clearVideosAsync("")) : null),
                     (Cloud.hasPermission("gen-code") ? HTML.mkButton(lf("generate codes"), () => {
                         var m = new ModalDialog()
@@ -718,7 +716,7 @@ module TDev.Browser {
                         var numuses = HTML.mkTextInput("text", "")
                         perm.value = "preview"
                         count.value = "1"
-                        credit.value = "100"
+                        credit.value = "1"
                         numuses.value = "1"
                         m.add(div("wall-dialog-body",
                             lf("Permissions (preview, educator, moderator, staff): "), perm,

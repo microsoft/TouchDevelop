@@ -6,7 +6,6 @@ module TDev.RT {
     {
         var _rt: Runtime;
         var _activeSong: Song;
-        var _songs: Songs = undefined;
         var _audio: HTMLAudioElement;
         var _source: HTMLSourceElement;
         var _shuffled: boolean;
@@ -17,7 +16,6 @@ module TDev.RT {
         {
             _rt = rt;
             _activeSong = null;
-            _songs = null;
             _onActiveSongChanged = undefined;
             _onPlayerStateChanged = undefined;
             if (rt.eventEnabled("active song changed"))
@@ -32,7 +30,6 @@ module TDev.RT {
             Player.removePlayerStateChangedEvent();
             _rt = null;
             _activeSong = null;
-            _songs = null;
             _onActiveSongChanged = undefined;
             _onPlayerStateChanged = undefined;
         }
@@ -101,46 +98,10 @@ module TDev.RT {
                 _audio.onplaying = _audio.onpause;
                 _audio.onended = () => {
                     raisePlayerStateChanged();
-                    if (_songs) {
-                        if (_shuffled) {
-                            var i = (Math_.random(_songs.count() - 1) + 1);
-                            Player.playOne(_songs.at(i));
-                        }
-                        else
-                            Player.next();
-                    }
                 };
                 _source = <HTMLSourceElement>document.createElement("source");
                 _audio.appendChild(_source);
                 document.body.appendChild(_audio);
-            }
-        }
-
-        //? Moves to the next song in the queue of playing songs
-        //@ cap(musicandsounds)
-        //@ writesMutable
-        export function next(): void
-        {
-            if (_songs) {
-                var i = _songs.indexOf(_activeSong);
-                i++;
-                if (i < _songs.count()) {
-                    Player.playOne(_songs.at(i));
-                }
-            }
-        }
-
-        //? Moves to the previous song in the queue of playing songs
-        //@ cap(musicandsounds)
-        //@ writesMutable
-        export function previous(): void
-        {
-            if (_songs) {
-                var i = _songs.indexOf(_activeSong);
-                i--;
-                if (i > -1) {
-                    Player.playOne(_songs.at(i));
-                }
             }
         }
 
@@ -174,26 +135,7 @@ module TDev.RT {
         //@ writesMutable [song].readsMutable [song].writesMutable
         export function play(song: Song)
         {
-            _songs = undefined; // clear song list
             Player.playOne(song);
-        }
-
-        //? Plays a collection of songs
-        //@ cap(musicandsounds)
-        //@ writesMutable
-        //@ embedsLink("Player", "Songs")
-        export function play_many(songs: Songs): void
-        {
-
-            if (songs.count() == 0) {
-                _songs = undefined;
-                Player.stop();
-            }
-            else {
-                _songs = songs;
-                _activeSong = undefined;
-                Player.playOne(_songs.at(0));
-            }
         }
 
         //? Gets the position in seconds whithin the active song
@@ -294,20 +236,6 @@ module TDev.RT {
         export function is_paused(r : ResumeCtx) //: boolean
         {
             r.resumeVal(_audio ? _audio.paused : false);
-        }
-
-        //? Plays an audio/video file from the home network
-        //@ writesMutable cap(home)
-        export function play_home_media(media: MediaLink): void {
-            switch (media.kind()) {
-                case 'song':
-                    var s = Song.mk(media.url(), 'media', media.title());
-                    Player.play(s);
-                    break;
-                default:
-                    Web.play_media(media.url());
-                    break;
-            }
         }
 
         //? Volume is no longer supported.

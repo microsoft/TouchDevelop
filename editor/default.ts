@@ -261,13 +261,19 @@ module TDev
             Storage.temporary = true;
         }
 
+
         var m = /lang=([a-zA-Z\-]+)/.exec(url)
         if (m) {
             Util.setTranslationLanguage(m[1])
         } else if (!Util.loadUserLanguageSetting()) {
-            var lang = window.navigator.language || window.navigator.userLanguage
-            if (lang)
-                Util.setTranslationLanguage(lang)
+            m = /TD_LANG=([\w\-]+)/.exec(document.cookie)
+            if (m)
+                Util.setTranslationLanguage(m[1])
+            else {
+                var lang = window.navigator.language || window.navigator.userLanguage
+                if (lang)
+                    Util.setTranslationLanguage(lang)
+            }
         }
 
         if (Math.random() < 0.05 || /translationTracking/.test(url))
@@ -539,9 +545,6 @@ module TDev
 
         // init API keys
         TDev.RT.ApiManager.bingMapsKey = 'AsnQk63tYReqttLHcIL1RUsc_0h0BwCOib6j0Zvk8QjWs4FQjM9JRM9wEKescphX';
-        TDev.RT.ApiManager.liveConnectClientId = '0000000040118292';
-        TDev.RT.ApiManager.liveConnectRedirectDomainId = 'cloudservices';
-        TDev.RT.ApiManager.liveConnectUserId = 'touchdevelop';
 
         Browser.inEditor = true;
 

@@ -908,7 +908,6 @@ module TDev
         private typeCheckPending = false;
         private onRestore = () => {};
         private lastEditHash = "";
-        private libExtractor = new LibraryExtractor();
 
         public sideKeyFocus = false;
         private sideTabs: SideTab[];
@@ -1609,7 +1608,7 @@ module TDev
             TipManager.setTip(null); // clear any tip
             var run0 = () => {
                 this.spyManager.onRunAction(<AST.Action>a);
-                ProgressOverlay.lockAndShow(lf("compiling script"), () => {
+                ProgressOverlay.lockAndShow(lf("starting script"), () => {
                     if (!Script) {
                         ProgressOverlay.hide();
                         return;
@@ -2001,7 +2000,7 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
             
-            if (uploader && Browser.isDesktop && Browser.isWindows) {
+            if (uploader && Browser.isDesktop && Browser.isWindows && Cloud.config.uploader) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
                     lf("Tired of copying the .hex file? "),
                     HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader!")))
@@ -2026,10 +2025,10 @@ module TDev
             this.currentCompilationModalDialog.show();
         }
 
-        public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean } = {}) {
+        public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean; source?: string; } = {}) {
             tick(Ticks.coreNativeCompile);
             if (!options.showSource) this.showCompilationDialog(true, !!options.uploader);
-            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource);
+            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource, options.source);
             if (!options.showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
@@ -2067,6 +2066,8 @@ module TDev
             return cpp.then((cpp: string) => {
                 if (debug) {
                     ModalDialog.showText(cpp);
+                    var zip = Embedded.packageApp(name, { "main.cpp": cpp });
+                    if (zip) HTML.browserDownload(zip, Util.toFileName("microbit-" + name + ".zip", "microbit-project.zip"));                    
                     notifyCompiled(cpp);
                     return;
                 }
@@ -2406,11 +2407,6 @@ module TDev
                 this.queueNavRefresh();
                 this.dismissSidePane();
             }
-        }
-
-        public moveDeclToLibrary(decl:AST.Decl)
-        {
-            this.libExtractor.moveDecl(decl);
         }
 
         public cutDecl(decl: AST.Decl, dontCopy = false) {
@@ -4118,7 +4114,6 @@ module TDev
 
             this.dismissSidePane();
             this.setLastScreenshotCanvas(null);
-            this.libExtractor.reset();
             Plugins.stopAllPlugins();
             return this.saveStateAsync({ forReal: true, clearScript: true });
         }

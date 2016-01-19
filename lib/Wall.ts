@@ -245,21 +245,6 @@ module TDev.RT {
            s.rt.pageTransitionStyle = style;
         }
 
-        //? Sets the wall background as a cloud picture. The best resolution will be picked and the picture might be clipped to fit the screen.
-        //@ picAsync cap(cloudservices)
-        export function set_background_cloud_picture(picture: CloudPicture, r: ResumeCtx): void {
-            picture.toPictureUrlAsync("screen")
-                .done(url => {
-                    if (url) {
-                        var wp = r.rt.getCurrentPage();
-                        wp.bgPictureUrl = url;
-                        wp.bgPicture = null;
-                        r.rt.applyPageAttributes(true);
-                    }
-                    r.resume();
-                });
-        }
-
         //? Sets the wall background picture. The picture will be resized and clipped to the screen background as needed.
         //@ [picture].readsMutable picAsync
         export function set_background_picture(picture:Picture, r:ResumeCtx)

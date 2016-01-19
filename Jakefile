@@ -401,6 +401,8 @@ task('default', [
     console.log("[I] build completed.");
 });
 
+task('build', ['default']);
+
 desc('clean up the build folders and files')
 task('clean', [], function () {
   // XXX do this in a single call? check out https://github.com/mde/utilities/blob/master/lib/file.js

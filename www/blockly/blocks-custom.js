@@ -25,6 +25,9 @@ var digitalPinsDropdown = [
   ["P0", "P0"],
   ["P1", "P1"],
   ["P2", "P2"],
+  ["P8", "P8"],
+  ["P12", "P12"],
+  ["P16", "P16"]
 ];
 
 var leftRightDropdown = [
@@ -51,18 +54,11 @@ var cameraMessageDropdown = [
     ["take photo", "take photo"],
     ["start video capture", "start video capture"],
     ["stop video capture", "stop video capture"],
-    ["toggle front - rear", "toggle front - rear"],
+    ["toggle front-rear", "toggle front-rear"],
     ["launch photo mode", "launch photo mode"],
     ["launch video mode", "launch video mode"],
     ["stop photo mode", "stop photo mode"],
     ["stop video mode", "stop video mode"],
-];
-
-var microphoneMessageDropdown = [
-    ["launch", "launch"],
-    ["start capture", "start capture"],
-    ["stop capture", "stop capture"],
-    ["stop", "stop"],
 ];
 
 var alertMessageDropdown = [
@@ -71,7 +67,7 @@ var alertMessageDropdown = [
     ["play sound", "play sound"],
     ["play ringtone", "play ringtone"],
     ["find my phone", "find my phone"],
-    ["ring alarm", "ring alarm 1"],
+    ["ring alarm", "ring alarm"],
 ];
 
 var remoteControlMessageDropdown = [
@@ -86,20 +82,51 @@ var remoteControlMessageDropdown = [
     ["volume down", "volume down"]    
 ];
 
+var deviceInfoEventDropdown = [
+    ["incoming call", "incoming call"],
+    ["incoming message", "incoming message"],
+    ["orientation landscape", "orientation landscape"],
+    ["orientation portrait", "orientation portrait"],
+    ["shaken", "shaken"],
+    ["display off", "display off"],
+    ["display on", "display on"]
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
     "D": 294,
-    "D#": 311,
+    "Eb": 311,
     "E": 330,
     "F": 349,
     "F#": 370,
     "G": 392,
     "G#": 415,
     "A": 440,
-    "A#": 466,
+    "Bb": 466,
     "B": 494,
+    "C5":523,
 };
+
+var dimensionDropdown = [
+    ["x", "x"],
+    ["y", "y"],
+    ["z", "z"],
+    ["strength", "strength"]
+];
+
+var rotationDropDown = [
+    ["pitch", "pitch"],
+    ["roll", "roll"],
+];
+
+var beatFractions = [
+    ["1", "1"],
+    ["1/2", "1/2"],
+    ["1/4", "1/4"],
+    ["1/8", "1/8"],
+    ["1/16", "1/16"],
+];
 
 var notesDropdown = Object.keys(notes).map(function (note) { return [note, note] });
 
@@ -403,6 +430,67 @@ Blockly.Blocks['device_set_analog_period'] = {
     }
 };
 
+Blockly.Blocks['device_set_servo_pin'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/servo-write-pin');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("servo write");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "name");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Sets the angle of the shaft of a servo in degrees between 0 and 180. For a continuous servo, will set the speed of the servo.');
+    }
+};
+
+Blockly.Blocks['device_set_servo_pulse'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/servo-set-pulse');
+        this.setColour(blockColors.pins);
+        this.appendDummyInput()
+            .appendField("servo set pulse");
+        this.appendValueInput("micros")
+            .setCheck("Number");
+        this.appendDummyInput()
+            .appendField("(micros) to pin")
+            .appendField(new Blockly.FieldDropdown(analogPinsDropdown), "pin");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setTooltip('Configures the period to be 20ms and sets the pulse width, based on the value it is given.');
+    }
+};
+
+Blockly.Blocks['math_map'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/map');
+        this.setColour(blockColors.pins);
+        this.appendValueInput("value")
+            .setCheck("Number")
+            .appendField("map");
+        this.appendValueInput("fromLow")
+            .setCheck("Number")
+            .appendField("from low");
+        this.appendValueInput("fromHigh")
+            .setCheck("Number")
+            .appendField("from high");
+        this.appendValueInput("toLow")
+            .setCheck("Number")
+            .appendField("to low");
+        this.appendValueInput("toHigh")
+            .setCheck("Number")
+            .appendField("to high");
+        this.setInputsInline(false);                                  
+        this.setOutput(true, "Number");
+        this.setTooltip("Re-maps a number from one range to another.");
+    }
+};
+
 Blockly.Blocks['device_get_brightness'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/brightness');
@@ -436,14 +524,38 @@ Blockly.Blocks['device_get_acceleration'] = {
         this.appendDummyInput()
             .appendField("acceleration (mg)");
         this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown([
-                ["x", "x"],
-                ["y", "y"],
-                ["z", "z"],
-            ]), "NAME");
+            .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-        this.setTooltip('Get the acceleration on an axis (between -2048 and 2047).');
+        this.setTooltip('Returns the acceleration on an axis (between -2048 and 2047).');
+    }
+};
+
+Blockly.Blocks['device_get_rotation'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/rotation');
+        this.setColour(blockColors.input);
+        this.appendDummyInput()
+            .appendField("rotation (°)");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(rotationDropDown), "NAME");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Returns the rotation in degrees.');
+    }
+};
+
+Blockly.Blocks['device_get_magnetic_force'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/magnetic-force');
+        this.setColour(blockColors.input);
+        this.appendDummyInput()
+            .appendField("magnetic force (microT)");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(dimensionDropdown), "NAME");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Get the magnetic force on an axis (in micro Tesla).');
     }
 };
 
@@ -491,6 +603,7 @@ Blockly.Blocks['device_plot'] = {
     this.setTooltip('Turns the LED at coordinates (x, y) on.');
   }
 };
+
 Blockly.Blocks['device_unplot'] = {
   init: function() {
     this.setHelpUrl('https://www.microbit.co.uk/functions/unplot');
@@ -526,6 +639,24 @@ Blockly.Blocks['device_point'] = {
     this.setInputsInline(true);
     this.setOutput(true, "Boolean");
     this.setTooltip('Returns true if the LED at coordinates (x, y) is on, false otherwise.');
+  }
+};
+
+Blockly.Blocks['device_plot_bar_graph'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/plot-bar-graph');
+    this.setColour(blockColors.led);
+    this.appendDummyInput()
+        .appendField("plot bar graph of");
+    this.appendValueInput("value")
+        .setCheck("Number");
+    this.appendValueInput("high")
+        .setCheck("Number")
+        .appendField("up to");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Displays a bar graph of the value compared to high.');
   }
 };
 
@@ -993,7 +1124,7 @@ Blockly.Blocks['game_sprite_set_property'] = {
     }
 };
 
-Blockly.Blocks['antenna_camera'] = {
+Blockly.Blocks['devices_camera'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1008,22 +1139,7 @@ Blockly.Blocks['antenna_camera'] = {
     }
 };
 
-Blockly.Blocks['antenna_microphone'] = {
-    init: function()
-    {
-        this.setColour(blockColors.antenna);
-        this.appendDummyInput().appendField("tell microphone to ");
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldDropdown(microphoneMessageDropdown), "property");
-        this.setInputsInline(true);
-        this.setPreviousStatement(true);
-        this.setNextStatement(true);            
-        this.setTooltip('Sends a microphone event');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/tell-microphone-to");
-    }
-};
-
-Blockly.Blocks['antenna_alert'] = {
+Blockly.Blocks['devices_alert'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1038,7 +1154,7 @@ Blockly.Blocks['antenna_alert'] = {
     }
 };
 
-Blockly.Blocks['antenna_remote_control'] = {
+Blockly.Blocks['devices_remote_control'] = {
     init: function()
     {
         this.setColour(blockColors.antenna);
@@ -1053,6 +1169,21 @@ Blockly.Blocks['antenna_remote_control'] = {
     }
 };
 
+Blockly.Blocks['devices_device_info_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("on notified");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(deviceInfoEventDropdown), "NAME");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the micro:bit receives an event from the device');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-device-notification");
+    }
+};
 
 Blockly.Blocks['controls_simple_for'] = {
   /**
@@ -1152,10 +1283,10 @@ Blockly.Blocks['device_note'] = {
         init: function () {
             this.setHelpUrl('https://www.microbit.co.uk/functions/note');
             this.setColour(blockColors.music);
-            this.appendDummyInput().appendField(x == "1" ? "one whole note" : x+" note");
+            this.appendDummyInput().appendField(x+" beat");
             this.setInputsInline(true);
             this.setOutput(true, "Number");
-            this.setTooltip((x == "1" ? "A whole note." : "A "+x+"th note.") + " Set the variable \"whole note\" to change the default tempo.");
+            this.setTooltip("A duration in ms based on the current tempo.");
         }
     };
 });
@@ -1166,11 +1297,11 @@ Blockly.Blocks['device_play_note'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/play-note');
     this.setColour(blockColors.music);
     this.appendDummyInput()
-        .appendField("play");
+        .appendField("play tone (Hz)");
     this.appendValueInput("note")
-        .setCheck("Number");
+        .setCheck("Number")
     this.appendDummyInput()
-        .appendField("for");
+        .appendField("for (ms)");
     this.appendValueInput("duration")
         .setCheck("Number");
     this.setInputsInline(true);
@@ -1185,7 +1316,7 @@ Blockly.Blocks['device_ring'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/ring');
     this.setColour(blockColors.music);
     this.appendDummyInput()
-        .appendField("ring");
+        .appendField("ring tone (Hz)");
     this.appendValueInput("note")
         .setCheck("Number");
     this.setInputsInline(true);
@@ -1193,6 +1324,81 @@ Blockly.Blocks['device_ring'] = {
     this.setNextStatement(true);
     this.setTooltip('Rings a given note on P0. You can also provide a specific frequency.');
   }
+};
+
+Blockly.Blocks['device_rest'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/rest');
+    this.setColour(blockColors.music);
+    this.appendDummyInput()
+        .appendField("rest (ms)");
+    this.appendValueInput("duration")
+        .setCheck("Number");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Rests (plays nothing) for a specified time through pin P0.');
+  }
+};
+
+Blockly.Blocks['device_beat'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(beatFractions), "fraction");
+        this.appendDummyInput()
+            .appendField("beat (ms)");
+        this.setOutput(true, "Number");
+        this.setInputsInline(true);
+        this.setTooltip('Gets the duration of a fraction of a beat from the current tempo (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("tempo (bpm)");
+        this.setOutput(true, "Number");
+        this.setInputsInline(true);
+        this.setTooltip('Gets the tempo (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_change_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("change tempo by (bpm)");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Change the tempo by the given amount');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
+};
+
+Blockly.Blocks['device_set_tempo'] = {
+    init: function()
+    {
+        this.setColour(blockColors.music);
+        this.appendDummyInput()
+            .appendField("set tempo to (bpm)");
+        this.appendValueInput("value")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sets the tempo to the given amount of beats per minute (bpm)');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/tempo");
+    }
 };
 
 Blockly.Blocks['variables_change'] = {

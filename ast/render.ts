@@ -248,10 +248,7 @@ module TDev
         }
 
         public visitFieldName(n: AST.FieldName) {
-            if (n.isOut && Cloud.isRestricted())
-                return this.kw("returns");
-            else
-                return this.id(n.data) + this.op(":");
+            return this.id(n.data) + this.op(":");
         }
 
         public visitLiteral(n:AST.Literal)
@@ -911,25 +908,8 @@ module TDev
                 hd += this.op(" ()");
             }
             if (n.action.hasOutParameters()) {
-                if (Cloud.isRestricted()) {
-                    // The "returns" syntax without the output parameter name.
-                    var params = n.action.getOutParameters();
-                    if (params.length == 1) {
-                        // Inline, simplified version of visitActionParameter
-                        // without the name.
-                        var p = params[0];
-                        returns = this.stmt(p, this.diffLine(p, p.diffAltStmt, p => [
-                                    this.kw("returns"),
-                                    this.kind(p.getKind())]) + this.possibleError(p));
-                    } else {
-                        outParms = this.renderBlock(n.outParameters);
-                        returns = this.tline(this.kw("returns") + this.op(" ("));
-                    }
-                } else {
-                    // Old outparam convention.
-                    returns = this.tline(this.kw("returns") + this.op(" ("));
-                    outParms = this.renderBlock(n.outParameters);
-                }
+                returns = this.tline(this.kw("returns") + this.op(" ("));
+                outParms = this.renderBlock(n.outParameters);
             }
 
             if (AST.proMode && !inParms && !outParms)

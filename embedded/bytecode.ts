@@ -58,7 +58,7 @@ module TDev.AST.Bytecode
             Util.oops("bad bytes " + bytes)
     }
 
-    var currentSetup = null;
+    var currentSetup:string = null;
     export function setupFor(extInfo:ExtensionInfo, bytecodeInfo:any)
     {
         if (isSetupFor(extInfo))
@@ -311,6 +311,8 @@ module TDev.AST.Bytecode
         {
             // Util.assert(!this.isarg)
             Util.assert(!(this.def instanceof GlobalDef))
+            if (this.isarg && this.isByRefLocal())
+                return // already handled by the local
             if (this.isRef() || this.isByRefLocal()) {
                 this.emitLoadCore(proc);
                 proc.emitCallRaw("bitvm::decr");
@@ -341,40 +343,9 @@ module TDev.AST.Bytecode
         mkLocal(def:LocalDef = null)
         {
             var l = new Location(this.locals.length, def)
+            //if (def) console.log("LOCAL: " + def.getName() + ": ref=" + def.isByRef() + " cap=" + def._isCaptured + " mut=" + def._isMutable)
             this.locals.push(l)
             return l
-        }
-
-        peepHole()
-        {
-            /* TODO
-               TODO remember that used labels are instructions, push{r0} lbl: pop{r0} cannot be eliminated
-            var res = []
-            for (var i = 0; i < this.body.length; ++i) {
-                var op = this.body[i]
-                var op2 = this.body[i + 1]
-
-                if (op2) {
-                    if (op.name == "push {r0}" && op2.name == "pop {r0}") {
-                        i++;
-                        continue
-                    }
-
-                    if (op.name == "B" && op.arg0 == op2) {
-                        continue; // skip B to next instruction
-                    }
-                }
-
-                res.push(op)
-            }
-
-            this.body = res
-            */
-        }
-
-        expandOpcodes()
-        {
-            this.peepHole()
         }
 
         emitClrs(omit:LocalDef, inclArgs = false)
@@ -400,7 +371,6 @@ module TDev.AST.Bytecode
 
             Util.assert(inf.args <= 4)
 
-            // TODO check on the order, optimize?
             if (inf.args >= 4)
                 this.emit("pop {r3}");
             if (inf.args >= 3)
@@ -410,32 +380,25 @@ module TDev.AST.Bytecode
             if (inf.args >= 1)
                 this.emit("pop {r0}");
 
-            var numMask = 0
+            var reglist:string[] = []
+
+            for (var i = 0; i < 4; ++i) {
+                if (mask & (1 << i))
+                    reglist.push("r" + i)
+            }
+
+            var numMask = reglist.length
 
             if (inf.type == "F" && mask != 0) {
                 // reserve space for return val
-                // TODO use @startstack
-                this.emit("push {r0}");
-            }
-
-            if (mask & (1 << 0)) {
-                numMask++
-                this.emit("push {r0}");
-            }
-            if (mask & (1 << 1)) {
-                numMask++
-                this.emit("push {r1}");
-            }
-            if (mask & (1 << 2)) {
-                numMask++
-                this.emit("push {r2}");
-            }
-            if (mask & (1 << 3)) {
-                numMask++
-                this.emit("push {r3}");
+                reglist.push("r7")
+                this.emit("@stackmark retval")
             }
 
             Util.assert((mask & ~0xf) == 0)
+
+            if (reglist.length > 0)
+                this.emit("push {" + reglist.join(",") + "}")
 
             this.emit("bl " + name)
 
@@ -443,7 +406,7 @@ module TDev.AST.Bytecode
                 if (mask == 0)
                     this.emit("push {r0}");
                 else {
-                    this.emit("str r0, [sp, #4*" + numMask + "]")
+                    this.emit("str r0, [sp, retval@-1]")
                 }
             }
             else if (inf.type == "P") {
@@ -630,7 +593,11 @@ module TDev.AST.Bytecode
                 return bytes
             }
 
-            var hd = [0x4206, this.globals.length, bytecodeStartAddr & 0xffff, bytecodeStartAddr >>> 16, 0, 0, 0, 0]
+            var hd = [0x4207, this.globals.length, bytecodeStartAddr & 0xffff, bytecodeStartAddr >>> 16]
+            var tmp = hexTemplateHash()
+            for (var i = 0; i < 4; ++i)
+                hd.push(parseInt(swapBytes(tmp.slice(i * 4, i * 4 + 4)), 16))
+
             myhex[jmpStartIdx] = hexBytes(nextLine(hd, jmpStartAddr))
 
             ptr = 0
@@ -649,7 +616,8 @@ module TDev.AST.Bytecode
                 addr += 16
             }
 
-            hex.slice(bytecodeStartIdx).forEach(l => myhex.push(l))
+            if (!shortForm)
+                hex.slice(bytecodeStartIdx).forEach(l => myhex.push(l))
             
             return myhex;
         }
@@ -711,15 +679,24 @@ module TDev.AST.Bytecode
             Util.assert(this.csource == "");
 
             this.emit("; start")
+            this.emit(".hex 708E3B92C615A841C49866C975EE5197")
+            this.emit(".hex " + hexTemplateHash() + " ; hex template hash")
+            this.emit(".hex 0000000000000000 ; @SRCHASH@")
+            this.emit(".space 16 ; reserved")
 
             this.procs.forEach(p => {
-                this.csource += "\n"
-                this.csource += p.body
+                this.csource += "\n" + p.body
             })
 
             this.csource += this.stringsBody
 
             this.emit("_program_end:");
+        }
+
+        patchSrcHash()
+        {
+            var srcSha = Random.sha256buffer(Util.stringToUint8Array(Util.toUTF8(this.csource)))
+            this.csource = this.csource.replace(/\n.*@SRCHASH@\n/, "\n    .hex " + srcSha.slice(0, 16).toUpperCase() + " ; program hash\n")
         }
 
         addSource(meta:string, blob:Uint8Array)
@@ -732,10 +709,7 @@ module TDev.AST.Bytecode
             }
 
             this.emit(".balign 16");
-            this.emit(".short 0x1441");
-            this.emit(".short 0x2f0e");
-            this.emit(".short 0x2fb8");
-            this.emit(".short 0xbba2");
+            this.emit(".hex 41140E2FB82FA2BB");
             this.emit(".short " + metablob.length);
             this.emit(".short " + blob.length);
             this.emit(".short 0"); // future use
@@ -929,17 +903,21 @@ module TDev.AST.Bytecode
 
         public serialize(shortForm:boolean, metainfo:string, blob:Uint8Array)
         {
+            var compiled = false
             shortForm = false; // this doesn't work yet
 
             if (this.binary.procs.length == 0) {
                 shortForm = true // which is great in case there are errors in the program
             } else {
                 this.binary.serialize()
+                compiled = true
             }
             var lenSrc = 0
 
             if (metainfo != null && blob != null)
                 lenSrc = this.binary.addSource(metainfo, blob);
+
+            this.binary.patchSrcHash()
 
             var sourceSaved = lenSrc > 0;
             this.binary.assemble()
@@ -948,7 +926,8 @@ module TDev.AST.Bytecode
                 data: null,
                 contentType: "application/x-microbit-hex",
                 csource: this.binary.csource,
-                sourceSaved: sourceSaved
+                sourceSaved: sourceSaved,
+                compiled: compiled,
             }
 
             if (!this.binary.buf)
@@ -1695,23 +1674,32 @@ module TDev.AST.Bytecode
 
             this.proc.pushLocals();
 
+            var copyArgIntoLocal = (loc:LocalDef) => {
+                if (!loc) return
+                var idx = inparms.indexOf(loc)
+                if (idx >= 0) {
+                    var curr = this.localIndex(loc, true)
+                    if (!curr) {
+                        var l = this.proc.mkLocal(loc)
+
+                        if (loc.isByRef()) {
+                            this.proc.emitCallRaw("bitvm::mkloc" + l.refSuff())
+                            l.emitStoreCore(this.proc)
+                        }
+
+                        this.proc.args[idx].emitLoadLocal(this.proc)
+                        this.proc.emit("push {r0}")
+                        l.emitStoreByRef(this.proc)
+                    }
+                }
+            }
+
             visitStmts(a.body, s => {
 
                 if (s instanceof ExprStmt) {
                     var ai = (<ExprStmt>s).expr.assignmentInfo()
                     if (ai) {
-                        ai.targets.forEach(t => {
-                            var loc = t.referencedLocal()
-                            var idx = inparms.indexOf(loc)
-                            if (loc && idx >= 0) {
-                                var curr = this.localIndex(loc, true)
-                                if (!curr) {
-                                    var l = this.proc.mkLocal(loc)
-                                    this.proc.args[idx].emitLoad(this.proc)
-                                    l.emitStore(this.proc)
-                                }
-                            }
-                        })
+                        ai.targets.forEach(t => copyArgIntoLocal(t.referencedLocal()))
                     }
                 }
             })
@@ -1817,6 +1805,13 @@ module TDev.AST.Bytecode
         if (!/(^\s)|(:$)/.test(s))
             s = "    " + s
         return s + "\n"
+    }
+
+    function hexTemplateHash()
+    {
+        var sha = currentSetup ? currentSetup.slice(0, 16) : ""
+        while (sha.length < 16) sha += "0"
+        return sha.toUpperCase()
     }
 
     function emptyExtInfo()
@@ -1931,7 +1926,7 @@ module TDev.AST.Bytecode
                     var nm = m[1]
                     if (isEnum)
                         nm = currNs + "::" + nm
-                    console.log(nm, num, val)
+                    //console.log(nm, num, val)
                     if (val != null) {
                         res.enums[nm] = val
                         return;

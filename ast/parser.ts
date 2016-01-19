@@ -286,17 +286,12 @@ module TDev { export module AST {
             switch (n) {
             case "Appointment Collection": collKind = api.getKind("Appointment"); break;
             case "Contact Collection": collKind = api.getKind("Contact"); break;
-            case "Device Collection": collKind = api.getKind("Device"); break;
             case "Link Collection": collKind = api.getKind("Link"); break;
             case "Location Collection": collKind = api.getKind("Location"); break;
-            case "Media Link Collection": collKind = api.getKind("Media Link"); break;
-            case "Media Player Collection": collKind = api.getKind("Media Player"); break;
-            case "Media Server Collection": collKind = api.getKind("Media Server"); break;
             case "Message Collection": collKind = api.getKind("Message"); break;
             case "Number Collection": collKind = api.core.Number; break;
             case "Page Collection": collKind = api.getKind("Page"); break;
             case "Place Collection": collKind = api.getKind("Place"); break;
-            case "Printer Collection": collKind = api.getKind("Printer"); break;
             case "String Collection": collKind = api.core.String; break;
             }
 

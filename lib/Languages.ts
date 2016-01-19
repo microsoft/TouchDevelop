@@ -198,24 +198,6 @@ module TDev.RT {
             return navigator.userLanguage || <string>(<any>navigator).language || "en-US";
         }
 
-        //? This API is no longer supported.
-        //@ stub cap(hawaii) flow(SinkSafe)
-        //@ [speech].readsMutable
-        //@ [lang].defl("en") [speech].deflExpr('senses->record_microphone')
-        //@ obsolete stub
-        export function speech_to_text(lang:string, speech:Sound) : string
-        { return undefined; }
-
-        //? This API is no longer supported.
-        //@ async cap(hawaii) flow(SinkSafe) returns(string)
-        //@ [pic].readsMutable
-        //@ [lang].defl("en")
-        //@ obsolete stub
-        export function picture_to_text(lang: string, pic: Picture, r : ResumeCtx) // : string
-        {
-            r.resumeVal("");
-        }
-
         export function isSpeechSupported() : boolean {
             return WebSpeechManager.isSupported();
         }

@@ -10,7 +10,7 @@ action main() {
   #xP1meKgKx2EeA03s skip;
 }
 #SVXVucr3dRK4J6Y7 meta import micro\u003abit {
-  pub "hdkwlu"
+  pub "nvzoiu"
   usage {
     type Image
     action `sync` \_libinit()
@@ -45,10 +45,9 @@ action main() {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `sync` remote_control(@event: String)
-    action `sync` camera(@event: String)
-    action `sync` microphone(@event: String)
-    action `sync` alert(@event: String)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `async` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -58,19 +57,26 @@ action main() {
     action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
     action `async` show_leds(leds: String, ms: Number)
-    action `async` play_note(frequency: Number, ms: Number)
-    action `sync` note(name: String) returns(frequency: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
     action `sync` queue_event(body: Action, name: String)
-    action `async` ring(frequency: Number)
+    action `async` ring_tone(frequency: Number)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
   }
 }
 #Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
-  pub "tulxtd"
+  pub "xpccdk"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -78,12 +84,13 @@ action main() {
     action `async` fade_in(ms: Number)
     action `async` fade_out(ms: Number)
     action `sync` screenshot() returns(img: ♻ micro\u003abit → Image)
+    action `sync` plot_bar_graph(value: Number, high: Number)
   }
   #Msmo63osSl8VOt4V resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #x2LHHGswL451jMCn meta import micro\u003abit_game {
-  pub "ryudev"
+  pub "zibjkk"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -117,7 +124,7 @@ action main() {
   }
 }
 #F7U0eegUWemWOHIj meta import micro\u003abit_sprites {
-  pub "vzkdcc"
+  pub "fxyeei"
   usage {
     type Led_Sprite
     action `async` create_sprite(x: Number, y: Number) returns(r: ♻ micro\u003abit_sprites → Led_Sprite)
@@ -126,19 +133,35 @@ action main() {
     action `sync` if_on_edge\u002c_bounce(@this: ♻ micro\u003abit_sprites → Led_Sprite)
     action `sync` turn_right(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
     action `sync` turn_left(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
-    action `sync` point_in_direction(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
-    action `sync` x_position(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
-    action `sync` y_position(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` set_direction(@this: ♻ micro\u003abit_sprites → Led_Sprite, degrees: Number)
+    action `sync` x(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` y(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
     action `sync` direction(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
-    action `sync` set_x_to(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number)
-    action `sync` set_y_to(@this: ♻ micro\u003abit_sprites → Led_Sprite, y: Number)
+    action `sync` set_x(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number)
+    action `sync` set_y(@this: ♻ micro\u003abit_sprites → Led_Sprite, y: Number)
     action `sync` change_y_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, y: Number)
     action `sync` change_x_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, x: Number)
-    action `sync` touching_\u003f(@this: ♻ micro\u003abit_sprites → Led_Sprite, other: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
-    action `sync` touching_edge\u003f(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
+    action `sync` is_touching(@this: ♻ micro\u003abit_sprites → Led_Sprite, other: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
+    action `sync` is_touching_edge(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Boolean)
     action `sync` on(@this: ♻ micro\u003abit_sprites → Led_Sprite)
     action `sync` off(@this: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` set_brightness(@this: ♻ micro\u003abit_sprites → Led_Sprite, brightness: Number)
+    action `sync` brightness(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+    action `sync` change_brightness_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, value: Number)
+    action `sync` change_direction_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, angle: Number)
+    action `sync` invalid_sprite() returns(r: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` delete(sprite: ♻ micro\u003abit_sprites → Led_Sprite)
   }
   #yf5JlXsz20jG8d7Y resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#dXUNy3TCtcUuQHgo meta import micro\u003abit_music {
+  pub "zbiwoq"
+  usage {
+    action `sync` tempo() returns(bpm: Number)
+    action `async` change_tempo_by(bpm: Number)
+    action `async` set_tempo(bpm: Number)
+  }
+  #Q0tEe5dsulVXEC8U resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }

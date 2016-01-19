@@ -12,7 +12,7 @@ action example() {
   meta private;
 }
 #fzxa4xOS5OcSs43F meta import micro\u003abit {
-  pub "hdkwlu"
+  pub "ruqbfc"
   usage {
     type Image
     action `sync` \_libinit()
@@ -47,10 +47,9 @@ action example() {
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `sync` remote_control(@event: String)
-    action `sync` camera(@event: String)
-    action `sync` microphone(@event: String)
-    action `sync` alert(@event: String)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `async` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -69,6 +68,13 @@ action example() {
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
     action `sync` queue_event(body: Action, name: String)
     action `async` ring(frequency: Number)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
   }
 }
 #BVGhpbmca
@@ -371,5 +377,11 @@ action invalid_sprite() returns(#nr31Nq023HjQjvBc r: * Led_Sprite) {
   #xja2b4gPwHB2dcd6 // {namespace:game}
   #cxvKf4e0N6UEtGPL // {action:ignoreReturn}
   #Naa3i2uT6RXc9lKZ `return` records→Led_Sprite→invalid;
+  meta sync;
+}
+#xUwWUO2jFGIlKOtq
+action delete(#TqK6aquLm37xVsNH sprite: * Led_Sprite) {
+  #bH7rJ8stE4vJr6ZV // Deletes the sprite from the game engine. All further operation of the sprite will not have any effect.
+  #KaYmbOrkjZ4CS4df data→sprites→remove($sprite);
   meta sync;
 }

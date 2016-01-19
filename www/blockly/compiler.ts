@@ -899,9 +899,21 @@ function compileNote(e: Environment, b: B.Block): J.JExpr {
 function compileDuration(e: Environment, b: B.Block): J.JExpr {
   var matches = b.type.match(/^device_duration_1\/(\d+)/);
   if (matches)
-    return H.mkSimpleCall("/", [ H.mkLocalRef("whole note"), H.mkNumberLiteral(parseInt(matches[1])) ]);
+      return H.mkSimpleCall("/", [
+          H.namespaceCall("music", "tempo", []),
+          H.mkNumberLiteral(parseInt(matches[1]))]);
   else
-    return H.mkLocalRef("whole note");
+    return H.namespaceCall("music", "tempo", []);
+}
+
+function compileBeat(e: Environment, b: B.Block): J.JExpr {
+  var matches = b.getFieldValue("fraction").match(/^1\/(\d+)/);
+  if (matches)
+      return H.mkSimpleCall("/", [
+          H.namespaceCall("music", "beat", []),
+          H.mkNumberLiteral(parseInt(matches[1]))]);
+  else
+    return H.namespaceCall("music", "beat", []);
 }
 
 // [t] is the expected type; we assume that we never null block children
@@ -945,6 +957,8 @@ function compileExpression(e: Environment, b: B.Block): J.JExpr {
         return compileImage(e, b, true, "image", "create image");
     case 'game_sprite_property':
         return compileStdCall(e, b, stdCallTable["game_sprite_" + b.getFieldValue("property")]);
+    case 'device_beat':
+        return compileBeat(e, b);
     default:
       if (b.type in stdCallTable)
         return compileStdCall(e, b, stdCallTable[b.type]);
@@ -1179,13 +1193,13 @@ function mkCallWithCallback(e: Environment, n: string, f: string, args: J.JExpr[
       H.namespaceCall(n, f, args)));
 }
 
-function compileEvent(e: Environment, b: B.Block, event: string, args: string[]): J.JStmt {
+function compileEvent(e: Environment, b: B.Block, event: string, args: string[], ns : string = "input"): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var compiledArgs = args.map((arg: string) => {
     return H.mkStringLiteral(b.getFieldValue(arg));
   });
   var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, "input", event, compiledArgs, body);
+  return mkCallWithCallback(e, ns, event, compiledArgs, body);
 }
 
 function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string, args?: J.JExpr[]): J.JCall {
@@ -1272,6 +1286,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "point",
     args: [{ field: "x" }, { field: "y" } ]
   },
+  device_plot_bar_graph: {
+    namespace: "led",
+    f: "plot bar graph",
+    args: [{ field: "value" }, { field: "high" } ]
+  },
   device_temperature: {
     namespace: "input",
     f: "temperature",
@@ -1311,6 +1330,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "acceleration",
     args: [{ field: "NAME" } ]
   },
+  device_get_rotation: {
+    namespace: "input",
+    f: "rotation",
+    args: [{ field: "NAME" } ]
+  },
+  device_get_magnetic_force: {
+    namespace: "input",
+    f: "magnetic force",
+    args: [{ field: "NAME" } ]
+  },
   device_get_running_time: {
     namespace: "input",
   f: "running time",
@@ -1341,6 +1370,21 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "analog set period",
     args: [{ field: "pin" } , { field: "micros" }]
   },
+  device_set_servo_pin: {
+    namespace: "pins",
+    f: "servo write pin",
+    args: [{ field: "name" }, { field: "value" } ]
+  },
+  device_set_servo_pulse: {
+    namespace: "pins",
+    f: "servo set pulse",
+    args: [{ field: "pin" } , { field: "micros" }]
+  },
+  math_map: {
+    namespace: "pins",
+    f: "map",
+    args: [{ field: "value" } , { field: "fromLow" },{ field: "fromHigh" },{ field: "toLow" },{ field: "toHigh" }]
+  },
   device_get_brightness: {
     namespace: "led",
     f: "brightness",
@@ -1353,19 +1397,39 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   device_play_note: {
     namespace: "music",
-    f: "play note",
+    f: "play tone",
     args: [{ field: "note" }, { field: "duration" } ]
   },
   device_ring: {
     namespace: "music",
-    f: "ring",
+    f: "ring tone",
     args: [{ field: "note" } ]
+  },
+  device_rest: {
+    namespace: "music",
+    f: "rest",
+    args: [{ field: "duration" } ]
   },
   device_note: {
     namespace: "music",
-    f: "note",
+    f: "note frequency",
     args: [{ field: "note" } ]
   },
+  device_tempo: {
+      namespace: "music",
+      f: "tempo",
+      args: []
+  },  
+  device_change_tempo: {
+      namespace: "music",
+      f: "change tempo by",
+      args: [{ field: "value" }]
+  },  
+  device_set_tempo: {
+      namespace: "music",
+      f: "set tempo",
+      args: [{ field: "value" }]
+  },  
   game_start_countdown: {
     namespace: "game",
     f: "start countdown",
@@ -1481,23 +1545,18 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "brightness",
       args: [{ field: "sprite" }]
   },
-  antenna_camera: {
-    namespace: "antenna",
+  devices_camera: {
+    namespace: "devices",
     f: "tell camera to",
     args: [{field:"property"}]
   },
-  antenna_remote_control: {
-    namespace: "antenna",
+  devices_remote_control: {
+    namespace: "devices",
     f: "tell remote control to",
     args: [{field:"property"}]
   },
-  antenna_microphone: {
-    namespace: "antenna",
-    f: "tell microphone to",
-    args: [{field:"property"}]
-  },
-  antenna_alert: {
-    namespace: "antenna",
+  devices_alert: {
+    namespace: "devices",
     f: "raise alert to",
     args: [{field:"property"}]
   },
@@ -1558,6 +1617,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
         case 'device_button_event':
           stmts.push(compileEvent(e, b, "on button pressed", [ "NAME" ]));
           break;
+          
+        case 'devices_device_info_event':
+          stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
+          break;              
 
         case 'device_shake_event':
           stmts.push(compileEvent(e, b, "on shake", []));
@@ -1607,7 +1670,7 @@ interface CompileOptions {
 }
 
 function isHandlerRegistration(b: B.Block) {
-  return /_event$/.test(b.type);
+  return /(forever|_event)$/.test(b.type);
 }
 
 // Find the parent (as in "scope" parent) of a Block. The [parentNode_] property

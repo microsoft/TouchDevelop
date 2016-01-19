@@ -35,6 +35,21 @@ var reqNo = 0
 http.globalAgent.maxSockets = 15;
 https.globalAgent.maxSockets = 15;
 
+function readRes(g, f) {
+    var bufs = []
+    g.on('data', (c) => {
+        if (typeof c === "string")
+            bufs.push(new Buffer(c, "utf8"))
+        else
+            bufs.push(c)
+    });
+
+    g.on('end', () => {
+        var total = Buffer.concat(bufs)
+        f(total)
+    })
+}
+
 function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, contentType = null)
 {
     var currReq = reqNo++;
@@ -87,6 +102,8 @@ function tdevGet(uri:string, f:(a:string)=>void, numRetries = 5, body = null, co
     }
     if (contentType) {
         purl.headers = { 'content-type': contentType }
+        if (/urlencoded|multipart/.test(contentType))
+            purl.method = 'POST'
     }
     if (!/^http:/.test(uri)) {
         var req = https.request(purl, handle);
@@ -312,6 +329,21 @@ export function test(args:string[])
 {
     if (args.length == 0) {
         getScript("");
+        [
+            "anmxa", "brng", "cjep", "etbm",
+            "hgcc", "hpjq", "mcrl", "pyqya",
+            "qubz", "tozq", "wpfi", "wmrn",
+            "xeid", "xxrc", "ywvc", "juwc",
+            "juwy", "nwqba", "drdw", "qstd",
+            "zfzv", "mbcb", "fqcy", "xylk",
+            "mxjr", "mxjr", "osdurmos", "ekwbwjnw",
+            "ahzh", "rfgn", "kehh", "tpjra",
+            "abxe", "pcojyqpe", "lqgfmjdf", "fnwna",
+            "jhrx", "nykob", "zzni", "ajnsa",
+            "wfwujpwu", "qrki", "skuw", "jvkg", "nhkja",
+            "mpuj", "adic", "afnpa", "ajgo", "aeud", "aoek", "apmc", "bccm", "bfkxa", "bjxf", "blrna", "bllm", "bwsn", "byfw", "bxfh", "ckun", "bzhm", "cjcr", "clpl", "csbb", "cmni", "cqvda", "czrm", "dgjy", "dlsq", "dmdf", "dxwt", "dvyr", "dzsy", "eabr", "edhk", "emgla", "evar", "evai", "exaca", "fexj", "fccczsrg", "fjkqa", "fxvk", "ggzd", "gemt", "ggoe", "gjzj", "gjmy", "glay", "gmrx", "gyiz", "gbfoa", "haon", "hcov", "heyg", "hinx", "hjwb", "hspx", "htbp", "hztb", "iery", "igsha", "ilhma", "isng", "izgp", "jbyk", "jjeg", "jjiba", "juir", "kaip", "kcfe", "kctl", "khbb", "kmdsa", "krxg", "kstla", "kwhr", "kuyw", "kxjy", "lalxa", "lalh", "lbji", "lbre", "lebt", "lczi", "lvgu", "lsmt", "lyzb", "manx", "mizi", "mwhy", "mrrv", "mvswa", "mxxx", "nnrq", "nnfd", "nlwsxwgu", "nsem", "nyyw", "obrr", "orko", "osyh", "ovjx", "ovxi", "ozcl", "pcmea", "pjtc", "pqqh", "pugra", "prqv", "pvkc", "pwbd", "pwbla", "piwi", "pvyja", "pynz", "qcbx", "qerh", "qgsr", "qvnv", "qxas", "rgax", "rpvj", "rrhib", "sfjlb", "sbxc", "sldu", "slmo", "sreo", "sryh", "ssln", "suqkc", "sxwz", "tduo", "tigo", "tkdw", "tmjz", "tplja", "tqxy", "tuoq", "twkt", "uaif", "uabp", "ugqk", "uncq", "uytn", "uzjqajmk", "vcmv", "vdrva", "vfnl", "vgug", "vjxt", "vxzy", "vziza", "wbmba", "wdus", "wkhu", "wmbnsqtu", "wnuj", "wznb", "wpoj", "wsmj", "wwpv", "wxpfa", "xhnr", "xiwf", "xkcz", "xtgb", "xrfg", "xtwe", "xtmk", "xzbra", "ycmp", "ycpn", "ybas", "yelya", "ygswa", "yqabb", "yshr", "yvdu", "yyyfa", "zpiha", "zpty", "zrgf", "zzue", "aego", "ahcf", "anfc", "bliv", "brxe", "inww", "pdsp", "slji", "syyc", "wgri", "xbmw", "slvj", "bjkl", "zggfa", "syut", "kkqo", "fovb", "axbp", "sntk", "dijf", "sean", "ooyf", "umaxa", "ytuj", "advp", "kkso", "wjod", "rlyq", "rreyb", "gapm", "swcg", "jdwx", "kfddwdyd", "rxvya", "gtyl", "kpcw", "hrwi", "qmwm", "pqmg", "reetuiyr", "ufwv", "egysa", "bzlb", "bjdv", "vqnr", "pwxr", "njkn", "zhjh", "aetg", "jyaxa", "kbix", "ergz", "lykxa", "kmjn", "gpvi", "sspc", "bdvk", "igmfatzq", "dkue", "puzy", "bbel", "uygyxxwb", "tgre", "sbvxa", "kvad", "ewlu", "ivgr", "bdke", "ovkh", "vfwb", "emzf", "iimo", "xyyu", "jhqy", "ufon", "xrec", "pbyx", "moji", "fiol", "kxoh", "nvwh", "tmbv", "hwtc", "uykt", "bkxz", "eteg", "qzxua", "rxdb", "jhtd", "zmkw", "fdnp", "hhzx", "mmtf", "xrasa", "ugvc", "uhso", "nlgx", "sduw", "heuk", "isqq", "kanf", "ihap", "zxks", "daay", "kiwg", "dlpoa", "udlk", "jdjv", "hdxq", "wxsq", "wxjpa", "rgah", "cqbba", "jhgp", "pogpa", "hlhb", "ebvk", "nsrl", "otfe", "celpa", "wxbma", "gvxka", "gjzz", "qjroa", "izpua", "awsv", "dmhca", "abcva", "gdmktghk", "ghkj", "haop", "fsxda", "rwem", "pfqk", "isijadvo", "dxlz", "qnvdskvs", "sktz", "tvbpa", "gbqs", "wtrt", "thtf", "avcl", "akmxa", "qzar", "agnm", "imol", "rcnk", "mkbq", "olnx", "zkvo", "gimd", "wcwo", "mfzx", "czap", "ctwh", "rgny", "bipl", "nnbe", "whdlb", "vuyo", "ornu", "pnco", "oeqbc", "vjgo", "rjola", "lull", "ppfgrqsm", "aodq", "zsmvfpxz", "iebq", "queub", "bxtua", "giko", "icox", "alsq", "ujti", "bpur", "eyzu", "lmcgjiny", "qozr", "jcvw", "mypmmnjw", "wxoza", "aimo", "xuxo", "phfz", "skmm", "gdwxa", "pfcw", "dyob", "felo", "zkmu", "sohra", "ztsrb", "ikkn", "atnj", "xdswa", "ascb", "rfco", "atgpa", "atfc", "appla", "jxyib", "mtsm", "spmoa", "vzxl", "kuira", "nhre", "caon", "qjkm",
+        ].forEach(id => delete scriptsCache[id]);
+
         args = Object.keys(scriptsCache);
     }
 
@@ -465,6 +497,7 @@ function logParseResponse(id:string, resp:TDev.ParseResponse)
             resp2.prettyScript = "";
             resp2.status = "";
             fs.appendFileSync("results.json", JSON.stringify(resp2, null, 2))
+            fs.appendFileSync("errors.json", JSON.stringify(id) + ",");
         }
     }
 }
@@ -480,6 +513,7 @@ function writeResultsHeader(f:()=>void)
             "<!DOCTYPE html><html><head><meta charset='utf-8'/>\n" + d.css +
             "</head><body>", "utf-8");
         fs.writeFileSync("results.json", "", "utf-8");
+        fs.writeFileSync("errors.json", "", "utf-8");
         f();
     })
 }
@@ -3544,6 +3578,7 @@ function fetchlibraries(args) {
         , 'fdbsiw' // micro:bit serial
         , 'xnkmqj' // micro:bit senses
         , 'drdxps' // micro:bit screen
+        , 'zbiwoq' // micro:bit music
         , 'lyusma' // micro:bit profile
         , 'xczaux' // blocks new
         , 'dceiba' // blocks blink
@@ -3875,6 +3910,109 @@ function genid()
     return "#id" + Math.floor(Math.random()*100000000) + " "
 }
 
+function multipartPost(uri:string, data:any, fn:string, fc:string, cb)
+{
+    // tried and failed to use request module...
+
+    var boundry = "--------------------------0461489f461126c5"
+    var form = ""
+
+    function add(name:string, val:string)
+    {
+        form += boundry + "\r\n"
+        form += "Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n"
+        form += val + "\r\n"
+    }
+
+    function addF(name:string, val:string)
+    {
+        form += boundry + "\r\n"
+        form += "Content-Disposition: form-data; name=\"files[" + name + "]\"; filename=\"blah.json\"\r\n"
+        form += "\r\n"
+        form += val + "\r\n"
+    }
+
+    Object.keys(data).forEach(k => add(k, data[k]))
+    if (fn)
+        addF(fn, fc)
+
+    form += boundry + "--\r\n"
+
+    var purl:any = url.parse(uri)
+    purl.method = "POST"
+    purl.headers = {
+        "Content-Type": "multipart/form-data; boundary=" + boundry.slice(2)
+    }
+    var code = 0 
+    var r = https.request(purl, resp => {
+        code = resp.statusCode
+        readRes(resp, data => {
+            var s = JSON.parse(data.toString("utf8"))
+            cb(code, s)
+        })
+    })
+    r.end(form)
+}
+
+function uploadTranslation(fn:string, v:string, cb)
+{
+    var apiRoot = "https://api.crowdin.com/api/project/touchdevelop/"
+    var suff = "?key=" + process.env.CROWDIN_KEY
+    var cnt = 0
+
+    function createDir(name:string, cb)
+    {
+        multipartPost(apiRoot + "add-directory" + suff, { json: "", name: name },
+            null, null, (code, resp) => {
+                if (code == 200) {
+                    cb()
+                    return
+                }
+
+                if (code == 404 && resp.error.code == 17) {
+                    var par = name.replace(/\/[^\/]+$/, "")
+                    if (par != name) {
+                        createDir(par, () => createDir(name, cb))
+                        return
+                    }
+                }
+
+                console.log("Error: create dir", name, code, resp)
+            })
+    }
+
+    var handler = (code, resp) => {
+        if (cnt++ > 5)
+            return
+
+        if (code == 404 && resp.error.code == 8) {
+            console.log("create new translation file:", fn)
+            multipartPost(apiRoot + "add-file" + suff, { type: "auto", json: "" }, fn, v, handler)
+        }
+        else if (code == 404 && resp.error.code == 17)
+            createDir(fn.replace(/\/[^\/]+$/, ""), start)
+        else if (code == 200)
+            cb(null)
+        else {
+            console.log("Error, upload translation", fn, code, resp)
+        }
+    }
+
+    var start = () =>
+        multipartPost(apiRoot + "update-file" + suff, { type: "auto", json: "", update_option: "update_as_unapproved" },
+                        fn, v, handler)
+    start()
+}
+
+function translatedoc(ids:string[])
+{
+    var ff = JSON.stringify({
+                "str1": "Hello world how are you",
+                "str2": "Something nice and something",
+            })
+    uploadTranslation("/bar/baz/qux/foo.json", ff, () => {})
+}
+
 var cmds = {
     "deps": { f: deps, a: "<script-file>", h: "compute and output script dependencies" },
     "parse": { f: parse, a: "<script-file>", h: "parse given file; will look for deps in the same directory" },
@@ -3937,6 +4075,7 @@ var cmds = {
     "dllite": { f:dllite, a:'store [conttok]', h:'get /api/store into dl/store-*.json'},
     "dlscripttext": { f:dlscripttext, a:'[firstfile]', h:'download script text based on dl/store-*.json'},
     "countpubs": { f:countpubs, a:'store [conttok]', h:'count publications'},
+    "translatedoc": {f:translatedoc, a:'id...', h:'upload doc scripts for translation in crowdin'},
 }
 
 export interface ScriptTemplate {

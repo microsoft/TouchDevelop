@@ -317,7 +317,7 @@ module TDev.AST.Thumb
             m = /^(\d+)$/i.exec(s)
             if (m) v = parseInt(m[1], 10)
 
-            m = /^(\w+)@(\d+)$/.exec(s)
+            m = /^(\w+)@(-?\d+)$/.exec(s)
             if (m) {
                 if (mul != 1)
                     this.directiveError(lf("multiplication not supported with saved stacks"));
@@ -507,6 +507,23 @@ module TDev.AST.Thumb
             }
         }
         
+        private emitHex(words:string[])
+        {
+            words.slice(1).forEach(w => {
+                if (w == ",") return
+                if (w.length % 4 != 0)
+                    this.directiveError(".hex needs an even number of bytes")
+                else if (!/^[a-f0-9]+$/i.test(w))
+                    this.directiveError(".hex needs a hex number")
+                else
+                    for (var i = 0; i < w.length; i += 4) {
+                        var n = parseInt(w.slice(i, i + 4), 16)
+                        n = ((n & 0xff) << 8) | ((n >> 8) & 0xff)
+                        this.emitShort(n)
+                    }
+            })
+        }
+        
         private handleDirective(l:Line)
         {
             var words = l.words;
@@ -550,6 +567,9 @@ module TDev.AST.Thumb
                     break;
                 case ".byte":
                     this.emitBytes(words);
+                    break;
+                case ".hex":
+                    this.emitHex(words);
                     break;
                 case ".hword":
                 case ".short":
@@ -846,6 +866,11 @@ module TDev.AST.Thumb
                                lnNext2.clobbersReg(ln.numArgs[0])) {
                         // RULE: movs rX, #V; mov rY, rX; clobber rX -> movs rY, #V
                         ln.update("movs r" + lnNext.numArgs[0] + ", #" + ln.numArgs[1])
+                        lnNext.update("")
+                    } else if (lnop == "pop" && ln.singleReg() >= 0 && lnNext.getOp() == "push" &&
+                               ln.singleReg() == lnNext.singleReg()) {
+                        // RULE: pop {rX}; push {rX} -> ldr rX, [sp, #0]
+                        ln.update("ldr r" + ln.singleReg() + ", [sp, #0]")
                         lnNext.update("")
                     } else if (lnNext2 && lnop == "push" && ln.singleReg() >= 0 && lnNext.preservesReg(ln.singleReg()) &&
                                lnNext2.getOp() == "pop" && ln.singleReg() == lnNext2.singleReg()) {

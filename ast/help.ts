@@ -917,6 +917,11 @@ module TDev {
                 if (!width) width = 2
                 var r = Util.fmt("<img class='md-img-inline' src='{0}' style='width:{1}em' alt='picture' />", Cloud.artUrl(artId), width);
                 return r;
+            } else if (macro == "hex") {
+                var args = arg.split(':');
+                if (args.length != 2)
+                    return MdComments.error(lf("missing script title: {hex:id:title}"));
+                return Util.fmt("<a href=\"{0:q}\" target=\"_blank\">{1:q}</a>", "/api/" + MdComments.shrink(args[0]) + "/hex?applyupdates=true", args[1]);                                
             } else if (macro == "decl" || macro == "decl*") {
                 var decl = !Script ? null : !arg ? Script : Script.things.filter((t) => t.getName() == arg)[0];
                 if (this.currComment && this.currComment.mdDecl)
@@ -1467,11 +1472,6 @@ module TDev {
 
         public extractStmts(stmts:AST.Stmt[])
         {
-            function isEmptyComment(s:AST.Stmt)
-            {
-                return s.docText() == ""
-            }
-
             this.init();
 
             var output = "";
@@ -1499,11 +1499,11 @@ module TDev {
                         var bits = m[1];
                         output += "<div class='md-para'>" + this.renderer.renderBitmatrix(bits, { cls: 'docs', height:7 }) + "</div>";
                         i++;
-                    } else if ((m = /^\s*(\{code}|````)\s*$/.exec(cmt)) != null) {
+                    } else if ((m = /^\s*(\{code\}|````)\s*$/.exec(cmt)) != null) {
                         var j = i + 1;
                         var seenStmt = false;
                         while (j < stmts.length) {
-                            if (/^\s*(\{\/code}|````)\s*$/.test(stmts[j].docText()))
+                            if (/^\s*(\{\/code\}|````)\s*$/.test(stmts[j].docText()))
                                 break;
                             j++;
                         }

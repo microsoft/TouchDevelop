@@ -3,11 +3,12 @@ meta name "micro:bit screen";
 meta rootId "V5599nbmoYZQw1w33khHVtMh";
 meta isLibrary "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
 #mExzaWj10ZHeHz4P meta import micro\u003abit {
-  pub "rwqgyd"
+  pub "ruqbfc"
   usage {
     type Image
     action `sync` \_libinit()
@@ -42,10 +43,9 @@ meta parentIds "";
     action `sync` forever(body: Action)
     action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
     action `sync` on_pin_pressed(name: String, body: Action)
-    action `sync` remote_control(@event: String)
-    action `sync` camera(@event: String)
-    action `sync` audio_recorder(@event: String)
-    action `sync` alert(@event: String)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `async` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -62,6 +62,15 @@ meta parentIds "";
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring(frequency: Number)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
   }
 }
 #ljbL9TDyViQp60st
@@ -174,4 +183,44 @@ action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image)
     }
   }
   meta sync;
+}
+#ovd9A8N30ut1go7D
+action plot_bar_graph(#hpG4t1C3SqiqVFVZ value: Number, #ZCK5n2unSOxU42XY high: Number) {
+  #zOTs2HbFZSsGIcZt // Displays a vertical bar graph based on the ``value`` and ``high`` value.
+  #xlNlnrVrytCbk5TQ // {hints:high:1024}
+  #qS76fFIpRiOAJ9r7 // {namespace:led}
+  #PfHFzO6Dk5aRnuIz // {help:/functions/plot-bar-graph}
+  #xIIhHcSXRfTjjsGE // {weight:20}
+  #xMI934nNAoZ2D22k $v := pins[lib micro\u003abit] →map(math→abs($value), 0, $high, 0, 4);
+  #xVN6w2AP5InoeHt3 if $v < 0 then {
+    #JQAjkd892SfAZVaM basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 1 0 0");
+  }
+  else { #Min3hDu7yaW5CsLL if $v = 0 then {
+    #Kipc7xzzcvftlk7v basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1");
+  }
+  else { #xz3ssI2E8u04Qu26 if $v = 1 then {
+    #xFr4ltnLkVIMInA4 basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1");
+  }
+  else { #q8IuhLmS4sGFPO55 if $v = 2 then {
+    #x7wL822ySG1ZdJOi basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+  }
+  else { #Gseh3zz4Rb8tB8JN if $v = 3 then {
+    #OGxguFRTl11Db823 basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+  }
+  else {
+    #mlCNyfGnvQhrFhHW basic[lib micro\u003abit] →plot_leds("1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
+  }
+  } } } } 
+  meta sync;
+}
+#YzC6hAtAqg8JGJmu
+action test_bargraph() {
+  #ontCmUQv3BUJaI49 // {shim:}
+  #wvK4U1Vp0BRBgQTq while true do {
+    #x2dlLTWbHX2S134E $millig := input[lib micro\u003abit] →acceleration("x");
+    #xJUYwGoxp4Xoqezo code→plot_bar_graph($millig, 1023);
+    #YfuOoWp0VBU2DzXK basic[lib micro\u003abit] →pause(100);
+  }
+  meta private;
+  meta test;
 }
