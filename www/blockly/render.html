@@ -30,8 +30,21 @@
   <body>
         <div id="blocklyDiv" style=""></div>
         <script type="application/javascript">    
-        var id = /id=([a-z]+)/i.exec(window.location.search)[1]    
+function load() {        
+        var m = /id=([a-z]+)/i.exec(window.location.search) || [];
+        var id = m[1]
+        if (!id) {
+            blocklyDiv.innerText = '! Missing id';
+            blocklyDiv.setAttribute('data-ready', 'true');
+            return;
+        }    
         $.get('https://www.microbit.co.uk/api/' + id + '/text', function(text) {
+            if (!text) {
+                blocklyDiv.innerText = '! Invalid script id';
+                blocklyDiv.setAttribute('data-ready', 'true');
+                return;
+            }
+            
             var blocklyDiv = document.getElementById('blocklyDiv');
             var workspace = Blockly.inject(blocklyDiv, {
                 readOnly: true,
@@ -46,6 +59,8 @@
                 console.error(e);
             }            
         });
+ }
+ load();
         </script>
   </body>
 </html>
