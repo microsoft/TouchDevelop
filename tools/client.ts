@@ -3868,7 +3868,7 @@ function importlist(args:string[])
 function litepost(args:string[])
 {
     var k = tdliteKey()
-    var dat = args[1] ? JSON.parse(args[1]) : {}
+    var dat = args[1] ? eval("(" + args[1] + ")") : {}
 
     tdevGet(k.liteUrl + "api/" + args[0] + "?nothingreally=42" + k.key, resp => {
         var parsed = JSON.parse(resp)
