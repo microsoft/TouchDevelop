@@ -54,7 +54,11 @@ function load() {
             Blockly.mainWorkspace.clear();
             try {
                 Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
+                var metrics = Blockly.mainWorkspace.getMetrics();
+                
                 blocklyDiv.setAttribute('data-ready', 'true');
+                blocklyDiv.setAttribute('data-content-width', metrics.contentWidth);
+                blocklyDiv.setAttribute('data-content-height', metrics.contentHeight);
             } catch (e) {
                 console.error(e);
             }            
