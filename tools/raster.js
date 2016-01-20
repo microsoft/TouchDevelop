@@ -1,4 +1,7 @@
-var url = 'http://localhost:4242/editor/local/blockly/render.html?id=hgmgxx';
+var system = require('system');
+var args = system.args;
+var url = args[1] || 'http://localhost:4242/editor/local/blockly/render.html?id=hgmgxx';
+var output = args[2] || 'build/blocks.png';
 var page = require('webpage').create();
 var needsResize = true;
 
@@ -29,8 +32,8 @@ function render() {
                 console.log('size: ' + JSON.stringify(page.viewportSize))
                 page.open(url, render);
             } else { 
-                console.log('rendering...')
-                page.render('build/blocks.png');
+                console.log('rendering to ' + output)
+                page.render(output);
                 phantom.exit();                                
             }
         } else {
