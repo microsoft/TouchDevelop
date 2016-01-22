@@ -17,7 +17,6 @@ function render() {
                 var metrics = page.evaluate(function () {
                     return Blockly.mainWorkspace.getMetrics();
                 });
-                console.log('metrics:' + JSON.stringify(metrics, null, 2));
                 page = require('webpage').create();
                 page.viewportSize = { 
                     width: metrics.contentWidth + metrics.contentLeft,
@@ -29,7 +28,6 @@ function render() {
                     width: metrics.contentWidth,
                     height: metrics.contentHeight
                 }
-                console.log('size: ' + JSON.stringify(page.viewportSize))
                 page.open(url, render);
             } else { 
                 console.log('rendering to ' + output)
