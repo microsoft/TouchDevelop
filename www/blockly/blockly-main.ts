@@ -350,6 +350,19 @@ module TDev {
         scaleSpeed: 1.1
       },
     });
+    
+    // support for opening help on the side pane
+    /*
+    (<any>Blockly).BlockSvg.prototype.showHelp_ = function() {
+        var url = goog.isFunction(this.helpUrl) ? this.helpUrl() : this.helpUrl;
+        if (url) {
+            post(<External.Message_Help> {
+                type: External.MessageType.Help,
+                url: url
+            })
+        }
+    };
+    */      
     onResize = () => {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;

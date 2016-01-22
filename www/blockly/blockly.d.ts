@@ -1,3 +1,6 @@
+declare module goog {
+    function isFunction(f : any) : boolean;
+}
 declare module Blockly {
     class Block {
         static obtain(workspace: Workspace, prototypeName?: string): Block;
