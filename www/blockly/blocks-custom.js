@@ -4,11 +4,13 @@ goog.provide('Blockly.Blocks.device');
 
 goog.require('Blockly.Blocks');
 
+/*
 var toHelpUrl = function(path) {
     return function () {
         window.open("https://www.microbit.co.uk/" + path, "_blank");
     }
 }
+*/
 
 var buttonsDropdownOn = [
   ["A", "A"],
@@ -223,7 +225,7 @@ Blockly.Variables.flyoutCategory = function(workspace) {
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#tmkc86
 Blockly.Blocks['device_print_message'] = {
   init: function() {
-    this.setHelpUrl(toHelpUrl("functions/show-string"));
+    this.setHelpUrl("https://www.microbit.co.uk/functions/show-string");
     this.setColour(blockColors.basic);
     this.appendDummyInput()
         .appendField("show");
