@@ -56,7 +56,7 @@ module TDev {
   });
 
   var onResize = () => {};
-
+  
   function receive(message: External.Message) {
     console.log("[inner message]", message);
 
@@ -603,7 +603,7 @@ module TDev {
       e.stopPropagation();
     });
     $("#command-run").click(() => doRun(false));
-  }
+  }       
 }
 
 // vim: set ts=2 sw=2 sts=2:

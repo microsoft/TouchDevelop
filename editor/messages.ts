@@ -24,6 +24,7 @@ module TDev {
             NewBaseVersion,
             Load,
             TypeCheck, // errors while typechecking
+            Help,
         };
 
         export interface Message_Init extends Message {
@@ -73,7 +74,7 @@ module TDev {
         // provided AST. (This, naturally, only makes sense if the language is
         // TouchDevelop).
         export interface Message_Compile extends Message {
-            type: MessageType; // == MessageType.Compile
+            // type: MessageType; // == MessageType.Compile
             text: any; // string if language == CPlusPlus, TDev.AST.Json.JApp if language == TouchDevelop
             language: Language;
             libs: { [libName: string]: LibEntry };
@@ -82,21 +83,21 @@ module TDev {
         }
 
         export interface Message_CompileAck extends Message {
-            type: MessageType; // == MessageType.Message_CompileAck
+            // type: MessageType; // == MessageType.Message_CompileAck
             status: Status;
             error?: string; // non-null iff status == Error
         }
 
         // The [libs] fields is the same as in [Message_Compile].
         export interface Message_Upgrade extends Message {
-            type: MessageType; // == MessageType.Message_Upgrade
+            // type: MessageType; // == MessageType.Message_Upgrade
             name: string;
             ast: any; // AST.Json.JApp
             libs: { [libName: string]: LibEntry };
         }
 
         export interface Message_Run extends Message {
-            type: MessageType; // == MessageType.Message_Run
+            // type: MessageType; // == MessageType.Message_Run
             ast: any; // AST.Json.JApp
             libs: { [libName: string]: LibEntry };
             onlyIfSplit?: boolean; // Run the program only if in "split mode".
@@ -116,8 +117,13 @@ module TDev {
         // From the inner iframe to the outer one, when a .hex file was dropped
         // on top of the inner iframe.
         export interface Message_Load extends Message {
-            type: MessageType; // == MessageType.Load
+            // type: MessageType; // == MessageType.Load
             file: File;
+        }
+        
+        // Editor requests to show help page from web site
+        export interface Message_Help extends Message {
+            path: string;
         }
 
         // A saved script has some text (this is what ends up published when the

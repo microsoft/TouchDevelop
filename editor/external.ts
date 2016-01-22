@@ -587,8 +587,19 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             this.receiveUpgrade(message2);
-            break;
-
+            break;                
+                
+          case MessageType.Help:
+                var msgh = <Message_Help>event.data;
+                Cloud.getPublicApiAsync("/help/" + msgh.path)
+                    .done(html => {
+                        var editorSide = elt("externalEditorSide");
+                        var rt = TheEditor.currentRt;
+                        if(rt) (<EditorHost>rt.host).showWall();
+                        Browser.setInnerHTML(editorSide,
+                            html || lf("Oops, we could not load the help. Please make sure you are connected to internet."));
+                    })
+              break;
           case MessageType.Run:
             tick(Ticks.externalRun);
             var message3 = <Message_Run> event.data;
@@ -701,8 +712,9 @@ module TDev {
       Ticker.setCurrentEditorId(editor.id);
 
       // Clear leftover iframes and simulators.
-      document.getElementById("externalEditorSide").setChildren([]);
-      var iframeDiv = document.getElementById("externalEditorFrame");
+      var editorSide = elt("externalEditorSide");
+      editorSide.setChildren([]);
+      var iframeDiv = elt("externalEditorFrame");
       iframeDiv.setChildren([]);
 
       // Load the editor; send the initial message.
