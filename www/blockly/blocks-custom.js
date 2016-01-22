@@ -4,14 +4,6 @@ goog.provide('Blockly.Blocks.device');
 
 goog.require('Blockly.Blocks');
 
-/*
-var toHelpUrl = function(path) {
-    return function () {
-        window.open("https://www.microbit.co.uk/" + path, "_blank");
-    }
-}
-*/
-
 var buttonsDropdownOn = [
   ["A", "A"],
   ["B", "B"],
