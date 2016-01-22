@@ -86,7 +86,7 @@ module TDev.Hex
                     }))
     }
 
-    function getHexInfoAsync(extInfo:AST.Bytecode.ExtensionInfo)
+    function getHexInfoAsync(extInfo:AST.Bytecode.ExtensionInfo) : Promise
     {
         if (!extInfo.sha)
             return Promise.as(null)
@@ -112,7 +112,9 @@ module TDev.Hex
                     meta.hex = decompressHex(meta.hex)
                     return Promise.as(meta)
                 }
-                else
+                else {
+                    if (Cloud.isOffline()) return Promise.as(null);
+                    
                     return downloadHexInfoAsync(extInfo)
                         .then(meta => {
                             var origHex = meta.hex
@@ -120,8 +122,9 @@ module TDev.Hex
                             var store = JSON.stringify(meta)
                             meta.hex = origHex
                             return storeHexInfoAsync(extInfo.sha, store)
-                                    .then(() => meta)
+                                .then(() => meta)
                         })
+                }
             })
     }
 
