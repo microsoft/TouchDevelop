@@ -123,7 +123,7 @@ module TDev {
         
         // Editor requests to show help page from web site
         export interface Message_Help extends Message {
-            url: string;
+            path: string;
         }
 
         // A saved script has some text (this is what ends up published when the

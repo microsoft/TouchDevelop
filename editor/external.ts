@@ -591,21 +591,44 @@ module TDev {
                 
           case MessageType.Help:
             var msgh = <Message_Help>event.data;
+            var path = msgh.path;
+            var ptr: JsonPointer;
             var editorSide = elt("externalEditorSide");
-            var iframe = document.createElement("iframe");
-            iframe.classList.add("docs");
-            iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-            iframe.src = msgh.url;
-            if (editorSide.offsetWidth == 0) {
-                var m = new ModalDialog();
-                m.add(iframe);
-                m.setScroll();
-                m.addOk();
-                m.show();                
-            } else {
-                editorSide.setChildren([iframe]);
-                editorSide.classList.remove("dismissed");                
-            }
+            editorSide.setChildren([div("externalEditorHelp", lf("loading..."))]);
+            var rt = TheEditor.currentRt;
+            var p = rt ? rt.stopAsync() : Promise.as();
+            p.then(() => Cloud.getPrivateApiAsync("ptr" + path.replace(/\//g, "-")))
+                .then((p: JsonPointer) => {
+                    if (!p) return new PromiseInv();
+                    ptr = p;
+                    return Cloud.getScriptTextAsync(ptr.scriptid);
+                }).then((text: string) => {
+                    var ht = HelpTopic.fromScriptText(ptr.scriptid, text);
+                    var rend = new Renderer();
+                    rend.stringLimit = 90;
+                    rend.mdComments.useExternalLinks = true;
+                    rend.mdComments.showCopy = false;
+                    rend.mdComments.forWeb = true;                    
+                    return ht.renderAsync(rend.mdComments);
+                }).done((html:string) => {
+                    var doc = div("externalEditorHelp");
+                    Browser.setInnerHTML(doc, html);
+                    if (editorSide.offsetWidth == 0) {
+                        var m = new ModalDialog();
+                        m.add(doc);
+                        m.stretchWide();
+                        m.setScroll();
+                        m.addOk();
+                        m.show();                
+                    } else {
+                        editorSide.setChildren([doc]);
+                        editorSide.classList.remove("dismissed");                
+                    }
+                }, e => {
+                    Util.reportError("help", e, false);
+                    editorSide.setChildren([div("externalEditorHelp",lf("oops, could not load the documentation."))]);
+                    window.open(path);
+                });                
             break;
           case MessageType.Run:
             tick(Ticks.externalRun);

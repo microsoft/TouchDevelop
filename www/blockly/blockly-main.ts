@@ -352,17 +352,18 @@ module TDev {
     });
     
     // support for opening help on the side pane
-    /*
     (<any>Blockly).BlockSvg.prototype.showHelp_ = function() {
         var url = goog.isFunction(this.helpUrl) ? this.helpUrl() : this.helpUrl;
+        var m = /^https:\/\/www.microbit.co.uk(.*)$/i.exec(url);
         if (url) {
-            post(<External.Message_Help> {
-                type: External.MessageType.Help,
-                url: url
-            })
+            if (m && m[1])
+                post(<External.Message_Help>{
+                    type: External.MessageType.Help,
+                    path: m[1]
+                });
+            else window.open(url);
         }
     };
-    */      
     onResize = () => {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;

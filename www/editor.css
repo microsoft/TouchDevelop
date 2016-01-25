@@ -1881,6 +1881,14 @@ span.errorSq .kw
     flex: 3;                      /*CSSpref*/  -webkit-flex: 3;  -moz-flex: 3;  -ms-flex: 3;
 }
 
+.externalEditorHelp {
+    margin-left:1em;
+    margin-right:1em;
+    margin-top:1em;
+    font-size:0.6em;
+    overflow:auto;
+}
+
 #externalEditorSide .boardCanvas {
     width: 100% !important;
     height: auto !important;
