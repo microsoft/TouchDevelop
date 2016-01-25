@@ -38,7 +38,14 @@ function load() {
             blocklyDiv.setAttribute('data-ready', 'true');
             return;
         }    
-        $.get('https://www.microbit.co.uk/api/' + id + '/text', function(text) {
+        $.getJSON('https://www.microbit.co.uk/api/' + id, function(script) {    
+        if (!script) {
+            blocklyDiv.innerText = '! Script not found';
+            blocklyDiv.setAttribute('data-ready', 'true');
+            return;
+        }    
+                
+        $.get('https://www.microbit.co.uk/api/' + script.updateid + '/text', function(text) {
             if (!text) {
                 blocklyDiv.innerText = '! Invalid script id';
                 blocklyDiv.setAttribute('data-ready', 'true');
@@ -62,6 +69,7 @@ function load() {
             } catch (e) {
                 console.error(e);
             }            
+        });
         });
  }
  load();
