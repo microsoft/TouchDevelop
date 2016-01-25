@@ -106,7 +106,7 @@ module TDev
             var bind = null;
             if (this.theLibrary.resolved) {
                 var box = DeclRender.mkBox(this.theLibrary.resolved);
-                (<any>box).theDesc.setChildren([this.theLibrary.pubid ? "published :: /" + this.theLibrary.pubid: "(local)"]);
+                (<any>box).theDesc.setChildren([this.theLibrary.pubid ? "published /" + this.theLibrary.pubid: "(local)"]);
                 bind = box.withClick(() => this.rebind());
             } else
                 bind = HTML.mkButton(lf("nothing; bind it!"), () => this.rebind());

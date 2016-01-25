@@ -254,7 +254,7 @@ module TDev
                     if (decl instanceof Kind) limit = 40;
                     if ((name + sigText).length > limit && sigText != "()") {
                         if (desc)
-                            desc = Util.htmlEscape(sigText) + " :: " + desc;
+                            desc = Util.htmlEscape(sigText) + " " + desc;
                         else
                             desc = Util.htmlEscape(sigText);
                     } else {

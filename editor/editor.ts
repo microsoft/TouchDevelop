@@ -1458,7 +1458,7 @@ module TDev
                     this.host.hideWallAsync().done(() => {
                         this.showEditorContainer();
                         this.lastEditHash = "edit:" + Script.localGuid + ":" + loc.decl.getStableName() + this.idSuffix()
-                        this.historyMgr.setHash(this.lastEditHash, Script.getName() + " :: " + loc.decl.getName())
+                        this.historyMgr.setHash(this.lastEditHash, Script.getName() + " " + loc.decl.getName())
                         this.setSplitScreen(this.hadSplit)
                     })
                 };
@@ -1744,9 +1744,9 @@ module TDev
                 if (SizeMgr.splitScreen || headless) return
 
                 if (isMain)
-                    this.historyMgr.setHash("run:" + Script.localGuid + this.idSuffix(), Script.getName() + " :: run")
+                    this.historyMgr.setHash("run:" + Script.localGuid + this.idSuffix(), Script.getName() + " run")
                 else
-                    this.historyMgr.setHash("run-action:" + Script.localGuid + ":" + a.getStableName() + this.idSuffix(), Script.getName() + " :: run " + a.getName())
+                    this.historyMgr.setHash("run-action:" + Script.localGuid + ":" + a.getStableName() + this.idSuffix(), Script.getName() + " run " + a.getName())
             }
             setHash();
 

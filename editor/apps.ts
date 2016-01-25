@@ -1012,7 +1012,7 @@ module TDev.AppExport
                     Azure.storeWebsiteAuth({
                         key: wa.key + ":" + nameInput.value,
                         webspace: "custom",
-                        website: wa.website + " :: " + nameInput.value,
+                        website: wa.website + " " + nameInput.value,
                         destinationAppUrl: wa.destinationAppUrl,
                         everUsed: true,
                         deploymentKey: wa.deploymentKey + "/proxy/" + nameInput.value,

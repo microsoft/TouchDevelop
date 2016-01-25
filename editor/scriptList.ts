@@ -1920,7 +1920,7 @@
             var setHash = () => {
                 TheEditor.historyMgr.setHash("list:" + this.apiPath + ":" + s.persistentId() + ":" + t.getId() + s.additionalHash(),
                     s.getTitle()
-                        + (t.getId() == "overview" ? "" : " :: " + t.getName())
+                        + (t.getId() == "overview" ? "" : " " + t.getName())
                         + " (" + this.topTitle + ")");
             }
             setHash();
@@ -3655,7 +3655,7 @@
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
                                     Util.timeSince(it.time)
-                                        + (scrid ? " :: /" + scrid : "")
+                                        + (scrid ? " /" + scrid : "")
                                         + (it.scriptsize ? lf(", size: {0} characters", it.scriptsize) : ""))),
                             div("sdAuthor", div("sdAuthorInner showWhenSelected", lf("current"))))))
             box.setFlag("selected", it.isactive)
@@ -4463,7 +4463,7 @@
                                 Util.timeSince(c.time),
                                 c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
                                 c.comments > 0 ? " " + c.comments + " replies " : null,
-                                span("sdCmtId", " :: /" + c.id),
+                                span("sdCmtId", " /" + c.id),
                             div("sdCmtBtns", translateBtn, likeBtn, delBtn)),
                         nestedPubs,
                         nestedComments,
@@ -4641,7 +4641,7 @@
         getId() { return "tags"; }
         getName() { return lf("tags"); }
 
-        private fullName(c:JsonTag) { return c.category ? c.category + " :: " + c.name : c.name; }
+        private fullName(c:JsonTag) { return c.category ? c.category + " " + c.name : c.name; }
 
         inlineText(cc:JsonIdObject)
         {
@@ -5403,7 +5403,7 @@
                 if (a) time = a.time;
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time);
-                if (this.publicId) timeStr += " :: /" + this.publicId;
+                if (this.publicId) timeStr += " /" + this.publicId;
                 addInfo.setChildren([timeStr]);
 
                 nameBlock.setChildren([this.getTitle()]);
@@ -5656,7 +5656,7 @@
                 if (a) time = a.time;
                 var timeStr = "";
                 if (time) timeStr = Util.timeSince(time);
-                if (this.publicId) timeStr += " :: /" + this.publicId;
+                if (this.publicId) timeStr += " /" + this.publicId;
                 addInfo.setChildren([timeStr]);
 
                 nameBlock.setChildren([a.name]);
@@ -6512,7 +6512,7 @@
                 var timeStr = "";
                 if (!deleted) {                    
                     if (time) timeStr = Util.timeSince(time);
-                    if (this.publicId) timeStr += " :: /" + this.publicId;
+                    if (this.publicId) timeStr += " /" + this.publicId;
                     if (this.publicId && this.jsonScript) {
                         if (this.jsonScript.ishidden)
                             timeStr += lf(" [hidden]")
@@ -9452,7 +9452,7 @@
                         textDiv,
                         div("sdCmtMeta", [
                                 Util.timeSince(c.time),
-                                span("sdCmtId", " :: /" + c.id),
+                                span("sdCmtId", " /" + c.id),
                                 //div("sdCmtBtns", delBtn),
                             ]));
 
@@ -10033,7 +10033,7 @@
                                 Util.timeSince(c.time),
                                 //c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
                                 c.comments > 0 ? " " + c.comments + " comments " : null,
-                                span("sdCmtId", " :: /" + c.id),
+                                span("sdCmtId", " /" + c.id),
                             div("sdRelatedBtns", HTML.mkButton(lf("open"), () => {
                                 var b = this.browser();
                                 b.loadDetails(b.getScriptInfoById(c.id));
