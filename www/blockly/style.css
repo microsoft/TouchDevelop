@@ -98,7 +98,15 @@ body, input {
 #script-icons > *:not(:first-child) {
   display: inline-block;
   cursor: pointer;
-  padding-left: .5rem;
+  border: 2px solid currentColor;
+  border-radius: 1em;
+  height: 1.5em;
+  width: 1.5em;
+  text-align: center;  
+}
+
+#script-icons > *:not(:first-child):hover {
+    background: rgba(100,100,100,0.3);        
 }
 
 #script-icons {
@@ -212,6 +220,10 @@ body, input {
   line-height: 3.8rem;
   padding: .2rem;
   font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Symbola", sans-serif;
+}
+
+.roundsymbol:hover, .roundbutton .svg-wrapper:hover {
+    background: rgba(100,100,100,0.3);    
 }
 
 .svg-wrapper svg {
