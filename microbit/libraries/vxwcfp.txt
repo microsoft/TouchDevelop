@@ -2780,7 +2780,7 @@ action rotation(#Hc1jGwhjaC7IKMYj kind: String) returns(#nybXv9g8UNYUVvLO angle:
   #uy3Q4O9JgrSbAgzY // {help:/functions/rotation}
   #nIWWg8S2EfseNqBN // {namespace:input}
   #H8M557Nv0mthwxR5 // {weight:60}
-  #exd1NQ4dHpmAW4Is // {enum:kind:roll=0,pitch=1}
+  #exd1NQ4dHpmAW4Is // {enum:kind:pitch=0,roll=1}
   #A2S02DdTu68XAkS6 // {shim:micro_bit::getRotation}
   #KHSKxqHusXKmJ96h $x := code→acceleration("y");
   #TDpGRYYu4wknG2QD $y := - code→acceleration("x");
@@ -2790,8 +2790,10 @@ action rotation(#Hc1jGwhjaC7IKMYj kind: String) returns(#nybXv9g8UNYUVvLO angle:
   #aqZTKjLnrx3auGYS if $kind→equals("roll") then {
     #VGYsdlr44neknh2p `return` math→floor(math→rad_to_deg($roll));
   }
-  #C8bMftDsn2hjvQ5q $pitch := math→atan( - $x / ($y * math→sin($roll) + $z * math→cos($roll)));
-  #uqPa5krZh97byvdt `return` math→floor(math→rad_to_deg($pitch));
+  else {
+    #C8bMftDsn2hjvQ5q $pitch := math→atan( - $x / ($y * math→sin($roll) + $z * math→cos($roll)));
+    #uqPa5krZh97byvdt `return` math→floor(math→rad_to_deg($pitch));
+  }
 }
 #ko8AY4P56uQxR3Lx
 action note(#Y4tRTwLYNsq0niNH name: String) returns(#Shffo9ayK8aw62UV frequency: Number) {
@@ -2810,4 +2812,16 @@ action note(#Y4tRTwLYNsq0niNH name: String) returns(#Shffo9ayK8aw62UV frequency:
     #IMF8844p2G43Esg8 `return` 0;
   }
   meta sync;
+}
+#oQBH3ZAjr5l30Gy1
+action test_rotation() {
+  #LypAVSbUH5nm9UNJ // {shim:}
+  #hdpW2ZEMMT5A8CGv code→\_libinit;
+  #f3AX3jZEtzwHQqsE code→forever;
+  #W2leacY4H1Hw8aVT where `implicit` \_body\_() {
+    #xGDUqeP40Y1Av5kr $angle := code→rotation("roll");
+    #tblBtCn20WaO4kss code→show_number($angle, 150);
+  }
+  meta private;
+  meta test;
 }
