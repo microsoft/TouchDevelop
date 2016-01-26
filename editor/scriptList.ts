@@ -6970,10 +6970,11 @@
                 .then(() => this.getScriptTextAsync())
                 .then((scriptText: string) => {
                     if (!scriptText || !this.cloudHeader) return;
-                    var scriptStub = {
+                    var scriptStub = <World.ScriptStub>{
                         editorName: this.cloudHeader.editor || "touchdevelop",
                         scriptText: scriptText,
                         scriptName: this.cloudHeader.name,
+                        scriptComment: this.getDescription() || ""
                     };
                     return World.installUnpublishedAsync(this.cloudHeader.scriptId, this.cloudHeader.userId, scriptStub)
                 }).then((hd: Cloud.Header) => {
