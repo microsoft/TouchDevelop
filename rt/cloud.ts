@@ -229,7 +229,7 @@ module TDev.Cloud {
         userVoice?: string;
         tickFilter?: StringMap<number>;
         primaryLocale: string;
-        uploader?: boolean;
+        uploader?: string;
         cloudId: string;
         microbitGitTag: string;
         

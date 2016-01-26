@@ -2000,10 +2000,10 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
             
-            if (uploader && Browser.isDesktop && Browser.isWindows && Cloud.config.uploader) {
+            if (uploader && Cloud.config.uploader) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
                     lf("Tired of copying the .hex file? "),
-                    HTML.mkA("", "https://www.touchdevelop.com/microbituploader", "blank", lf("Try the uploader!")))
+                    HTML.mkA("", Cloud.config.uploader, "blank", lf("Get the tools!")))
                 );
             }
             
