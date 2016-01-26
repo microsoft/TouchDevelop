@@ -1281,6 +1281,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "unplot",
     args: [{ field: "x" }, { field: "y" } ]
   },
+  device_stop_animation: {
+    namespace: "led",
+    f: "stop animation",
+    args: []
+  },
   device_point: {
     namespace: "led",
     f: "point",

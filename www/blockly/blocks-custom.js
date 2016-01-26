@@ -623,6 +623,18 @@ Blockly.Blocks['device_unplot'] = {
   }
 };
 
+Blockly.Blocks['device_stop_animation'] = {
+  init: function() {
+    this.setHelpUrl('https://www.microbit.co.uk/functions/stop-animation');
+    this.setColour(blockColors.led);
+    this.appendDummyInput()
+        .appendField("stop animation");
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setTooltip('Cancels all current and pending animations.');
+  }
+};
+
 //https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#jw5b4i
 Blockly.Blocks['device_point'] = {
   init: function() {
