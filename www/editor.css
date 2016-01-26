@@ -1882,9 +1882,7 @@ span.errorSq .kw
 }
 
 .externalEditorHelp {
-    margin-left:1em;
-    margin-right:1em;
-    margin-top:1em;
+    padding:1em 1em 1em 1em;
     font-size:0.6em;
     overflow:auto;
 }
