@@ -659,13 +659,14 @@ Blockly.Blocks['device_plot_bar_graph'] = {
     this.setHelpUrl('https://www.microbit.co.uk/functions/plot-bar-graph');
     this.setColour(blockColors.led);
     this.appendDummyInput()
-        .appendField("plot bar graph of");
+        .appendField("plot bar graph");
     this.appendValueInput("value")
-        .setCheck("Number");
+        .setCheck("Number")
+        .appendField("of");
     this.appendValueInput("high")
         .setCheck("Number")
         .appendField("up to");
-    this.setInputsInline(true);
+   // this.setInputsInline(true);
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setTooltip('Displays a bar graph of the value compared to high.');
