@@ -2705,7 +2705,7 @@ action map(#xDrpNVDYcOP4xPyM value: Number, #W7lLKHDJCBcfFWfx from_low: Number, 
   #Tft9hSpV4N3FKVO6 // {help:functions/map}
   #xCn7AaB8RuB8qFVD // {namespace:pins}
   #dnQlRSL4btf2ExhK // {weight:40}
-  #uc5IndedDZWZMEwV `return` ($value - $from_low) * ($to_high - $to_low) / ($from_high - $from_low) + $from_low;
+  #uc5IndedDZWZMEwV `return` ($value - $from_low) * ($to_high - $to_low) / ($from_high - $from_low) + $to_low;
   meta sync;
 }
 #g4a4jkTOoyzp82wv
