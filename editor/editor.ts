@@ -2000,12 +2000,12 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
             
-            if (uploader && Cloud.config.uploader) {
+            /*if (uploader && Cloud.config.uploader) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
                     lf("Tired of copying the .hex file? "),
                     HTML.mkA("", Cloud.config.uploader, "blank", lf("Get the tools!")))
                 );
-            }
+            }*/
             
             if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
