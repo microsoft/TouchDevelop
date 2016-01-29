@@ -39,6 +39,7 @@ var spritePropertyDropdown = [
   ["x", "x"],
   ["y", "y"],
   ["direction", "direction"],
+  ["blink", "blink"],
   ["brightness", "brightness"]
 ];
 

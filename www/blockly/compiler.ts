@@ -1490,6 +1490,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
       f: "change direction by",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
+  game_sprite_change_blink: {
+      isExtensionMethod: true,
+      f: "change blink by",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
   game_sprite_change_brightness: {
       isExtensionMethod: true,
       f: "change brightness by",
@@ -1508,6 +1513,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   game_sprite_set_direction: {
       isExtensionMethod: true,
       f: "set direction",
+      args: [{ field: "sprite" } ,{ field: "value" }]
+  },
+  game_sprite_set_blink: {
+      isExtensionMethod: true,
+      f: "set blink",
       args: [{ field: "sprite" } ,{ field: "value" }]
   },
   game_sprite_set_brightness: {
@@ -1543,6 +1553,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   game_sprite_direction: {
       isExtensionMethod: true,
       f: "direction",
+      args: [{ field: "sprite" }]
+  },
+  game_sprite_blink: {
+      isExtensionMethod: true,
+      f: "blink",
       args: [{ field: "sprite" }]
   },
   game_sprite_brightness: {

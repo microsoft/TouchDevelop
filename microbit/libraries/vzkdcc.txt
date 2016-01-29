@@ -88,6 +88,7 @@ table Led_Sprite {
     #sdXbuHxH9qCkC7qR \_y : Number
     #eTU9ge4joHCJTqwK \_dir : Number
     #CLRbdVAs4KoUqa4G \_brightness : Number
+    #j4ZDeRimsQwonSek \_blink : Number
   }
 }
 #xbp2Y1F2yQjR1gEi
@@ -117,6 +118,11 @@ action init() {
   #ORPuncsI5B4zWKsC if data→img→is_invalid then {
     #xW1383xeJNO22s2z data→img := image[lib micro\u003abit] →create_image("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0");
     #RhS9YdgJ5X2DrEy1 data→sprites := create→Collection_of→\u2339Led_Sprite;
+    #mLM9Xvcp2MUURJ2o basic[lib micro\u003abit] →forever;
+    #f8294LK1k6meNU80 where `implicit` \_body\_() {
+      #WkUDkEISz4deLXyq basic[lib micro\u003abit] →pause(30);
+      #C2A2hbqvfB4G49S2 code→plot;
+    }
   }
   meta private;
   meta sync;
@@ -128,11 +134,18 @@ var sprites : Collection[ * Led_Sprite] {
 #mFH9LyIh4pa2Goe8
 action plot() {
   #zMVFcsyhZHmabHaV // Plots the current sprites on the screen
+  #OZV0I9V2oA2dv7zh $now := input[lib micro\u003abit] →running_time;
   #Q5smeV7QsSwvEXau data→img→clear;
   #sUh5ANmEJC9YzA6C for 0 ≤ i < data→sprites→count do {
     #cngEXkIoZe8PB6iQ $ps := data→sprites→at($i);
     #xvfBtyPgxfnWShil if $ps→\_brightness > 0 then {
-      #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+      #zpiTrj2PTmpmArwG $r := 0;
+      #Wo7d24Z1wBHCNlEM if $ps→\_blink > 0 then {
+        #eOh4Cz98WEQhStbQ $r := math→mod($now / $ps→\_blink, 2);
+      }
+      #xYX47qOm5Ljyl8vf if $r = 0 then {
+        #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+      }
     }
   }
   #xMy88FrS4AY8GpKp data→img→plot_image(0);
@@ -403,6 +416,7 @@ action delete(#TqK6aquLm37xVsNH sprite: * Led_Sprite) {
 action test_pong() {
   #i8JqKk4Qc1tXPvFb // {shim:}
   #s2X9VygZOY29nARC $paddle := code→create_sprite(0, 2);
+  #NBrpqVUuuENIGkHh $paddle→set_blink(100);
   #li2Xx982HOn3o2VB $ball := code→create_sprite(4, 1);
   #vb0CkZtaWnHnk1XU $ball→set_direction( - 45);
   #T5sAL25TVftlfVcf input[lib micro\u003abit] →on_button_pressed("A");
@@ -430,25 +444,24 @@ action test_pong() {
   meta private;
   meta test;
 }
-#xk4G3Wg3vzY5HLQv meta import micro\u003abit_game {
-  pub "zibjkk"
-  usage {
-    action `sync` score() returns(score: Number)
-    action `sync` set_score(value: Number)
-    action `sync` life() returns(life: Number)
-    action `async` set_life(value: Number)
-    action `sync` add_score(points: Number)
-    action `async` add_life(lives: Number)
-    action `async` start_countdown(ms: Number)
-    action `async` game_over()
-    action `async` current_time() returns(ms: Number)
-    action `async` remove_life(life: Number)
-    action `async` level_up()
-    action `async` level() returns(lv: Number)
-    action `async` start_stopwatch()
-    action `sync` is_running() returns(running: Boolean)
-    action `async` show_score()
-  }
-  #xKjaRnzrFnF5STE2 resolve micro\u003abit = ♻ micro\u003abit with {
-  }
+#UxwYpEnnSWg0DNxW
+action set_blink(#aKrr34Wgo3kkbwZp sprite: * Led_Sprite, #hqkyJK2pO17MsVDC ms: Number) {
+  #IwFtTdIGBNUXLH5Y // Sets the blink duration interval in millisecond.
+  #x9O466bk8ufa2Yio // {hints:ms:100,50,200}
+  #xg2e74XGOsfxy48l $sprite→\_blink := math→clamp(0, 10000, $ms);
+  meta sync;
+}
+#vjw2ol9RXAfcugGH
+action change_blink_by(#tiHtDdJLNoz1vvYz @this: * Led_Sprite, #xYGs397pRbQfSJYL ms: Number) {
+  #x7mcAB7o2E4JTjLx // Changes the ``blink`` duration by the given amount of millisecons
+  #xRtxfoag4GzP4P5w // {hints:ms:10}
+  #H16162bYai4of4DQ $@this→set_blink($@this→\_blink + $ms);
+  meta sync;
+}
+#zIjNoKzrTHYAVS9A
+action blink(#xfOf8pD0DexU1uz2 @this: * Led_Sprite) returns(#xTF5bE4QTqBPBl8X r: Number) {
+  #fasvxj1L7NBocnta // Reports the ``blink`` duration of a sprite
+  #PlrHp3HKOnu50Qzg // {action:ignoreReturn}
+  #m4hy2L2dtnFC00Pk `return` $@this→\_blink;
+  meta sync;
 }
