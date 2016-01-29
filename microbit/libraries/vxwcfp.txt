@@ -2217,7 +2217,7 @@ action show_leds(#Agy1tNVQeIcg2pFD leds: String, #H23Wq0aPH08LnwS6 ms: Number) {
 }
 #t4AKY0PCv6CBzZ12
 action play_tone(#zExdWNZANFRC5nyu frequency: Number, #Ulhn7NcyJhmRukqz ms: Number) {
-  #RQfvAHuFsy3gBARR // Plays a music tone through pin ``P0`` for the given duration.
+  #RQfvAHuFsy3gBARR // Plays a tone through pin ``P0`` for the given duration.
   #cyajATGMs74bzPW7 // {help:functions/play-tone}
   #xQkMwqu2Oa6nrGiE // {namespace:music}
   #ZTzyTPXsUFIyRaeU // {weight:90}
@@ -2577,7 +2577,7 @@ action test_play_note() {
 }
 #xSM8dUbL7z4962Uq
 action ring_tone(#x6LSvAzKrDJ17xu5 frequency: Number) {
-  #xPhZkakRDj6rdLie // Plays a music tone through pin ``P0``.
+  #xPhZkakRDj6rdLie // Plays a tone through pin ``P0``.
   #Io3qQ3JyDbVd2NVV // {help:functions/ring-tone}
   #Tt9V48fB99uH7oPY // {namespace:music}
   #YGzmuem9F35GsbhE // {weight:80}
@@ -2786,7 +2786,7 @@ action rotation(#Hc1jGwhjaC7IKMYj kind: String) returns(#nybXv9g8UNYUVvLO angle:
 }
 #ko8AY4P56uQxR3Lx
 action note(#Y4tRTwLYNsq0niNH name: String) returns(#Shffo9ayK8aw62UV frequency: Number) {
-  #x2rK4VyqeesyxDoG // Gets the frequency of a note.
+  #x2rK4VyqeesyxDoG // This function is obsolete. Please use ``music->note frequency`` instead.
   #j07ppvwZ0wXrU4MB // {enum:name:C=262,C#=277,D=294,Eb=311,E=330,F=349,F#=370,G=392,G#=415,A=440,Bb=466,B=494,C3=131,C#3=139,D3=147,Eb3=156,E3=165,F3=175,F#3=185,G3=196,G#3=208,A3=220,Bb3=233,B3=247,C4=262,C#4=277,D4=294,Eb4=311,E4=330,F4=349,F#4=370,G4=392,G#4=415,A4=440,Bb4=466,B4=494,C5=523,C#5=555,D5=587,Eb5=622,E5=659,F5=698,F#5=740,G5=784,G#5=831,A5=880,Bb5=932,B5=989}
   #rBsuxzJQpYkPcNvY // {shim:TD_ID}
   #x2imSmluVwjKgKJq // {namespace:music}
@@ -2870,4 +2870,14 @@ action set_display_mode(#WTg2PtS86SYIQDt0 mode: String) {
 #hjjZvF3ZOHXgRyFu
 var \_greyscale : Boolean {
   transient = true;
+}
+#g0ss4j1eLk5ynyUt
+action play_note(#bHaFCNEEJaK991Yo frequency: Number, #TcObkTO93uKAovfA ms: Number) {
+  #xgZagGizmoldZ7s1 // This function is obsolete. Please use ``music->play tone`` instead.
+  #xLfJimnAWhsIU1wq // {help:functions/play-tone}
+  #R0wMYnIMaWgjqZan // {namespace:music}
+  #VfhIF1cNxbzbYO2J // {weight:0}
+  #fc2nyHYoM4jaKZJl // {hints:frequency:440}
+  #Neq372aA2RIBI0lX // {hints:ms:1000}
+  #xoBbd94UdCwRCF99 code→play_tone($frequency, $ms);
 }
