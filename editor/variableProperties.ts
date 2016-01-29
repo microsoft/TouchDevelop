@@ -725,6 +725,23 @@ module TDev
             m.show();            
         }
 
+        function askImportOrUploadAsync(file: File) {
+            if (!file) return Promise.as([])
+
+            var res = new PromiseInv()
+
+            if (Cloud.hasPermission("post-art-hex") && /\.hex$/i.test(file.name))
+            {
+                ModalDialog.askMany(lf("Import or upload?"), 
+                    lf("You have dropped a hex file and you have permission to upload it. Would you like to import the file, or upload it?"),
+                    {
+                        "import": () => res.success(handleImportFilesAsync([file])),
+                        "upload": () => res.success([])
+                    })
+            } else return handleImportFilesAsync([file])
+            return res
+        }
+
         export function handleImportFilesAsync(files: File[]) {
             if (!files || !files.length) return Promise.as([]);
             
@@ -841,23 +858,36 @@ module TDev
         
         function uploadFile(file: File) {
             if (!file) return;
-                    
-            handleImportFilesAsync([file])
+
+            var fileType = file.type
+            var extension = file.name.replace(/.*\./, "").toLowerCase()
+            var fileTypeOverride = ""
+
+            // sniff extension if needed
+            if (!fileType) 
+                Object.keys(HTML.documentMimeTypes).forEach(k => {
+                    if (extension == HTML.documentMimeTypes[k]) {
+                        fileType = k
+                        fileTypeOverride = k
+                    }
+                })
+
+            askImportOrUploadAsync(file)
                 .then(guids => {
                     if (guids.length > 0) return;
                     if (Cloud.anonMode(lf("uploading art"))) return;
-                    var isDoc = HTML.documentMimeTypes.hasOwnProperty(file.type)
+                    var isDoc = HTML.documentMimeTypes.hasOwnProperty(fileType)
                     var sizeLimit = 1
                     if (isDoc) sizeLimit = 8
                     if (file.size > sizeLimit * 1024 * 1024) {
                         ModalDialog.info(lf("file too big"), lf("sorry, the file is too big (max {0}Mb)", sizeLimit));
                     } else {
                         var name = file.name;
-                        var m = /^([\w ]+)(\.[a-z0-9]+)$/i.exec(file.name);
+                        var m = /^([\w\(\)\- ]+)(\.[a-z0-9]+)$/i.exec(file.name);
                         if (m) name = m[1];
-                        if (/^image\/(png|jpeg)$/i.test(file.type)) {
+                        if (/^image\/(png|jpeg)$/i.test(fileType)) {
                             ArtUtil.uploadPictureDialogAsync({
-                                removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(file.type),
+                                removeWhite: Cloud.isRestricted() ? false : /^image\/png$/i.test(fileType),
                                 input: HTML.mkFileInput(file, 1),
                                 initialName: name,
                                 finalDialog: !Script
@@ -868,7 +898,7 @@ module TDev
                                         TheEditor.addNode(n);
                                     }
                                 });
-                        } else if (/^audio\/(mp3|mpeg)$/i.test(file.type)) {
+                        } else if (/^audio\/(mp3|mpeg)$/i.test(fileType)) {
                             ArtUtil.uploadSoundDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshSoundResource(art.name, art.wavurl);
@@ -876,7 +906,7 @@ module TDev
                                 }
                             });
                         } else if (isDoc) {
-                            ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1), name).done((art: JsonArt) => {
+                            ArtUtil.uploadDocumentDialogAsync(HTML.mkFileInput(file, 1, fileTypeOverride), name).done((art: JsonArt) => {
                                 if (art && Script) {
                                     var n = TheEditor.freshDocumentResource(art.name, art.bloburl);
                                     TheEditor.addNode(n);

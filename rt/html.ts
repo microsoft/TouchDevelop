@@ -427,17 +427,24 @@ module TDev.HTML {
         }
     }
    
-    export function fileReadAsDataURLAsync(f: File) : Promise {
+    export function fileReadAsDataURLAsync(f: File, fileType = "") : Promise {
         if (!f)
             return Promise.as(null);
-        else {
-            return new Promise((onSuccess, onError, onProgress) => {
-                var reader = new FileReader();
-                reader.onerror = (ev) => onSuccess(null);
-                reader.onload = (ev) => onSuccess(reader.result);
-                reader.readAsDataURL(f);
-            });
-        }
+
+        if (fileType)
+            return fileReadAsArrayBufferAsync(f).then(buf => {
+                            if (buf)
+                                return "data:" + fileType + ";base64," + btoa(
+                                    Util.uint8ArrayToString(new Uint8Array(buf)))
+                            else return null
+                        })
+
+        return new Promise((onSuccess, onError, onProgress) => {
+            var reader = new FileReader();
+            reader.onerror = (ev) => onSuccess(null);
+            reader.onload = (ev) => onSuccess(reader.result);
+            reader.readAsDataURL(f);
+        });
     }
 
     export var documentMimeTypes: StringMap<string> = {
@@ -448,7 +455,8 @@ module TDev.HTML {
         "application/x-zip-compressed": "zip",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx"
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+        "application/x-microbit-hex": "hex",
     };
 
     export function mkDocumentInput(maxMb: number): IInputElement {
@@ -505,20 +513,22 @@ module TDev.HTML {
         return file;
     }
 
-    export function mkFileInput(file : File, maxMb: number): IInputElement
+    export function mkFileInput(file : File, maxMb: number, fileType = ""): IInputElement
     {
         var input;
-        if (/^image\//.test(file.type)) {
+        fileType = fileType || file.type
+
+        if (/^image\//.test(fileType)) {
             input = document.createElement("img");
             input.style.maxWidth = '15em';
             input.style.maxHeight = '7em';
             input.src = file;
-            fileReadAsDataURLAsync(file).done(url => input.src = url);
-        } else if (/^audio\//.test(file.type)) {
+            fileReadAsDataURLAsync(file, fileType).done(url => input.src = url);
+        } else if (/^audio\//.test(fileType)) {
             input = document.createElement("audio");
             (<any>input).crossorigin = "anonymous";
             input.src = file;
-            fileReadAsDataURLAsync(file).done(url => input.src = url);
+            fileReadAsDataURLAsync(file, fileType).done(url => input.src = url);
         } else {
             input = div('wall-textbox', lf("{0} {1}Kb", file.name, Math.ceil(file.size / 1000)));
         }
@@ -526,7 +536,7 @@ module TDev.HTML {
         return <IInputElement>{
             element : input,
             validate : () => null,
-            readAsync: (): Promise => fileReadAsDataURLAsync(file)
+            readAsync: (): Promise => fileReadAsDataURLAsync(file, fileType)
         };
     }
 
@@ -935,7 +945,7 @@ module TDev.HTML {
         browserDownloadUInt8Array(buf, name, contentType);
     }
     
-    export function browserDownloadUInt8Array(buf: Uint8Array, name: string, contentType: string = "octet/stream") {        
+    export function browserDownloadUInt8Array(buf: Uint8Array, name: string, contentType: string = "octet/stream") {
         try {
             if (typeof saveAs !== "undefined") {
                 var b = new Blob([buf], { type: contentType })
