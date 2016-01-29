@@ -12,73 +12,6 @@ action example() {
   #xPbBQ4T5AZXIhcZ6 // {shim:}
   meta private;
 }
-#fzxa4xOS5OcSs43F meta import micro\u003abit {
-  pub "jvkxya"
-  usage {
-    type Image
-    action `sync` \_libinit()
-    action `async` pause(ms: Number)
-    action `sync` clear_screen()
-    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
-    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
-    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
-    action `sync` plot(x: Number, y: Number)
-    action `sync` point(x: Number, y: Number) returns(on: Boolean)
-    action `async` show_string(text: String, interval: Number)
-    action `sync` unplot(x: Number, y: Number)
-    action `sync` on_button_pressed(name: String, body: Action)
-    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
-    action `sync` compass_heading() returns(degrees: Number)
-    action `sync` acceleration(dimension: String) returns(millig: Number)
-    action `sync` digital_write_pin(name: String, value: Number)
-    action `sync` digital_read_pin(name: String) returns(value: Number)
-    action `sync` analog_read_pin(name: String) returns(value: Number)
-    action `sync` analog_write_pin(name: String, value: Number)
-    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
-    action `sync` brightness() returns(brightness: Number)
-    action `sync` set_brightness(value: Number)
-    action `async` show_animation(leds: String, interval: Number)
-    action `sync` running_time() returns(now: Number)
-    action `async` show_number(value: Number, interval: Number)
-    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
-    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
-    action `sync` clear(img: ♻ micro\u003abit → Image)
-    action `sync` in_background(body: Action)
-    action `async` calibrate()
-    action `sync` forever(body: Action)
-    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
-    action `sync` on_pin_pressed(name: String, body: Action)
-    action `sync` tell_camera_to(@event: String)
-    action `sync` raise_alert_to(@event: String)
-    action `async` on_notified(@event: String, body: Action)
-    action `sync` notify_event_registration(evid: String)
-    action `sync` add_button(text: String, @action: Action)
-    action `sync` reset()
-    action `sync` warning(message: String)
-    action `sync` analog_set_period(pin: String, micros: Number)
-    action `sync` analog_set_pitch_pin(name: String)
-    action `async` analog_pitch(frequency: Number, ms: Number)
-    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
-    action `async` show_leds(leds: String, ms: Number)
-    action `async` play_tone(frequency: Number, ms: Number)
-    action `sync` note_frequency(name: String) returns(frequency: Number)
-    action `sync` plot_leds(leds: String)
-    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
-    action `sync` temperature() returns(temp: Number)
-    action `sync` stop_animation()
-    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
-    action `sync` queue_event(body: Action, name: String)
-    action `async` ring_tone(frequency: Number)
-    action `sync` tell_remote_control_to(@event: String)
-    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
-    action `sync` magnetic_force(dimension: String) returns(millig: Number)
-    action `sync` servo_write_pin(name: String, value: Number)
-    action `sync` servo_set_pulse(pin: String, micros: Number)
-    action `async` rest(ms: Number)
-    action `async` rotation(kind: String) returns(angle: Number)
-    action `sync` note(name: String) returns(frequency: Number)
-  }
-}
 #BVGhpbmca
 table Led_Sprite {
   type = "Object";
@@ -118,10 +51,14 @@ action init() {
   #ORPuncsI5B4zWKsC if data→img→is_invalid then {
     #xW1383xeJNO22s2z data→img := image[lib micro\u003abit] →create_image("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0");
     #RhS9YdgJ5X2DrEy1 data→sprites := create→Collection_of→\u2339Led_Sprite;
+    #SaBsOzam1nmkE90K led[lib micro\u003abit] →set_display_mode("greyscale");
     #mLM9Xvcp2MUURJ2o basic[lib micro\u003abit] →forever;
     #f8294LK1k6meNU80 where `implicit` \_body\_() {
       #WkUDkEISz4deLXyq basic[lib micro\u003abit] →pause(30);
       #C2A2hbqvfB4G49S2 code→plot;
+      #MIM8NVr4S1JzyKS4 if game[lib micro\u003abit_game] →is_game_over then {
+        #vdr7cTGcwj9nFbuE basic[lib micro\u003abit] →pause(600);
+      }
     }
   }
   meta private;
@@ -134,6 +71,9 @@ var sprites : Collection[ * Led_Sprite] {
 #mFH9LyIh4pa2Goe8
 action plot() {
   #zMVFcsyhZHmabHaV // Plots the current sprites on the screen
+  #Ly2t4y22wIqGBVJ4 if game[lib micro\u003abit_game] →is_game_over then {
+    #U44b0BkVL4cQWrH2 `return` ;
+  }
   #OZV0I9V2oA2dv7zh $now := input[lib micro\u003abit] →running_time;
   #Q5smeV7QsSwvEXau data→img→clear;
   #sUh5ANmEJC9YzA6C for 0 ≤ i < data→sprites→count do {
@@ -144,7 +84,7 @@ action plot() {
         #eOh4Cz98WEQhStbQ $r := math→mod($now / $ps→\_blink, 2);
       }
       #xYX47qOm5Ljyl8vf if $r = 0 then {
-        #vsryWRdItzY5w8Gf data→img→set_pixel($ps→\_x, $ps→\_y, true);
+        #vsryWRdItzY5w8Gf data→img→set_pixel_brightness($ps→\_x, $ps→\_y, data→img→pixel_brightness($ps→\_x, $ps→\_y) + $ps→\_brightness);
       }
     }
   }
@@ -417,6 +357,7 @@ action test_pong() {
   #i8JqKk4Qc1tXPvFb // {shim:}
   #s2X9VygZOY29nARC $paddle := code→create_sprite(0, 2);
   #NBrpqVUuuENIGkHh $paddle→set_blink(100);
+  #pYCFQ2QktMJs93Qx $paddle→set_brightness(8);
   #li2Xx982HOn3o2VB $ball := code→create_sprite(4, 1);
   #vb0CkZtaWnHnk1XU $ball→set_direction( - 45);
   #T5sAL25TVftlfVcf input[lib micro\u003abit] →on_button_pressed("A");
@@ -464,4 +405,97 @@ action blink(#xfOf8pD0DexU1uz2 @this: * Led_Sprite) returns(#xTF5bE4QTqBPBl8X r:
   #PlrHp3HKOnu50Qzg // {action:ignoreReturn}
   #m4hy2L2dtnFC00Pk `return` $@this→\_blink;
   meta sync;
+}
+#x0npij8XjopQavcK meta import micro\u003abit_game {
+  pub "xgqnpl"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` game_over()
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` start_stopwatch()
+    action `sync` is_running() returns(running: Boolean)
+    action `async` show_score()
+    action `sync` is_game_over() returns(over: Boolean)
+  }
+  #zC5J5ehItETvjAK0 resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#awExHfjoQJnV2nR1 meta import micro\u003abit {
+  pub "thflqk"
+  usage {
+    type Image
+    action `sync` \_libinit()
+    action `async` pause(ms: Number)
+    action `sync` clear_screen()
+    action `sync` width(@this: ♻ micro\u003abit → Image) returns(w: Number)
+    action `async` scroll_image(@this: ♻ micro\u003abit → Image, x_offset_per_step: Number, interval: Number)
+    action `sync` button_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` plot(x: Number, y: Number)
+    action `sync` point(x: Number, y: Number) returns(on: Boolean)
+    action `async` show_string(text: String, interval: Number)
+    action `sync` unplot(x: Number, y: Number)
+    action `sync` on_button_pressed(name: String, body: Action)
+    action `async` show_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` compass_heading() returns(degrees: Number)
+    action `sync` acceleration(dimension: String) returns(millig: Number)
+    action `sync` digital_write_pin(name: String, value: Number)
+    action `sync` digital_read_pin(name: String) returns(value: Number)
+    action `sync` analog_read_pin(name: String) returns(value: Number)
+    action `sync` analog_write_pin(name: String, value: Number)
+    action `sync` create_image(leds: String) returns(img: ♻ micro\u003abit → Image)
+    action `sync` brightness() returns(brightness: Number)
+    action `sync` set_brightness(value: Number)
+    action `async` show_animation(leds: String, interval: Number)
+    action `sync` running_time() returns(now: Number)
+    action `async` show_number(value: Number, interval: Number)
+    action `sync` set_pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Boolean)
+    action `sync` pixel(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Boolean)
+    action `sync` clear(img: ♻ micro\u003abit → Image)
+    action `sync` in_background(body: Action)
+    action `async` calibrate()
+    action `sync` forever(body: Action)
+    action `sync` pin_is_pressed(name: String) returns(pressed: Boolean)
+    action `sync` on_pin_pressed(name: String, body: Action)
+    action `sync` tell_camera_to(@event: String)
+    action `sync` raise_alert_to(@event: String)
+    action `async` on_notified(@event: String, body: Action)
+    action `sync` notify_event_registration(evid: String)
+    action `sync` add_button(text: String, @action: Action)
+    action `sync` reset()
+    action `sync` warning(message: String)
+    action `sync` analog_set_period(pin: String, micros: Number)
+    action `sync` analog_set_pitch_pin(name: String)
+    action `async` analog_pitch(frequency: Number, ms: Number)
+    action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
+    action `async` show_leds(leds: String, ms: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
+    action `sync` plot_leds(leds: String)
+    action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
+    action `sync` temperature() returns(temp: Number)
+    action `sync` stop_animation()
+    action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
+    action `sync` queue_event(body: Action, name: String)
+    action `async` ring_tone(frequency: Number)
+    action `sync` tell_remote_control_to(@event: String)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
+    action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
+    action `sync` set_display_mode(mode: String)
+  }
 }

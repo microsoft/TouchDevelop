@@ -240,6 +240,9 @@ action set_led_color(#By9YA6QxMYHWVuPB state: Number, #w3io4YAswOq422Cs led: Spr
   }
   else {
     #TJGybBt6wykGbktJ $led→set_color(data→led_on_color);
+    #W39jTBnHFjSBib2V if data→\_greyscale then {
+      #wL9uIv4tefOsQPiY $led→set_opacity(1 / 10 + 9 / 10 * math→log($state, 2) / 7);
+    }
   }
   meta private;
   meta sync;
@@ -873,7 +876,7 @@ action parse_image(#x0HNlskTjdSJeH7D leds: String) returns(#xysJj47ftGjOcxII img
   #Y31WIkDlikmi6Enb for 0 ≤ i < $rows do {
     #xuoRzFEt1jKUNb07 for 0 ≤ j < $frames * $rows do {
       #qS2DEgnlZI2rzI6E $bit := $coll→at($k);
-      #BF25h8Q5DS7t75Ol $img→leds→set_item($j, $i, $bit→to_number);
+      #BF25h8Q5DS7t75Ol $img→leds→set_item($j, $i, $bit→to_number * 255);
       #aH1dE2Wf26cTcJPy $k := $k + 1;
     }
   }
@@ -930,19 +933,11 @@ action set_pixel(#P0GQI7mqQZLddWdU @this: * Image, #E5qctGDlXgeNbS9G x: Number, 
   #xOswNPjjGMm1sUfm // Set a pixel state at position ``(x,y)``
   #InGkIRcHpl4IXVQK // {help:functions/set-pixel}
   #zIS2o2dBpWF9RDx8 // {namespace:image}
-  #xpZ7UZvq2Tr4fPY8 // {shim:micro_bit::setImagePixel}
-  #Ttlwr2BQ8yIw6IcW $x := math→round($x);
-  #BNwkMfmgM6AGCtZ3 $y := math→round($y);
-  #SSAeQ4VRV2uQEsxl if $x < 0 `or` $x ≥ $@this→leds→row_count then {
-    #xxg0vFq2rbHOOMV1 code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
-    #ZH3TRsErYzyfXgx3 `return` ;
+  #l8YA4111fgihgo2H $b := 0;
+  #mOmRFng7uyfg3XLR if $value then {
+    #ET2Fj3fuKjgQ93Hh $b := 255;
   }
-  else { #xHF8EEXFlAoY2lKx if $y < 0 `or` $y ≥ $@this→leds→column_count then {
-    #CDa2E4zfBb49ltrJ code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
-    #mWJh2S7saTBMyqGM `return` ;
-  }
-  else { } } 
-  #nOHzYIkw7kzK81UX $@this→leds→set_item($x, $y, $value→to_number);
+  #fYNF76FqaZnZ4tL1 $@this→set_pixel_brightness($x, $y, $b);
   meta sync;
 }
 #xNKMIAKQZ2XYQAqe
@@ -952,19 +947,7 @@ action pixel(#TVxswFwyZs0INV5W @this: * Image, #QLIezAtdKSgv2ohr x: Number, #yMN
   #xwxPjJYSo2B5Vkkq // {namespace:image}
   #JTtgaUATi8Oo7he4 // {hints:x:0,1,2,3,4}
   #Itieq6wpbGiz7w6r // {hints:y:0,1,2,3,4}
-  #BxesDHsvnmMZkenI // {shim:micro_bit::getImagePixel}
-  #fg2Mv5bXgzcqjXUU $x := math→round($x);
-  #xagn2bFXho7BIPi7 $y := math→round($y);
-  #B3iuDYg6RgNn8B3B if $x < 0 `or` $x ≥ $@this→leds→row_count then {
-    #xG93gCiHc1YxoaZM code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
-    #VYUf4BJs3gI77sMd `return` false;
-  }
-  else { #xd24JUL30hN2r5ke if $y < 0 `or` $y ≥ $@this→leds→column_count then {
-    #S4SHEhCcCrgCOl5Y code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
-    #MubndmgVKnESr4QU `return` false;
-  }
-  else { } } 
-  #xvb9SDkT0J0NZqMf `return` $@this→leds→item($x, $y) ≠ 0;
+  #KUGL4al4LBtoR7uX `return` $@this→pixel_brightness($x, $y) > 0;
   meta sync;
 }
 #aqdR2AyKfGIWjWKX
@@ -1536,7 +1519,7 @@ action init_font() {
         #Krg7mRods3Dl3k2y $char := $font_rows→at($c * 5 + $row);
         #PWFqQxwKPwt6h2Wd for 0 ≤ col < 5 do {
           #NOwv6OryF0clX7lo if bits→and_uint32($char, bits→shift_left_uint32(1, $col)) ≠ 0 then {
-            #Cx4707D9Ly7f7wl3 data→font→leds→set_item($c * 5 + 4 - $col, $row, 1);
+            #Cx4707D9Ly7f7wl3 data→font→leds→set_item($c * 5 + 4 - $col, $row, 255);
           }
         }
       }
@@ -2012,6 +1995,12 @@ action test_pixel() {
   #SGt5eFaUBCizckCO $img := code→create_image("0 1 0 0 0 1 1 1 1 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1\n0 1 0 0 0 0 0 0 0 1");
   #rsIi4z5FSvXfEUbY $img→set_pixel(8, 0, false);
   #T5DS5wjBwJlWRDyx $img→scroll_image(1, 400);
+  #xRajHiRTS3WVG9eQ // grey scale
+  #x6EPsTOBC5Stwv2i code→set_display_mode("greyscale");
+  #YxThP9Zpstv3c0GU for 0 ≤ j < 5 do {
+    #ctiRFQOKYtpl58Rb $img→set_pixel_brightness(9, $j, math→pow(2, $j));
+  }
+  #v7M3MZfrjb3ul0Hz $img→plot_image(5);
   meta private;
   meta test;
 }
@@ -2824,4 +2813,61 @@ action test_rotation() {
   }
   meta private;
   meta test;
+}
+#xOyhkiuukKoXsSf3
+action set_pixel_brightness(#MXRjgwVpEVBRFqeR @this: * Image, #lV45czXkvrdYIaFe x: Number, #VziHcAryoNtz2N0K y: Number, #FGY5E61J6hOffs9e value: Number) {
+  #xjJS62ADi09BoR8h // Set a pixel state at position ``(x,y)``
+  #gY4qfnINky41OVAC // {help:functions/set-pixel}
+  #b2ukvr2YqvGXd6We // {namespace:image}
+  #nWnpK22Wo0dDCaec // {shim:micro_bit::setImagePixel}
+  #RuFHoZWWNJ7nwFbf $x := math→floor($x);
+  #lULDn4tozSW2Swy5 $y := math→floor($y);
+  #cAZh6VFQFZ4HCzP1 if $x < 0 `or` $x ≥ $@this→leds→row_count then {
+    #xAfMmCVOUHZpho4h code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
+    #x2K2FAWG4d6E2s5I `return` ;
+  }
+  else { #mrBUjDL4OsPrtTvk if $y < 0 `or` $y ≥ $@this→leds→column_count then {
+    #HbOQG7UJVWq2B1kb code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
+    #oIipripGXsEtvKys `return` ;
+  }
+  else { } } 
+  #xLygH81fjmSis6kt $@this→leds→set_item($x, $y, $value);
+  meta sync;
+}
+#ZHNC7Mxlv12jRmo6
+action pixel_brightness(#uAEF3o8d5wYosjdT @this: * Image, #S7i6zQSOqBnuNhu5 x: Number, #q9VHqzfRTnI9XDDn y: Number) returns(#FECK2kiFRCeWmF5l state: Number) {
+  #ZAYbbyQljcBromJm // Get the pixel state at position ``(x,y)``
+  #s1qXnDy7759gbelE // {help:functions/pixel}
+  #xg27bIuNvP0nRcPO // {namespace:image}
+  #DWYzPeCDN4GNxa2l // {hints:x:0,1,2,3,4}
+  #cRWiaeT8TKShGdR7 // {hints:y:0,1,2,3,4}
+  #BjJ8orBlo6iJ0NrJ // {shim:micro_bit::getImagePixel}
+  #r3TTpBg0VX2b6DHN $x := math→round($x);
+  #dfZYFPmXS7GKLohf $y := math→round($y);
+  #ti4xQsZ8cO2NCsd4 if $x < 0 `or` $x ≥ $@this→leds→row_count then {
+    #fnFG55i42XiJcdrv code→warning("x should be between 0 and " →concat(($@this→leds→row_count - 1)→to_string));
+    #g27fXMxF9GIeePsv `return` 0;
+  }
+  else { #JUUkH61WF1tcL28p if $y < 0 `or` $y ≥ $@this→leds→column_count then {
+    #HMKmCc6B0h2Q4cz2 code→warning("y should be between 0 and " →concat(($@this→leds→column_count - 1)→to_string));
+    #R11nLsD2zpYlRGFb `return` 0;
+  }
+  else { } } 
+  #ma6H9dmbM5CRZvzn `return` $@this→leds→item($x, $y);
+  meta sync;
+}
+#add7T3y7MNatnGny
+action set_display_mode(#WTg2PtS86SYIQDt0 mode: String) {
+  #E35ZI91OTJ2kyT6g // Sets the display mode between black and white and greyscale for rendering LEDs.
+  #b56Xmqi0Ckx0Hz4B // {enum:mode:back and white=0,greyscale=1}
+  #jhKTS5UHC8Rltnka // {shim:micro_bit::setDisplayMode}
+  #SVF4C6g4vgbWIOis // {namespace:led}
+  #jycAgxiKjEkoBwJs // {weight:1}
+  #zCgiDN8quFSVnDaT // {help:/functions/set-display-mode}
+  #awhSb2rKqSuvmbXC data→\_greyscale := $mode→equals("greyscale");
+  meta sync;
+}
+#hjjZvF3ZOHXgRyFu
+var \_greyscale : Boolean {
+  transient = true;
 }

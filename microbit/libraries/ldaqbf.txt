@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // A #microbit game library.
 #FICjbNZc86cUSakA meta import micro\u003abit {
-  pub "jvkxya"
+  pub "thflqk"
   usage {
     type Image
     action `sync` \_libinit()
@@ -72,6 +72,9 @@ meta parentIds "";
     action `async` rest(ms: Number)
     action `async` rotation(kind: String) returns(angle: Number)
     action `sync` note(name: String) returns(frequency: Number)
+    action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
+    action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
+    action `sync` set_display_mode(mode: String)
   }
 }
 #GSTBzUmgzKqh572M
@@ -201,6 +204,7 @@ action game_over() {
     #PHqtjWicyXXr3VHk code→unplug_events;
     #Guoq4pVnwlRVXTiW led[lib micro\u003abit] →stop_animation;
     #XkFnkf3J2op1RUmQ led[lib micro\u003abit] →set_brightness(255);
+    #qnqiNm6WirsquFMr led[lib micro\u003abit] →set_display_mode("back and white");
     #DQ2Ufby7NHShBjEc while true do {
       #oeKwkJj5snJoUEnm for 0 ≤ i < 8 do {
         #qN0fKrhol7iI1zpn basic[lib micro\u003abit] →clear_screen;
@@ -209,7 +213,7 @@ action game_over() {
       }
       #fYNBElDJt4VLUcV3 basic[lib micro\u003abit] →show_animation("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 0 1 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0", 100);
       #XKk2kW9RyjOsqmB1 for 0 ≤ j < 3 do {
-        #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string(" GAME OVER ", 100);
+        #bwOlN7eGtv4fFmR6 basic[lib micro\u003abit] →show_string(" GAMEOVER ", 100);
         #PZAWQZkkKMCO3f8F code→show_score;
       }
     }
@@ -398,4 +402,12 @@ action test_score() {
   #ZUqE4xmrbyn4GjFZ code→show_score;
   meta private;
   meta test;
+}
+#dwHWlvnQ2iMQzo7I
+action is_game_over() returns(#x32ZhBoC55aPFdsW over: Boolean) {
+  #j2k4LBl4jXqOt9sp // Indicates if the game is display the game over sequence.
+  #JerSvQ3nm3EA1FsL // {namespace:game}
+  #x4RgK65eS6RtgjPc // {help:/functions/game-library}
+  #IsnY41mRsPoBXboe `return` data→\_is_game_over;
+  meta sync;
 }

@@ -537,7 +537,7 @@ module TDev {
 
     "micro:bit sprites": {
       pubId: "vzkdcc",
-      depends: [ "micro:bit" ]
+      depends: [ "micro:bit", "micro:bit game" ]
     },
     
     "micro:bit screen": {

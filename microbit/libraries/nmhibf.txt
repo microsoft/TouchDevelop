@@ -10,7 +10,7 @@ action main() {
   #xP1meKgKx2EeA03s skip;
 }
 #SVXVucr3dRK4J6Y7 meta import micro\u003abit {
-  pub "nvzoiu"
+  pub "xytpsi"
   usage {
     type Image
     action `sync` \_libinit()
@@ -73,6 +73,10 @@ action main() {
     action `sync` servo_set_pulse(pin: String, micros: Number)
     action `async` rest(ms: Number)
     action `async` rotation(kind: String) returns(angle: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
+    action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
+    action `sync` set_display_mode(mode: String)
   }
 }
 #Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
@@ -90,7 +94,7 @@ action main() {
   }
 }
 #x2LHHGswL451jMCn meta import micro\u003abit_game {
-  pub "zibjkk"
+  pub "rwbwnc"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -107,6 +111,7 @@ action main() {
     action `async` start_stopwatch()
     action `sync` is_running() returns(running: Boolean)
     action `async` show_score()
+    action `sync` is_game_over() returns(over: Boolean)
   }
   #uTSBhGGRoLDgCI2N resolve micro\u003abit = ♻ micro\u003abit with {
   }
@@ -124,7 +129,7 @@ action main() {
   }
 }
 #F7U0eegUWemWOHIj meta import micro\u003abit_sprites {
-  pub "fxyeei"
+  pub "xbpfet"
   usage {
     type Led_Sprite
     action `async` create_sprite(x: Number, y: Number) returns(r: ♻ micro\u003abit_sprites → Led_Sprite)
@@ -151,16 +156,22 @@ action main() {
     action `sync` change_direction_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, angle: Number)
     action `sync` invalid_sprite() returns(r: ♻ micro\u003abit_sprites → Led_Sprite)
     action `sync` delete(sprite: ♻ micro\u003abit_sprites → Led_Sprite)
+    action `sync` set_blink(sprite: ♻ micro\u003abit_sprites → Led_Sprite, ms: Number)
+    action `sync` change_blink_by(@this: ♻ micro\u003abit_sprites → Led_Sprite, ms: Number)
+    action `sync` blink(@this: ♻ micro\u003abit_sprites → Led_Sprite) returns(r: Number)
+  }
+  #kOOTnWpb6q3mwRs3 resolve micro\u003abit_game = ♻ micro\u003abit_game with {
   }
   #yf5JlXsz20jG8d7Y resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
 #dXUNy3TCtcUuQHgo meta import micro\u003abit_music {
-  pub "zbiwoq"
+  pub "pzngyn"
   usage {
     action `sync` tempo() returns(bpm: Number)
     action `async` change_tempo_by(bpm: Number)
     action `async` set_tempo(bpm: Number)
+    action `sync` beat() returns(ms: Number)
   }
   #Q0tEe5dsulVXEC8U resolve micro\u003abit = ♻ micro\u003abit with {
   }
