@@ -23,6 +23,7 @@ module TDev.AST {
     export var propRenames:StringMap<string> = {};
     export var crossKindRenames:StringMap<string> = {};
     export var writableLocalsInClosures = true;
+    export var allowCppCompiler = false;
 
     export function reset()
     {

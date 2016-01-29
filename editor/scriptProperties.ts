@@ -220,7 +220,7 @@ module TDev
                     ),
                 this.settingsSection = div("formLine",
                     this.isLibrary,
-                    isBeta && this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
+                    AST.allowCppCompiler && this.editor.widgetEnabled("scriptPropertiesUseCppCompiler") ? this.useCppCompiler : null,
                     this.editor.widgetEnabled("scriptPropertiesPropertyCloud") ? this.isCloud : null),
                 dbg ? div("formLine",
                     div("varLabel", lf("under the hood (dbg)")),

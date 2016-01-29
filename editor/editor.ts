@@ -2107,7 +2107,7 @@ module TDev
 
         public useNativeCompilation()
         {
-            return Cloud.useNativeCompilation || (Script && Script.usesCppCompiler())
+            return AST.allowCppCompiler && (Cloud.useNativeCompilation || (Script && Script.usesCppCompiler()))
         }
 
         private currentScriptCompiling: string;

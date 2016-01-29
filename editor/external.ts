@@ -513,7 +513,7 @@ module TDev {
               case Language.TouchDevelop:
                 fixupLibs(message1.libs);
                 // We got a TouchDevelop AST.
-                if (message1.text.useCppCompiler) {
+                if (AST.allowCppCompiler && message1.text.useCppCompiler) {
                   // The external editor demands C++ compilation. Generate the
                   // C++ code
                   compileLanguage = Language.CPlusPlus;
