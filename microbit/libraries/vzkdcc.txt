@@ -3,6 +3,7 @@ meta name "micro:bit sprites";
 meta rootId "IrNJbTSBupAi6m6b0w7EHBVL";
 meta isLibrary "yes";
 meta hasIds "yes";
+meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 #YTCiBQqlEqAR6hEl
@@ -12,7 +13,7 @@ action example() {
   meta private;
 }
 #fzxa4xOS5OcSs43F meta import micro\u003abit {
-  pub "ruqbfc"
+  pub "jvkxya"
   usage {
     type Image
     action `sync` \_libinit()
@@ -59,15 +60,15 @@ action example() {
     action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
     action `async` show_leds(leds: String, ms: Number)
-    action `async` play_note(frequency: Number, ms: Number)
-    action `sync` note(name: String) returns(frequency: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
     action `sync` queue_event(body: Action, name: String)
-    action `async` ring(frequency: Number)
+    action `async` ring_tone(frequency: Number)
     action `sync` tell_remote_control_to(@event: String)
     action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
     action `sync` magnetic_force(dimension: String) returns(millig: Number)
@@ -75,6 +76,7 @@ action example() {
     action `sync` servo_set_pulse(pin: String, micros: Number)
     action `async` rest(ms: Number)
     action `async` rotation(kind: String) returns(angle: Number)
+    action `sync` note(name: String) returns(frequency: Number)
   }
 }
 #BVGhpbmca
@@ -159,7 +161,7 @@ action move(#qvj22Zhu8Eo5aUG6 @this: * Led_Sprite, #f3DRVSobQuPZvt4O leds: Numbe
   }
   else { #Dm3TvL4C2BDNYlpJ if $@this→\_dir = - 45 then {
     #xLloUv2wDidasof7 $@this→\_x := $@this→\_x - $leds;
-    #Q4eMk8ku2tzRTWmV $@this→\_y := $@this→\_y + $leds;
+    #Q4eMk8ku2tzRTWmV $@this→\_y := $@this→\_y - $leds;
   }
   else { #TkGM1qH4v7YjA3Dj if $@this→\_dir = - 90 then {
     #wiV8WWkDvoYq47YZ $@this→\_x := $@this→\_x - $leds;
@@ -206,23 +208,31 @@ action if_on_edge\u002c_bounce(#HV4x3j8JF159462w @this: * Led_Sprite) {
     #mhlBDRbCxrRN2GJh $@this→\_dir := - 90;
   }
   else { #y6QrCxoz5uQ2s6Xe if $@this→\_dir = 135 `and` ($@this→\_x = 4 `or` $@this→\_y = 4) then {
-    #xSXuex4eRZT5v1LQ if $@this→\_y = 4 then {
-      #E22lLCJn4ecoqZ29 $@this→\_dir := - 45;
+    #xP7I1EvwXEbwBqmq if $@this→x = 4 `and` $@this→y = 4 then {
+      #Msc2p75THd3we4FC $@this→\_dir := - 45;
+    }
+    else { #xSXuex4eRZT5v1LQ if $@this→\_y = 4 then {
+      #E22lLCJn4ecoqZ29 $@this→\_dir := 45;
     }
     else {
       #OoLMy4bQlVjRfZeE $@this→\_dir := - 135;
     }
+    } 
   }
   else { #KO0B13gTd4WyOTav if $@this→\_dir = 180 `and` $@this→\_y = 4 then {
     #HYmYAypV2ZRjwxjR $@this→\_dir := 0;
   }
   else { #TC5SNjX4AmPPzgIq if $@this→\_dir = - 45 `and` ($@this→\_x = 0 `or` $@this→\_y = 0) then {
-    #wNngfLmvyionXaDP if $@this→\_y = 0 then {
+    #bte4O4gurLB2v8Ai if $@this→x = 0 `and` $@this→y = 0 then {
+      #x7iP8m2Y9zQkHyHh $@this→\_dir := 135;
+    }
+    else { #wNngfLmvyionXaDP if $@this→\_y = 0 then {
       #DjbzNtzG2PEVhOVc $@this→\_dir := - 135;
     }
     else {
       #Q3IgxEngGQNS1Y5t $@this→\_dir := 45;
     }
+    } 
   }
   else { #xXlWXaP45766gsVk if $@this→\_dir = - 90 `and` $@this→\_x = 0 then {
     #xpKOVFoZAzm3xyS1 $@this→\_dir := 90;
@@ -308,12 +318,14 @@ action set_y(#xe00Eqd2Sye76CcK @this: * Led_Sprite, #xUIp4QMLCBopDvKT y: Number)
 #xCdoxKQ2PYO4sDeW
 action change_y_by(#GtmKdo2M0rB6Xoxp @this: * Led_Sprite, #xnOmlrhOk7cRHCIg y: Number) {
   #nMbLdUu2E6HK3aod // Changes the ``y`` position by the given amount
+  #kq22RIc81QnunNP4 // {hints:y:1}
   #xaWt7GUOc2SDslvK $@this→go_to($@this→\_x, $@this→\_y + $y);
   meta sync;
 }
 #vaus553SVioo4jJr
 action change_x_by(#BNyURA3lrR445XJ2 @this: * Led_Sprite, #GC5f2Y5myMXFJMuk x: Number) {
   #Wa4DXXQfls07wwqI // Changes the ``x`` position by the given amount
+  #ky1UesBkqQza1YpA // {hints:x:1}
   #TE7whTqcF6AjYWvK $@this→go_to($@this→\_x + $x, $@this→\_y);
   meta sync;
 }
@@ -361,12 +373,14 @@ action brightness(#x7Z3c9xE3t1SbCOb @this: * Led_Sprite) returns(#xUzQbOrOfDuvpE
 #CflgTntqHhWbxHlW
 action change_brightness_by(#YOnjOM5Dijox14bO @this: * Led_Sprite, #XChQ7dKtgcDBImGc value: Number) {
   #QS0H5xTlm0sn0Unq // Changes the ``y`` position by the given amount
+  #O1QaAEjifPnQ8azU // {hints:value:25}
   #Jk6fyOIwYdZoztd0 $@this→set_brightness($@this→\_brightness + $value);
   meta sync;
 }
 #fe4BUMNMHkLIbNKa
 action change_direction_by(#x32MjNr12ofz2JYc @this: * Led_Sprite, #xuoTqBS6Ikir95JL angle: Number) {
   #VNIvix2ffUeRNdMx // Changes the ``direction`` position by the given amount by turning right
+  #zPHNWOxwhGlBgO69 // {hints:angle:45,90,-45,-90}
   #l2PLkh6uahGZEzIi $@this→turn_right($angle);
   meta sync;
 }
@@ -384,4 +398,57 @@ action delete(#TqK6aquLm37xVsNH sprite: * Led_Sprite) {
   #bH7rJ8stE4vJr6ZV // Deletes the sprite from the game engine. All further operation of the sprite will not have any effect.
   #KaYmbOrkjZ4CS4df data→sprites→remove($sprite);
   meta sync;
+}
+#hi6X8Z2yYBVyLkWz
+action test_pong() {
+  #i8JqKk4Qc1tXPvFb // {shim:}
+  #s2X9VygZOY29nARC $paddle := code→create_sprite(0, 2);
+  #li2Xx982HOn3o2VB $ball := code→create_sprite(4, 1);
+  #vb0CkZtaWnHnk1XU $ball→set_direction( - 45);
+  #T5sAL25TVftlfVcf input[lib micro\u003abit] →on_button_pressed("A");
+  #Xc0cWs4EfXhPU1Xi where `implicit` \_body\_() {
+    #OrYN2UYJXGDZbVBr $paddle→change_y_by( - 1);
+  }
+  #AXHWyd3kTYsJElLr input[lib micro\u003abit] →on_button_pressed("B");
+  #xregKwVEF7FuAUjf where `implicit` \_body\_() {
+    #cwZAbLXRz4aW5rkZ $paddle→change_y_by(1);
+  }
+  #xdRq7JGUl6BOhWsK basic[lib micro\u003abit] →forever;
+  #EqqnOIfFy9hTWQkt where `implicit` \_body\_() {
+    #O31nNQcgm3V9q3at basic[lib micro\u003abit] →pause(500);
+    #xNa4DdNTY3Rp2wZM $ball→move(1);
+    #OszsjBEfq4VxjnS4 if $ball→x = 0 then {
+      #tv2doKCLd8JeZj3b if $paddle→y ≠ $ball→y then {
+        #vfKYjiha0E346q6D control[lib micro\u003abit] →reset;
+      }
+    }
+    #RQqLvxZWJGUf2vau $ball→if_on_edge\u002c_bounce;
+    #NexnUUAILkC5kxqt if $ball→x = 0 then {
+      #xc1sfBAq2ujFBfj2 $ball→change_x_by(1);
+    }
+  }
+  meta private;
+  meta test;
+}
+#xk4G3Wg3vzY5HLQv meta import micro\u003abit_game {
+  pub "zibjkk"
+  usage {
+    action `sync` score() returns(score: Number)
+    action `sync` set_score(value: Number)
+    action `sync` life() returns(life: Number)
+    action `async` set_life(value: Number)
+    action `sync` add_score(points: Number)
+    action `async` add_life(lives: Number)
+    action `async` start_countdown(ms: Number)
+    action `async` game_over()
+    action `async` current_time() returns(ms: Number)
+    action `async` remove_life(life: Number)
+    action `async` level_up()
+    action `async` level() returns(lv: Number)
+    action `async` start_stopwatch()
+    action `sync` is_running() returns(running: Boolean)
+    action `async` show_score()
+  }
+  #xKjaRnzrFnF5STE2 resolve micro\u003abit = ♻ micro\u003abit with {
+  }
 }
