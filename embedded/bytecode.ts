@@ -819,10 +819,12 @@ module TDev.AST.Bytecode
     export class ReachabilityVisitor
         extends PreCompiler
     {
+        markShims = false;
+
         useAction(a:Action)
         {
             if (a.getShimName() != null) {
-                if (a._compilerInlineBody) {
+                if (this.markShims || a._compilerInlineBody) {
                     // TODO  mark stuff as used
                     a.visitorState = true;
                 }
@@ -830,6 +832,19 @@ module TDev.AST.Bytecode
             }
 
             super.useAction(a)
+        }
+    }
+
+    export function computeReachableNodes(app:App, markShims = false)
+    {
+        var prev = Script
+        try {
+            Script = app
+            var pre = new ReachabilityVisitor({});
+            pre.markShims = markShims
+            pre.run(Script)
+        } finally {
+            Script = prev
         }
     }
 
@@ -862,8 +877,7 @@ module TDev.AST.Bytecode
             var prev = Script
             try {
                 Script = this.app
-                var pre = new ReachabilityVisitor({});
-                pre.run(this.app)
+                computeReachableNodes(this.app)
 
                 this.app.librariesAndThis().forEach(l => {
                     if (l.isThis()) {
@@ -1961,8 +1975,21 @@ module TDev.AST.Bytecode
                 })
         }
 
-        if (app)
+        function isUsed(a:Action) {
+            if (a.visitorState) return true
+            var l = <LibraryRefAction>a
+            if (l.template && l.template.visitorState)
+                return true
+            return false
+        }
+
+        if (app) {
+            computeReachableNodes(app, true)
             app.librariesAndThis().forEach(l => {
+                if (!l.isThis() && !l.getPublicActions().some(isUsed)) {
+                    Util.log("skip library " + l.getName())
+                    return
+                }
                 thisErrors = ""
                 l.resolved.resources().forEach(r => {
                     if (r.getName() != "glue.cpp" && r.getName() != "glue.json") return;
@@ -1982,6 +2009,7 @@ module TDev.AST.Bytecode
                     res.errors += lf("Library {0}:\n", l.getName()) + thisErrors
                 }
             })
+        }
 
         if (res.errors)
             return res;
