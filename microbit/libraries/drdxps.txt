@@ -8,7 +8,7 @@ meta platform "current";
 meta parentIds "";
 // Specialized functions to control the screen #microbit
 #mExzaWj10ZHeHz4P meta import micro\u003abit {
-  pub "ruqbfc"
+  pub "tuzezw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -55,15 +55,15 @@ meta parentIds "";
     action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
     action `async` show_leds(leds: String, ms: Number)
-    action `async` play_note(frequency: Number, ms: Number)
-    action `sync` note(name: String) returns(frequency: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
     action `sync` queue_event(body: Action, name: String)
-    action `async` ring(frequency: Number)
+    action `async` ring_tone(frequency: Number)
     action `sync` tell_remote_control_to(@event: String)
     action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
     action `sync` magnetic_force(dimension: String) returns(millig: Number)
@@ -71,6 +71,12 @@ meta parentIds "";
     action `sync` servo_set_pulse(pin: String, micros: Number)
     action `async` rest(ms: Number)
     action `async` rotation(kind: String) returns(angle: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
+    action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
+    action `sync` set_display_mode(mode: String)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` light_level() returns(light: Number)
   }
 }
 #ljbL9TDyViQp60st
@@ -187,24 +193,24 @@ action screenshot() returns(#xqf63n34DRJFpmqH img: ♻ micro\u003abit → Image)
 #ovd9A8N30ut1go7D
 action plot_bar_graph(#hpG4t1C3SqiqVFVZ value: Number, #ZCK5n2unSOxU42XY high: Number) {
   #zOTs2HbFZSsGIcZt // Displays a vertical bar graph based on the ``value`` and ``high`` value.
-  #xlNlnrVrytCbk5TQ // {hints:high:1024}
+  #xlNlnrVrytCbk5TQ // {hints:high:1023}
   #qS76fFIpRiOAJ9r7 // {namespace:led}
   #PfHFzO6Dk5aRnuIz // {help:/functions/plot-bar-graph}
   #xIIhHcSXRfTjjsGE // {weight:20}
-  #xMI934nNAoZ2D22k $v := pins[lib micro\u003abit] →map(math→abs($value), 0, $high, 0, 4);
-  #xVN6w2AP5InoeHt3 if $v < 0 then {
+  #xMI934nNAoZ2D22k $v := pins[lib micro\u003abit] →map(math→abs($value), 0, $high, 0, 5);
+  #xVN6w2AP5InoeHt3 if $v ≤ 0 then {
     #JQAjkd892SfAZVaM basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 1 0 0");
   }
-  else { #Min3hDu7yaW5CsLL if $v = 0 then {
+  else { #Min3hDu7yaW5CsLL if $v = 1 then {
     #Kipc7xzzcvftlk7v basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1");
   }
-  else { #xz3ssI2E8u04Qu26 if $v = 1 then {
+  else { #xz3ssI2E8u04Qu26 if $v = 2 then {
     #xFr4ltnLkVIMInA4 basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1");
   }
-  else { #q8IuhLmS4sGFPO55 if $v = 2 then {
+  else { #q8IuhLmS4sGFPO55 if $v = 3 then {
     #x7wL822ySG1ZdJOi basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
   }
-  else { #Gseh3zz4Rb8tB8JN if $v = 3 then {
+  else { #Gseh3zz4Rb8tB8JN if $v = 4 then {
     #OGxguFRTl11Db823 basic[lib micro\u003abit] →plot_leds("0 0 0 0 0\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1\n1 1 1 1 1");
   }
   else {
