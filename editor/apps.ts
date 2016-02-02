@@ -1231,7 +1231,7 @@ module TDev.AppExport
             if (!webInput.value) webInput.readOnly = true;
             if (!emailInput.value) emailInput.readOnly = true;
             if (!domainInput.value) domainInput.readOnly = true;
-            Cloud.getUserSettingsAsync().then((settings: TDev.Cloud.UserSettings) => {
+            Cloud.getUserSettingsAsync(true).then((settings: TDev.Cloud.UserSettings) => {
                 if (settings && settings.website && !webInput.value) webInput.value = settings.website;
                 if (!domainInput.value) domainInput.value = "com.app." + Cloud.getUserId();
                 if (settings && settings.email && !emailInput.value) emailInput.value = settings.email;

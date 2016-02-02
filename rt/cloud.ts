@@ -346,10 +346,10 @@ module TDev.Cloud {
                 lf(". Please read our "), link(lf("privacy policy"), "/privacy"), "."))
     }
 
-    export var authenticateAsync = (activity:string, redirect = false, dontRedirect = false): Promise =>
+    export var authenticateAsync = (activity:string, redirect = false, dontRedirect = false, sensitive = false): Promise =>
     { // boolean
 
-        if (!Cloud.isAccessTokenExpired()) return Promise.as(true);
+        if (!sensitive && !Cloud.isAccessTokenExpired()) return Promise.as(true);
 
         function loginAsync() {
             var loginUrl = Cloud.getServiceUrl() + "/oauth/dialog?response_type=token&"
@@ -389,13 +389,21 @@ module TDev.Cloud {
                 var r = new PromiseInv();
 
                 var m = new ModalDialog();
-                m.addHTML(
-                    lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
-                    (!(<any>TDev).TheEditor ? "" :
-                      "<p class='agree'>" +
-                      lf("You can run and save your scripts locally, but to access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
-                      "</p>")
+                if (sensitive)
+                    m.addHTML(
+                        lf("<h3>we need you to sign in again</h3>") +
+                          "<p class='agree'>" +
+                          lf("Accessing private data requires verification of your sign in credentials.") +
+                          "</p>"
                     )
+                else
+                    m.addHTML(
+                        lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
+                        (!(<any>TDev).TheEditor ? "" :
+                          "<p class='agree'>" +
+                          lf("You can run and save your scripts locally, but to access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
+                          "</p>")
+                        )
                 m.fullWhite();
                 var ignoreDismiss = false;
                 m.add(div("wall-dialog-buttons",
@@ -953,6 +961,9 @@ module TDev.Cloud {
                 _migrate();
                 return;
             }
+            else if (e.status == 452) {
+                return authenticateAsync(action, true, false, true).then(() => null)
+            }
             else if (e.status == 400)
                 throw new Error(lf("Cloud precondition violated ({0})", e.errorMessage));
         }
@@ -988,8 +999,12 @@ module TDev.Cloud {
         return Util.httpPostJsonAsync(getPrivateApiUrl("me/notificationchannel"), body);
     }
 
-    export function getUserSettingsAsync(): Promise {
-        return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=short"))
+    export function getUserSettingsAsync(priv = false): Promise {
+        return Util.httpGetJsonAsync(getPrivateApiUrl("me/settings?format=" + (priv ? "sensitive" : "nonsensitive")))
+            .then(r => r, e => {
+                Cloud.handlePostingError(e, lf("get settings"))
+                return new PromiseInv();
+            })
     }
 
     export function postUserSettingsAsync(body: UserSettings) : Promise // of void
