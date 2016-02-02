@@ -2000,6 +2000,8 @@ module TDev
                 this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
             
+            this.currentCompilationModalDialog.add(div("wall-dialog-body", lf("Be aware, this script may contain devices events that can control a connected device. e.g. mobile phone or tablet.")));
+            
             /*if (uploader && Cloud.config.uploader) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
                     lf("Tired of copying the .hex file? "),
