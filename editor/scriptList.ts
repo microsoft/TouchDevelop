@@ -8306,7 +8306,7 @@
                 ch.unshift(settingsDiv)
 
                 var refreshSettings = () =>
-                Cloud.getPrivateApiAsync(this.publicId + "/settings?format=short")
+                Cloud.getPrivateApiAsync(this.publicId + "/settings?format=sensitive")
                 .done((s:Cloud.UserSettings) => {
                     if (!s) return
 
@@ -8366,9 +8366,7 @@
                     settingsDiv.setChildren(cc)
                 }, e => Cloud.handlePostingError(e, lf("get settings")))
 
-                if (this.isMe())
-                    refreshSettings()
-                else
+                //if (this.isMe()) refreshSettings() else
                     settingsDiv.setChildren(HTML.mkButton(lf("view/edit name, email, ..."), refreshSettings))
             }
 
