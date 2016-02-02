@@ -553,7 +553,12 @@ module TDev {
     "micro:bit music": {
       pubId: "zbiwoq",
       depends: [ "micro:bit" ]
-    }
+    }, 
+    
+    "micro:bit radio": {
+      pubId: "fgkphf",
+      depends: [ "micro:bit" ]
+    },
   };
 
   function doGraduate(msgSel?: string) {
