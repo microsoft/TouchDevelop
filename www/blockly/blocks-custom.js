@@ -1212,6 +1212,32 @@ Blockly.Blocks['devices_device_info_event'] = {
     }
 };
 
+Blockly.Blocks['devices_signal_strength'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/signal-strength');
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput()
+            .appendField("signal strengh");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Gets the signal strength reported by the paired device from 0 (no signal) to 4 (full strength).');
+    }
+};
+
+Blockly.Blocks['devices_signal_strength_changed_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("on signal strength changed");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the signal strength on the paired device changes.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-signal-strength-changed-event");
+    }
+};
+
 Blockly.Blocks['radio_set_group'] = {
     init: function()
     {

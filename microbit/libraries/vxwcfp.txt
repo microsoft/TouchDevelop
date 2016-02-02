@@ -1847,6 +1847,7 @@ action on_notified(#ja99pvTLEWszGU6R @event: String, #u92yApOZzhWqx4x9 body: Act
   #m2Y4FjpJXWArRpT0 // {help:functions/on-notified}
   #Bux3nIa98lMeKv4u code→notify_event_registration("on notified " ∥ $@event);
   #MDbRckoe8yhfH0Uw code→pairing_warning;
+  meta sync;
 }
 #xPty4Z96gEpPmXcC
 var counters : Json_Builder {
@@ -2902,4 +2903,25 @@ action is_ble_required() returns(#zvaiE3bc26qZJe0m r: Boolean) {
 #Si7IjGa9nv451k3d
 var ble_required : Boolean {
   transient = true;
+}
+#qhRPOv27q7FwkCnd
+action signal_strength() returns(#pjNiV2VnbNOLOrtS strength: Number) {
+  #xT2ELzQbRIFqjn4W // Returns the last signal strength reported by the paired device.
+  #BQe7g7kLBH1JXry2 // {help:functions/signal-strength}
+  #LvClLSskMFcoNgOo // {namespace:devices}
+  #nqacunRHChfkRx2G // {weight:40}
+  #xHPfdExQ4TqV8mdt // {shim:micro_bit::signalStrength}
+  #kSpK0NglrvAg93Vz data→ble_required := true;
+  #z4nSUBqBKe6WaUJY `return` 0;
+  meta sync;
+}
+#u9XE1xZdVNsJL8sJ
+action on_signal_strength_changed(#cuYkQZekjFUGjAi4 body: Action) {
+  #RUTzQqkWAkkLT07I // Registers code to run when the device notifies about a change of signal strength.
+  #iYAREqvtJxpxvOH0 // {shim:micro_bit::onSignalStrengthChanged}
+  #UceJa459XHIqYGpt // {namespace:devices}
+  #xmRckxNtld14XWCK // {help:functions/on-signal-strength-changed}
+  #Csvsk6MK3WAipXGZ code→notify_event_registration("on string strength changed");
+  #t84fDrl4Mq6am32n code→pairing_warning;
+  meta sync;
 }

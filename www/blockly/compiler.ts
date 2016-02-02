@@ -1594,6 +1594,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "raise alert to",
     args: [{field:"property"}]
   },
+  devices_signal_strength: {
+    namespace: "devices",
+    f: "signal strength",
+    args: []
+  },
   radio_broadcast: {
     namespace: "radio",
     f: "broadcast",
@@ -1666,6 +1671,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
           break;              
 
+        case 'devices_signal_strength_changed_event':
+          stmts.push(compileEvent(e, b, "on signal strength changed", [], "devices"));
+          break;              
+              
         case 'radio_broadcast_received_event':
           stmts.push(compileNumberEvent(e, b, "on received", [ "MESSAGE" ], "radio"));
           break;              
