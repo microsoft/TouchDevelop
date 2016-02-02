@@ -1753,7 +1753,7 @@ action tell_camera_to(#p3kEX3EqeufdJmG1 @event: String) {
   #eeF0Fl9hopb7V9WB // {help:functions/tell-camera-to}
   #Iqur1M60Xd5273Xa // {shim:micro_bit::devices::camera}
   #gQP8w2Pvp4ygp502 // {enum:event:take photo=MES_CAMERA_EVT_TAKE_PHOTO,start video capture=MES_CAMERA_EVT_START_VIDEO_CAPTURE,stop video capture=MES_CAMERA_EVT_STOP_VIDEO_CAPTURE,toggle front-rear=MES_CAMERA_EVT_TOGGLE_FRONT_REAR,launch photo mode=MES_CAMERA_EVT_LAUNCH_PHOTO_MODE,launch video mode=MES_CAMERA_EVT_LAUNCH_VIDEO_MODE,stop photo mode=MES_CAMERA_EVT_STOP_PHOTO_MODE,stop video mode=MES_CAMERA_EVT_STOP_VIDEO_MODE}
-  #yDtIYowWcPuh4mNt code→show_event_notification("camera", $@event);
+  #yDtIYowWcPuh4mNt code→show_ble_event_notification("camera", $@event);
   meta sync;
 }
 #CzqRWuR2SyiUNdAg
@@ -1764,7 +1764,7 @@ action raise_alert_to(#pHqCn0ZWIdyNQSVu @event: String) {
   #ZCcDnTF7ZiSNaNNA // {help:functions/raise-alert-to}
   #oq6L8Lgvq4qKxsZb // {shim:micro_bit::devices::alert}
   #gEJkfOlRyGq3Cq72 // {enum:event:display toast=MES_ALERT_EVT_DISPLAY_TOAST,vibrate=MES_ALERT_EVT_VIBRATE,play sound=MES_ALERT_EVT_PLAY_SOUND,play ringtone=MES_ALERT_EVT_PLAY_RINGTONE,find my phone=MES_ALERT_EVT_FIND_MY_PHONE,ring alarm=MES_ALERT_EVT_ALARM1,ring alarm 2=MES_ALERT_EVT_ALARM2,ring alarm 3=MES_ALERT_EVT_ALARM3,ring alarm 4=MES_ALERT_EVT_ALARM4,ring alarm 5=MES_ALERT_EVT_ALARM5,ring alarm 6=MES_ALERT_EVT_ALARM6}
-  #feboFmM8Q6SZnWuH code→show_event_notification("alert", $@event);
+  #feboFmM8Q6SZnWuH code→show_ble_event_notification("alert", $@event);
   meta sync;
 }
 #DFpXK66KYosuH2qD
@@ -2653,10 +2653,11 @@ action clear_pin_handler(#RSL4xscVGqj094dJ name: String) {
   meta sync;
 }
 #jIsIcIMs28T2k3d1
-action show_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K3d msg: String) {
+action show_ble_event_notification(#iWT7LqrE1qPWy3nn family: String, #m26PlHeE0cZD3K3d msg: String) {
   #xw5ZOUW8EPnesEjC // {shim:}
   #xBsth8WKFROreEm2 code→\_libinit;
   #VHYJDnaGvLgvy0IS code→pairing_warning;
+  #lHoodQfdcB4tjgLt data→ble_required := true;
   #xGdYFwSAjkS6aGY3 $sprite := data→board→create_text(100, 40, 24, $family→concat("\n")→concat($msg));
   #FYwPad2E8AYpRN4N $sprite→set_color(colors→white);
   #x4iM24484ozaNTeT $sprite→fit_text;
@@ -2683,7 +2684,7 @@ action tell_remote_control_to(#ct4m4Kjn25Ui4zdx @event: String) {
   #tYPnukasH2fTz7ef // {help:functions/tell-remote-control-to}
   #K8Z19s2gUUoEo7hY // {shim:micro_bit::devices::remote_control}
   #KA5hsujGsAGoxW2v // {enum:event:play=MES_REMOTE_CONTROL_EVT_PLAY,pause=MES_REMOTE_CONTROL_EVT_PAUSE,stop=MES_REMOTE_CONTROL_EVT_STOP,next track=MES_REMOTE_CONTROL_EVT_NEXTTRACK,previous track=MES_REMOTE_CONTROL_EVT_PREVTRACK,forward=MES_REMOTE_CONTROL_EVT_FORWARD,rewind=MES_REMOTE_CONTROL_EVT_REWIND,volume up=MES_REMOTE_CONTROL_EVT_VOLUMEUP,volume down=MES_REMOTE_CONTROL_EVT_VOLUMEDOWN}
-  #DWxu9anbEMzicq8T code→show_event_notification("remote control", $@event);
+  #DWxu9anbEMzicq8T code→show_ble_event_notification("remote control", $@event);
   meta sync;
 }
 #x4q8jp37FZ2yFjtH
@@ -2890,4 +2891,15 @@ action light_level() returns(#GXD5twYeWvP3BPyt light: Number) {
   #vYVhQXlLmZu5Mva8 // {shim:micro_bit::lightLevel}
   #akAqI31dd4qWYn7N `return` math→clamp(0, 255, math→abs(code→acceleration("y") / 2)) - 255;
   meta sync;
+}
+#v82mkjS2I5pZXQeU
+action is_ble_required() returns(#zvaiE3bc26qZJe0m r: Boolean) {
+  #ndD8Jzfci1As2Qku // Returns a value indicating if any BLE function has been used so far. **simulator only**
+  #Zg2S3ZOPKDzRoqjl // {namespace:simulator}
+  #x429y8Nylcc5yo1k `return` data→ble_required;
+  meta sync;
+}
+#Si7IjGa9nv451k3d
+var ble_required : Boolean {
+  transient = true;
 }

@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "xsurev"
+  pub "tashnb"
   usage {
     type Image
     action `sync` \_libinit()
@@ -86,6 +86,7 @@ action example() {
     action `sync` set_display_mode(mode: String)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` light_level() returns(light: Number)
+    action `sync` is_ble_required() returns(r: Boolean)
   }
 }
 #EONeQiUgK4Dyu1NP
@@ -95,6 +96,10 @@ action broadcast(#eq984CqHIkP4OJdH message: Number) {
   #DD3E9MVbQTp4j1Gk // {weight:80}
   #XvyNCzSx67zF66bF // {help:/functions/broadcast-message}
   #xW9iSSsgBwIdFRB6 // {shim:micro_bit::broadcastMessage}
+  #x9mzIfsEmmZ2PN2U if $message < 0 `or` $message > 65325 then {
+    #yQ8JU15njGgAWe4y simulator[lib micro\u003abit] →warning("message should be between 0 and 65535.");
+  }
+  #P7z49XkRIp7PaPPY code→no_ble_warning;
   meta sync;
 }
 #IJpYYCZw1F44TQZX
@@ -104,6 +109,10 @@ action on_received(#D5GQ19JFw0Y0Q2gx message: Number, #BxhfICatrNOOO7VO body: Ac
   #yKwnAAs6C14iUQLT // {weight:79}
   #zDFWR0D2okETrRiW // {help:/functions/on-received}
   #xU6Dl4D5gfvuwNnV // {shim:micro_bit::onBroadcastMessageReceived}
+  #E4rMn8dTVR7fpRnA if $message < 0 `or` $message > 65325 then {
+    #xwdN7WANf04Jvj4L simulator[lib micro\u003abit] →warning("message should be between 0 and 65535.");
+  }
+  #F7BabMVS4VtIFWJO code→no_ble_warning;
 }
 #YX3T4fGx4ZOV2ZPC
 action set_group(#JLhxZUfc4PKew5BJ id: Number) {
@@ -112,6 +121,10 @@ action set_group(#JLhxZUfc4PKew5BJ id: Number) {
   #TMnfWrjAXTx93qYi // {weight:10}
   #b21F8HHSSNVMAeMM // {help:/functions/set-group}
   #XvR4P2cRp3umvyJP // {shim:micro_bit::setGroup}
+  #zE6npucJKk4Twkrd if $id < 0 `or` $id > 255 then {
+    #IYK0DDnnYar268Qs simulator[lib micro\u003abit] →warning("id should be between 0 and 255.");
+  }
+  #pSorupBCws2zt9Dw code→no_ble_warning;
   meta sync;
 }
 #MG4magNAAo55UTHZ
@@ -119,4 +132,13 @@ var glue\u002ejson : String {
   is\_resource = true;
   url = "data:text/plain;base64,ewogICAgImNvbmZpZyI6IHsKICAgICAgICAiTUlDUk9CSVRfQkxFX0VOQUJMRUQiOiAiMCIKICAgIH0KfQ==";
   transient = true;
+}
+#h01rXRuezjuB2LB4
+action no_ble_warning() {
+  #baoZBooap1nnUdta // {shim:}
+  #TXIRDnUlUMzXy8IY if simulator[lib micro\u003abit] →is_ble_required then {
+    #Eg3dbC5ZVvRwhO8o simulator[lib micro\u003abit] →warning("*radio* functions cannot be used with *devices* function or BLE enabled");
+  }
+  meta private;
+  meta sync;
 }
