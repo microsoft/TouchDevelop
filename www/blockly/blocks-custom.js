@@ -560,6 +560,18 @@ Blockly.Blocks['device_get_magnetic_force'] = {
     }
 };
 
+Blockly.Blocks['device_get_light_level'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/light-level');
+        this.setColour(blockColors.input);
+        this.appendDummyInput()
+            .appendField("light level");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Get the light level from 0 (dark) to 255 (bright).');
+    }
+};
+
 Blockly.Blocks['device_get_running_time'] = {
     init: function () {
         this.setHelpUrl('https://www.microbit.co.uk/functions/running_time');
@@ -1196,6 +1208,37 @@ Blockly.Blocks['devices_device_info_event'] = {
         this.setInputsInline(true);
         this.setTooltip('Registers code to run when the micro:bit receives an event from the device');
         this.setHelpUrl("https://www.microbit.co.uk/functions/on-device-notification");
+    }
+};
+
+Blockly.Blocks['devices_broadcast'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("broadcast");
+        this.appendValueInput("MESSAGE")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Broadcasts a message to other devices over radio.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/broadcast");
+    }
+};
+
+Blockly.Blocks['devices_broadcast_received_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("on received");
+        this.appendValueInput("MESSAGE")
+            .setCheck("Number");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the micro:bit receives an broadcast message');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-received");
     }
 };
 

@@ -2881,3 +2881,13 @@ action play_note(#bHaFCNEEJaK991Yo frequency: Number, #TcObkTO93uKAovfA ms: Numb
   #Neq372aA2RIBI0lX // {hints:ms:1000}
   #xoBbd94UdCwRCF99 code→play_tone($frequency, $ms);
 }
+#ZCnPMPq5QSyyJy6i
+action light_level() returns(#GXD5twYeWvP3BPyt light: Number) {
+  #WV0iSATx7aji44xQ // Reads the light level applied to the LED screen in a range from ``0`` (dark) to ``255`` bright. In the simulator, the ``acceleration y`` is used to emulate this value.
+  #xikatVrpE6xh0BTn // {help:functions/light-level}
+  #rjeg4imR7dmRWMEJ // {namespace:input}
+  #xi0fmPgjARvr6Z9r // {weight:55}
+  #vYVhQXlLmZu5Mva8 // {shim:micro_bit::lightLevel}
+  #akAqI31dd4qWYn7N `return` math→clamp(0, 255, math→abs(code→acceleration("y") / 2)) - 255;
+  meta sync;
+}

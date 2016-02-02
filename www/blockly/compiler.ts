@@ -1345,6 +1345,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "magnetic force",
     args: [{ field: "NAME" } ]
   },
+  device_get_light_level: {
+    namespace: "input",
+    f: "light level",
+    args: []
+  },
   device_get_running_time: {
     namespace: "input",
   f: "running time",
@@ -1580,6 +1585,11 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "raise alert to",
     args: [{field:"property"}]
   },
+  devices_broadcast: {
+    namespace: "devices",
+    f: "broadcast",
+    args: [{field:"MESSAGE"}]
+  },
 }
 
 function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
@@ -1640,6 +1650,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           
         case 'devices_device_info_event':
           stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
+          break;              
+
+        case 'devices_broadcast_received_event':
+          stmts.push(compileEvent(e, b, "on received", [ "MESSAGE" ], "devices"));
           break;              
 
         case 'device_shake_event':
