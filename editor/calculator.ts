@@ -460,6 +460,12 @@ module TDev
 
             if (this.searchApi.visible && this.searchApi.dismissing()) return;
 
+            if (!elt(this.expressionDisplay.id)) {
+                // our display element is not visible - possibly a redraw has happened
+                TheEditor.dismissSidePane();
+                return;
+            }
+
             this.typeCheck();
 
             // this is a bit overzelous, but most likely if we display it, we'll edit it
