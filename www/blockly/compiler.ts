@@ -1202,6 +1202,15 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[],
   return mkCallWithCallback(e, ns, event, compiledArgs, body);
 }
 
+function compileNumberEvent(e: Environment, b: B.Block, event: string, args: string[], ns : string = "input"): J.JStmt {
+  var bBody = b.getInputTargetBlock("HANDLER");
+  var compiledArgs = args.map((arg: string) => {
+    return H.mkNumberLiteral(parseInt(b.getFieldValue(arg)) || 0);
+  });
+  var body = compileStatements(e, bBody);
+  return mkCallWithCallback(e, ns, event, compiledArgs, body);
+}
+
 function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string, args?: J.JExpr[]): J.JCall {
   args = args === undefined ? [] : args;
   var state = "";
@@ -1585,10 +1594,15 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "raise alert to",
     args: [{field:"property"}]
   },
-  devices_broadcast: {
-    namespace: "devices",
+  radio_broadcast: {
+    namespace: "radio",
     f: "broadcast",
     args: [{field:"MESSAGE"}]
+  },
+  radio_set_group: {
+    namespace: "radio",
+    f: "set group",
+    args: [{field:"ID"}]
   },
 }
 
@@ -1652,8 +1666,8 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
           break;              
 
-        case 'devices_broadcast_received_event':
-          stmts.push(compileEvent(e, b, "on received", [ "MESSAGE" ], "devices"));
+        case 'radio_broadcast_received_event':
+          stmts.push(compileNumberEvent(e, b, "on received", [ "MESSAGE" ], "radio"));
           break;              
 
         case 'device_shake_event':

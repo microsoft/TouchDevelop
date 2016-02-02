@@ -13,6 +13,7 @@ action main() {
   #y6kj0BBUYlWuwy6W led[lib micro\u003abit];
   #xPTTNHFnhdSz2dhl input[lib micro\u003abit];
   #D2z4dybkpmvwZyDo math;
+  #xeHVLR4ZvaT2pN9f radio[lib micro\u003abit_radio];
   #xVSeqKOnHOk6JFR2 music[lib micro\u003abit];
   #w9qtFNmNqcWH4xF9 game[lib micro\u003abit_game];
   #SNTTZp3SXz6JkWWX pins[lib micro\u003abit];
@@ -124,7 +125,7 @@ var img : ♻ micro\u003abit → Image {
   transient = true;
 }
 #xvqxk1q4qCZk22MO meta import micro\u003abit_screen {
-  pub "tulxtd"
+  pub "tgpxru"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -132,6 +133,7 @@ var img : ♻ micro\u003abit → Image {
     action `async` fade_in(ms: Number)
     action `async` fade_out(ms: Number)
     action `sync` screenshot() returns(img: ♻ micro\u003abit → Image)
+    action `sync` plot_bar_graph(value: Number, high: Number)
   }
   #OE9022wXGJBOumFg resolve micro\u003abit = ♻ micro\u003abit with {
   }
@@ -149,7 +151,7 @@ var img : ♻ micro\u003abit → Image {
   }
 }
 #nxBsrWkksKmQnONy meta import micro\u003abit_game {
-  pub "zibjkk"
+  pub "rwbwnc"
   usage {
     action `sync` score() returns(score: Number)
     action `sync` set_score(value: Number)
@@ -166,6 +168,7 @@ var img : ♻ micro\u003abit → Image {
     action `async` start_stopwatch()
     action `sync` is_running() returns(running: Boolean)
     action `async` show_score()
+    action `sync` is_game_over() returns(over: Boolean)
   }
   #iFGAT33WIPN92bpo resolve micro\u003abit = ♻ micro\u003abit with {
   }
@@ -195,7 +198,7 @@ table Thing {
   }
 }
 #BD280UyphFhv6ijW meta import micro\u003abit {
-  pub "dtyvzo"
+  pub "xsurev"
   usage {
     type Image
     action `sync` \_libinit()
@@ -232,7 +235,7 @@ table Thing {
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` tell_camera_to(@event: String)
     action `sync` raise_alert_to(@event: String)
-    action `async` on_message_received(id: String, callback: Action1[Number])
+    action `async` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -242,16 +245,37 @@ table Thing {
     action `async` analog_pitch(frequency: Number, ms: Number)
     action `async` plot_frame(@this: ♻ micro\u003abit → Image, index: Number)
     action `async` show_leds(leds: String, ms: Number)
-    action `async` play_note(frequency: Number, ms: Number)
-    action `sync` note(name: String) returns(frequency: Number)
+    action `async` play_tone(frequency: Number, ms: Number)
+    action `sync` note_frequency(name: String) returns(frequency: Number)
     action `sync` plot_leds(leds: String)
     action `sync` plot_image(@this: ♻ micro\u003abit → Image, x_offset: Number)
     action `sync` temperature() returns(temp: Number)
     action `sync` stop_animation()
     action `async` show_frame(img: ♻ micro\u003abit → Image, frame: Number)
     action `sync` queue_event(body: Action, name: String)
-    action `async` ring(frequency: Number)
+    action `async` ring_tone(frequency: Number)
     action `sync` tell_remote_control_to(@event: String)
-    action `async` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` map(value: Number, from_low: Number, from_high: Number, to_low: Number, to_high: Number) returns(r: Number)
+    action `sync` magnetic_force(dimension: String) returns(millig: Number)
+    action `sync` servo_write_pin(name: String, value: Number)
+    action `sync` servo_set_pulse(pin: String, micros: Number)
+    action `async` rest(ms: Number)
+    action `async` rotation(kind: String) returns(angle: Number)
+    action `sync` note(name: String) returns(frequency: Number)
+    action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
+    action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
+    action `sync` set_display_mode(mode: String)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` light_level() returns(light: Number)
+  }
+}
+#xLiveMvd5B2gAfbC meta import micro\u003abit_radio {
+  pub "fgkphf"
+  usage {
+    action `sync` broadcast_message(message: Number)
+    action `async` on_message_received(message: Number, body: Action)
+    action `sync` set_group(id: Number)
+  }
+  #FWeZFbR2NJW7Ofd1 resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }

@@ -367,6 +367,29 @@
         </block>
 
       </category>
+      <category name="Radio" colour="270">
+          <block type="radio_broadcast">
+            <value name="MESSAGE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>            
+          </block>
+          <block type="radio_broadcast_received_event">
+            <value name="MESSAGE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>            
+          </block>
+          <block type="radio_set_group">
+            <value name="ID">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>            
+          </block>
+      </category>          
       <category name="Music" colour="52">
         <block type="device_play_note" gap="8">
           <value name="note">
@@ -560,8 +583,6 @@
           <block type="devices_remote_control" gap="8"></block>
           <block type="devices_alert"></block>
           <block type="devices_device_info_event"></block>
-          <block type="devices_broadcast" />
-          <block type="devices_broadcast_received_event" />
       </category>      
     </xml>
     <div class="popup hidden" id="popup-log">

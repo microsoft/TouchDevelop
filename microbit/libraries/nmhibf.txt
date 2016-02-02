@@ -10,7 +10,7 @@ action main() {
   #xP1meKgKx2EeA03s skip;
 }
 #SVXVucr3dRK4J6Y7 meta import micro\u003abit {
-  pub "xytpsi"
+  pub "xsurev"
   usage {
     type Image
     action `sync` \_libinit()
@@ -77,10 +77,12 @@ action main() {
     action `sync` set_pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number, value: Number)
     action `sync` pixel_brightness(@this: ♻ micro\u003abit → Image, x: Number, y: Number) returns(state: Number)
     action `sync` set_display_mode(mode: String)
+    action `async` play_note(frequency: Number, ms: Number)
+    action `sync` light_level() returns(light: Number)
   }
 }
 #Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
-  pub "xpccdk"
+  pub "tgpxru"
   usage {
     action `sync` toggle(x: Number, y: Number)
     action `sync` plot_all()
@@ -174,5 +176,15 @@ action main() {
     action `sync` beat() returns(ms: Number)
   }
   #Q0tEe5dsulVXEC8U resolve micro\u003abit = ♻ micro\u003abit with {
+  }
+}
+#zxhkf1792MyI2pv3 meta import micro\u003abit_radio {
+  pub "fgkphf"
+  usage {
+    action `sync` broadcast_message(message: Number)
+    action `async` on_message_received(message: Number, body: Action)
+    action `sync` set_group(id: Number)
+  }
+  #xwzxqs7sfJMxu6ZF resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }

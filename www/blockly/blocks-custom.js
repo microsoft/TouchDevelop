@@ -143,6 +143,7 @@ var blockColors = {
     images: 45,
     variables: 330,
     antenna: 156,
+    radio: 270,
 }
 
 Blockly.Variables.flyoutCategory = function(workspace) {
@@ -1211,25 +1212,40 @@ Blockly.Blocks['devices_device_info_event'] = {
     }
 };
 
-Blockly.Blocks['devices_broadcast'] = {
+Blockly.Blocks['radio_set_group'] = {
     init: function()
     {
-        this.setColour(blockColors.antenna);
+        this.setColour(blockColors.radio);
+        this.appendDummyInput().appendField("set group");
+        this.appendValueInput("ID")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Sets the radio to listen to packets sent with the given group id.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/set-group");
+    }
+};
+
+Blockly.Blocks['radio_broadcast'] = {
+    init: function()
+    {
+        this.setColour(blockColors.radio);
         this.appendDummyInput().appendField("broadcast");
         this.appendValueInput("MESSAGE")
             .setCheck("Number");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
-        this.setTooltip('Broadcasts a message to other devices over radio.');
+        this.setTooltip('Broadcasts a message to other micro:bit over radio.');
         this.setHelpUrl("https://www.microbit.co.uk/functions/broadcast");
     }
 };
 
-Blockly.Blocks['devices_broadcast_received_event'] = {
+Blockly.Blocks['radio_broadcast_received_event'] = {
     init: function()
     {
-        this.setColour(blockColors.antenna);
+        this.setColour(blockColors.radio);
         this.appendDummyInput().appendField("on received");
         this.appendValueInput("MESSAGE")
             .setCheck("Number");
@@ -1237,8 +1253,8 @@ Blockly.Blocks['devices_broadcast_received_event'] = {
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField("do");
         this.setInputsInline(true);
-        this.setTooltip('Registers code to run when the micro:bit receives an broadcast message');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/on-received");
+        this.setTooltip('Registers code to run when the micro:bit receives an broadcast message over radio.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-message-received");
     }
 };
 
