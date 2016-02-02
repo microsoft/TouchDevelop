@@ -314,6 +314,7 @@ module TDev
                 this.dismissBtn.style.display = "inline-block";
                 this.runBtn.style.display = "inline-block";
                 if (this.compileBtn) this.compileBtn.style.display = "inline-block";
+                this.setSize()
             }
         }
 
