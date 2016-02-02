@@ -2925,3 +2925,10 @@ action on_signal_strength_changed(#cuYkQZekjFUGjAi4 body: Action) {
   #t84fDrl4Mq6am32n code→pairing_warning;
   meta sync;
 }
+#vU4TB2HA3pkUDhEu
+var namespacedocs\u002ejson : Json_Object {
+  // {shim:}
+  is\_resource = true;
+  url = "data:text/plain;base64,ewogICAgImRldmljZXMiOiAiRnVuY3Rpb25zIHRvIGNvbnRyb2wgcGFpcmVkIGRldmljZXMgc3VjaCBhcyBwaG9uZXMgb3IgdGFibGV0cyBvdmVyIEJsdWV0b290aCBMb3cgRW5lcmd5LiIKfQ==";
+  transient = true;
+}

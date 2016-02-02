@@ -1745,6 +1745,7 @@ module TDev.AST {
         extends Decl
     {
         public isExtension = false;
+        private _description : string;
         public firstLibraryRef:LibraryRef;
         public _isBrowsable = true;
         constructor() {
@@ -1755,7 +1756,22 @@ module TDev.AST {
         public getUsage() { return this.usage; }
         public nodeType() { return "singletonDef"; }
         public accept(v:NodeVisitor) { return v.visitSingletonDef(this); }
-        public getDescription(skip?:boolean) { return this.getKind().getHelp(!skip); }
+        public getDescription(skip?: boolean) { 
+            if (!this._description) {
+                this._description = this.getKind().getHelp(!skip);
+                if (this.isExtension && this.firstLibraryRef.resolved) {
+                    var stringResource = this.firstLibraryRef.resolved
+                        .resources().filter(n => n.getName() == "namespacedocs.json")[0]
+                    if (stringResource) {
+                        try {
+                            var jsdocs = JSON.parse(RT.String_.valueFromArtUrl(stringResource.url));
+                            if (jsdocs[this.getName()]) this._description = jsdocs[this.getName()];
+                        } catch (e) { }
+                    }
+                }
+            }
+            return this._description;            
+        }
         public isBrowsable() { return this._isBrowsable; }
         public usageMult() { return 1; }
         public usageKey() {
