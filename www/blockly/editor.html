@@ -382,6 +382,15 @@
                 </shadow>
             </value>            
           </block>
+          <block type="radio_datagram_send" gap="8">
+            <value name="MESSAGE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>            
+          </block>
+          <block type="radio_datagram_receive" gap="14"></block>
+          <block type="radio_datagraph_received_event"></block>
           <block type="radio_set_group" gap="8">
             <value name="ID">
                 <shadow type="math_number">

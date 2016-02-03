@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "tashnb"
+  pub "vyzssw"
   usage {
     type Image
     action `sync` \_libinit()
@@ -54,7 +54,7 @@ action example() {
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` tell_camera_to(@event: String)
     action `sync` raise_alert_to(@event: String)
-    action `async` on_notified(@event: String, body: Action)
+    action `sync` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -87,6 +87,8 @@ action example() {
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` light_level() returns(light: Number)
     action `sync` is_ble_required() returns(r: Boolean)
+    action `sync` signal_strength() returns(strength: Number)
+    action `sync` on_signal_strength_changed(body: Action)
   }
 }
 #EONeQiUgK4Dyu1NP
@@ -141,4 +143,72 @@ action no_ble_warning() {
   }
   meta private;
   meta sync;
+}
+#mMKObOylkEG0o3Pb
+action send_packet(#m42yqgLiIeBat5RC packet: String) {
+  #HH3lEmxU5pR4KpPa // Broadcasts a string packet over radio to any connected micro:bit in the group. The maximum length of the string is 32 characters; other characters are dropped.
+  #b4rYff60Is205Lao // {help:/functions/send-packet}
+  #gHX3uMSmRgVDmlzn // {namespace:radio}
+  #OxeeRKZ6vHD3mX30 // {shim:micro_bit::datagramSend}
+  #xYT1QOjd6mkXn5KU if $packet→count > 32 then {
+    #xjtToypUD2DqfhzB simulator[lib micro\u003abit] →warning("packet cannot contain more than 32 characters");
+  }
+  #kuTJQ1kDXG69F2Y7 code→no_ble_warning;
+  meta sync;
+}
+#xEB1OeefNttK4XaV
+action receive_packet() returns(#OIrC6T2d22RBBHQJ packet: String) {
+  #bZuQNQi2tZf9So4V // Reads the next string packet on the queue from the radio.
+  #H8C2sMb2AKhjj42o // {help:/functions/receive-packet}
+  #dJbFiNCNTfTKUaLc // {namespace:radio}
+  #T4I4pBkzPd1VHOOO // {shim:micro_bit::datagramReceive}
+  #XHkvzsBthHJeYYyB code→no_ble_warning;
+  #q5XjGP0N1Gh3YTXw `return` "";
+  meta sync;
+}
+#SMx8YyKcI4pAObY2
+action on_packet_received(#tBS1T6nSo8rUqsY7 body: Action) {
+  #fWp5FQpAJV4iRmsG // Registers code to run when a packet is received over radio.
+  #xnN774igx2x4UWuY // {namespace:radio}
+  #SzaD3876jaBR9pNj // {weight:30}
+  #x8gOYjgUh8l3G2Pq // {help:/functions/on-packet-received}
+  #x7E0TlIwdsH717cv // {shim:micro_bit::onDatagramReceived}
+  #L2W14AFrG29Ckepi code→no_ble_warning;
+  meta sync;
+}
+#FAZmEVoFZ3OTr4vm
+action receive_number() returns(#fSyRaWUpEANhPJPH packet: Number) {
+  #xtihVLKSmSNRkZed // Reads the next packet as a number from the radio queue.
+  #z0vQGYAOUB0dZFHR // {help:/functions/receive-number}
+  #kTgJ6RVFFixopyvQ // {weight:20}
+  #xAWIR5c8x0vMajQo // {namespace:radio}
+  #xsUD6CCNcPC12beV // {shim:micro_bit::datagramReceiveNumber}
+  #lzACcuzcb1Fi00FK code→no_ble_warning;
+  #fPfqOmMueoCMTtSH `return` 0;
+  meta sync;
+}
+#hbpuyGcmXyrHoDBi
+action send_number(#RKWTDcaeleEEbneT packet: Number) {
+  #feiNFE3V0Tacui9b // Broadcasts a number over radio to any connected micro:bit in the group.
+  #x92AzPvQ4Nw0UBIu // {help:/functions/send-number}
+  #x0qErSSQgI4OluEM // {namespace:radio}
+  #NYPQ8J2jucMs20mk // {shim:micro_bit::datagramSendNumber}
+  #WryjPyfpY15N5viP code→no_ble_warning;
+  meta sync;
+}
+#Z6FWLt37ITbuSwPf meta import micro\u003abit_serial {
+  pub "lohjia"
+  usage {
+    action `sync` write_line(text: String)
+    action `sync` write_number(value: Number)
+    action `sync` read_string() returns(msg: String)
+    action `sync` write_string(text: String)
+    action `sync` write_image(img: ♻ micro\u003abit → Image)
+    action `sync` write_screen()
+    action `sync` read_screen()
+    action `sync` read_image() returns(img: ♻ micro\u003abit → Image)
+    action `sync` write_value(name: String, value: Number)
+  }
+  #N42F0cCpDobLFao6 resolve micro\u003abit = ♻ micro\u003abit with {
+  }
 }

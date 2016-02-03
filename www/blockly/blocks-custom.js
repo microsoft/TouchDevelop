@@ -1284,6 +1284,47 @@ Blockly.Blocks['radio_broadcast_received_event'] = {
     }
 };
 
+Blockly.Blocks['radio_datagram_send'] = {
+    init: function()
+    {
+        this.setColour(blockColors.radio);
+        this.appendDummyInput().appendField("send number");
+        this.appendValueInput("MESSAGE")
+            .setCheck("Number");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);            
+        this.setTooltip('Broadcasts a number to other micro:bits over radio.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/send-number");
+    }
+};
+
+Blockly.Blocks['radio_datagram_receive'] = {
+    init: function () {
+        this.setHelpUrl('https://www.microbit.co.uk/functions/receive-number');
+        this.setColour(blockColors.radio);
+        this.appendDummyInput()
+            .appendField("receive number");
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setTooltip('Reads the next packet received by the radio. 0 if queue empty.');
+    }
+};
+
+Blockly.Blocks['radio_datagraph_received_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.radio);
+        this.appendDummyInput().appendField("on packet received");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the micro:bit receives a number packet over radio.');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-packet-received");
+    }
+};
+
 Blockly.Blocks['controls_simple_for'] = {
   /**
    * Block for 'for' loop.

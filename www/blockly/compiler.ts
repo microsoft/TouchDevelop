@@ -768,7 +768,7 @@ function infer(e: Environment, w: B.Workspace) {
 // each property ref, the right value for its [parent] property.
 ///////////////////////////////////////////////////////////////////////////////
 
-function extractNumber(b: B.Block) {
+function extractNumber(b: B.Block) : number {
   var v = b.getFieldValue("NUM");
   if (!v.match(/\d+/)) {
     Errors.report(v+" is not a valid numeric value", b);
@@ -1205,7 +1205,7 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[],
 function compileNumberEvent(e: Environment, b: B.Block, event: string, args: string[], ns : string = "input"): J.JStmt {
   var bBody = b.getInputTargetBlock("HANDLER");
   var compiledArgs = args.map((arg: string) => {
-    return H.mkNumberLiteral(parseInt(b.getFieldValue(arg)) || 0);
+      return compileExpression(e, b.getInputTargetBlock(arg));
   });
   var body = compileStatements(e, bBody);
   return mkCallWithCallback(e, ns, event, compiledArgs, body);
@@ -1604,6 +1604,16 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "broadcast",
     args: [{field:"MESSAGE"}]
   },
+  radio_datagram_send: {
+    namespace: "radio",
+    f: "send number",
+    args: [{field:"MESSAGE"}]
+  },
+  radio_datagram_receive: {
+    namespace: "radio",
+    f: "receive number",
+    args: []
+  },
   radio_set_group: {
     namespace: "radio",
     f: "set group",
@@ -1679,6 +1689,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileNumberEvent(e, b, "on received", [ "MESSAGE" ], "radio"));
           break;              
 
+        case 'radio_datagraph_received_event':
+          stmts.push(compileEvent(e, b, "on packet received", [], "radio"));
+          break;              
+              
         case 'device_shake_event':
           stmts.push(compileEvent(e, b, "on shake", []));
           break;
