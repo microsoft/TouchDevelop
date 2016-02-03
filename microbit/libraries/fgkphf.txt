@@ -196,19 +196,3 @@ action send_number(#RKWTDcaeleEEbneT packet: Number) {
   #WryjPyfpY15N5viP code→no_ble_warning;
   meta sync;
 }
-#Z6FWLt37ITbuSwPf meta import micro\u003abit_serial {
-  pub "lohjia"
-  usage {
-    action `sync` write_line(text: String)
-    action `sync` write_number(value: Number)
-    action `sync` read_string() returns(msg: String)
-    action `sync` write_string(text: String)
-    action `sync` write_image(img: ♻ micro\u003abit → Image)
-    action `sync` write_screen()
-    action `sync` read_screen()
-    action `sync` read_image() returns(img: ♻ micro\u003abit → Image)
-    action `sync` write_value(name: String, value: Number)
-  }
-  #N42F0cCpDobLFao6 resolve micro\u003abit = ♻ micro\u003abit with {
-  }
-}
