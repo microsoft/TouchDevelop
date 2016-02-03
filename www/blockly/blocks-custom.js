@@ -1315,7 +1315,7 @@ Blockly.Blocks['radio_datagraph_received_event'] = {
     init: function()
     {
         this.setColour(blockColors.radio);
-        this.appendDummyInput().appendField("on packet received");
+        this.appendDummyInput().appendField("on data received");
         this.appendStatementInput("HANDLER")
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField("do");
