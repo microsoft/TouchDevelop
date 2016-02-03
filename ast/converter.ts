@@ -1,6 +1,8 @@
 ///<reference path='refs.ts'/>
 
 module TDev.AST {
+    var useAsync = false;
+
     class TsQuotingCtx
         extends QuotingCtx
     {
@@ -74,7 +76,7 @@ module TDev.AST {
                 n = n[0].toUpperCase() + n.slice(1)
             } else  if (d instanceof Action) {
                 var a = <Action>d;
-                if (!a.isAtomic)
+                if (useAsync && !a.isAtomic)
                     n += "Async"
             }
 
@@ -284,7 +286,7 @@ module TDev.AST {
                 return
             }
 
-            if (e.awaits()) {
+            if (useAsync && e.awaits()) {
                 this.tw.write("await").space()
             }
 
@@ -698,7 +700,7 @@ module TDev.AST {
 
         inlineAction(a:InlineAction)
         {
-            if (!(<ActionKind>a.name.getKind()).isAtomic())
+            if (useAsync && !(<ActionKind>a.name.getKind()).isAtomic())
                 this.tw.kw("async").space()
             this.pcommaSep(a.inParameters, p => this.localDef(p))
             this.tw.op("=>").beginBlock();
@@ -904,7 +906,7 @@ module TDev.AST {
 
         actionReturn(a:Action)
         {
-            if (!a.isAtomic) this.tw.kw("Promise<")
+            if (useAsync && !a.isAtomic) this.tw.kw("Promise<")
 
                 var outp = a.getOutParameters()
                 if (outp.length == 0) this.tw.kw("void")
@@ -915,7 +917,7 @@ module TDev.AST {
                     this.tw.op0("]")
                 }
 
-            if (!a.isAtomic) this.tw.op0(">")
+            if (useAsync && !a.isAtomic) this.tw.op0(">")
         }
 
         printActionTypeDef(a:Action)
@@ -967,14 +969,14 @@ module TDev.AST {
                     this.tw.kw("private")
                 else
                     this.tw.kw("public")
-                if (!a.isAtomic)
+                if (useAsync && !a.isAtomic)
                     this.tw.kw("async")
                 this.tw.globalId(a)
                 this.pcommaSep(a.getInParameters().slice(1), printP)
             } else {
                 if (!a.isPrivate)
                     this.tw.kw("export")
-                if (!a.isAtomic)
+                if (useAsync && !a.isAtomic)
                     this.tw.kw("async")
                 this.tw.kw("function")
                 this.tw.globalId(a)
