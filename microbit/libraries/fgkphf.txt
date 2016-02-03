@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "vyzssw"
+  pub "xgzgcy"
   usage {
     type Image
     action `sync` \_libinit()
@@ -96,7 +96,7 @@ action broadcast(#eq984CqHIkP4OJdH message: Number) {
   #b49VkB7P43iuVbZW // Sends a message id to other micro:bit in the group using radio.
   #bCG252KuacSf4L7y // {namespace:radio}
   #DD3E9MVbQTp4j1Gk // {weight:80}
-  #XvyNCzSx67zF66bF // {help:/functions/broadcast-message}
+  #XvyNCzSx67zF66bF // {help:/functions/broadcast}
   #xW9iSSsgBwIdFRB6 // {shim:micro_bit::broadcastMessage}
   #x9mzIfsEmmZ2PN2U if $message < 0 `or` $message > 65325 then {
     #yQ8JU15njGgAWe4y simulator[lib micro\u003abit] →warning("message should be between 0 and 65535.");
@@ -145,9 +145,9 @@ action no_ble_warning() {
   meta sync;
 }
 #mMKObOylkEG0o3Pb
-action send_packet(#m42yqgLiIeBat5RC packet: String) {
+action send_string(#m42yqgLiIeBat5RC packet: String) {
   #HH3lEmxU5pR4KpPa // Broadcasts a string packet over radio to any connected micro:bit in the group. The maximum length of the string is 32 characters; other characters are dropped.
-  #b4rYff60Is205Lao // {help:/functions/send-packet}
+  #b4rYff60Is205Lao // {help:/functions/send-string}
   #gHX3uMSmRgVDmlzn // {namespace:radio}
   #OxeeRKZ6vHD3mX30 // {shim:micro_bit::datagramSend}
   #xYT1QOjd6mkXn5KU if $packet→count > 32 then {
@@ -157,9 +157,9 @@ action send_packet(#m42yqgLiIeBat5RC packet: String) {
   meta sync;
 }
 #xEB1OeefNttK4XaV
-action receive_packet() returns(#OIrC6T2d22RBBHQJ packet: String) {
+action receive_string() returns(#OIrC6T2d22RBBHQJ packet: String) {
   #bZuQNQi2tZf9So4V // Reads the next string packet on the queue from the radio.
-  #H8C2sMb2AKhjj42o // {help:/functions/receive-packet}
+  #H8C2sMb2AKhjj42o // {help:/functions/receive-string}
   #dJbFiNCNTfTKUaLc // {namespace:radio}
   #T4I4pBkzPd1VHOOO // {shim:micro_bit::datagramReceive}
   #XHkvzsBthHJeYYyB code→no_ble_warning;
@@ -167,11 +167,11 @@ action receive_packet() returns(#OIrC6T2d22RBBHQJ packet: String) {
   meta sync;
 }
 #SMx8YyKcI4pAObY2
-action on_packet_received(#tBS1T6nSo8rUqsY7 body: Action) {
+action on_data_received(#tBS1T6nSo8rUqsY7 body: Action) {
   #fWp5FQpAJV4iRmsG // Registers code to run when a packet is received over radio.
   #xnN774igx2x4UWuY // {namespace:radio}
   #SzaD3876jaBR9pNj // {weight:30}
-  #x8gOYjgUh8l3G2Pq // {help:/functions/on-packet-received}
+  #x8gOYjgUh8l3G2Pq // {help:/functions/on-data-received}
   #x7E0TlIwdsH717cv // {shim:micro_bit::onDatagramReceived}
   #L2W14AFrG29Ckepi code→no_ble_warning;
   meta sync;

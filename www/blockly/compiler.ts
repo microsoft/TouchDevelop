@@ -1690,7 +1690,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;              
 
         case 'radio_datagraph_received_event':
-          stmts.push(compileEvent(e, b, "on packet received", [], "radio"));
+          stmts.push(compileEvent(e, b, "on data received", [], "radio"));
           break;              
               
         case 'device_shake_event':
