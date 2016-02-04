@@ -358,6 +358,38 @@ function processLf(filename:string)
     })
 }
 
+function processLib(filename:string)
+{
+    if (!/\.txt$/.test(filename)) return
+
+    console.log('extracting strings from %s', filename);    
+    var prevAct = ""
+    loadText(filename).split('\n').forEach((line:string, idx:number) => {
+        function err(msg:string) {
+            console.log("%s(%d): %s", filename, idx, msg);
+            errCnt++;
+        }
+
+        if (prevAct) {
+            var m = /^\s*#\S+\s+\/\/ (.*)/.exec(line)
+            if (m) {
+                if (!/(^\{)|TODO:/.test(m[1])) {
+                    translationStrings[m[1]] = 1
+                }
+            }
+        }
+
+        prevAct = ""
+
+        var m = /^action ([\w\\]+)/.exec(line)
+        if (m) {
+            prevAct = m[1]
+            if (/example/.test(prevAct))
+                prevAct = ""
+        }
+    })
+}
+
 export function genStubs()
 {
     console.log("*** Start");
@@ -378,6 +410,13 @@ export function genStubs()
         })
     });
     processLf("tools/client.ts");
+
+    ["libraries"].forEach(pth => {
+        fs.readdirSync(pth).forEach((fn) => {
+            fileCnt++;
+            processLib(path.join(pth, fn));
+        })
+    });
 
     Object.keys(translationHelpStrings).forEach(k => translationStrings[k] = 1)
     var tr = Object.keys(translationStrings)
