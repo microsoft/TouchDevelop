@@ -2855,6 +2855,22 @@ module TDev
             this.libCache.clear();
             return this.libCache.loadLibsAsync(Script).then(() => {
                 AST.TypeChecker.tcApp(Script);
+                var libsFixed = 0
+                Script.libraries().forEach(l => {
+                    if (l.resolved && l.resolved._forcedUpdate) {
+                        l.resolveClauses.stmts.forEach((r:AST.ResolveClause) => {
+                            if (!r.defaultLib) {
+                                var fix = Script.libraries().filter(l => l.getName() == r.formalLib.getName())[0]
+                                if (fix) {
+                                    r.defaultLib = fix
+                                    libsFixed++
+                                }
+                            }
+                        })
+                    }
+                })
+                if (libsFixed)
+                    AST.TypeChecker.tcApp(Script);
                 Script.setStableNames();
                 if (fromDB) {
                     this.scriptForCloud = this.serializeScript();
