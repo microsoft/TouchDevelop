@@ -65,8 +65,7 @@ body, input {
 }
 
 #blocklyDiv {
-  position: absolute;
-  background:white;
+  position: absolute;  
 }
 
 .blocklyTreeLabel {
