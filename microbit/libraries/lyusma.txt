@@ -13,7 +13,6 @@ action main() {
   #y6kj0BBUYlWuwy6W led[lib micro\u003abit];
   #xPTTNHFnhdSz2dhl input[lib micro\u003abit];
   #D2z4dybkpmvwZyDo math;
-  #xeHVLR4ZvaT2pN9f radio[lib micro\u003abit_radio];
   #xVSeqKOnHOk6JFR2 music[lib micro\u003abit];
   #w9qtFNmNqcWH4xF9 game[lib micro\u003abit_game];
   #SNTTZp3SXz6JkWWX pins[lib micro\u003abit];
@@ -198,7 +197,7 @@ table Thing {
   }
 }
 #BD280UyphFhv6ijW meta import micro\u003abit {
-  pub "xsurev"
+  pub "xgzgcy"
   usage {
     type Image
     action `sync` \_libinit()
@@ -235,7 +234,7 @@ table Thing {
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` tell_camera_to(@event: String)
     action `sync` raise_alert_to(@event: String)
-    action `async` on_notified(@event: String, body: Action)
+    action `sync` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -267,15 +266,8 @@ table Thing {
     action `sync` set_display_mode(mode: String)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` light_level() returns(light: Number)
-  }
-}
-#xLiveMvd5B2gAfbC meta import micro\u003abit_radio {
-  pub "fgkphf"
-  usage {
-    action `sync` broadcast_message(message: Number)
-    action `async` on_message_received(message: Number, body: Action)
-    action `sync` set_group(id: Number)
-  }
-  #FWeZFbR2NJW7Ofd1 resolve micro\u003abit = ♻ micro\u003abit with {
+    action `sync` is_ble_required() returns(r: Boolean)
+    action `sync` signal_strength() returns(strength: Number)
+    action `sync` on_signal_strength_changed(body: Action)
   }
 }

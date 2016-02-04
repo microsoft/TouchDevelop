@@ -10,7 +10,7 @@ action main() {
   #xP1meKgKx2EeA03s skip;
 }
 #SVXVucr3dRK4J6Y7 meta import micro\u003abit {
-  pub "xsurev"
+  pub "xgzgcy"
   usage {
     type Image
     action `sync` \_libinit()
@@ -47,7 +47,7 @@ action main() {
     action `sync` on_pin_pressed(name: String, body: Action)
     action `sync` tell_camera_to(@event: String)
     action `sync` raise_alert_to(@event: String)
-    action `async` on_notified(@event: String, body: Action)
+    action `sync` on_notified(@event: String, body: Action)
     action `sync` notify_event_registration(evid: String)
     action `sync` add_button(text: String, @action: Action)
     action `sync` reset()
@@ -79,6 +79,9 @@ action main() {
     action `sync` set_display_mode(mode: String)
     action `async` play_note(frequency: Number, ms: Number)
     action `sync` light_level() returns(light: Number)
+    action `sync` is_ble_required() returns(r: Boolean)
+    action `sync` signal_strength() returns(strength: Number)
+    action `sync` on_signal_strength_changed(body: Action)
   }
 }
 #Alu1GJCl0XiyaFNn meta import micro\u003abit_screen {
@@ -176,15 +179,5 @@ action main() {
     action `sync` beat() returns(ms: Number)
   }
   #Q0tEe5dsulVXEC8U resolve micro\u003abit = ♻ micro\u003abit with {
-  }
-}
-#zxhkf1792MyI2pv3 meta import micro\u003abit_radio {
-  pub "fgkphf"
-  usage {
-    action `sync` broadcast_message(message: Number)
-    action `async` on_message_received(message: Number, body: Action)
-    action `sync` set_group(id: Number)
-  }
-  #xwzxqs7sfJMxu6ZF resolve micro\u003abit = ♻ micro\u003abit with {
   }
 }
