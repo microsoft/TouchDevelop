@@ -343,7 +343,7 @@ module TDev {
         var cats = blocklyToolbox.getElementsByTagName("category");
         for (var i = 0; i < cats.length; ++i) {
             var catEl = <any>cats.item(i);
-            if (catEl.getAttribute("debug")) catEl.remove();
+            if (catEl.getAttribute("debug")) catEl.parentElement.removeChild(catEl);
         }
     }
     var workspace = Blockly.inject(blocklyDiv, {
