@@ -6,6 +6,7 @@
 module TDev {
 
   // ---------- Communication protocol
+  var dbg = /(dbg|test)=1/.test(window.location.href);
 
   var allowedOrigins = [
     /^http:\/\/localhost/,
@@ -337,15 +338,23 @@ module TDev {
 
     var blocklyArea = document.getElementById('editor');
     var blocklyDiv = document.getElementById('blocklyDiv');
+    var blocklyToolbox = document.getElementById("blockly-toolbox");
+    if (!dbg) {
+        var cats = blocklyToolbox.getElementsByTagName("category");
+        for (var i = 0; i < cats.length; ++i) {
+            var catEl = <any>cats.item(i);
+            if (catEl.getAttribute("debug")) catEl.remove();
+        }
+    }
     var workspace = Blockly.inject(blocklyDiv, {
-      toolbox: document.getElementById("blockly-toolbox"),
+      toolbox: blocklyToolbox,
       scrollbars: true,
       media: "./media/",
       zoom: {
         enabled: true,
         controls: true,
         wheel: true,
-        maxScale: 2,
+        maxScale: 2.5,
         minScale: .1,
         scaleSpeed: 1.1
       },
@@ -554,14 +563,15 @@ module TDev {
       pubId: "zbiwoq",
       depends: [ "micro:bit" ]
     }, 
-    /*
     "micro:bit radio": {
       pubId: "fgkphf",
       depends: [ "micro:bit" ]
-    }, */
+    },
   };
   
-  
+  if (!dbg) {
+      delete libs["micro:bit radio"];
+  }  
 
   function doGraduate(msgSel?: string) {
     var ast = compileOrError(true, msgSel);

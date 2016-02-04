@@ -65,6 +65,7 @@ module TDev {
       }
 
       var ckPath = isLocal ? '/microbit/sequencer/bin/' : '/';
+      var blocksPath = dbg ? "?dbg=1" : isLocal ? "?local=1" : isTest ? "?test=1" : "";
 
       externalEditorsCache = [ /* {
         name: "C++ Editor",
@@ -80,7 +81,7 @@ module TDev {
           description: "Drag and drop blocks to code!",
           id: "blockly",
           origin: origin,
-          path: path + "blockly/editor.html",
+          path: path + "blockly/editor.html" + blocksPath,
           logoUrl: "https://az742082.vo.msecnd.net/pub/vrvndwmo",
           order: 1,
         }, {
