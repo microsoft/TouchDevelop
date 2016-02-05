@@ -2956,8 +2956,8 @@ action on_gamepad_button(#D3QUCj7BfHCBhap4 name: String, #xI9Zgf22rh0WuyDZ body:
   #E9BV9SOyuTlksOp9 // {namespace:devices}
   #T48grEOAY1B4H1ph // {weight:40}
   #WZzx5JA2s7ssD9tE // {enum:name:A down=MES_DPAD_BUTTON_A_DOWN,A up=MES_DPAD_BUTTON_A_UP,B down=MES_DPAD_BUTTON_B_DOWN,B up=MES_DPAD_BUTTON_B_UP,C down=MES_DPAD_BUTTON_C_DOWN,C up=MES_DPAD_BUTTON_C_UP,D down=MES_DPAD_BUTTON_D_DOWN,D up=MES_DPAD_BUTTON_D_UP,1 up=MES_DPAD_BUTTON_1_DOWN,1 down=MES_DPAD_BUTTON_1_UP,2 down=MES_DPAD_BUTTON_2_DOWN,2 up=MES_DPAD_BUTTON_2_UP,3 down=MES_DPAD_BUTTON_3_DOWN,3 up=MES_DPAD_BUTTON_3_UP,4 down=MES_DPAD_BUTTON_4_DOWN,4 up=MES_DPAD_BUTTON_4_UP}
-  #yUSp4coqF0Z782rL // {shim:micro_bit::onButtonPressed}
-  #huR2efoZWTsLGE6k $evid := "on gamepad button pressed " ∥ $name;
+  #yUSp4coqF0Z782rL // {shim:micro_bit::onGamepadButton}
+  #huR2efoZWTsLGE6k $evid := "on gamepad button " ∥ $name;
   #NIoxxw4REvwe9Fac code→notify_event_registration($evid);
   #FVzCwPmbtYNq7UzA code→pairing_warning;
   meta sync;
