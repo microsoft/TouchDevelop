@@ -1202,13 +1202,13 @@ function compileEvent(e: Environment, b: B.Block, event: string, args: string[],
   return mkCallWithCallback(e, ns, event, compiledArgs, body);
 }
 
-function compileNumberEvent(e: Environment, b: B.Block, event: string, args: string[], ns : string = "input"): J.JStmt {
-  var bBody = b.getInputTargetBlock("HANDLER");
-  var compiledArgs = args.map((arg: string) => {
-      return compileExpression(e, b.getInputTargetBlock(arg));
-  });
-  var body = compileStatements(e, bBody);
-  return mkCallWithCallback(e, ns, event, compiledArgs, body);
+function compileNumberEvent(e: Environment, b: B.Block, event: string, args: string[], ns: string = "input"): J.JStmt {
+    var bBody = b.getInputTargetBlock("HANDLER");
+    var compiledArgs = args.map((arg: string) => {
+        return H.mkNumberLiteral(parseInt(b.getFieldValue(arg)));
+    });
+    var body = compileStatements(e, bBody);
+    return mkCallWithCallback(e, ns, event, compiledArgs, body);
 }
 
 function compileImage(e: Environment, b: B.Block, big: boolean, n: string, f: string, args?: J.JExpr[]): J.JCall {

@@ -1272,9 +1272,8 @@ Blockly.Blocks['radio_broadcast_received_event'] = {
     init: function()
     {
         this.setColour(blockColors.radio);
-        this.appendDummyInput().appendField("on received");
-        this.appendValueInput("MESSAGE")
-            .setCheck("Number");
+        this.appendDummyInput().appendField("on received")
+            .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "MESSAGE");
         this.appendStatementInput("HANDLER")
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField("do");
