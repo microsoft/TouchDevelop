@@ -93,6 +93,25 @@ var deviceInfoEventDropdown = [
     ["display on", "display on"]
 ];
 
+var gamepadButtonEventDropdown = [
+    ["A down",  "A down"],
+    ["A up",    "A up"],
+    ["B down",  "B down"],
+    ["B up",    "B up"],
+    ["C down",  "C down"],
+    ["C up",    "C up"],
+    ["D down",  "D down"],
+    ["D up",    "D up"],
+    ["1 down",  "1 down"],
+    ["1 up",    "1 up"],
+    ["2 down",  "2 down"],
+    ["2 up",    "2 up"],
+    ["3 down",  "3 down"],
+    ["3 up",    "3 up"],
+    ["4 down",  "4 down"],
+    ["4 up",    "4 up"]
+];
+
 var notes = {
     "C": 262,
     "C#": 277,
@@ -1193,6 +1212,22 @@ Blockly.Blocks['devices_remote_control'] = {
         this.setNextStatement(true);            
         this.setTooltip('Sends an remote control event');
         this.setHelpUrl("https://www.microbit.co.uk/functions/tell-remote-control-to");
+    }
+};
+
+Blockly.Blocks['devices_gamepad_event'] = {
+    init: function()
+    {
+        this.setColour(blockColors.antenna);
+        this.appendDummyInput().appendField("on gamepad button");
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldDropdown(gamepadButtonEventDropdown), "NAME");
+        this.appendStatementInput("HANDLER")
+            .setAlign(Blockly.ALIGN_RIGHT)
+            .appendField("do");
+        this.setInputsInline(true);
+        this.setTooltip('Registers code to run when the micro:bit receives a gamepad (DPAD) from the device');
+        this.setHelpUrl("https://www.microbit.co.uk/functions/on-gamepad-button");
     }
 };
 

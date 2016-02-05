@@ -5,7 +5,6 @@ meta color "#ff008000";
 meta rootId "iYo5o9pL2tCMNDztgDDztVLg";
 meta isLibrary "yes";
 meta hasIds "yes";
-meta splitScreen "yes";
 meta platform "current";
 meta parentIds "";
 // The BBC micro:bit device api. #microbit
@@ -1275,18 +1274,6 @@ action calibrate() {
   #xodr3UlxL4wpG04K // {weight:0}
   #ZJoAB7BFrtoAg633 // {shim:TD_NOOP}
 }
-#z4SoTUi3P30D33zG
-action compass_calibrate_start() {
-  #xGkSLS3rBCWSox2b // starts the compass calibration
-  #PMF9CQOjT5lgVYN4 // {shim:uBit.compass.calibrateStart}
-  meta private;
-}
-#IaMVVHezFMwLNPY4
-action compass_calibrate_end() {
-  #tMN4sVe82cqdPk5h // ends the compass calibration
-  #xAtBynTCRvTf8vaM // {shim:uBit.compass.calibrateEnd}
-  meta private;
-}
 #OsMsC0czXS2YrjdU
 action forever(#xYRk46PsjFkdlEOm body: Action) {
   #a1ZdSLsAwD6Rv0FM // Repeats the code forever in the background. On each iteration, allows other codes to run.
@@ -2350,15 +2337,19 @@ var current_theme : String {
 #ZcRIUJagQtw2kOc3
 action init_theme() {
   #xG4G6cfMaEbWqlM9 // {shim:}
-  #EkEHXeeTIhNElM4z data→theme_button := data→board→create_ellipse(42, 42);
-  #sfJgDE9vpMmOJbD7 data→theme_button→set_pos(data→board→width - 64, 54);
-  #UAxpSTycnW8y28Sg data→theme_button→set_gradient(false);
-  #gvxgpbcF2Vh2n8p5 data→theme_button→set_color(colors→white);
+  #EkEHXeeTIhNElM4z data→theme_button_inner := code→create_circle(data→board→width - 64, 54);
+  #gvxgpbcF2Vh2n8p5 data→theme_button_inner→set_color(colors→white);
+  #GFgmQ44OMr4dNwq4 data→theme_button := code→create_circle(data→theme_button_inner→x, data→theme_button_inner→y);
+  #Z29h69s2yrXbBYqT data→theme_button→opacity := 0;
+  #xAwSmgeMsxy2mo2m data→theme_button→width := 112;
+  #GbVT219kzML5zCRs data→theme_button→height := 112;
+  #c0AwY5ROsgtG2Knd data→theme_button→x := data→theme_button_inner→x;
+  #sQR4SSgpdHIVYt3Q data→theme_button→y := data→theme_button_inner→y;
   #B2CwAWAZnJLS03hT data→theme_button_text := data→board→create_text(100, 40, 20, "THEME");
   #D3Q0VYJTEsOeCSSW data→theme_button_text→set_color(colors→white);
   #xmkTU26RbeIFb2Jc data→theme_button_text→fit_text;
-  #e4SNFryMf0J07YJC data→theme_button_text→x := data→theme_button→x;
-  #tgvI4UL0HsxskMLH data→theme_button_text→y := data→theme_button→y - 34;
+  #e4SNFryMf0J07YJC data→theme_button_text→x := data→theme_button_inner→x;
+  #tgvI4UL0HsxskMLH data→theme_button_text→y := data→theme_button_inner→y - 34;
   #LzHTvRzGmrVF5uqf data→theme_button→on_touch_down($touch_down);
   #j2kGPOFC3VpxGuvH where touch_down(x: Number, y: Number) {
     #zUofeW9VI4OAw6vA if data→current_theme→equals("red") then {
@@ -2373,7 +2364,7 @@ action init_theme() {
   meta sync;
 }
 #xdhVzgfGv2tKJXiC
-var theme_button : Sprite {
+var theme_button_inner : Sprite {
   // {shim:}
   transient = true;
 }
@@ -2513,6 +2504,7 @@ action event_bus_worker(#VnWE2Q9sB2A5uIXD name: String) {
 action queue_event(#ErQcVVIPwKO622FK body: Action, #x6jst5KZQ5V4sFOr name: String) {
   #TvMY9sg6cL0LP4R4 // Queues an event to be executed in its own queue. **simulator only**.
   #G4HX55fpvnZloONU // {namespace:simulator}
+  #uUvNaoO65YqMtQTe // {action:libsonly}
   #x6pUJ4oEgynKekYO // {shim:TD_NOOP}
   #NpFfWiYSSrNXvvQY $c := records→Event_Bus_table→count;
   #xv0tUVTZQbNE3PW4 if $c < 10 then {
@@ -2897,6 +2889,7 @@ action light_level() returns(#GXD5twYeWvP3BPyt light: Number) {
 action is_ble_required() returns(#zvaiE3bc26qZJe0m r: Boolean) {
   #ndD8Jzfci1As2Qku // Returns a value indicating if any BLE function has been used so far. **simulator only**
   #Zg2S3ZOPKDzRoqjl // {namespace:simulator}
+  #blWfIptmUrfDF24o // {action:libsonly}
   #x429y8Nylcc5yo1k `return` data→ble_required;
   meta sync;
 }
@@ -2931,4 +2924,41 @@ var namespacedocs\u002ejson : Json_Object {
   is\_resource = true;
   url = "data:text/plain;base64,ewogICAgImJhc2ljIjogIkRpc3BsYXkgc3RyaW5nLCBudW1iZXJzLCBpbWFnZXMgb24gdGhlIHNjcmVlbiBhbmQgYmFzaWMgbG9vcHMuIiwKICAgICJpbnB1dCI6ICJBY2Nlc3MgdG8gc2Vuc29yIGFuZCBldmVudHMuIiwKICAgICJsZWQiOiAiVHVybiBvbiBhbmQgb2ZmIExFRHMgb24gdGhlIHNjcmVlbi4iLAogICAgImNvbnRyb2wiOiAiUmVwZWF0IGNvZGUgd2l0aCB2YXJpb3VzIGxvb3BzLiIsCiAgICAibG9naWMiOiAiSWYgc3RhdGVtZW50IGFuZCBib29sZWFuIG9wZXJhdG9ycy4iLAogICAgIm11c2ljIjogIlBsYXkgdG9uZXMgb24gdGhlIHBpbnMuIiwKICAgICJwaW5zIjogIkludGVyYWN0IHdpdGggZWxlY3Rvcm5pYyBzZW5zb3JzIGFuZCBtb3RvcnMgdGhyb3VnIHRoZSBwaW5zLiIsCiAgICAicmFkaW8iOiAiQnJvYWRjYXN0ZWQgY29tbXVuaWNhdGlvbiBiZXR3ZWVuIG1pY3JvOmJpdHMuIiwKICAgICJnYW1lIjogIlNwcml0ZXMgYW5kIGdhbWUgYW5pbWF0aW9ucyIsCiAgICAiZGV2aWNlcyI6ICJDb250cm9sIHBhaXJlZCBkZXZpY2VzIHN1Y2ggYXMgcGhvbmVzIG9yIHRhYmxldHMgb3ZlciBCbHVldG9vdGguIgp9";
   transient = true;
+}
+#xYboMgkbvJoQX7sC
+action test_simulator() {
+  #u48cZt3DgE4wCB4Y // {shim:}
+  #Rl7A4R4pnG5P27KE code→\_libinit;
+  #zfAUVfu4BJ1DcIiz data→board→set_debug_mode(true);
+  #RzutKKtsqnxrwC65 code→forever;
+  #vRZvHqSS2hxQZ66I where `implicit` \_body\_() {
+    #qcsH21SkO2PAgOTL code→acceleration("x");
+    #xhGcRD9sid5iFVrZ code→acceleration("y");
+    #o4AExlgMkXXOP8GA code→acceleration("z");
+    #LRctI025VatmeOCr code→acceleration("strength");
+    #KV0405Bp8kY5Q0WX code→compass_heading;
+    #zmws2q49NZq7htip code→temperature;
+    #TwCxJBJlwOBGSdMS code→light_level;
+    #jCWPzJVSnmUVX3HY code→magnetic_force("x");
+  }
+  meta private;
+  meta test;
+}
+#GmOcDyC1h7Te2171
+var theme_button : Sprite {
+  // {shim:}
+  transient = true;
+}
+#ptr6LKVPwprLEIih
+action on_gamepad_button(#D3QUCj7BfHCBhap4 name: String, #xI9Zgf22rh0WuyDZ body: Action) {
+  #ec8bEwDIIWvoXaAQ // Register code to run when the micro:bit receives a command from the paired gamepad.
+  #DNz3nPXpQNLBRxS2 // {help:functions/on-gamepad-button}
+  #E9BV9SOyuTlksOp9 // {namespace:devices}
+  #T48grEOAY1B4H1ph // {weight:40}
+  #WZzx5JA2s7ssD9tE // {enum:name:A down=MES_DPAD_BUTTON_A_DOWN,A up=MES_DPAD_BUTTON_A_UP,B down=MES_DPAD_BUTTON_B_DOWN,B up=MES_DPAD_BUTTON_B_UP,C down=MES_DPAD_BUTTON_C_DOWN,C up=MES_DPAD_BUTTON_C_UP,D down=MES_DPAD_BUTTON_D_DOWN,D up=MES_DPAD_BUTTON_D_UP,1 up=MES_DPAD_BUTTON_1_DOWN,1 down=MES_DPAD_BUTTON_1_UP,2 down=MES_DPAD_BUTTON_2_DOWN,2 up=MES_DPAD_BUTTON_2_UP,3 down=MES_DPAD_BUTTON_3_DOWN,3 up=MES_DPAD_BUTTON_3_UP,4 down=MES_DPAD_BUTTON_4_DOWN,4 up=MES_DPAD_BUTTON_4_UP}
+  #yUSp4coqF0Z782rL // {shim:micro_bit::onButtonPressed}
+  #huR2efoZWTsLGE6k $evid := "on gamepad button pressed " ∥ $name;
+  #NIoxxw4REvwe9Fac code→notify_event_registration($evid);
+  #FVzCwPmbtYNq7UzA code→pairing_warning;
+  meta sync;
 }

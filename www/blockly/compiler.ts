@@ -1681,6 +1681,10 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileEvent(e, b, "on notified", [ "NAME" ], "devices"));
           break;              
 
+        case 'devices_gamepad_event':
+          stmts.push(compileEvent(e, b, "on gamepad button", [ "NAME" ], "devices"));
+          break;              
+              
         case 'devices_signal_strength_changed_event':
           stmts.push(compileEvent(e, b, "on signal strength changed", [], "devices"));
           break;              
