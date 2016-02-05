@@ -5513,6 +5513,10 @@ div.validation-error {
   padding-top: 2em;
 }
 
+.code-preview {
+    font-size:0.8em;
+}
+
 .floatingSmilie {
   float: right;
   font-size: 6em;

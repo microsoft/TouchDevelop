@@ -675,7 +675,7 @@ module TDev {
               m.add(div('wall-dialog-header', lf("here is your code")))
               m.add(div('wall-dialog-body',
                 lf("By dragging and placing blocks, you've created the following code.")))
-              var preview = div('');              
+              var preview = div('code-preview');              
               m.add(preview);
               Embedded.parseScript(text)
                 .done((app: AST.App) => {
