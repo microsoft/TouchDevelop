@@ -506,7 +506,7 @@ module TDev
                     }
                 });
                 if (limitedMode) {
-                    var b = options.mkSeeMore(needKbd ? lf("you can also search") : lf("there is {0} more option{0:s}", skipCnt))
+                    var b = options.mkSeeMore(needKbd ? lf("you can also search") : lf("more option{0:s}", skipCnt))
                     HTML.setTickCallback(b, Ticks.sideMoreOptions, () => {
                         limitedMode = false;
                         refresh(options.initialEmptyQuery);                        
