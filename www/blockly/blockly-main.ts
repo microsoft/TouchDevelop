@@ -574,10 +574,10 @@ module TDev {
   }  
 
   function doGraduate(msgSel?: string) {
+    doSave();
     var ast = compileOrError(true, msgSel);
     if (!ast)
       return;
-    doSave();
     post(<External.Message_Upgrade> {
       type: External.MessageType.Upgrade,
       ast: ast,
@@ -587,11 +587,11 @@ module TDev {
   }
 
   function doCompile(msgSel?: string) {
+    doSave();
     var ast = compileOrError(false, msgSel);
     if (!ast)
       return;
     $("#command-compile > .roundsymbol").addClass("compiling");
-    doSave();
     post(<External.Message_Compile> {
       type: External.MessageType.Compile,
       text: ast,
@@ -603,6 +603,7 @@ module TDev {
   }
   
   function doRun(auto : boolean) {
+    doSave();
     var ast = compileOrError(false, "#errorsRun");
     if (!ast)
       return;
