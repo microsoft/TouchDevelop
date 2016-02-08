@@ -190,7 +190,7 @@ module TDev.Hex
     }
 
     var firstTime = true;
-    export function compile(app : AST.App, compilationStartTime:number, saveStateAsync:()=>Promise, showSource : boolean, source: string)
+    export function compile(app : AST.App, compilationStartTime:number, saveStateAsync:()=>Promise, showSource : boolean, source: string, onCompiled?: (fileName: string, url:string) => void)
     {
         var times = ""
         var startTime = Util.now();
@@ -265,6 +265,8 @@ module TDev.Hex
                 if (res.data) {
                     var fn = Util.toFileName("microbit-" + app.getName(), 'script') + ".hex";
                     HTML.browserDownloadText(res.data, fn, res.contentType);
+                    if (onCompiled)
+                        onCompiled(fn, "data:" + res.contentType + ";base64," + Util.base64EncodeBytes(<any>Util.stringToUint8Array(Util.toUTF8(<string>res.data))));
                 }
             })
             .done(() => {},

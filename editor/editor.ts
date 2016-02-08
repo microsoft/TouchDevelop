@@ -1977,8 +1977,9 @@ module TDev
         }
 
         private currentCompilationModalDialog: ModalDialog;
+        private currentCompilationButtonDiv: HTMLElement;
 
-        private showCompilationDialog(inBrowser: boolean, uploader:boolean) {
+        private showCompilationDialog(inBrowser: boolean) {
             
             this.currentCompilationModalDialog = new ModalDialog();
             if (!inBrowser) {
@@ -1987,31 +1988,26 @@ module TDev
             } 
             if (TDev.Cloud.config.companyLogoHorizontalUrl)
                 this.currentCompilationModalDialog.add(div("wall-dialog-header powered-by-logo", HTML.mkImg(TDev.Cloud.config.companyLogoHorizontalUrl)));
+            var msg: string;
             if (inBrowser) {
-                var msg = Cloud.isFota()
+                msg = Cloud.isFota()
                     ? lf("Your .hex will be uploaded onto your BBC micro:bit soon.")
                     : lf("Your .hex file is ready. Drag and drop it onto your BBC micro:bit device drive.")
-                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             } else {
                 this.currentCompilationModalDialog.add(div("wall-dialog-header", lf("compiling...")));
-                var msg = Cloud.isFota()
+                msg = Cloud.isFota()
                     ? lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, it will be uploaded onto your BBC micro:bit.")
                     : lf("Please wait while we prepare your .hex file. When the .hex file is downloaded, drag and drop it onto your BBC micro:bit device drive.")
-                this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));
             }
+            msg +=" " + lf("Be aware, this script may contain devices events that can control a connected device. e.g. mobile phone or tablet.");
+            this.currentCompilationModalDialog.add(div("wall-dialog-body", msg));            
             
-            this.currentCompilationModalDialog.add(div("wall-dialog-body", lf("Be aware, this script may contain devices events that can control a connected device. e.g. mobile phone or tablet.")));
-            
-            /*if (uploader && Cloud.config.uploader) {
-                this.currentCompilationModalDialog.add(div("wall-dialog-body",
-                    lf("Tired of copying the .hex file? "),
-                    HTML.mkA("", Cloud.config.uploader, "blank", lf("Get the tools!")))
-                );
-            }*/
+            this.currentCompilationButtonDiv = div("wall-dialog-buttons");
+            this.currentCompilationModalDialog.add(this.currentCompilationButtonDiv);
             
             if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
                 this.currentCompilationModalDialog.add(div("wall-dialog-body",
-                    lf("To compile and flash BBC micro:bit scripts on your iPhone or iPad, you will need to have the BBC micro:bit app installed (available early 2016).")
+                    lf("To compile and flash BBC micro:bit scripts on your iPhone or iPad, you will need to have the BBC micro:bit app installed.")
                 ));                
             }
             
@@ -2029,8 +2025,17 @@ module TDev
 
         public bytecodeCompileWithUi(app: AST.App, options: { showSource?: boolean; uploader?: boolean; source?: string; } = {}) {
             tick(Ticks.coreNativeCompile);
-            if (!options.showSource) this.showCompilationDialog(true, !!options.uploader);
-            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource, options.source);
+            var onCompiled = undefined;
+            if (!options.showSource) {
+                this.showCompilationDialog(true);
+                onCompiled = (fn, url) => {
+                    var a = <HTMLAnchorElement>HTML.mkAButton(lf("right click to save to another location"), url);
+                    a.target = "_blank";
+                    (<any>a).download = fn || "microbit.hex";
+                    this.currentCompilationButtonDiv.setChildren([a]);
+                };
+            }
+            Hex.compile(app, this.compilationStartTime, () => this.saveStateAsync(), !!options.showSource, options.source, onCompiled);
             if (!options.showSource)
                 Util.setTimeout(10000, () => {
                     if (this.currentCompilationModalDialog && this.currentCompilationModalDialog.visible)
@@ -2043,7 +2048,7 @@ module TDev
         // information. Returns a promise with the JSON returned from the cloud
         // (structure unknown).
         public compileWithUi(guid: string, cpp: Promise, name: string, debug?: boolean, btn?: HTMLElement): Promise {
-            this.showCompilationDialog(false, true);
+            this.showCompilationDialog(false);
             if (btn) {
                 btn.setFlag("working", true);
                 btn.classList.add("disabledItem");
