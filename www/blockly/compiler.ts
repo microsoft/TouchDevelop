@@ -1601,7 +1601,7 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
   },
   radio_broadcast: {
     namespace: "radio",
-    f: "broadcast",
+    f: "broadcast message",
     args: [{field:"MESSAGE"}]
   },
   radio_datagram_send: {
@@ -1690,7 +1690,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           break;              
               
         case 'radio_broadcast_received_event':
-          stmts.push(compileNumberEvent(e, b, "on received", [ "MESSAGE" ], "radio"));
+          stmts.push(compileNumberEvent(e, b, "on message received", [ "MESSAGE" ], "radio"));
           break;              
 
         case 'radio_datagraph_received_event':

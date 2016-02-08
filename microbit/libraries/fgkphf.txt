@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "xgzgcy"
+  pub "ndodyk"
   usage {
     type Image
     action `sync` \_libinit()
@@ -89,14 +89,15 @@ action example() {
     action `sync` is_ble_required() returns(r: Boolean)
     action `sync` signal_strength() returns(strength: Number)
     action `sync` on_signal_strength_changed(body: Action)
+    action `sync` on_gamepad_button(name: String, body: Action)
   }
 }
 #EONeQiUgK4Dyu1NP
-action broadcast(#eq984CqHIkP4OJdH message: Number) {
+action broadcast_message(#eq984CqHIkP4OJdH message: Number) {
   #b49VkB7P43iuVbZW // Sends a message id to other micro:bit in the group using radio.
   #bCG252KuacSf4L7y // {namespace:radio}
   #DD3E9MVbQTp4j1Gk // {weight:80}
-  #XvyNCzSx67zF66bF // {help:/functions/broadcast}
+  #XvyNCzSx67zF66bF // {help:/functions/broadcast-message}
   #xW9iSSsgBwIdFRB6 // {shim:micro_bit::broadcastMessage}
   #x9mzIfsEmmZ2PN2U if $message < 0 `or` $message > 65325 then {
     #yQ8JU15njGgAWe4y simulator[lib micro\u003abit] →warning("message should be between 0 and 65535.");
@@ -105,16 +106,17 @@ action broadcast(#eq984CqHIkP4OJdH message: Number) {
   meta sync;
 }
 #IJpYYCZw1F44TQZX
-action on_received(#D5GQ19JFw0Y0Q2gx message: Number, #BxhfICatrNOOO7VO body: Action) {
+action on_message_received(#D5GQ19JFw0Y0Q2gx message: Number, #BxhfICatrNOOO7VO body: Action) {
   #FbP46LCQxLtiy2cg // Registers code to run when a particular message is received from another micro:bit.
   #enk4CdkcCaJtTNyG // {namespace:radio}
   #yKwnAAs6C14iUQLT // {weight:79}
-  #zDFWR0D2okETrRiW // {help:/functions/on-received}
+  #zDFWR0D2okETrRiW // {help:/functions/on-message-received}
   #xU6Dl4D5gfvuwNnV // {shim:micro_bit::onBroadcastMessageReceived}
   #E4rMn8dTVR7fpRnA if $message < 0 `or` $message > 65325 then {
     #xwdN7WANf04Jvj4L simulator[lib micro\u003abit] →warning("message should be between 0 and 65535.");
   }
   #F7BabMVS4VtIFWJO code→no_ble_warning;
+  meta sync;
 }
 #YX3T4fGx4ZOV2ZPC
 action set_group(#JLhxZUfc4PKew5BJ id: Number) {

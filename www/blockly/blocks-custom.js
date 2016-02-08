@@ -1292,7 +1292,7 @@ Blockly.Blocks['radio_broadcast'] = {
     init: function()
     {
         this.setColour(blockColors.radio);
-        this.appendDummyInput().appendField("broadcast");
+        this.appendDummyInput().appendField("broadcast message");
         this.appendValueInput("MESSAGE")
             .setCheck("Number");
         this.setInputsInline(true);
@@ -1307,7 +1307,7 @@ Blockly.Blocks['radio_broadcast_received_event'] = {
     init: function()
     {
         this.setColour(blockColors.radio);
-        this.appendDummyInput().appendField("on received")
+        this.appendDummyInput().appendField("on message received")
             .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "MESSAGE");
         this.appendStatementInput("HANDLER")
             .setAlign(Blockly.ALIGN_RIGHT)
