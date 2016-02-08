@@ -1686,11 +1686,6 @@ module TDev
                 else run1()
             };
 
-            if (!this.parentScript && Script.usesCloudLibs() && !Azure.getDestinationAppUrl(Script)) {
-                AppExport.setupAzure()
-                return
-            }
-
             if (this.currentRt) this.currentRt.stopAsync().then(() => run());
             else run();
         }

@@ -33,13 +33,11 @@ module TDev
         static allPlatforms = {
             "HTML5": PlatformCapability.AnyWeb,
             "Cordova mobile app": PlatformCapability.CordovaApp,
-            "Azure Web app": PlatformCapability.AzureWebSite,
         }
 
         static shortPlatforms = {
             "web": PlatformCapability.AnyWeb,
             "cordova": PlatformCapability.CordovaApp,
-            "azure": PlatformCapability.AzureWebSite,
         }
 
         public nodeType() { return "app"; }
@@ -92,10 +90,6 @@ module TDev
                 }),
                 HTML.mkButton(lf("Cordova mobile app"), () => {
                     platforms = PlatformCapability.CordovaApp;
-                    m.dismiss()
-                }),
-                HTML.mkButton(lf("Azure web app"), () => {
-                    platforms = PlatformCapability.AzureWebSite;
                     m.dismiss()
                 }),
                 HTML.mkButton(lf("any client"), () => {
@@ -152,11 +146,7 @@ module TDev
                 //}
                 return HTML.mkButton(name, () => {
                     e.saveStateAsync({ forReal: true }).done(() => {
-                        if (store == "azure") {
-                            tick(Ticks.exportAzure);
-                            AppExport.setupAzure();
-                        }
-                        else if (store == "cordova") {
+                        if (store == "cordova") {
                             tick(Ticks.exportCordova);
                             AppExport.deployCordova(Script, e.getBaseScriptId())
                         }
@@ -193,7 +183,6 @@ module TDev
                     ),
                 this.exportSection = divId("exportApp", "formLine",
                     div("varLabel", lf("export")),
-                    btn("azure", lf("Azure web app")),
                     btn("cordova", lf("Cordova mobile app")),
                     btn("html5", "HTML5 app")
                     ),

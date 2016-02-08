@@ -443,11 +443,6 @@ module TDev {
             | Network
             ,
 
-        AzureWebSite =
-            Npm
-            | Network
-            | Shell,
-
         CordovaApp =
             Accelerometer
             | Compass

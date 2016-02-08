@@ -810,109 +810,6 @@ module TDev.AppExport
         return r
     }
 
-/*
-    export function ensureAzureDeploymentAsync()
-    {
-        var fail = () =>
-                ModalDialog.infoAsync(lf("deployment failed"),
-                            lf("please go to script properties and tap the [Azure] button"));
-
-        var wa = Azure.getWebsiteAuthForApp(Script)
-        if (!wa) return fail()
-
-        return deployLocalWebappAsync(wa).then(v => v ? v : fail(), err => fail())
-    }
-*/
-
-    export function setupAzure()
-    {
-        var sub = getManagementCerificate()
-        var m = new ModalDialog()
-
-        m.add(div('wall-dialog-header', lf("export to Azure web app")));
-        m.addHTML(lf("<a href='http://azure.microsoft.com/en-us/services/websites/' target='_blank'>Azure web apps</a> let you deploy and scale modern websites and web apps in seconds."));
-        var err = div(null)
-        m.add(err)
-
-        var wa = Azure.getWebsiteAuthForApp(Script)
-
-        var changeWebsite = () => {
-            m.dismiss()
-            chooseWebsiteAsync().done(y => {
-                if (y) setupAzure()
-            }, err => {
-                    if (err) isDeployError(err)
-                })
-        }
-
-        m.add(div("wall-dialog-body", div("whiteField", websiteBox(wa).withClick(changeWebsite))))
-
-                /*
-                !wa ? null : HTML.mkButton(lf("validate"), () => {
-                    m.dismiss()
-                    setDeploymentWebsiteAsync(wa).done(y => {
-                        setupAzure()
-                    })
-                }),
-                */
-
-        if (wa) {
-            m.add(div("wall-dialog-buttons", [
-                HTML.mkButton(lf("deploy"), () => {
-                    m.dismiss()
-                    deployLocalWebappAsync(Script, wa)
-                        .done(y => AppExport.showStatus(wa),
-                            err => setDeploymentWebsiteAsync(wa).then(y => AppExport.showStatus(wa), err => isDeployError(err))
-                            );
-                }),
-                HTML.mkButton(lf("environment"), () => envSetup(wa)),
-                HTML.mkButton(lf("shell"), () => {
-                    HTML.showProgressNotification(lf("loading shell logs"), true);
-                    mgmtRequestAsync(wa, "combinedlogs")
-                        .done(resp => {
-                            var logs: LogMessage[] = [];
-                            logs.push(RT.App.createInfoMessage('------- server internal logs -------'));
-                            logs = logs.concat(resp.logs || []);
-                            TDev.RT.App.showLog(logs);
-                        });
-                }),
-                HTML.mkButton(lf("crashes"), () => {
-                    HTML.showProgressNotification(lf("loading server crashes"), true);
-                    mgmtRequestAsync(wa, "info/crashes")
-                        .done(resp => {
-                            var crashes = resp.crashes
-                            if (resp.workers) {
-                                crashes = []
-                                resp.workers.forEach(r => {
-                                    if (r.body && r.body.crashes)
-                                        crashes.pushRange(r.body.crashes)
-                                })
-                            }
-                            showCrashes(crashes)
-                        });
-                }),
-                HTML.mkButton(lf("proxy"), () => proxySetup(wa))
-            ]))
-        }
-        
-        if (sub) {
-            m.add(div("wall-dialog-body", sub.subcriptionName, HTML.mkLinkButton(lf("forget"),
-                () => {
-                    m.dismiss()
-                    clearManagementCertificate()
-                    setupAzure()
-                })))
-        } else
-            m.add(div("wall-dialog-subtle", lf("no management certificate"), HTML.mkLinkButton(lf("setup"),
-                () => {
-                    m.dismiss()
-                    askManagementCerificateAsync().done(() => {
-                        setupAzure()
-                    })
-                })))        
-        m.show()
-    }
-
     function envSetup(wa: Azure.WebsiteAuth)
     {
         getAzureConfigAsync(wa).then(cfg => {
@@ -1125,11 +1022,7 @@ module TDev.AppExport
             .then(() => AppExport.deployLocalWebappAsync(app, wa))
             .done(() => AppExport.showStatus(wa),
                 err => {
-                    if (app == Script)
-                        AppExport.setupAzure()
-                    else
-                        ModalDialog.info(lf("deployment not configured"),
-                            lf("Go to the main script and try to deploy from there."))
+                    ModalDialog.info(lf("deployment not configured"), lf("Go to the main script and try to deploy from there."))
                 });
     }
 
