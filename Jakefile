@@ -443,8 +443,13 @@ task('upload', [ "build/client.js" ], { async : true }, function() {
         if (!setting) return
         console.log("[I] uploading to " + n)
 	var cmd = 'node build/client.js tdupload ' + setting + ' ' + buildVersion;
-        if (process.env.TRAVIS_BRANCH == "master")
-	  cmd += ' latest';
+	if (/NEXT/.test(n)) {
+          if (process.env.TRAVIS_BRANCH == "master")
+	    cmd += ' latest';
+	} else if (/LITE/.test(n)) {
+          if (process.env.TRAVIS_BRANCH == "bbcmicrobit")
+	    cmd += ' latest';
+	}
         procs.push(cmd);
     })
     runAndComplete(procs, this);
