@@ -2240,7 +2240,7 @@ action note_frequency(#G5aP8OToIirHnSrm name: String) returns(#icSfcpgaQI61R31i 
   #xhQC7C2c52WDwr8z // {namespace:music}
   #iXmcRdXDoHI3JVod // {weight:40}
   #x3L2s27YTHChFBvT // {help:functions/note-frequency}
-  #cY7oVDRa2q52ktSU $f := art→note_table→number($name→to_upper_case→trim(" \t"));
+  #cY7oVDRa2q52ktSU $f := art→notetable\u002esjon→number($name→to_upper_case→trim(" \t"));
   #fxhp0PqdX2BUGW4N if `not` $f→is_invalid then {
     #x0GIA0PDAM9yE8tE `return` $f;
   }
@@ -2251,7 +2251,7 @@ action note_frequency(#G5aP8OToIirHnSrm name: String) returns(#icSfcpgaQI61R31i 
   meta sync;
 }
 #z4gSyUfMQnLVFUce
-var note_table : Json_Object {
+var notetable\u002esjon : Json_Object {
   // {shim:}
   is\_resource = true;
   url = "data:text/plain;base64,ewogICAgIkMiOjI2MiwKICAgICJDIyI6Mjc3LAogICAgIkQiOjI5NCwKICAgICJFQiI6MzExLAogICAgIkUiOjMzMCwKICAgICJGIjozNDksCiAgICAiRiMiOjM3MCwKICAgICJHIjozOTIsCiAgICAiRyMiOjQxNSwKICAgICJBIjo0NDAsCiAgICAiQkIiOjQ2NiwKICAgICJCIjo0OTQsCiAgICAKICAgICJDMyI6MTMxLAogICAgIkMjMyI6MTM5LAogICAgIkQzIjoxNDcsCiAgICAiRUIzIjoxNTYsCiAgICAiRTMiOjE2NSwKICAgICJGMyI6MTc1LAogICAgIkYjMyI6MTg1LAogICAgIkczIjoxOTYsCiAgICAiRyMzIjoyMDgsCiAgICAiQTMiOjIyMCwKICAgICJCQjMiOjIzMywKICAgICJCMyI6MjQ3LAogICAgCiAgICAiQzQiOjI2MiwKICAgICJDIzQiOjI3NywKICAgICJENCI6Mjk0LAogICAgIkVCNCI6MzExLAogICAgIkU0IjozMzAsCiAgICAiRjQiOjM0OSwKICAgICJGIzQiOjM3MCwKICAgICJHNCI6MzkyLAogICAgIkcjNCI6NDE1LAogICAgIkE0Ijo0NDAsCiAgICAiQkI0Ijo0NjYsCiAgICAiQjQiOjQ5NCwKICAgIAogICAgIkM1Ijo1MjMsCiAgICAiQyM1Ijo1NTUsCiAgICAiRDUiOjU4NywKICAgICJFQjUiOjYyMiwKICAgICJFNSI6NjU5LAogICAgIkY1Ijo2OTgsCiAgICAiRiM1Ijo3NDAsCiAgICAiRzUiOjc4NCwKICAgICJHIzUiOjgzMSwKICAgICJBNSI6ODgwLAogICAgIkJCNSI6OTMyLAogICAgIkI1Ijo5ODkKfQ==";
@@ -2304,10 +2304,11 @@ action set_theme(#cJ3VYThrkFH2nnon name: String) {
     #waG9f7vlgr57D4RL data→left_eye→color := "#273EE2" →to_color;
   }
   else {
-    #E12o9ZhEzBrBdaxR $markup := $markup→replace("#273EE2", "#3ADCFE")→replace("#D4AF37", "#989898")→replace("#F9F9F9", "#000");
+    #fu62b3psxXKSTvpr $s := art→boardcolors\u002ejson→at(math→random(art→boardcolors\u002ejson→count))→to_string;
+    #E12o9ZhEzBrBdaxR $markup := $markup→replace("#273EE2", $s)→replace("#D4AF37", "#989898")→replace("#F9F9F9", "#000");
     #NAj8gc9TnnnW95KJ data→led_on_color := "#ff7f7f" →to_color;
     #PDctHCuC00kxArHt data→back_led_color := "#202020" →to_color;
-    #HzF84IyeFuNZEN0S data→left_eye→color := "#3ADCFE" →to_color;
+    #HzF84IyeFuNZEN0S data→left_eye→color := $s→to_color;
   }
   #o0Sg6ZIdqIY2MrO7 data→right_eye→color := data→left_eye→color;
   #DflzlS5FVtxTtiv3 data→picture→blend_svg($markup, 0, 0, 612, 498, 0);
@@ -2786,7 +2787,7 @@ action note(#Y4tRTwLYNsq0niNH name: String) returns(#Shffo9ayK8aw62UV frequency:
   #x2imSmluVwjKgKJq // {namespace:music}
   #R8VYGr4Htc42XPG2 // {weight:0}
   #vZCz3CeHwrqlLi2V // {help:functions/note-frequency}
-  #C4Nk1CulhgpB34fw $f := art→note_table→number($name→to_upper_case→trim(" \t"));
+  #C4Nk1CulhgpB34fw $f := art→notetable\u002esjon→number($name→to_upper_case→trim(" \t"));
   #xM27VD6UJfPYh0hy if `not` $f→is_invalid then {
     #xYh72XsEjmWTjxm6 `return` $f;
   }
@@ -2961,4 +2962,11 @@ action on_gamepad_button(#D3QUCj7BfHCBhap4 name: String, #xI9Zgf22rh0WuyDZ body:
   #NIoxxw4REvwe9Fac code→notify_event_registration($evid);
   #FVzCwPmbtYNq7UzA code→pairing_warning;
   meta sync;
+}
+#dYquo5vKBlFTf010
+var boardcolors\u002ejson : Json_Object {
+  // {shim:}
+  is\_resource = true;
+  url = "data:text/plain;base64,WwoiIzNBRENGRSIsCiIjRkZENDNBIiwKIiMzQUZGQjMiLAoiI0ZGM0E1NCIKXQ==";
+  transient = true;
 }
