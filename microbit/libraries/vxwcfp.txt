@@ -680,7 +680,7 @@ action analog_read_pin(#MbbuFwADdbqnJ4Vx name: String) returns(#NMqOBEeeGloyin4x
   #xah2vLBRZf3FqQzb // {help:functions/analog-read-pin}
   #xsg9Er2mxpPh27XU // {namespace:pins}
   #n6fzrbe7G44K3Hb9 // {weight:47}
-  #cZ6kmydl2t7Q2yKy // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #x60f9nanAtGqf58c // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
   #KbSL0ZGyQSVvXAE4 // {shim:micro_bit::analogReadPin}
   #xYp4xr8kW2d84h5C $p := code→pin_by_name($name);
   #x4ki5CnUbrxJQS5O `return` $p→mass - 1;
@@ -692,7 +692,7 @@ action analog_write_pin(#Ij91JuDakdZUgyo4 name: String, #CeWgWOcwgRe0D5op value:
   #kTJK4kSvEWdiaeOC // {help:functions/analog-write-pin}
   #b4oneIlT9h82g7S4 // {namespace:pins}
   #M12kgf6X8FWgiE4P // {weight:46}
-  #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
   #RXZASxwspuxN3AMn // {hints:value:1023,0}
   #AY2QBjk4JghxAoSU // {shim:micro_bit::analogWritePin}
   #NhjrLchqhj38jvVW $value := math→round($value);
@@ -2119,7 +2119,7 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #xyHbQm9j2k6iXq4P // {namespace:pins}
   #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period}
   #PAYMs0BDD8RbLR3B // {weight:10}
-  #JJlkLNk8vpo4Ivms // {enum:pin:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #SqhPms4IXETastFm // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
   #Xh232b04YquKwayo // {hints:micros:20000}
   meta sync;
 }
@@ -2130,7 +2130,7 @@ action analog_set_pitch_pin(#xpU1U000JWEY2Boq name: String) {
   #YOZY4h2Snemy2Ssv // {namespace:pins}
   #ksrlzJbUsmtEkaBH // {help:functions/analog-set-pitch}
   #xQhxWqWeqz22iboM // {weight:12}
-  #x7Gl6mIAeDddLD4A // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
+  #vKrvmC4KbTx4UrT9 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
   #WHQMX8TGwNk4rHSx data→pitch_pin := $name;
   meta sync;
 }
