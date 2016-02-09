@@ -277,7 +277,7 @@ module TDev.Cloud {
                 return origin + "/blockly/render.html?id=" + encodeURIComponent(id);
             }
         },
-        microbitGitTag : "v75"
+        microbitGitTag : "v76"
     }
 
     export function isArtUrl(url : string) : boolean {

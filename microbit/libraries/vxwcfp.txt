@@ -653,7 +653,7 @@ action digital_write_pin(#kihCn9i6hirgp2CN name: String, #SKnQ2VHVowJuQj03 value
   #x8IX3LaoPHuSPP1k // {help:functions/digital-write-pin}
   #QvcKHCKm4bLp2av4 // {namespace:pins}
   #p48bRe3Fk04cqci0 // {weight:48}
-  #hf52W4GpWNOvCu3I // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P8=uBit.io.P8,P12=uBit.io.P12,P16=uBit.io.P16}
+  #hf52W4GpWNOvCu3I // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P4=uBit.io.P4,P5=uBit.io.P5,P6=uBit.io.P6,P7=uBit.io.P7,P8=uBit.io.P8,P9=uBit.io.P9,P10=uBit.io.P10,P11=uBit.io.P11,P12=uBit.io.P12,P13=uBit.io.P13,P14=uBit.io.P14,P15=uBit.io.P15,P16=uBit.io.P16,P19=uBit.io.P19,P20=uBit.io.P20}
   #xm4nD5CwJqCSj9nK // {shim:micro_bit::digitalWritePin}
   meta sync;
 }
@@ -663,7 +663,7 @@ action digital_read_pin(#w0yR0K9R0Vc1fl1w name: String) returns(#YJovAyKaUYf7fde
   #dmS3OiTqd3Gl4lDI // {help:functions/digital-read-pin}
   #BnyFEXR5wKKdhtR5 // {namespace:pins}
   #h1y7ij55abn1ywo2 // {weight:49}
-  #vVkiLisfPoFGrb43 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P8=uBit.io.P8,P12=uBit.io.P12,P16=uBit.io.P16}
+  #xXyGXmuQJNZlU61v // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P4=uBit.io.P4,P5=uBit.io.P5,P6=uBit.io.P6,P7=uBit.io.P7,P8=uBit.io.P8,P9=uBit.io.P9,P10=uBit.io.P10,P11=uBit.io.P11,P12=uBit.io.P12,P13=uBit.io.P13,P14=uBit.io.P14,P15=uBit.io.P15,P16=uBit.io.P16,P19=uBit.io.P19,P20=uBit.io.P20}
   #KeelVlaOy290uC3r // {shim:micro_bit::digitalReadPin}
   #YQtrwltmovQDIOC4 $pin := code→pin_by_name($name);
   #Ko563vnmhZrsGquz if `not` $pin→is_invalid `and` $pin→mass - 1 > 0 then {
@@ -680,7 +680,7 @@ action analog_read_pin(#MbbuFwADdbqnJ4Vx name: String) returns(#NMqOBEeeGloyin4x
   #xah2vLBRZf3FqQzb // {help:functions/analog-read-pin}
   #xsg9Er2mxpPh27XU // {namespace:pins}
   #n6fzrbe7G44K3Hb9 // {weight:47}
-  #x60f9nanAtGqf58c // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
+  #x60f9nanAtGqf58c // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P4=uBit.io.P4,P10=uBit.io.P10}
   #KbSL0ZGyQSVvXAE4 // {shim:micro_bit::analogReadPin}
   #xYp4xr8kW2d84h5C $p := code→pin_by_name($name);
   #x4ki5CnUbrxJQS5O `return` $p→mass - 1;
@@ -692,7 +692,7 @@ action analog_write_pin(#Ij91JuDakdZUgyo4 name: String, #CeWgWOcwgRe0D5op value:
   #kTJK4kSvEWdiaeOC // {help:functions/analog-write-pin}
   #b4oneIlT9h82g7S4 // {namespace:pins}
   #M12kgf6X8FWgiE4P // {weight:46}
-  #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
+  #RE8jT20OKbkM5oUQ // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P4=uBit.io.P4,P10=uBit.io.P10}
   #RXZASxwspuxN3AMn // {hints:value:1023,0}
   #AY2QBjk4JghxAoSU // {shim:micro_bit::analogWritePin}
   #NhjrLchqhj38jvVW $value := math→round($value);
@@ -2119,7 +2119,7 @@ action analog_set_period(#x0BXJqvN5uf5JIh2 pin: String, #amJYJbzMJzlrlol3 micros
   #xyHbQm9j2k6iXq4P // {namespace:pins}
   #OBcAFCK2Q2DfudpZ // {help:functions/analog-set-period}
   #PAYMs0BDD8RbLR3B // {weight:10}
-  #SqhPms4IXETastFm // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
+  #SqhPms4IXETastFm // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
   #Xh232b04YquKwayo // {hints:micros:20000}
   meta sync;
 }
@@ -2130,7 +2130,7 @@ action analog_set_pitch_pin(#xpU1U000JWEY2Boq name: String) {
   #YOZY4h2Snemy2Ssv // {namespace:pins}
   #ksrlzJbUsmtEkaBH // {help:functions/analog-set-pitch}
   #xQhxWqWeqz22iboM // {weight:12}
-  #vKrvmC4KbTx4UrT9 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2,P3=uBit.io.P3,P5=uBit.io.P5,P10=uBit.io.P10}
+  #vKrvmC4KbTx4UrT9 // {enum:name:P0=uBit.io.P0,P1=uBit.io.P1,P2=uBit.io.P2}
   #WHQMX8TGwNk4rHSx data→pitch_pin := $name;
   meta sync;
 }

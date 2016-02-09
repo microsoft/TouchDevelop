@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "ndodyk"
+  pub "howjlb"
   usage {
     type Image
     action `sync` \_libinit()
@@ -158,16 +158,6 @@ action send_string(#m42yqgLiIeBat5RC packet: String) {
   #kuTJQ1kDXG69F2Y7 code→no_ble_warning;
   meta sync;
 }
-#xEB1OeefNttK4XaV
-action receive_string() returns(#OIrC6T2d22RBBHQJ packet: String) {
-  #bZuQNQi2tZf9So4V // Reads the next string packet on the queue from the radio.
-  #H8C2sMb2AKhjj42o // {help:/functions/receive-string}
-  #dJbFiNCNTfTKUaLc // {namespace:radio}
-  #T4I4pBkzPd1VHOOO // {shim:micro_bit::datagramReceive}
-  #XHkvzsBthHJeYYyB code→no_ble_warning;
-  #q5XjGP0N1Gh3YTXw `return` "";
-  meta sync;
-}
 #SMx8YyKcI4pAObY2
 action on_data_received(#tBS1T6nSo8rUqsY7 body: Action) {
   #fWp5FQpAJV4iRmsG // Registers code to run when a packet is received over radio.
@@ -187,14 +177,5 @@ action receive_number() returns(#fSyRaWUpEANhPJPH packet: Number) {
   #xsUD6CCNcPC12beV // {shim:micro_bit::datagramReceiveNumber}
   #lzACcuzcb1Fi00FK code→no_ble_warning;
   #fPfqOmMueoCMTtSH `return` 0;
-  meta sync;
-}
-#hbpuyGcmXyrHoDBi
-action send_number(#RKWTDcaeleEEbneT packet: Number) {
-  #feiNFE3V0Tacui9b // Broadcasts a number over radio to any connected micro:bit in the group.
-  #x92AzPvQ4Nw0UBIu // {help:/functions/send-number}
-  #x0qErSSQgI4OluEM // {namespace:radio}
-  #NYPQ8J2jucMs20mk // {shim:micro_bit::datagramSendNumber}
-  #WryjPyfpY15N5viP code→no_ble_warning;
   meta sync;
 }
