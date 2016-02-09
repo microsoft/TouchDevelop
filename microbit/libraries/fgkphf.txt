@@ -17,7 +17,7 @@ action example() {
   meta private;
 }
 #UWc0jewBCyZ0aHsL meta import micro\u003abit {
-  pub "howjlb"
+  pub "jzzrnq"
   usage {
     type Image
     action `sync` \_libinit()
@@ -147,14 +147,11 @@ action no_ble_warning() {
   meta sync;
 }
 #mMKObOylkEG0o3Pb
-action send_string(#m42yqgLiIeBat5RC packet: String) {
-  #HH3lEmxU5pR4KpPa // Broadcasts a string packet over radio to any connected micro:bit in the group. The maximum length of the string is 32 characters; other characters are dropped.
-  #b4rYff60Is205Lao // {help:/functions/send-string}
+action send_number(#m42yqgLiIeBat5RC value: Number) {
+  #HH3lEmxU5pR4KpPa // Broadcasts a number over radio to any connected micro:bit in the group.
+  #b4rYff60Is205Lao // {help:/functions/send-number}
   #gHX3uMSmRgVDmlzn // {namespace:radio}
-  #OxeeRKZ6vHD3mX30 // {shim:micro_bit::datagramSend}
-  #xYT1QOjd6mkXn5KU if $packet→count > 32 then {
-    #xjtToypUD2DqfhzB simulator[lib micro\u003abit] →warning("packet cannot contain more than 32 characters");
-  }
+  #OxeeRKZ6vHD3mX30 // {shim:micro_bit::datagramSendNumber}
   #kuTJQ1kDXG69F2Y7 code→no_ble_warning;
   meta sync;
 }
