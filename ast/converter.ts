@@ -50,11 +50,19 @@ module TDev.AST {
         
         public unUnicode(s:string)
         {
+            s = s.replace(/#/g, " sharp ")
+            s = s.replace(/\+/g, " plus ")
             s = s.replace(/\s+([A-Za-z])/g, (v,l) => l.toUpperCase())
             s = s.replace(/[^a-zA-Z0-9]+/g, "_");
             if (s == "" || /^[0-9]/.test(s) || TsQuotingCtx.keywords.hasOwnProperty(s)) s = "_" + s;
             return s;
         }
+    }
+
+    function stringLit(s:string) {
+        if (s.length > 20 && /\n/.test(s))
+            return "`" + s.replace(/[\\`${}]/g, f => "\\" + f) + "`"
+        else return JSON.stringify(s)
     }
 
     class TsTokenWriter
@@ -152,6 +160,7 @@ module TDev.AST {
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
         private apis:StringMap<number> = {};
+        private allEnums:StringMap<number> = {};
         public useExtensions = false;
 
         constructor(private app:App)
@@ -691,7 +700,7 @@ module TDev.AST {
             if (typeof l.data == "number")
                 this.tw.write(l.stringForm || l.data.toString())
             else if (typeof l.data == "string")
-                this.tw.write(JSON.stringify(l.data))
+                this.tw.write(stringLit(l.data))
             else if (typeof l.data == "boolean")
                 this.tw.kw(l.data ? "true" : "false")
             else
@@ -980,9 +989,9 @@ module TDev.AST {
                                     arg = arg
                                 annot.push(n + "=" + arg)
                                 break;
-                            //case "enum":
-                            //    break;
+                            case "enum":
                             case "namespace":
+                            case "action":
                                 break;
                             case "hints":
                                 paramHelp[arg0] = ", eg: " + argRest.replace(/,/g, ", ")
@@ -1008,12 +1017,22 @@ module TDev.AST {
                         this.tw.write(" * @param ")
                         this.localName(p.local)
                         this.tw.write(" TODO" + (paramHelp[p.getName()] || "")).nl()
-
                     })
                     this.tw.write(" */").nl()
                 }
                 if (annot.length)
                     this.tw.write("//% " + annot.join(" ")).nl()
+
+                a.getParameters().forEach(p => {
+                    if (p.enumMap) {
+                        var thisEnum = "enum TODO {\n" +
+                        Object.keys(p.enumMap).map(k =>
+                            "    //% enumval=" + p.enumMap[k] + "\n    " +
+                            this.tw.globalCtx.quote(k, 0) + ",\n").join("") +
+                        "}\n"
+                        this.allEnums[thisEnum] = 1
+                    }
+                })
             }
 
             if (isExtension) {
@@ -1098,8 +1117,13 @@ module TDev.AST {
             this.tw.globalId(g).op0(": ");
             this.type(g.getKind())
             var d = this.defaultValue(g.getKind())
-            if (g.isResource)
-                d = JSON.stringify(g.stringResourceValue() || g.url)
+            if (g.isResource) {
+                if (g.getKind() == api.core.JsonObject) {
+                    d = RT.String_.valueFromArtUrl(g.url)
+                } else {
+                    d = stringLit(g.stringResourceValue() || g.url)
+                }
+            }
             if (d != null)
                 this.tw.op("=").write(d)
             this.tw.op0(";").nl();
@@ -1173,6 +1197,7 @@ module TDev.AST {
                 if (ns)
                     this.tw.endBlock()
             })
+            this.tw.write(Object.keys(this.allEnums).join("\n"))
         }
 
         visitComment(c:Comment)
