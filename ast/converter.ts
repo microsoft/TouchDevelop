@@ -955,13 +955,65 @@ module TDev.AST {
             }
 
             var stmts = a.body.stmts.slice(0)
+            var annot:string[] = []
+
             if (!/^example/.test(a.getName()) && stmts[0] instanceof Comment) {
-                this.tw.write("/**").nl()
+                var paramHelp = {}
+                var helpLines = 0
                 while (stmts[0] instanceof Comment) {
-                    this.tw.write(" * " + (<Comment>stmts[0]).text).nl()
+                    var txt = (<Comment>stmts[0]).text
+                    txt = txt.replace(/\{(\w+)(:[^{}]*)?\}/g, (full, n, arg) => {
+                        if (!arg) arg = ":"
+                        arg = arg.slice(1)
+                        var arg0 = arg.replace(/:.*/)
+                        var argRest = arg.slice(arg0.length + 1)
+                        switch (n) {
+                            case "shim":
+                            case "help":
+                            case "weight":
+                                if (/\s/.test(arg))
+                                    if (/"/.test(arg))
+                                        arg = "'" + arg + "'"
+                                    else
+                                        arg = "\"" + arg + "\""
+                                else
+                                    arg = arg
+                                annot.push(n + "=" + arg)
+                                break;
+                            //case "enum":
+                            //    break;
+                            case "namespace":
+                                break;
+                            case "hints":
+                                paramHelp[arg0] = ", eg: " + argRest.replace(/,/g, ", ")
+                                break;
+                            default:
+                                return full;
+                        }
+                        if (n == "shim" && a.isAtomic)
+                            annot.push("async")
+                        return ""
+                    })
+                    txt = txt.trim()
+                    if (txt) {
+                        if (helpLines == 0)
+                            this.tw.write("/**").nl()
+                        this.tw.write(" * " + txt).nl()
+                        helpLines++
+                    }
                     stmts.shift();
                 }
-                this.tw.write(" */").nl()
+                if (helpLines) {
+                    a.getInParameters().forEach(p => {
+                        this.tw.write(" * @param ")
+                        this.localName(p.local)
+                        this.tw.write(" TODO" + (paramHelp[p.getName()] || "")).nl()
+
+                    })
+                    this.tw.write(" */").nl()
+                }
+                if (annot.length)
+                    this.tw.write("//% " + annot.join(" ")).nl()
             }
 
             if (isExtension) {
@@ -1112,7 +1164,15 @@ module TDev.AST {
             this.tw.nl()
             dump(a.records())
             this.tw.nl()
-            dump(a.allActions().filter(a => !this.isOwnExtension(a) && !a.isActionTypeDef()))
+            var normalActions = a.allActions().filter(a => !this.isOwnExtension(a) && !a.isActionTypeDef())
+            var byNs = Util.groupBy(normalActions, a => a.getNamespaces()[0] || "")
+            Object.keys(byNs).forEach(ns => {
+                if (ns)
+                    this.tw.kw("namespace " + ns).beginBlock()
+                dump(byNs[ns])
+                if (ns)
+                    this.tw.endBlock()
+            })
         }
 
         visitComment(c:Comment)
