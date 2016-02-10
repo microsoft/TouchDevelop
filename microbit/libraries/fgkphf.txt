@@ -176,3 +176,35 @@ action receive_number() returns(#fSyRaWUpEANhPJPH packet: Number) {
   #fPfqOmMueoCMTtSH `return` 0;
   meta sync;
 }
+#oyeIEyiHV4PESy4U
+action send_numbers(#TWt85ZdnVdVks4qg value_0: Number, #PALeJ44H2Jig7U7B value_1: Number, #IwK2JEOATiM8RQ04 value_2: Number, #fskCUC0B4vBGYBLG value_3: Number) {
+  #ERs1hyWijsUBXoHe // Broadcasts 4 numbers over radio to any connected micro:bit in the group.
+  #dGsSNcnYD0RGFtvl // {help:/functions/send-numbers}
+  #uVsullsCBMINE1O1 // {namespace:radio}
+  #x8mJQt2FJdBKMzd3 // {shim:micro_bit::datagramSendNumbers}
+  #gv4vA8FL8nIAVki3 code→no_ble_warning;
+  meta sync;
+}
+#xysWLtMHlf2zYhdJ
+action received_signal_strength() returns(#wuN34PfnNZIdqWlZ value: Number) {
+  #f5mVcBPivHN282Ra // Gets the received signal strength indicator (RSSI) from the packet received by ``receive number``. Not supported in simulator.
+  #HOrMSvvRxOuQddcJ // {namespace:radio}
+  #IOckS15VISqB5nVE // {help:/functions/received-signal-strength}
+  #RcFAlFsMUWi3MFva // {weight:10}
+  #x17eQWFQlXYrNFlL // {shim:micro_bit::datagramGetRSSI}
+  #VLgsANH0v4U1dIL4 `return` 0;
+  meta sync;
+}
+#KYq2xN2ZmadaaUUg
+action received_number_at(#LVXgw8JVnPxY0943 index: Number) returns(#x6YaeVBsa5NA28zv value: Number) {
+  #u6EURoiQD9fmCRXy // Reads a number at a given index from the packet received by ``receive number``. Not supported in simulator.
+  #mpcZtI9daTGald96 // {namespace:radio}
+  #xHGZvv2WSCLy5FBO // {help:/functions/received-number-at}
+  #mOgS7NOjb8RpWfra // {weight:20}
+  #ggzhtKIQXUhtxIcB // {shim:micro_bit::datagramGetNumber}
+  #xpQKJfDpm9u25M65 if $index < 0 `or` $index ≥ 4 then {
+    #x1xGyL4Q4QMQ7lTc simulator[lib micro\u003abit] →warning("index should be between ``0`` and ``3``.");
+  }
+  #xpj1aMYjd1CvkKHT `return` 0;
+  meta sync;
+}
