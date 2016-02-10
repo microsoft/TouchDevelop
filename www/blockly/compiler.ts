@@ -1609,9 +1609,24 @@ var stdCallTable: { [blockType: string]: StdFunc } = {
     f: "send number",
     args: [{field:"MESSAGE"}]
   },
+  radio_datagram_send_numbers: {
+    namespace: "radio",
+    f: "send numbers",
+    args: [{field:"VALUE0"},{field:"VALUE1"},{field:"VALUE2"},{field:"VALUE3"}]
+  },
   radio_datagram_receive: {
     namespace: "radio",
     f: "receive number",
+    args: []
+  },
+  radio_datagram_received_number_at: {
+    namespace: "radio",
+    f: "received number at",
+    args: [{field:"VALUE"}]
+  },
+  radio_datagram_rssi: {
+    namespace: "radio",
+    f: "receive signal strength",
     args: []
   },
   radio_set_group: {
@@ -1693,7 +1708,7 @@ function compileStatements(e: Environment, b: B.Block): J.JStmt[] {
           stmts.push(compileNumberEvent(e, b, "on message received", [ "MESSAGE" ], "radio"));
           break;              
 
-        case 'radio_datagraph_received_event':
+        case 'radio_datagram_received_event':
           stmts.push(compileEvent(e, b, "on data received", [], "radio"));
           break;              
               
