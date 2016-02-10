@@ -1354,7 +1354,7 @@ Blockly.Blocks['radio_datagram_send_numbers'] = {
         this.setPreviousStatement(true);
         this.setNextStatement(true);            
         this.setTooltip('Broadcasts a number to other micro:bits over radio.');
-        this.setHelpUrl("https://www.microbit.co.uk/functions/send-number");
+        this.setHelpUrl("https://www.microbit.co.uk/functions/send-numbers");
     }
 };
 

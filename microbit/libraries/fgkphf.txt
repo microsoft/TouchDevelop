@@ -197,11 +197,12 @@ action received_signal_strength() returns(#wuN34PfnNZIdqWlZ value: Number) {
 }
 #KYq2xN2ZmadaaUUg
 action received_number_at(#LVXgw8JVnPxY0943 index: Number) returns(#x6YaeVBsa5NA28zv value: Number) {
-  #u6EURoiQD9fmCRXy // Reads a number at a given index from the packet received by ``receive number``. Not supported in simulator.
+  #u6EURoiQD9fmCRXy // Reads a number at a given index, between ``0`` and ``3``, from the packet received by ``receive number``. Not supported in simulator.
   #mpcZtI9daTGald96 // {namespace:radio}
   #xHGZvv2WSCLy5FBO // {help:/functions/received-number-at}
   #mOgS7NOjb8RpWfra // {weight:20}
   #ggzhtKIQXUhtxIcB // {shim:micro_bit::datagramGetNumber}
+  #IjOuVbCncaPFM29O // {hints:index:0,1,2,3}
   #xpQKJfDpm9u25M65 if $index < 0 `or` $index ≥ 4 then {
     #x1xGyL4Q4QMQ7lTc simulator[lib micro\u003abit] →warning("index should be between ``0`` and ``3``.");
   }
