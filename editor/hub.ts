@@ -971,6 +971,7 @@ module TDev.Browser {
                 "Install Script": "app_browseEditInstall",
                 "Uninstall Script": "app_browseUninstall",
                 "File Save": "app_browseSave",
+                "TD Tutorial Start": "Tutorial_step0",
             }
 
             ModalDialog.editText(lf("How many days back?"), "180", days => {
