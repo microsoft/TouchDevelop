@@ -3624,22 +3624,15 @@ module TDev
             if (sig.length > 0)
                 sig.push(" -- ")
 
-            var translate = find.property instanceof AST.LibraryRefAction
-            sig.push(this.renderHelpCore(Util.firstSentence(find.property.getDescription()), translate))
+            sig.push(this.renderHelpCore(Util.translatedFirstSentence(find.property.getDescription())))
 
             return sig
         }
 
-        private renderHelpCore(desc:string, translate:boolean)
+        private renderHelpCore(desc:string)
         {
             var md = new MdComments();
             var elt = HTML.span("md-inline")
-            desc = desc.replace(/{hints:[^}]+}/g, "")
-            desc = desc.replace(/\n/g, " ")
-            desc = desc.replace(/^\s+/, "")
-            desc = desc.replace(/\s+$/, "")
-            if (translate)
-                desc = lf_static(desc, !!Util.translationToken)
             Browser.setInnerHTML(elt, md.formatInline(desc));
             return elt
         }
@@ -3757,7 +3750,7 @@ module TDev
                 if (th.def) {
                     addTopic(th.def.getKind().getName())
                     if (results.length == 0)
-                        setHelp(th.def.getName() + " -- " + Util.firstSentence(th.def.getDescription()))
+                        setHelp(th.def.getName() + " -- " + Util.translatedFirstSentence(th.def.getDescription()))
                 }
             }
 
@@ -3766,7 +3759,7 @@ module TDev
             } else if (this.stmt instanceof AST.OptionalParameter) {
                 var opt = (<AST.OptionalParameter>this.stmt).recordField
                 if (opt && opt.getDescription())
-                    setHelp(this.renderHelpCore(opt.getName() + " -- " + Util.firstSentence(opt.getDescription()), true))
+                    setHelp(this.renderHelpCore(opt.getName() + " -- " + Util.translatedFirstSentence(opt.getDescription())))
             }
 
             if (!didIt) setHelp("")

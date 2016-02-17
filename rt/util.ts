@@ -320,6 +320,20 @@ module TDev{
         if (index > -1) return s.substr(0, index + searchString.length);
         else return s;
     }  
+
+    export function translatedFirstSentence(desc:string)
+    {
+        desc = desc.replace(/{hints:[^}]+}/g, "")
+        desc = desc.replace(/\n/g, " ")
+        desc = desc.replace(/^\s+/, "")
+        desc = desc.replace(/\s+$/, "")
+        var d2 = lf_static(desc, !!translationToken)
+        var trimmed = firstSentence(d2)
+        if (d2 == desc)
+            return lf_static(trimmed, false)
+        else
+            return trimmed
+    }
     
     export function firstSentence(s: string): string {
         return Util.trimAfter(s, ".");
