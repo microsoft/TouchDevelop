@@ -84,8 +84,10 @@ module TDev
     function handleChromeSerial() {
         var buffers: StringMap<string> = {};
         var chrome = (<any>window).chrome;
-        if (chrome && chrome.runtime) {
-            var port = chrome.runtime.connect("hccbjdgogdkdomojppdljbijomobfdap", { name: "micro:bit" });
+        if (chrome && chrome.runtime) {            
+            var m = /chromeid=([a-z]+)/.exec(window.location.href);            
+            var extensionId = m ? m[1] : "cihhkhnngbjlhahcfmhekmbnnjcjdbge"
+            var port = chrome.runtime.connect(extensionId, { name: "micro:bit" });
             port.onMessage.addListener(function(msg) {
                 if (msg.type == "serial") {
                     Browser.serialLog = true;
