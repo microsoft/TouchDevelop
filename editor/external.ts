@@ -244,7 +244,7 @@ module TDev {
             elt("externalEditorSide").style.background = "#336699 url(https://az742082.vo.msecnd.net/pub/psopafpj) 0 0 repeat";
             var bbcLogo_src = TheChannel.editor.origin + '/static/img/bbcLogo.png';
             var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(bbcLogo_src));
-            var link = HTML.mkA(null, 'http://micropython.org/', "_blank", null);
+            var link = HTML.mkA(null, 'http://python.org/community/microbit/', "_blank", null);
             var logo_src = TheChannel.editor.origin + '/static/img/micropython.png';
             var logo_image = HTML.mkImg(logo_src);
             link.appendChildren([logo_image]);
