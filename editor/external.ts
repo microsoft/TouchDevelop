@@ -50,10 +50,10 @@ module TDev {
       var ckOrigin;
       var pyOrigin;
 
-      if (isLocal) {
+      if (isLocal && !dbg) {
         ckOrigin = CK_ORIGINS.LOCAL;
         pyOrigin = PY_ORIGINS.LOCAL;
-      } else if (isTest) {
+      } else if (isTest || dbg) {
         ckOrigin = CK_ORIGINS.TEST;
         pyOrigin = PY_ORIGINS.TEST;
       } else if (isStage) {
@@ -373,11 +373,12 @@ module TDev {
       public receive(event) {
         if (event.origin != this.editor.origin)
           return;
-
+        Util.log('editor: received ' + JSON.stringify(event, null, 2));
         switch ((<Message> event.data).type) {
-          case MessageType.Save: {
+            case MessageType.Save: {
             tick(Ticks.externalSave);
             var message = <Message_Save>event.data;
+            Util.assert(!!this.guid);
             Promise.join([
               World.getInstalledHeaderAsync(this.guid),
               World.getInstalledScriptAsync(this.guid),
