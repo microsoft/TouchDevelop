@@ -85,7 +85,7 @@ tsd reinstall
 npm install
 ````
 
-### Quick windows setup
+### Quick Windows setup
 These steps install the tools for Windows (+ extras to handle the Arduino compilation scenarios)
 * install [Chocolatey](https://chocolatey.org/)
 * install nodejs, Visual Studio Code
