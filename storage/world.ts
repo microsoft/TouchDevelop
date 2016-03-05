@@ -113,7 +113,7 @@ module TDev {
             }
             if (header.editor && (!header.meta || !header.meta.name)) {
                 Util.log("ERROR pre-condition not met for [setInstalledAsync]; bailing");
-                debugger;
+                //debugger;
                 return Promise.as();
             }
             if (header.meta)
