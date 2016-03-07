@@ -3584,6 +3584,7 @@ function fetchlibraries(args) {
         , 'xczaux' // blocks new
         , 'dceiba' // blocks blink
         , 'pwjcnz' // flashing heart tutorial
+        , 'xyelfe' // python new
     ], "microbit/libraries", () => concatlibs());
     fetchLibs({ liteUrl: "https://www.touchdevelop.com/", key: "" }, [
         'angli' // game
