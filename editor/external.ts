@@ -93,11 +93,7 @@ module TDev {
           path: ckPath,
           logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
           order: 0,
-        }];
-
-      if (TDev.isBeta || isLocal) {
-        externalEditorsCache.push(
-        {
+        }, {
           company: "The Python Software Foundation",
           name: "MicroPython",
           description: "Hack your micro:bit with MicroPython!",
@@ -106,8 +102,7 @@ module TDev {
           path: "/editor.html",
           logoUrl: pyOrigin + '/static/img/python-powered.png',
           order: 3
-        })
-      }
+      }]
     }
     return externalEditorsCache;
   }
