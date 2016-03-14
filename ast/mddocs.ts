@@ -2,6 +2,19 @@
 
 module TDev.AST.MdDocs {
 
+    var topicCore:string;
+    var topicName:string;
+
+    var artNames:StringMap<NameInfo> = {};
+
+    interface NameInfo {
+        topics:string[];
+        name:string;
+        id:string;
+    }
+
+    var artCount:StringMap<number> = {};
+
     class Writer extends AST.TokenWriter
     {
         public uniqueId(id:string)
@@ -29,12 +42,21 @@ module TDev.AST.MdDocs {
         }
     }
 
+    export function info() {
+        var arr = Object.keys(artNames).map(k => artNames[k])
+        arr.sort((a, b) => b.topics.length - a.topics.length)
+        return JSON.stringify({
+            pics: arr
+        }, null, 1)
+    }
+
     function formatText(s:string)
     {
         var warnS = ""
         function warn(m:string)
         {
             warnS += "WARN: " + m + "\n"
+            console.log("WARN: " + m)
         }
 
         s = s.replace(/\s+/g, " ").trim()
@@ -65,6 +87,40 @@ module TDev.AST.MdDocs {
             } else if (macro == "fullsig") {
                 warn("unsupported macro: " + macro)
                 return full;
+            } else if (macro == "topic") {
+                topicName = arg
+                topicCore = ("/" + arg).replace(/(\/(td|functions))+\//g, "/").replace(/\/(activity|quiz|quiz.answer(s|)|challenges|tutorial)$/, "")
+                if (!topicCore) topicCore = topicName
+                topicCore = topicCore.replace(/^\//, "").toLowerCase()
+                console.log("*** " + topicName)
+                return ""
+            } else if (macro == "pic") {
+                var args = arg.split(/:/)
+                var r0 = Script.resources().filter(r => MdComments.shrink(r.getName()) == MdComments.shrink(args[0]))[0]
+                var artId = ""
+                if (r0) {
+                    var mm = /([a-z]+)$/.exec(r0.url)
+                    if (mm) artId = mm[1]
+                }
+                if (!artId && /^[a-z]+$/.test(args[0])) {
+                    artId = args[0]
+                }
+
+                if (!artId)
+                    warn("missing picture: " + arg)
+                
+                if (!artNames.hasOwnProperty(artId)) {
+                    artCount[topicCore] = (artCount[topicCore] || 0) + 1
+                    artNames[artId] = {
+                        topics: [],
+                        name: topicCore + "-" + (artCount[topicCore] - 1),
+                        id: artId,
+                    }
+                }
+                artNames[artId].topics.push(topicName)
+
+                return "![](/img/" + artNames[artId].name + ".png)"
+
             } else {
                 warnS += "MACRO: " + macro
                 return full;

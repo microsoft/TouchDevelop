@@ -1752,10 +1752,11 @@ function mddocs(files:string[])
         TDev.AST.reset();
         TDev.AST.loadScriptAsync((s) => TDev.Promise.as(s == "" ? t : null));
         var md = TDev.AST.MdDocs.toMD(TDev.Script)
-        var mdF = f.replace(/\.td$/, "").replace(/$/, ".md")
+        var mdF = f.replace(/\.td$/, "").replace(/$/, ".md").replace(/src\//, "md/")
         fs.writeFileSync(mdF, md)
-        console.log("written", mdF)
+        // console.log("written", mdF)
     })
+    fs.writeFileSync("info.json", TDev.AST.MdDocs.info())
 }
 
 function featureize(dirs:string[])
