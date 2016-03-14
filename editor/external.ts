@@ -50,10 +50,10 @@ module TDev {
       var ckOrigin;
       var pyOrigin;
 
-      if (isLocal) {
+      if (isLocal && !dbg) {
         ckOrigin = CK_ORIGINS.LOCAL;
         pyOrigin = PY_ORIGINS.LOCAL;
-      } else if (isTest) {
+      } else if (isTest || dbg) {
         ckOrigin = CK_ORIGINS.TEST;
         pyOrigin = PY_ORIGINS.TEST;
       } else if (isStage) {
@@ -93,11 +93,7 @@ module TDev {
           path: ckPath,
           logoUrl: ckOrigin + ckPath + 'img/codekingdoms-microbit.png',
           order: 0,
-        }];
-
-      if (TDev.isBeta || isLocal) {
-        externalEditorsCache.push(
-        {
+        }, {
           company: "The Python Software Foundation",
           name: "MicroPython",
           description: "Hack your micro:bit with MicroPython!",
@@ -106,8 +102,7 @@ module TDev {
           path: "/editor.html",
           logoUrl: pyOrigin + '/static/img/python-powered.png',
           order: 3
-        })
-      }
+      }]
     }
     return externalEditorsCache;
   }
@@ -244,7 +239,7 @@ module TDev {
             elt("externalEditorSide").style.background = "#336699 url(https://az742082.vo.msecnd.net/pub/psopafpj) 0 0 repeat";
             var bbcLogo_src = TheChannel.editor.origin + '/static/img/bbcLogo.png';
             var bbcLogo = div("wallFullScreenLogo", HTML.mkImg(bbcLogo_src));
-            var link = HTML.mkA(null, 'http://micropython.org/', "_blank", null);
+            var link = HTML.mkA(null, 'http://python.org/community/microbit/', "_blank", null);
             var logo_src = TheChannel.editor.origin + '/static/img/micropython.png';
             var logo_image = HTML.mkImg(logo_src);
             link.appendChildren([logo_image]);
@@ -373,11 +368,12 @@ module TDev {
       public receive(event) {
         if (event.origin != this.editor.origin)
           return;
-
+        Util.log('editor: received ' + JSON.stringify(event, null, 2));
         switch ((<Message> event.data).type) {
-          case MessageType.Save: {
+            case MessageType.Save: {
             tick(Ticks.externalSave);
             var message = <Message_Save>event.data;
+            Util.assert(!!this.guid);
             Promise.join([
               World.getInstalledHeaderAsync(this.guid),
               World.getInstalledScriptAsync(this.guid),

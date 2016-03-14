@@ -875,6 +875,12 @@ module TDev
             askImportOrUploadAsync(file)
                 .then(guids => {
                     if (guids.length > 0) return;
+                    if (!Cloud.hasPermission("post-art")) {
+                        return ModalDialog.showAsync(lf("Sorry, we don't seem to recognize this file."), {
+                            title: lf("Import cancelled."),
+                            cancel: false
+                        })
+                    }                    
                     if (Cloud.anonMode(lf("uploading art"))) return;
                     var isDoc = HTML.documentMimeTypes.hasOwnProperty(fileType)
                     var sizeLimit = 1
@@ -913,7 +919,7 @@ module TDev
                                 }
                             });
                         } else {
-                            ModalDialog.info(lf("unsupported file type"), lf("sorry, you can only upload pictures (PNG and JPEG) or sounds (MP3)"));
+                            ModalDialog.info(lf("unsupported file type"), lf("Sorry, we don't seem to recognize this file."));
                         }
                     }
                 })
@@ -1020,8 +1026,14 @@ module TDev
         }
 
         export function uploadDocumentDialogAsync(input?: TDev.HTML.IInputElement, initialName?: string): Promise {
+            if (!Cloud.hasPermission("post-art")) {
+                return ModalDialog.showAsync(lf("Sorry, you do not have the permission to upload documents."), {
+                    title: lf("Upload cancelled."),
+                    cancel: false
+                })
+            }
             if (Cloud.anonMode(lf("uploading documents")))
-                return Promise.as();
+                return Promise.as();            
 
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
@@ -1090,9 +1102,15 @@ module TDev
         }
 
         export function uploadSoundDialogAsync(input? : TDev.HTML.IInputElement, initialName? : string): Promise {
+            if (!Cloud.hasPermission("post-art")) {
+                return ModalDialog.showAsync(lf("Sorry, you do not have the permission to upload sounds."), {
+                    title: lf("Upload cancelled."),
+                    cancel: false
+                })
+            }
             if (Cloud.anonMode(lf("uploading sounds"))) {
                 return Promise.as();
-            }
+            }            
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();
                 var art: JsonArt = null;
@@ -1184,8 +1202,14 @@ module TDev
         }
 
         export function uploadPictureDialogAsync(options:UploadPictureOptions = {}): Promise {
+            if (!Cloud.hasPermission("post-art")) {
+                return ModalDialog.showAsync(lf("Sorry, you do not have the permission to upload pictures."), {
+                    title: lf("Upload cancelled."),
+                    cancel: false
+                })
+            }
             if (Cloud.anonMode(lf("uploading pictures")))
-                return Promise.as();
+                return Promise.as();            
             var removeWhite = !!options.removeWhite
             return new Promise((onSuccess, onError, onProgress) => {
                 var m = new ModalDialog();

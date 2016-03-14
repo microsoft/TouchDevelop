@@ -999,7 +999,7 @@ module TDev.AST {
                             default:
                                 return full;
                         }
-                        if (n == "shim" && a.isAtomic)
+                        if (n == "shim" && !a.isAtomic)
                             annot.push("async")
                         return ""
                     })
