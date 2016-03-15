@@ -403,7 +403,7 @@ module TDev {
                 return links;
             },
             idToUrl: id => Cloud.config.primaryCdnUrl + "/pub/" + id,
-            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.primaryCdnUrl + "/pub/" + id))
+            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.primaryCdnUrl + "/pub/" + id, '', lf("open")))
         }, {
             id: "youtube",
             name: "YouTube",
