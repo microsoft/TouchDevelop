@@ -290,7 +290,7 @@ module TDev.HTML {
         return elt;
     }
 
-    export function mkImg(url:string, cls? : string, alt?: string):HTMLElement {
+    export function mkImg(url:string, cls? : string, alt?: string, ariaHidden?: boolean):HTMLElement {
         if (/^\//.test(url))
             url = (<any> url).slice(1);
 
@@ -301,15 +301,18 @@ module TDev.HTML {
 
         var img;
         if (/^svg:/.test(url)) {
-            img = SVG.getIconSVG(url.slice(4));
+            img = SVG.getIconSVG(url.slice(4), ariaHidden ? undefined : alt);
         } else {
             var elt = <HTMLImageElement> document.createElement("img");
             elt.src = proxyResource(url);
-            elt.alt = alt || "";
+            if (!ariaHidden)
+                elt.alt = alt || "";
             img = elt;
         }
         if (cls)
             img.className += " " + cls;
+        if (ariaHidden)
+            img.setAttribute("aria-hidden", "true");
         return img;
     }
 
@@ -590,13 +593,13 @@ module TDev.HTML {
         };
     }
 
-    export function mkTextInput(type:string, placeholder : string, role?:string) : HTMLInputElement
+    export function mkTextInput(type:string, placeholder : string, role?:string, label?: string) : HTMLInputElement
     {
         var txt = <HTMLInputElement> document.createElement("input");
         txt.setAttribute("type", type);
         if (placeholder) {
             txt.setAttribute("placeholder", placeholder);
-            txt.setAttribute("aria-label", placeholder);
+            txt.setAttribute("aria-label", label || placeholder);
         }
         if (role) HTML.setRole(txt, role);
         txt.autofocus = false;

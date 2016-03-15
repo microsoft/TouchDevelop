@@ -1402,7 +1402,7 @@ module TDev.Browser {
             var icon = div("sdIcon");
             var ic = ScriptInfo.editorIcons[k.id];
             icon.style.backgroundColor = ic.background;
-            icon.setChildren([HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))]);
+            icon.setChildren([HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"), '', k.name)]);
 
             var nameBlock = div("sdName", k.name);
             var hd = div("sdNameBlock", nameBlock);
@@ -1583,8 +1583,7 @@ module TDev.Browser {
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
-        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor"));
-        // private bglogo2 = div("hubBgLogo2", HTML.mkImg("svg:touchDevelop,#B9F594"));
+        private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor", '', '', true));
         private meBox = div("hubMe");
         private notificationBox = div("notificationBox");
         private topBox: HTMLElement;

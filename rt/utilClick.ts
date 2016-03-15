@@ -173,7 +173,10 @@ module TDev
                 case "mouseup":
                     if (!this.cleared) this.fireClick(e);
                     break;
-
+                case "keydown":
+                    var ke = <KeyboardEvent>e;
+                    if (!this.cleared && (ke.which == 13 || ke.which == 32)) this.fireClick(e);
+                    break;
                 /*
                 case "click":
                     e.stopPropagation();
@@ -238,6 +241,7 @@ module TDev
                 this.helt.addEventListener("touchstart", <any>this, false);
             else
                 this.helt.addEventListener("mousedown", <any>this, false);
+            this.helt.addEventListener("keydown", <any>this, false);
         }
 
         public unhook()
@@ -245,12 +249,17 @@ module TDev
             this.helt.removeEventListener("MSPointerDown", <any>this, false);
             this.helt.removeEventListener("touchstart", <any>this, false);
             this.helt.removeEventListener("mousedown", <any>this, false);
+            this.helt.removeEventListener("keydown", <any>this, false);
         }
     }
 
     export module Util {
         export function clickHandler(e:HTMLElement, cb:(e:any) => void, allowSelect?:boolean)
         {
+            if (e) {
+                e.setAttribute("role", "button")
+                e.tabIndex = 0;
+            }
             function newCb(e:any) {
                 try {
                     return cb(e);
@@ -272,7 +281,7 @@ module TDev
                     e.stopImmediatePropagation();
                     return true;
                 }
-        }
+        }   
 
         try {
             if (typeof HTMLElement != "undefined")

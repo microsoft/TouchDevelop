@@ -555,7 +555,7 @@ textarea
   width:calc(100% - 2em);
 }
 
-input.wall-textbox:hover {
+input.wall-textbox:hover, input.wall-textbox:focus {
   border-color: #ccc;
 }
 
