@@ -1,6 +1,6 @@
 {
-  "   Maybe: {0} ({1} at '{2}')\n":"",
-  "  -> Line {2} ('{1}'), error: {0}\n{3}":"",
+  "   Maybe: {0} ({1} at '{2}')\n":"{0}PBA",
+  "  -> Line {2} ('{1}'), error: {0}\n{3}":"  -> Line {2} ('{1}'), error: {0}\n{3}part",
   " -- a local variable":"",
   " [class]":"",
   " [hidden]":"",
