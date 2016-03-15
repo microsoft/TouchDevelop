@@ -6459,7 +6459,8 @@
 
             var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
 
-            return HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))
+            var editor = getExternalEditors().filter(e => e.id == this.getScriptType())[0];           
+            return HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"), '', editor ? editor.name : lf("script icon"))
         }
 
         public iconBgColor():string

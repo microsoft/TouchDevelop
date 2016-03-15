@@ -1407,7 +1407,7 @@ module TDev.Browser {
             var icon = div("sdIcon");
             var ic = ScriptInfo.editorIcons[k.id];
             icon.style.backgroundColor = ic.background;
-            icon.setChildren([HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"))]);
+            icon.setChildren([HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"), '', k.name)]);
 
             var nameBlock = div("sdName", k.name);
             var hd = div("sdNameBlock", nameBlock);

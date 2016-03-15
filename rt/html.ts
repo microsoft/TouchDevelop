@@ -301,7 +301,7 @@ module TDev.HTML {
 
         var img;
         if (/^svg:/.test(url)) {
-            img = SVG.getIconSVG(url.slice(4));
+            img = SVG.getIconSVG(url.slice(4), alt);
         } else {
             var elt = <HTMLImageElement> document.createElement("img");
             elt.src = proxyResource(url);

@@ -272,17 +272,20 @@ export module SVG {
 
     var pythonLogo = '<svg viewBox="0 0 90 90" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="78" height="77.593796" id="svg2169" sodipodi:version="0.32" inkscape:version="0.48.5 r10040" version="1.0" sodipodi:docname="python-logo1.svg" inkscape:output_extension="org.inkscape.output.svg.inkscape"> <defs id="defs2171"> <linearGradient id="linearGradient11301" inkscape:collect="always"> <stop id="stop11303" offset="0" style="stop-color:#ffe052;stop-opacity:1" /> <stop id="stop11305" offset="1" style="stop-color:#ffc331;stop-opacity:1" /> </linearGradient> <linearGradient gradientUnits="userSpaceOnUse" y2="168.1012" x2="147.77737" y1="111.92053" x1="89.136749" id="linearGradient11307" xlink:href="#linearGradient11301" inkscape:collect="always" /> <linearGradient id="linearGradient9515" inkscape:collect="always"> <stop id="stop9517" offset="0" style="stop-color:#387eb8;stop-opacity:1" /> <stop id="stop9519" offset="1" style="stop-color:#366994;stop-opacity:1" /> </linearGradient> <linearGradient gradientUnits="userSpaceOnUse" y2="131.85291" x2="110.14919" y1="77.070274" x1="55.549179" id="linearGradient9521" xlink:href="#linearGradient9515" inkscape:collect="always" /> </defs> <sodipodi:namedview id="base" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:zoom="1" inkscape:cx="9.3947058" inkscape:cy="72.439766" inkscape:document-units="px" inkscape:current-layer="layer1" width="131.10236px" height="184.25197px" inkscape:window-width="872" inkscape:window-height="624" inkscape:window-x="82" inkscape:window-y="82" showgrid="false" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0" showborder="true" inkscape:showpageshadow="false" inkscape:window-maximized="0" /> <metadata id="metadata2174"> <rdf:RDF> <cc:Work rdf:about=""> <dc:format>image/svg+xml</dc:format> <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" /> </cc:Work> </rdf:RDF> </metadata> <g inkscape:label="Calque 1" inkscape:groupmode="layer" id="layer1" transform="translate(-489.57146,-267.85101)"> <g id="g1894" transform="matrix(0.70638641,0,0,0.70638641,457.82822,220.192)"> <path style="color:#000000;fill:url(#linearGradient9521);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible" d="M 99.75,67.46875 C 71.718268,67.468752 73.46875,79.625 73.46875,79.625 L 73.5,92.21875 l 26.75,0 0,3.78125 -37.375,0 c 0,0 -17.9375,-2.034276 -17.9375,26.25 -2e-6,28.28427 15.65625,27.28125 15.65625,27.28125 l 9.34375,0 0,-13.125 c 0,0 -0.503652,-15.65625 15.40625,-15.65625 15.9099,0 26.53125,0 26.53125,0 0,0 14.90625,0.24096 14.90625,-14.40625 0,-14.647206 0,-24.21875 0,-24.21875 0,-2e-6 2.26318,-14.65625 -27.03125,-14.65625 z M 85,75.9375 c 2.661429,-2e-6 4.8125,2.151071 4.8125,4.8125 2e-6,2.661429 -2.151071,4.8125 -4.8125,4.8125 -2.661429,2e-6 -4.8125,-2.151071 -4.8125,-4.8125 -2e-6,-2.661429 2.151071,-4.8125 4.8125,-4.8125 z" id="path8615" inkscape:connector-curvature="0" /> <path id="path8620" d="m 100.5461,177.31485 c 28.03174,0 26.28125,-12.15625 26.28125,-12.15625 l -0.0312,-12.59375 -26.75,0 0,-3.78125 37.375,0 c 0,0 17.9375,2.03427 17.9375,-26.25001 10e-6,-28.284267 -15.65625,-27.281247 -15.65625,-27.281247 l -9.34375,0 0,13.124997 c 0,0 0.50366,15.65625 -15.40625,15.65625 -15.909902,0 -26.531252,0 -26.531252,0 0,0 -14.90625,-0.24096 -14.90625,14.40626 0,14.6472 0,24.21875 0,24.21875 0,0 -2.26318,14.65625 27.031252,14.65625 z m 14.75,-8.46875 c -2.66143,0 -4.8125,-2.15107 -4.8125,-4.8125 0,-2.66143 2.15107,-4.8125 4.8125,-4.8125 2.66143,0 4.8125,2.15107 4.8125,4.8125 1e-5,2.66143 -2.15107,4.8125 -4.8125,4.8125 z" style="color:#000000;fill:url(#linearGradient11307);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible" inkscape:connector-curvature="0" /> </g> </g> </svg>';
 
-    export function getIconSVG(name:string) : HTMLElement
+    export function getIconSVG(name:string, alt?: string) : HTMLElement
     {
         // return "data:image/svg+xml," + escape(svg);
         // return "data:image/svg+xml;base64," + base64_encode(svg);
-
+        var title = alt || name.split(',')[0];
         var d = div(null);
         d.innerHTML = getIconSVGCore(name);
-        var r = <HTMLElement> d.firstChild;
-        HTML.setRole(r, "presentation");
-        r.setAttribute("aria-label", name);
-        return r;
+        var svg = <HTMLElement> d.firstChild;
+        HTML.setRole(svg, "img");
+        svg.setAttribute("aria-label", title);
+        var tt = <SVGTextElement>document.createElementNS("http://www.w3.org/2000/svg", 'title')
+        tt.textContent = title;
+        svg.insertBefore(tt, svg.firstElementChild)
+        return svg;
     }
 
     export function getIconNames()
