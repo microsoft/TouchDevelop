@@ -37,7 +37,7 @@ module TDev.AST.MdDocs {
         s = s.replace(/\[([^\n\[\]]*)\]\s*\(([\w\/\-]+)\)/g, (f, name, lnk) => {
             if (!name)
                 name = lnk.replace(/.*\//, "")
-            lnk = lnk.replace(/^\/td/, "/ts")
+            lnk = lnk.replace(/^\/td/, "/js")
             lnk = "/microbit" + lnk
             return "[" + name + "](" + lnk + ")"
         })
@@ -87,19 +87,15 @@ module TDev.AST.MdDocs {
                     return "## " + title
                 else if (tp == "screen")
                     return ""
-                else if (title)
-                    title = tp + ": " + title
-                else
-                    title = tp
-                currBox = title
-                return "###~ " + title
+                currBox = tp
+                return "### ~" + tp + " " + title
             } else if (macro == "hide") {
                 currBox = "hide"
-                return "###~ hide"
+                return "### ~hide"
             } else if (macro == "/box" || macro == "/hide") {
                 if (currBox) {
                     currBox = null
-                    return "###~"
+                    return "### ~"
                 }
                 return ""
             } else if (macroMap.hasOwnProperty(macro)) {
