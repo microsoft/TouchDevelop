@@ -714,11 +714,17 @@ module TDev
                     lf("To import files to your iPhone or iPad, you need to have the latest software installed. Files can only be imported from a cloud storage app.")));
             }
             m.add(div('wall-dialog-body', input));
+            var err = div('wall-dialog-body');
+            m.add(err);
             m.add(div('wall-dialog-buttons',
                 HTML.mkButton(lf("import"), () => {
-                    m.dismiss();
-                    handleImportFilesAsync(Util.toArray(input.files))
-                        .done();
+                    if (!input.files.length)
+                        err.setChildren([lf("Please select a file before importing.")]);
+                    else {
+                        m.dismiss();
+                        handleImportFilesAsync(Util.toArray(input.files))
+                            .done();
+                    }
                 }),
                 HTML.mkButton(lf("cancel"), () => m.dismiss())
             ));
