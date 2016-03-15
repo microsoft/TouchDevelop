@@ -96,7 +96,7 @@
         private theList = div("slList");
         private header = div("sdListLabel");
         private botDiv = div(null);
-        private searchBox = HTML.mkTextInput("search", lf("Search..."), "search");
+        private searchBox = HTML.mkTextInput("search", lf("Search..."), "search", lf("Search"));
         private autoUpdate:KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
         private backContainer = div("slBackContainer");
@@ -169,6 +169,7 @@
 
 
             this.rightPane.withClick(() => this.hideSidePane(), true);
+            this.listHeaderHider.setAttribute("aria-hidden", "true")
             this.listHeaderHider.withClick(() => this.hideSidePane());
 
             this.setBackButton();            
@@ -6494,8 +6495,8 @@
             var res = div("sdHeaderOuter",
                             div("sdHeader", icon, screenShot,
                                 div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers,
-                                    facebook, abuseDiv)));
-
+                        facebook, abuseDiv)));
+            
             if (big)
                 res.className += " sdBigHeader";
 
@@ -6503,6 +6504,7 @@
                 var deleted = this.isDeleted();
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
+                res.setAttribute("aria-label", deleted ? lf("deleted script") : lf("script {0}", this.app.getName()))
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
                 if (deleted) author.setChildren([]);
@@ -8122,7 +8124,9 @@
                 this.userName = u.name;
                 this.userScore = u.score;
                 var authorHead = this.thumbnail(false);
+                authorDiv.setAttribute("aria-label", lf("author {0}", this.userName));
                 authorHead.classList.add("teamHead");
+                authorHead.setAttribute("aria-hidden", "true")
                 authorDiv.setChildren([
                     div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })

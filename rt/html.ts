@@ -593,13 +593,13 @@ module TDev.HTML {
         };
     }
 
-    export function mkTextInput(type:string, placeholder : string, role?:string) : HTMLInputElement
+    export function mkTextInput(type:string, placeholder : string, role?:string, label?: string) : HTMLInputElement
     {
         var txt = <HTMLInputElement> document.createElement("input");
         txt.setAttribute("type", type);
         if (placeholder) {
             txt.setAttribute("placeholder", placeholder);
-            txt.setAttribute("aria-label", placeholder);
+            txt.setAttribute("aria-label", label || placeholder);
         }
         if (role) HTML.setRole(txt, role);
         txt.autofocus = false;
