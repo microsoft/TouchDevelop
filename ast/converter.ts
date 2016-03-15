@@ -60,8 +60,11 @@ module TDev.AST {
     }
 
     function stringLit(s:string) {
-        if (s.length > 20 && /\n/.test(s))
+        if (s.length > 20 && /\n/.test(s)) {
+            if (/^[01 \n]*$/.test(s))
+                s = "\n" + s.replace(/0/g, ".").replace(/1/g, "#") + "\n"
             return "`" + s.replace(/[\\`${}]/g, f => "\\" + f) + "`"
+        }
         else return JSON.stringify(s)
     }
 
@@ -69,11 +72,19 @@ module TDev.AST {
         extends TokenWriter
     {
         public globalCtx = new TsQuotingCtx();
+        public highlight = 0
 
         constructor()
         {
             super()
             this.indentString = "    ";
+        }
+
+        public finalize(skipNL = false)
+        {
+            var ret = super.finalize(skipNL)
+            ret = ret.replace(/(\s+)\}\n\s*else/, (a, b) => b + "} else")
+            return ret
         }
 
         public globalId(d:Decl, pref = "")
@@ -104,6 +115,21 @@ module TDev.AST {
         }
 
         public kw(k:string) { return this.keyword(k) }
+
+        public semiNL() {
+            if (this.highlight)
+                this.sep().write("// ***")
+            this.nl()
+            return this
+        }
+
+        public comment(s:string)
+        {
+            var inner = MdDocs.formatText(s).trim()
+            inner.split("\n").forEach(l =>
+                this.op("//").space().write(l).nl())
+            return this
+        }
     }
 
     class AsyncFinder
@@ -182,11 +208,25 @@ module TDev.AST {
             }
         }
 
-        private localName(l:LocalDef)
+        public renderSnippet(stmts:AST.Stmt[]) {
+            this.tw.clear()
+            stmts.forEach(s => this.dispatch(s))
+            return this.tw.finalize()
+        }
+
+        public renderSig(act:Action) {
+            this.tw.clear()
+            this.printActionHeader(act)
+            return this.tw.finalize()
+        }
+
+        private localName(l:LocalDef):TsTokenWriter
         {
             if (l == this.thisLocal)
-                return this.tw.kw("this")
-            return this.tw.jsid(this.localCtx.quote(l.getName(), l.nodeId))
+                this.tw.kw("this")
+            else
+                this.tw.jsid(this.localCtx.quote(l.getName(), l.nodeId))
+            return this.tw
         }
 
         static kindMap:StringMap<string> = {
@@ -717,14 +757,14 @@ module TDev.AST {
             a.outParameters.forEach(p => {
                 this.tw.kw("let")
                 this.localDef(p)
-                this.tw.op0(";").nl()
+                this.tw.semiNL();
             })
 
             this.codeBlockInner(a.body.stmts)
 
             if (a.outParameters.length >= 1) {
                 this.tw.kw("return")
-                this.localName(a.outParameters[0]).op0(";").nl()
+                this.localName(a.outParameters[0]).semiNL();
             }
 
             this.tw.endBlock()
@@ -741,7 +781,7 @@ module TDev.AST {
                     this.localName(<LocalDef>d)
                 }
             } else if (d instanceof SingletonDef) {
-                this.tw.write("TD.")
+                // this.tw.write("TD.")
                 this.simpleId(d.getName())
             } else if (t.isEscapeDef()) {
                 var e = (<PlaceholderDef>d).escapeDef
@@ -838,7 +878,7 @@ module TDev.AST {
             if (es.isVarDef())
                 this.tw.kw("let")
             this.dispatch(es.expr)
-            this.tw.op0(";").nl()
+            this.tw.semiNL()
         }
 
         codeBlockInner(stmts:Stmt[])
@@ -936,10 +976,10 @@ module TDev.AST {
             this.pcommaSep(a.getInParameters(), p => this.localDef(p.local))
             this.tw.op("=>");
             this.actionReturn(a)
-            this.tw.op0(";").nl();
+            this.tw.semiNL()
         }
 
-        visitAction(a:Action)
+        printActionHeader(a:Action)
         {
             if (a.isActionTypeDef()) {
                 this.printActionTypeDef(a)
@@ -1054,14 +1094,30 @@ module TDev.AST {
                 this.pcommaSep(a.getInParameters(), printP)
             }
 
-            this.tw.op(":");
+            if (a.getOutParameters().length > 0) {
+                this.tw.op(":");
+                this.actionReturn(a);
+            }
 
-            this.actionReturn(a);
+            return { isExtension: isExtension, stmts: stmts, optsLocal: optsLocal, optsName: optsName }
+        }
 
-            this.tw.nl()
+        visitAction(a:Action)
+        {
+            var isMain = a.getInParameters().length == 0 && /^main/.test(a.getName())
+
+            if (isMain) {
+                this.codeBlockInner(a.body.stmts)
+                this.tw.nl()
+                return
+            }
+
+            var info = this.printActionHeader(a)
+            var optsLocal = info.optsLocal
+
             this.tw.beginBlock()
 
-            if (isExtension) {
+            if (info.isExtension) {
                 this.thisLocal = a.getInParameters()[0].local
             }
 
@@ -1072,20 +1128,20 @@ module TDev.AST {
                 this.type(optsLocal.getKind())
                 this.tw.write("(); ")
                 this.localName(optsLocal).write(".load(")
-                this.tw.jsid(optsName).op0(");").nl()
+                this.tw.jsid(info.optsName).op0(");").nl()
             }
 
             a.getOutParameters().forEach(p => {
                 this.tw.kw("let")
                 this.localDef(p.local)
-                this.tw.op0(";").nl()
+                this.tw.semiNL()
             })
 
-            this.codeBlockInner(stmts)
+            this.codeBlockInner(info.stmts)
 
             if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
-                this.localName(a.getOutParameters()[0].local).op0(";").nl()
+                this.localName(a.getOutParameters()[0].local).semiNL()
             } else if (a.getOutParameters().length > 1) {
                 this.tw.kw("return ");
                 if (!a.isAtomic) {
@@ -1126,7 +1182,7 @@ module TDev.AST {
             }
             if (d != null)
                 this.tw.op("=").write(d)
-            this.tw.op0(";").nl();
+            this.tw.semiNL()
         }
 
         visitLibraryRef(l:LibraryRef)
@@ -1149,7 +1205,7 @@ module TDev.AST {
                 var d = this.defaultValue(f.dataKind)
                 if (d != null)
                     this.tw.write(" = " + d)
-                this.tw.op0(";").nl()
+                this.tw.semiNL()
             })
 
             this.tw.write("static createFromJson(o:JsonObject) { let r = new ")
@@ -1168,7 +1224,7 @@ module TDev.AST {
                 this.simpleId(f.getName())
                 this.tw.op0("?:").sep()
                 this.type(f.dataKind)
-                this.tw.op0(";").nl()
+                this.tw.semiNL()
             })
             this.tw.endBlock()
 
@@ -1202,7 +1258,13 @@ module TDev.AST {
 
         visitComment(c:Comment)
         {
-            this.tw.write("// " + c.text).nl()
+            var tt = c.text.trim()
+            if (tt == "{highlight}")
+                this.tw.highlight++
+            else if (tt == "{/highlight}")
+                this.tw.highlight--
+            else
+                this.tw.comment(c.text)
         }
 
         visitStmt(s:Stmt)

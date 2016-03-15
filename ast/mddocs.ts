@@ -4,63 +4,49 @@ module TDev.AST.MdDocs {
 
     var topicCore:string;
     var topicName:string;
-
-    var artNames:StringMap<NameInfo> = {};
-
-    interface NameInfo {
-        topics:string[];
-        name:string;
-        id:string;
-    }
-
-    var artCount:StringMap<number> = {};
-
-    class Writer extends AST.TokenWriter
-    {
-        public uniqueId(id:string)
-        {
-            return this;
-        }
-
-        constructor()
-        {
-            super()
-            this.unicodeOps = false;
-            this.indentLevel++;
-            this.nl()
-        }
-
-        public quoted()
-        {
-            return "\n```" + this.finalize(true) + "\n```\n\n";
-        }
-
-        public comment(s:string)
-        {
-            this.op("//").space().write(formatText(s).trim()).nl();
-            return this
-        }
-    }
+    export var preexistingArtIds:StringMap<string> = {};
+    var lastTopic:string;
+    var currBox:string;
 
     export function info() {
-        var arr = Object.keys(artNames).map(k => artNames[k])
-        arr.sort((a, b) => b.topics.length - a.topics.length)
         return JSON.stringify({
-            pics: arr
         }, null, 1)
     }
 
-    function formatText(s:string)
+    var macroMap = {
+        "videoptr": "video",
+        "section": "section",
+        "breadcrumbtitle": "short",
+        "parenttopic": "parent",
+    }
+
+    export function formatText(s:string)
     {
         var warnS = ""
         function warn(m:string)
         {
+            if (topicName != lastTopic) {
+                console.log("*** " + topicName)
+                lastTopic = topicName
+            }
             warnS += "WARN: " + m + "\n"
             console.log("WARN: " + m)
         }
 
-        s = s.replace(/\s+/g, " ").trim()
-        s = s.replace(/^\{([\w\*]+)(:([^{}]*))?\}/g, (full, macro, dummy, arg) => {
+        s = s.replace(/\t/g, " ")
+        s = s.replace(/\[([^\n\[\]]*)\]\s*\(([\w\/\-]+)\)/g, (f, name, lnk) => {
+            if (!name)
+                name = lnk.replace(/.*\//, "")
+            lnk = lnk.replace(/^\/td/, "/ts")
+            lnk = "/microbit" + lnk
+            return "[" + name + "](" + lnk + ")"
+        })
+        s = s.replace(/\{([\/\w\*]+)(:([^{}]*))?\}/g, (full, macro, dummy, arg) => {
+            macro = macro.toLowerCase()
+            if (macro == "vimeo") {
+                macro = "videoptr"
+                arg = "vimeo/" + arg
+            }
             if (macro == "sig") {
                 var m = arg.split(/->/);
                 var act:Action = null;
@@ -69,9 +55,7 @@ module TDev.AST.MdDocs {
                         act = act || l.getPublicActions().filter(a => a.getName() == m[1])[0]
                 })
                 if (act) {
-                    var tw = new Writer()
-                    act.writeHeader(tw)
-                    return tw.quoted()
+                    return quoteCode(converter.renderSig(act))
                 } else {
                     warn("cannot find lib action: " + arg)
                     return full;
@@ -92,9 +76,35 @@ module TDev.AST.MdDocs {
                 topicCore = ("/" + arg).replace(/(\/(td|functions))+\//g, "/").replace(/\/(activity|quiz|quiz.answer(s|)|challenges|tutorial)$/, "")
                 if (!topicCore) topicCore = topicName
                 topicCore = topicCore.replace(/^\//, "").toLowerCase()
-                console.log("*** " + topicName)
                 return ""
-            } else if (macro == "pic") {
+            } else if (macro == "box") {
+                if(!arg) arg = "box"
+                var mm = /([^:]+):(.*)/.exec(arg)
+                var tp = mm ? mm[1] : arg
+                var title = mm ? mm[2] : ""
+                currBox = null
+                if (tp == "card")
+                    return "## " + title
+                else if (tp == "screen")
+                    return ""
+                else if (title)
+                    title = tp + ": " + title
+                else
+                    title = tp
+                currBox = title
+                return "###~ " + title
+            } else if (macro == "hide") {
+                currBox = "hide"
+                return "###~ hide"
+            } else if (macro == "/box" || macro == "/hide") {
+                if (currBox) {
+                    currBox = null
+                    return "###~"
+                }
+                return ""
+            } else if (macroMap.hasOwnProperty(macro)) {
+                return "### @" + macroMap[macro] + " " + (arg || "") + "\n"
+            } else if (macro == "pic" || macro == "pici") {
                 var args = arg.split(/:/)
                 var r0 = Script.resources().filter(r => MdComments.shrink(r.getName()) == MdComments.shrink(args[0]))[0]
                 var artId = ""
@@ -109,34 +119,35 @@ module TDev.AST.MdDocs {
                 if (!artId)
                     warn("missing picture: " + arg)
                 
-                if (!artNames.hasOwnProperty(artId)) {
-                    artCount[topicCore] = (artCount[topicCore] || 0) + 1
-                    artNames[artId] = {
-                        topics: [],
-                        name: topicCore + "-" + (artCount[topicCore] - 1),
-                        id: artId,
-                    }
+                var preName = preexistingArtIds[artId]
+                
+                if (!preName) {
+                    warn("unknown picture: " + arg)
+                    return "(picture " + args[0] + ")"
                 }
-                artNames[artId].topics.push(topicName)
 
-                return "![](/img/" + artNames[artId].name + ".png)"
+                return "![](/static/mb/" + preName + ")"
 
             } else {
                 warnS += "MACRO: " + macro
                 return full;
             }
         })
+        // s = s.replace(/\s+/g, " ").trim()
 
         if (/^\* /.test(s))
             return s + "\n" + warnS
         return "\n" + s + "\n" + warnS + "\n"
     }
 
+    function quoteCode(s:string)
+    {
+        return "\n```\n" + s.trim() + "\n```\n\n";
+    }
+
     function mkSnippet(stmts:Stmt[])
     {
-        var tw = new Writer()
-        stmts.forEach(s => s.writeTo(tw))
-        return tw.quoted()
+        return quoteCode(converter.renderSnippet(stmts))
     }
 
     function extractStmts(stmts:Stmt[])
@@ -176,8 +187,13 @@ module TDev.AST.MdDocs {
         return output
     }
 
+    var converter:Converter;
+
     export function toMD(app:App)
     {
+        converter = new Converter(app)
+        converter.run() // prep etc
+
         var header = "# " + app.getName() + "\n\n" + app.getDescription() + "\n\n"
         var body = extractStmts(app.mainAction().body.stmts)
         return (header + body).replace(/\n\n+/g, "\n\n")

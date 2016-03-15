@@ -1747,6 +1747,9 @@ function ts(files:string[])
 
 function mddocs(files:string[])
 {
+    var info = files.shift()
+    TDev.AST.MdDocs.preexistingArtIds = JSON.parse(fs.readFileSync(info, "utf8"))
+
     files.forEach(f => {
         var t = fs.readFileSync(f, "utf8")
         TDev.AST.reset();

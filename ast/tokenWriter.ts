@@ -54,6 +54,11 @@ module TDev { export module AST {
             return this;
         }
 
+        public clear()
+        {
+            this.buf = ""
+        }
+
         public finalizeShort()
         {
             return this.buf;
