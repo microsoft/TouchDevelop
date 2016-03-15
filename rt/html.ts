@@ -290,7 +290,7 @@ module TDev.HTML {
         return elt;
     }
 
-    export function mkImg(url:string, cls? : string, alt?: string):HTMLElement {
+    export function mkImg(url:string, cls? : string, alt?: string, ariaHidden?: boolean):HTMLElement {
         if (/^\//.test(url))
             url = (<any> url).slice(1);
 
@@ -301,15 +301,18 @@ module TDev.HTML {
 
         var img;
         if (/^svg:/.test(url)) {
-            img = SVG.getIconSVG(url.slice(4), alt);
+            img = SVG.getIconSVG(url.slice(4), ariaHidden ? undefined : alt);
         } else {
             var elt = <HTMLImageElement> document.createElement("img");
             elt.src = proxyResource(url);
-            elt.alt = alt || "";
+            if (!ariaHidden)
+                elt.alt = alt || "";
             img = elt;
         }
         if (cls)
             img.className += " " + cls;
+        if (ariaHidden)
+            img.setAttribute("aria-hidden", "true");
         return img;
     }
 

@@ -309,7 +309,7 @@
 
         private notificationsCount = -1;
         public addNotificationCounter(notificationBox : HTMLElement) {
-            var notificationsBtn = HTML.mkImg('svg:gel-alert,currentColor');
+            var notificationsBtn = HTML.mkImg('svg:gel-alert,currentColor', '', lf("notifications"));
             notificationsBtn.id = "notificationsBtn";
             var notificationsCounterDiv = div('notificationCounter');
 
@@ -3313,7 +3313,7 @@
                 });
             }
 
-            return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100"), lf("report abuse")).withClick(() => {
+            return div("sdReportAbuse", HTML.mkImg("svg:SmilieSad,#000,clip=100", '', '', true), lf("report abuse")).withClick(() => {
                 AbuseReportInfo.abuseOrDelete(this.getPublicationId(), doubleConfirm, undefined, onDeleted)
             });
 
@@ -3382,7 +3382,7 @@
                     ));
             }
             if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
-                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100")).withClick(() => {
+                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100", '', lf("add to channel"))).withClick(() => {
                     Meta.chooseListAsync({
                         header: lf("add to channel"),
                         custombuttons: [
@@ -4410,7 +4410,7 @@
                         textDiv.appendChild(trDiv);
                 });
             }
-            translateBtn = EditorSettings.widgets().translateComments ? div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000"), lf("translate")).withClick(translateCmt) : null;
+            translateBtn = EditorSettings.widgets().translateComments ? div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000", '', '', true), lf("translate")).withClick(translateCmt) : null;
 
             var delBtn:HTMLElement = null;
             var deleteCmt = () => {
@@ -4431,9 +4431,9 @@
             }
 
             if (c.userid == Cloud.getUserId() || (this.canDeleteAny && this.canDeleteAny())) {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000"), lf("delete")).withClick(deleteCmt);
+                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000", '', '', true), lf("delete")).withClick(deleteCmt);
             } else {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000"), lf("abuse")).withClick(reportAbuse);
+                delBtn = div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000", '', '', true), lf("abuse")).withClick(reportAbuse);
             }
 
             var likeBtn = div("sdCmtBtnOuter");
@@ -5200,7 +5200,7 @@
             if (this.parent.isMe()) {
                 var unsubDiv:HTMLElement;
                 box.firstChild.appendChild(
-                    unsubDiv = <HTMLElement>div("sdReportAbuse", HTML.mkImg("svg:Person,#000,clip=100"), lf("unsubscribe")).withClick(() => {
+                    unsubDiv = <HTMLElement>div("sdReportAbuse", HTML.mkImg("svg:Person,#000,clip=100", '', '', true), lf("unsubscribe")).withClick(() => {
                         unsubDiv.style.opacity = "0.1";
                         Util.httpRequestAsync(Cloud.getPrivateApiUrl(c.id + "/subscriptions"), "DELETE", undefined).then(() => {
                             UserInfo.invalidateSubscriptions(c.id)
@@ -5253,14 +5253,14 @@
             var reportAbuse = () => {
                 AbuseReportInfo.abuseOrDelete(c.id)
             }
-            var d = div("sdScreen", HTML.mkImg(c.thumburl));
+            var d = div("sdScreen", HTML.mkImg(c.thumburl, '', lf("screenshot")));
             d.withClick(() => {
                 var m = new ModalDialog();
 
                 var d = div("sdScreenShotFrame");
                 d.withClick(() => { m.dismiss() });
                 var loading = div("sdScreenShotImgLoading", lf("loading screenshot ..."));
-                var img = HTML.mkImg(c.pictureurl);
+                var img = HTML.mkImg(c.pictureurl, '', lf("screenshot"));
                 // TSBUG onLoadHandler was defined inline
                 var onLoadHandler = () => { loading.removeSelf() }
                 img.onload = onLoadHandler;
@@ -5270,7 +5270,7 @@
                     div(null, ScriptInfo.labeledBox(lf("featuring"), b.getScriptInfoById(c.publicationid).mkSmallBox())),
                     div(null, ScriptInfo.labeledBox(lf("taker"), b.getCreatorInfo(c).mkSmallBox())),
                     buttons = div("sdScreenShotButtons",
-                      div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000"), lf("report abuse")).withClick(reportAbuse)
+                      div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000", '', '', true), lf("report abuse")).withClick(reportAbuse)
                       )
                     ));
 
@@ -5285,7 +5285,7 @@
                 // delete button if screenshot author
                 if (c.userid === Cloud.getUserId()) {
                     buttons.appendChild(
-                        div("sdCmtBtn", HTML.mkImg("svg:Delete,#000"), lf("delete")).withClick(deleteScreenshot)
+                        div("sdCmtBtn", HTML.mkImg("svg:Delete,#000", '', '', true), lf("delete")).withClick(deleteScreenshot)
                     );
                 }
 
@@ -5409,7 +5409,7 @@
                 nameBlock.setChildren([this.getTitle()]);
                 dirAuto(nameBlock);
                 var img = null;
-                img = HTML.mkImg(a.thumburl);
+                img = HTML.mkImg(a.thumburl, '', lf("thumbnail"));
                 img.className += " checker";
                 icon.setChildren([img]);
 
@@ -5519,7 +5519,7 @@
                     )
                     var info = div("art-info", Math.round((Date.now()/1000 - ja.time) / 3600 / 24) + "d, by " + ja.username)
                     var e = div("art-review",
-                        HTML.mkImg(ja.mediumthumburl || ja.pictureurl),
+                        HTML.mkImg(ja.mediumthumburl || ja.pictureurl, '', lf("art picture")),
                         info, flag)
                     entries.push(e)
                     ids.push(ja.id)
@@ -5621,7 +5621,7 @@
                     });
                     img = playBtn;
                 } else if (a.bloburl) {
-                    img = HTML.mkImg("svg:document,currentColor");
+                    img = HTML.mkImg("svg:document,currentColor", '', lf("document"));
                 }
 
                 d.setChildren([img,
@@ -5764,7 +5764,7 @@
         private mkButtons(): HTMLElement {
             var mkBtn = (icon:string, desc:string, key:string, f:()=>void) =>
             {
-                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon)), div("sdBigButtonDesc sdHeartCounter", desc));
+                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)), div("sdBigButtonDesc sdHeartCounter", desc));
                 TheEditor.keyMgr.btnShortcut(b, key);
                 return b.withClick(f);
             }
@@ -6777,8 +6777,9 @@
             var save : HTMLElement;            
             var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
             {
-                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon)),
+                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)),
                     div("sdBigButtonDesc " + (desc.length > 7 ? "sdBigButtonLongDesc" : ""), desc));
+                b.setAttribute("aria-label", desc);
                 TheEditor.keyMgr.btnShortcut(b, key);
                 return b.withClick(() => {
                     tick(t);
