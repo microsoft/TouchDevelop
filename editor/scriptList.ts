@@ -15,7 +15,12 @@
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
             this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
+            this.leftPane.tabIndex = -1;
+            this.leftPane.setAttribute("aria-label", lf("Script list"));
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
+            this.rightPane.tabIndex = -1;
+            this.rightPane.setAttribute("aria-label", lf("Script description pane"));
+            this.hdContainer.tabIndex = 0;
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
