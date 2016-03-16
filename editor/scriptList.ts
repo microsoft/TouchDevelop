@@ -76,7 +76,7 @@
                 if (siteMore) {
                     siteMore.setChildren([
                         HTML.mkImg("svg:bars,white"),
-                        siteMore.innerText
+                        lf("More")
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
@@ -7453,15 +7453,15 @@
                         m.setScroll();
                     }
 
+                    if (EditorSettings.widgets().publishDescription) {
+                        // if different author, allow to create pull request
+                        m.add(div('wall-dialog-body', changeDescription));
+                    }
                     var publishBtn;
                     m.add(div("wall-dialog-buttons",
                         publishBtn = HTML.mkButton(lf("publish"), () => pub(false, uploadScreenshot ? screenshotDataUri : undefined)),
                         EditorSettings.widgets().publishAsHidden ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())));
-                    if (EditorSettings.widgets().publishDescription) {
-                        // if different author, allow to create pull request
-                        m.add(div('wall-dialog-buttons', changeDescription));
-                    }
                     if (EditorSettings.widgets().sendPullRequest &&
                         this.cloudHeader.userId && this.cloudHeader.userId != Cloud.getUserId()) {
                         m.add(div('wall-dialog-body',
@@ -8127,6 +8127,7 @@
                 authorDiv.setAttribute("aria-label", lf("author {0}", this.userName));
                 authorHead.classList.add("teamHead");
                 authorHead.setAttribute("aria-hidden", "true")
+                authorHead.tabIndex = -1;
                 authorDiv.setChildren([
                     div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })

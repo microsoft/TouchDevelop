@@ -1,46 +1,63 @@
 ///<reference path='refs.ts'/>
-module TDev
-{
-    export class ModalDialog
-    {
+module TDev {
+    export class ModalDialog {
         private overlay = div("modalOverlay");
         private dialog = div("modalDialog");
         private floating: HTMLElement;
-        private outerDialog:HTMLElement;
+        private outerDialog: HTMLElement;
         private savedKeyState = null;
         private id = Random.uniqueId();
         private logView: TDev.RT.AppLogView;
 
-        constructor(header = "")
-        {
+        constructor(header = "") {
+            this.dialog.setAttribute("role", "dialog");
             this.floating = div("modalDialogInner", this.dialog);
             this.outerDialog = div("modalDialogOuter", div("modalDialogMid", this.floating));
             if (header)
-                this.add(div("wall-dialog-header", header))
+                this.add(div("wall-dialog-header", header));
             this.fullWhite();
+        }
+        
+        public setAlert() {
+            this.dialog.setAttribute("role", "alertdialog");
+            this.applyAria();
+        }
+
+        private applyAria() {
+            var foundtitle = false;
+            var founddesc = false;
+            Util.children(this.dialog).forEach(el => {
+                if (!foundtitle && el.classList.contains('wall-dialog-header')) {
+                    foundtitle = true;
+                    if (!el.id) el.id = Util.guidGen();
+                    this.dialog.setAttribute("aria-labelledby", el.id);
+                }
+                if (!founddesc && el.classList.contains('wall-dialog-body')) {
+                    founddesc = true;
+                    if (!el.id) el.id = Util.guidGen();
+                    this.dialog.setAttribute("aria-describedby", el.id);
+                }                
+            })
         }
 
         public opacity = 0.85;
-        public onDismiss:(m:ModalDialog)=>void = null;
+        public onDismiss: (m: ModalDialog) => void = null;
         public visible = false;
         public canDismiss = true;
 
-        static current:ModalDialog;
-        static dismissCurrent()
-        {
+        static current: ModalDialog;
+        static dismissCurrent() {
             if (ModalDialog.currentIsVisible()) {
                 ModalDialog.current.canDismiss = true;
                 ModalDialog.current.dismiss()
             }
         }
 
-        static currentIsVisible()
-        {
+        static currentIsVisible() {
             return ModalDialog.current && ModalDialog.current.visible;
         }
 
-        public show()
-        {
+        public show() {
             this.showBare();
         }
 
@@ -58,51 +75,44 @@ module TDev
             }
         }
 
-        public addFirst(v:HTMLElement)
-        {
+        public addFirst(v: HTMLElement) {
             if (this.dialog.firstChild)
                 this.dialog.insertBefore(v, this.dialog.firstChild)
             else this.add(v)
         }
 
-        public empty()
-        {
+        public empty() {
             this.dialog.setChildren([])
         }
 
-        public addBody(v:any)
-        {
+        public addBody(v: any) {
             this.add(div("wall-dialog-body", v))
         }
 
-        public add(v:any)
-        {
+        public add(v: any) {
             if (v && Array.isArray(v))
                 this.dialog.appendChildren(v);
             else
                 this.dialog.appendChildren([v]);
+            this.applyAria();
         }
 
-        public addClass(c:string)
-        {
+        public addClass(c: string) {
             this.dialog.className += " " + c;
         }
 
-        public addHTML(html:string) : HTMLElement
-        {
+        public addHTML(html: string): HTMLElement {
             var b = div("wall-dialog-body");
             Browser.setInnerHTML(b, html);
             this.add(b);
             return b;
         }
 
-        public addOuter(v:any)
-        {
+        public addOuter(v: any) {
             this.outerDialog.appendChildren([v]);
         }
 
-        public stretchDown(e:HTMLElement, keep = 0)
-        {
+        public stretchDown(e: HTMLElement, keep = 0) {
             this.outerDialog.className += " modalDialogOuterLong";
             this.listheight = SizeMgr.windowHeight - e.offsetTop - (3 + keep) * SizeMgr.topFontSize;
             e.style.height = this.listheight + "px";
@@ -118,14 +128,12 @@ module TDev
             }
         }
 
-        public stretchWide()
-        {
+        public stretchWide() {
             this.floating.style.width = 'calc(100% - 1em)';
             this.dialog.style.width = '100%';
         }
-        
-        public showBare(what:HTMLElement = null)
-        {
+
+        public showBare(what: HTMLElement = null) {
             Ticker.dbg("ModalDialog.showBare0");
 
             if (ModalDialog.current && ModalDialog.current != this && !ModalDialog.current.canDismiss)
@@ -139,13 +147,13 @@ module TDev
             Util.children(root).forEach(ch => ch.setAttribute("aria-hidden", "true"));
             root.appendChildren([this.overlay, what || this.outerDialog]);
 
-            var btnsDiv:HTMLElement;
+            var btnsDiv: HTMLElement;
 
             Util.children(this.dialog).forEach((e) => {
                 if (e.className == "wall-dialog-buttons")
                     btnsDiv = e;
                 if (e.withClick && !(<any>e).clickHandler && !(<any>e).onselectstart)
-                    e.withClick(() => {})
+                    e.tabIndex = -1;
             });
 
             if (!what) {
@@ -176,11 +184,15 @@ module TDev
 
             elt("root").setFlag("modal-visible", true);
 
+            // find first input field or buttondiv
+            var focus = this.dialog.getElementsByTagName("input")[0]
+                || this.dialog.getElementsByTagName("button")[0];
+            if (focus) focus.focus();
+            
             Ticker.dbg("ModalDialog.showBare1");
         }
 
-        public dismiss()
-        {
+        public dismiss() {
             if (!this.canDismiss) {
                 Ticker.dbg("ModalDialog.dismiss - cannot");
                 return;
@@ -205,8 +217,7 @@ module TDev
             if (f) f(this);
         }
 
-        static ask(msg: string, confirmation: string, act: () => void, critical = false, header: string = null)
-        {
+        static ask(msg: string, confirmation: string, act: () => void, critical = false, header: string = null) {
             var m = new ModalDialog();
             if (header == null) header = confirmation + "?"
             m.add([
@@ -216,30 +227,31 @@ module TDev
                     HTML.mkButton(lf("cancel"), () => m.dismiss()),
                     HTML.mkButton(confirmation, () => { act(); m.dismiss(); }))
             ]);
-            if (critical)   
+            m.setAlert();
+            if (critical)
                 m.critical();
             m.show();
             return m;
         }
 
         static askAsync(msg: string, confirmation: string, critical = false, header: string = null)
-            // the promise never finishes when not confirmed
+        // the promise never finishes when not confirmed
         {
             var ret = new PromiseInv()
             var m = ModalDialog.ask(msg, confirmation, () => { ret.success(null) }, critical, header)
             return ret
         }
 
-        static askMany(header:string, msg:string, options:any)
-        {
+        static askMany(header: string, msg: string, options: any) {
             var m = new ModalDialog();
             m.add([
                 div("wall-dialog-header", header),
                 div("wall-dialog-body", msg),
                 div("wall-dialog-buttons",
-                    Object.keys(options).map((k:string) =>
+                    Object.keys(options).map((k: string) =>
                         HTML.mkButton(k, () => { m.dismiss(); options[k](); })))
             ]);
+            m.setAlert();
             m.show();
             return m;
         }
@@ -269,46 +281,44 @@ module TDev
                 submsg && div("wall-dialog-body", submsg),
                 div("wall-dialog-buttons", buttons)
             ]);
+            m.setAlert();
             m.show();
             return m;
         }
 
-        static info(title:string, msg:string, btn : string = "ok")
-        {
+        static info(title: string, msg: string, btn: string = "ok") {
             var m = new ModalDialog();
             m.add([
                 div("wall-dialog-header", title),
                 div("wall-dialog-body", msg)])
             if (btn)
                 m.addOk(btn)
+            m.setAlert();
             m.show();
             return m;
         }
 
-        static infoAsync(title:string, msg:string, btn : string = "ok")
-        {
+        static infoAsync(title: string, msg: string, btn: string = "ok") {
             var r = new PromiseInv()
             var m = ModalDialog.info(title, msg, btn)
             m.onDismiss = () => r.success(null)
             return r
         }
 
-        public addButtons(btns:any)
-        {
+        public addButtons(btns: any) {
             this.add(div("wall-dialog-buttons", Object.keys(btns).map(b => HTML.mkButton(b, btns[b]))))
         }
 
-        public addOk(btn = lf("ok"), f:()=>void = null, cls = "", btns:any = [])
-        {
+        public addOk(btn = lf("ok"), f: () => void = null, cls = "", btns: any = []) {
             var b = HTML.mkButton(btn, () => {
-                        if (f) f();
-                        else this.dismiss();
-                    });
+                if (f) f();
+                else this.dismiss();
+            });
             if (cls) b.className += " " + cls;
             this.add(div("wall-dialog-buttons", [b, btns]))
             return b;
         }
-        
+
         static showAsync(msg: any, options: { title?: string; cancel?: boolean } = {}): Promise {
             return new Promise(function(onSuccess, onError, onProgress) {
                 var m = new ModalDialog();
@@ -320,12 +330,12 @@ module TDev
                     m.dismiss();
                 }, "", options.cancel ? HTML.mkButton(lf("cancel"), () => m.dismiss()) : undefined);
                 m.onDismiss = () => onSuccess(ok);
-                m.show();                
-            })            
+                m.setAlert();
+                m.show();
+            })
         }
 
-        static showText(s:string, title:string = null, msg:string = null, done : () => void = null) : ModalDialog
-        {
+        static showText(s: string, title: string = null, msg: string = null, done: () => void = null): ModalDialog {
             var m = new ModalDialog();
             if (title != null)
                 m.add(div('wall-dialog-header', title));
@@ -336,6 +346,7 @@ module TDev
             m.dialog.appendChild(elt);
             (<any>m).textArea = elt;
             m.onDismiss = done;
+            m.setAlert();
             m.show();
             m.stretchDown(elt);
             m.stretchWide();
@@ -345,8 +356,7 @@ module TDev
             return m;
         }
 
-        static showTable(headers: string[], values: string[][], ondblclick: (md: ModalDialog, idx: number) => any) : ModalDialog
-        {
+        static showTable(headers: string[], values: string[][], ondblclick: (md: ModalDialog, idx: number) => any): ModalDialog {
             var m = new ModalDialog();
             var table = <HTMLTableElement>document.createElement("table");
             table.className = "traces";
@@ -367,7 +377,7 @@ module TDev
                     var v = <HTMLTableCellElement>document.createElement("td");
                     v.textContent = rowValues[j];
                     v.ondblclick = function(ev) {
-                        var target:any = ev.target || ev.srcElement;
+                        var target: any = ev.target || ev.srcElement;
                         return ondblclick(m, target.parentElement.sectionRowIndex - 1);
                     }
                     row.appendChild(v);
@@ -377,12 +387,12 @@ module TDev
 
             m.dialog.appendChild(table);
             m.stretchDown(table);
+            m.setAlert();
             m.show();
             return m;
         }
 
-        static editText(lbl:string, text:string, updateAsync:(s:string)=>Promise)
-        {
+        static editText(lbl: string, text: string, updateAsync: (s: string) => Promise) {
             var m = new ModalDialog();
 
             var btns = div("wall-dialog-buttons",
@@ -400,31 +410,28 @@ module TDev
             m.add(div(null, inp))
             m.add(btns)
 
+            m.setAlert();
             m.show()
 
             return m
         }
-        
-        public noChrome()
-        {
+
+        public noChrome() {
             this.outerDialog.className += " modalNoChrome";
         }
 
-        public fullScreen(iMeanIt = false)
-        {
+        public fullScreen(iMeanIt = false) {
             this.outerDialog.className += " modalNoChrome " + (iMeanIt ? "reallyFullScreen" : "modalFullScreen");
             this.outerDialog.setChildren(this.dialog);
         }
 
-        public fullBlack()
-        {
+        public fullBlack() {
             this.outerDialog.classList.add("modalFullBlack");
             this.outerDialog.classList.remove("modalFullWhite");
             this.outerDialog.classList.remove("modalFullYellow");
         }
-       
-        public fullWhite()
-        {
+
+        public fullWhite() {
             this.outerDialog.classList.remove("modalFullBlack");
             this.outerDialog.classList.add("modalFullWhite");
             this.outerDialog.classList.remove("modalFullYellow");
@@ -435,12 +442,13 @@ module TDev
             this.outerDialog.classList.remove("modalFullWhite");
             this.outerDialog.classList.add("modalFullYellow");
         }
-                
+
         public critical() {
             this.outerDialog.classList.remove("modalFullBlack");
             this.outerDialog.classList.remove("modalFullWhite");
             this.outerDialog.classList.remove("modalFullYellow");
             this.floating.classList.add('bg-critical');
+            this.setAlert();
         }
 
         public setScroll() {
@@ -462,8 +470,7 @@ module TDev
         }
 
         // queryAsync returns a promise that returns HTMLElement[]
-        public choose(boxes:HTMLElement[], options : ModalChooseOptions = {})
-        {
+        public choose(boxes: HTMLElement[], options: ModalChooseOptions = {}) {
             var progressBar = HTML.mkProgressBar();
             var list = this.list = HTML.mkModalList([]);
             var search = HTML.mkTextInput("text", lf("choose..."));
@@ -477,19 +484,19 @@ module TDev
                 limitedMode = false;
 
             var needKbd = false;
-            
+
             function selectedItem(): HTMLElement { return Util.children(list).filter(el => el.getFlag("current"))[0]; }
-            
-            function refresh(onlineOK:boolean) {
+
+            function refresh(onlineOK: boolean) {
                 var allTerms = search.value;
-                var terms = allTerms.split(/\s+/).map((s:string) => s.toLowerCase()).filter((s) => s != "");
+                var terms = allTerms.split(/\s+/).map((s: string) => s.toLowerCase()).filter((s) => s != "");
                 var res = []
                 var ids = {}
 
                 if (terms.length > 0) limitedMode = false;
                 var skipCnt = 0;
 
-                boxes.forEach((b:HTMLElement) => {
+                boxes.forEach((b: HTMLElement) => {
                     var miss = false;
                     if (limitedMode && (<any>b).initiallyHidden) {
                         skipCnt++;
@@ -509,7 +516,7 @@ module TDev
                     var b = options.mkSeeMore(needKbd ? lf("you can also search") : lf("there is {0} more option{0:s}", skipCnt))
                     HTML.setTickCallback(b, Ticks.sideMoreOptions, () => {
                         limitedMode = false;
-                        refresh(options.initialEmptyQuery);                        
+                        refresh(options.initialEmptyQuery);
                     });
                     res.push(b);
                 }
@@ -517,21 +524,21 @@ module TDev
 
                 if (onlineOK && !!options.queryAsync && Cloud.isOnline()) {
                     progressBar.start();
-                    options.queryAsync(allTerms).then((bxs : HTMLElement[]) => {
-                            progressBar.stop();
-                            if (!autoKeyboard.resultsCurrent(allTerms)) {
-                                return;
-                            }
-                            if (!!bxs) {
-                                bxs.forEach((bx) => {
-                                    var bkey = bx.textContent.toLowerCase();
-                                    if(!ids[bkey]) {
-                                        ids[bkey] = 1;
-                                        list.appendChild(bx);
-                                        Util.highlightWords(bx, terms, true);
-                                    }
-                                });
-                            }
+                    options.queryAsync(allTerms).then((bxs: HTMLElement[]) => {
+                        progressBar.stop();
+                        if (!autoKeyboard.resultsCurrent(allTerms)) {
+                            return;
+                        }
+                        if (!!bxs) {
+                            bxs.forEach((bx) => {
+                                var bkey = bx.textContent.toLowerCase();
+                                if (!ids[bkey]) {
+                                    ids[bkey] = 1;
+                                    list.appendChild(bx);
+                                    Util.highlightWords(bx, terms, true);
+                                }
+                            });
+                        }
                     }).done();
                 }
 
@@ -545,7 +552,7 @@ module TDev
             if (options.header) {
                 this.add(div("modalSearchHeader", options.header));
             }
-            
+
             if (options.includeSearch !== undefined)
                 needKbd = !!options.includeSearch;
             else
@@ -567,43 +574,43 @@ module TDev
 
             // this has to happen after show() - show() saves the keyboard state so later this handler is removed
             // always capture keyboard in modal dialog
-                KeyboardMgr.instance.register("Down", e => {
-                    var selected = selectedItem();
-                    if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
-                    else if(selected && selected.nextElementSibling) {
-                        selected.setFlag("current", false);
-                        selected.nextElementSibling.setFlag("current", true);
-                        (<HTMLElement>selected.nextElementSibling).scrollIntoView(false);
-                    }
+            KeyboardMgr.instance.register("Down", e => {
+                var selected = selectedItem();
+                if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
+                else if (selected && selected.nextElementSibling) {
+                    selected.setFlag("current", false);
+                    selected.nextElementSibling.setFlag("current", true);
+                    (<HTMLElement>selected.nextElementSibling).scrollIntoView(false);
+                }
+                return true;
+            });
+            KeyboardMgr.instance.register("Up", e => {
+                var selected = selectedItem();
+                if (!selected && list.lastElementChild) list.lastElementChild.setFlag("current", true);
+                else if (selected && selected.previousElementSibling) {
+                    selected.setFlag("current", false);
+                    selected.previousElementSibling.setFlag("current", true);
+                    (<HTMLElement>selected.previousElementSibling).scrollIntoView(false);
+                }
+                return true;
+            });
+            KeyboardMgr.instance.register("Enter", e => {
+                var selected = selectedItem();
+                if (selected && (<any>selected).clickHandler) {
+                    (<any>selected).clickHandler.fireClick(e);
+                } else if (list.firstElementChild) list.firstElementChild.setFlag("current", true);
+                return true;
+            });
+            KeyboardMgr.instance.register("***", (e: KeyboardEvent) => {
+                if (e.fromTextBox) return false;
+                var s = Util.keyEventString(e);
+                if (s) {
+                    search.value += s;
+                    Util.setKeyboardFocus(search);
                     return true;
-                });
-                KeyboardMgr.instance.register("Up", e => {
-                    var selected = selectedItem();                    
-                    if (!selected && list.lastElementChild) list.lastElementChild.setFlag("current", true);
-                    else if(selected && selected.previousElementSibling) {
-                        selected.setFlag("current", false);
-                        selected.previousElementSibling.setFlag("current", true);
-                        (<HTMLElement>selected.previousElementSibling).scrollIntoView(false);
-                    }
-                    return true;
-                });
-                KeyboardMgr.instance.register("Enter", e => {
-                    var selected = selectedItem();
-                    if (selected && (<any>selected).clickHandler) {
-                        (<any>selected).clickHandler.fireClick(e);
-                    } else if (list.firstElementChild) list.firstElementChild.setFlag("current", true);    
-                    return true;
-                });                
-                KeyboardMgr.instance.register("***", (e: KeyboardEvent) => {
-                    if (e.fromTextBox) return false;
-                    var s = Util.keyEventString(e);
-                    if (s) {
-                        search.value += s;
-                        Util.setKeyboardFocus(search);
-                        return true;
-                    }
-                    return false;
-                });
+                }
+                return false;
+            });
 
             if (!options.dontStretchDown)
                 this.stretchDown(list, 2.8);
@@ -618,13 +625,12 @@ module TDev
             }
 
             refresh(options.initialEmptyQuery);
-         }
+        }
 
 
     }
 
-    export interface ModalChooseOptions
-    {
+    export interface ModalChooseOptions {
         queryAsync?: (terms: string) => Promise;
         searchHint?: string;
         initialQuery?: string;
@@ -640,38 +646,33 @@ module TDev
     }
 
 
-    export module ProgressOverlay
-    {
-        var overlay:HTMLElement;
-        var msgDiv:HTMLElement;
-        var addInfo:HTMLElement;
-        var progress:HTMLElement;
+    export module ProgressOverlay {
+        var overlay: HTMLElement;
+        var msgDiv: HTMLElement;
+        var addInfo: HTMLElement;
+        var progress: HTMLElement;
         var visible = 0;
         var unblockedKeyboard = false;
-        var logView : TDev.RT.AppLogView;
+        var logView: TDev.RT.AppLogView;
 
-        export var lock:PromiseInv = PromiseInv.as();
+        export var lock: PromiseInv = PromiseInv.as();
 
-        export function lockAndShow(msg = lf("working hard"), f?:() => void, splashUrl?:string)
-        {
+        export function lockAndShow(msg = lf("working hard"), f?: () => void, splashUrl?: string) {
             lock.done(() => show(msg, f, splashUrl))
         }
 
-        export function lockAndShowAsync(msg:string)
-        {
+        export function lockAndShowAsync(msg: string) {
             var r = new PromiseInv()
             lockAndShow(msg, () => r.success(null));
             return r
         }
 
-        export function bumpShow()
-        {
+        export function bumpShow() {
             Util.assert(isActive())
             visible++;
         }
 
-        export function show(msg = lf("working hard"), f?:() => void, splashUrl? : string)
-        {
+        export function show(msg = lf("working hard"), f?: () => void, splashUrl?: string) {
             visible++;
             Ticker.dbg("ProgressOverlay.show " + visible + " " + msg);
             if (visible > 1) {
@@ -682,11 +683,11 @@ module TDev
             if (!overlay) {
                 overlay =
                     div("modalOverlay", div("modalMessage",
-                            msgDiv = div("modalMessageHeader"),
-                            addInfo = div("modalMessagePleaseWait"),
-                            progress = div("modalMessagePleaseWait")
-                            ));
-                overlay.withClick(() => {});
+                        msgDiv = div("modalMessageHeader"),
+                        addInfo = div("modalMessagePleaseWait"),
+                        progress = div("modalMessagePleaseWait")
+                    ));
+                overlay.withClick(() => { });
                 overlay.style.backgroundColor = "white";
                 overlay.style.opacity = "0.95";
                 overlay.style.backgroundSize = "cover";
@@ -708,13 +709,11 @@ module TDev
                 Util.setTimeout(Browser.isWebkit ? 100 : 1, f);
         }
 
-        export function setAddInfo(info:any[])
-        {
+        export function setAddInfo(info: any[]) {
             addInfo.setChildren(info);
         }
 
-        export function hide()
-        {
+        export function hide() {
             if (visible == 0) {
                 // certain code path call setMessage but don't actually display the overlay
                 // thus this check fails in the compiled apps
@@ -741,14 +740,12 @@ module TDev
             }
         }
 
-        export function setProgress(msg:string)
-        {
+        export function setProgress(msg: string) {
             if (progress)
                 progress.setChildren(msg);
         }
 
-        export function setMessage(msg:string)
-        {
+        export function setMessage(msg: string) {
             if (msgDiv)
                 msgDiv.setChildren(msg);
         }

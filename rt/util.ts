@@ -181,6 +181,7 @@ module TDev {
         var elt = <HTMLDivElement>document.createElement(tag);
         if (cl)
             elt.className = cl;
+        elt.tabIndex = -1;
         elt.appendChildren(children.filter(e => e != undefined));
         return elt;
     }
