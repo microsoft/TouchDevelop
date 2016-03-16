@@ -915,8 +915,10 @@
                         elts.push(searchDiv);
                     } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
+                    } else {
+                        elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
-
+                                        
                     sd.setChildren(elts);
                 }, true);
             }
