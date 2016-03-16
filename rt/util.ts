@@ -175,11 +175,16 @@ module TDev {
         return el;
     }
 
-    export function div(cl:string, ...children:any[]):HTMLElement {
-        var elt = <HTMLDivElement>document.createElement("div");
+    export function div(cl: string, ...children: any[]): HTMLElement {
+        var tag = "div";
+        if (cl == "wall-dialog-header") tag = "h1"
+        var elt = <HTMLDivElement>document.createElement(tag);
         if (cl)
             elt.className = cl;
+        elt.tabIndex = -1;
         elt.appendChildren(children.filter(e => e != undefined));
+        if (cl == "sdLoadingMore")
+            elt.setAttribute("aria-live", "polite");
         return elt;
     }
 

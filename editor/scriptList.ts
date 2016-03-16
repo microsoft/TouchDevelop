@@ -15,7 +15,12 @@
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
             this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
+            this.leftPane.tabIndex = -1;
+            this.leftPane.setAttribute("aria-label", lf("Script list"));
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
+            this.rightPane.tabIndex = -1;
+            this.rightPane.setAttribute("aria-label", lf("Script description pane"));
+            this.hdContainer.tabIndex = 0;
             this.theRoot = div("slRoot", this.rightPane, this.leftPane);
             elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
@@ -76,7 +81,7 @@
                 if (siteMore) {
                     siteMore.setChildren([
                         HTML.mkImg("svg:bars,white"),
-                        siteMore.innerText
+                        lf("More")
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
@@ -910,8 +915,10 @@
                         elts.push(searchDiv);
                     } else if (items.length == 0 && !direct.hasChildNodes()) {
                         elts.push(div("sdLoadingMore", lf("no results match your search")));
+                    } else {
+                        elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
-
+                                        
                     sd.setChildren(elts);
                 }, true);
             }
@@ -7453,15 +7460,15 @@
                         m.setScroll();
                     }
 
+                    if (EditorSettings.widgets().publishDescription) {
+                        // if different author, allow to create pull request
+                        m.add(div('wall-dialog-body', changeDescription));
+                    }
                     var publishBtn;
                     m.add(div("wall-dialog-buttons",
                         publishBtn = HTML.mkButton(lf("publish"), () => pub(false, uploadScreenshot ? screenshotDataUri : undefined)),
                         EditorSettings.widgets().publishAsHidden ? HTML.mkButton(lf("publish as hidden"), () => pub(true, uploadScreenshot ? screenshotDataUri : undefined)) : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())));
-                    if (EditorSettings.widgets().publishDescription) {
-                        // if different author, allow to create pull request
-                        m.add(div('wall-dialog-buttons', changeDescription));
-                    }
                     if (EditorSettings.widgets().sendPullRequest &&
                         this.cloudHeader.userId && this.cloudHeader.userId != Cloud.getUserId()) {
                         m.add(div('wall-dialog-body',
@@ -8127,6 +8134,7 @@
                 authorDiv.setAttribute("aria-label", lf("author {0}", this.userName));
                 authorHead.classList.add("teamHead");
                 authorHead.setAttribute("aria-hidden", "true")
+                authorHead.tabIndex = -1;
                 authorDiv.setChildren([
                     div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
