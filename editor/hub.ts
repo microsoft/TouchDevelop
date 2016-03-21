@@ -1408,6 +1408,7 @@ module TDev.Browser {
             var author = div("sdAuthorInner", k.company);
             var addInfo = div("sdAddInfoInner", k.description);
             var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo))));
+            res.setAttribute("aria-label", k.name);
             return res;
         }
                 
