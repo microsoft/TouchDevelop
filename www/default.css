@@ -530,6 +530,22 @@ p.wall-record
   margin: 0;
 }
 
+::-webkit-input-placeholder {
+   color: #333333;  
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #333333;  
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #333333;  
+}
+
+:-ms-input-placeholder {  
+   color: #333333;  
+}
+
 .wall-button,
 .wall-textbox,
 div.wall-label
