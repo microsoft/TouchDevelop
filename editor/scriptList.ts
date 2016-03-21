@@ -1988,6 +1988,8 @@
             var tabs = s.getTabs();
             this.tabLabels = [];
 
+            this.tabLabelContainer.tabIndex = -1;
+            this.tabLabelContainer.setAttribute("aria-hidden", "true")
             if (tabs.length == 1) {
                 this.tabLabelContainer.style.display = "none";
             } else {
