@@ -534,12 +534,12 @@ p.wall-record
    color: #333333;
 }
 
-:-moz-placeholder { /* Firefox 18- */
-   color: #333333;
+input::-moz-placeholder {
+  color: black;
 }
 
-::-moz-placeholder {  /* Firefox 19+ */
-   color: #333333;
+::placeholder {
+   color: #333333;    
 }
 
 :-ms-input-placeholder {
