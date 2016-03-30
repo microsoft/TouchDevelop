@@ -766,6 +766,8 @@ module TDev
                     if (guids.length > 0) {
                         HTML.showProgressNotification(lf("{0} file{0:s} imported", guids.length));
                         Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                    } else {
+                        HTML.showWarningNotification(lf("Oops, no files were imported."));
                     }
                     return guids;
                 }, e => ProgressOverlay.hide());

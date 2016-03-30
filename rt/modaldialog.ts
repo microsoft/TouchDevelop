@@ -153,7 +153,7 @@ module TDev {
                 if (e.className == "wall-dialog-buttons")
                     btnsDiv = e;
                 if (e.withClick && !(<any>e).clickHandler && !(<any>e).onselectstart)
-                    e.tabIndex = -1;
+                 e.tabIndex = -1;
             });
 
             if (!what) {
@@ -184,10 +184,18 @@ module TDev {
 
             elt("root").setFlag("modal-visible", true);
 
+            this.dialog.removeAttribute("aria-labelledby");
+            var  h1 = this.dialog.getElementsByTagName("h1")[0];
+            if (h1) {
+                h1.id = Util.guidGen();
+                this.dialog.setAttribute("aria-labelledby", h1.id);
+            }
+
             // find first input field or buttondiv
-            var focus = this.dialog.getElementsByTagName("input")[0]
-                || this.dialog.getElementsByTagName("button")[0];
-            if (focus) focus.focus();
+            setTimeout(() => {
+                var focus = this.dialog.getElementsByTagName("input")[0] || this.dialog.getElementsByTagName("button")[0];
+                if (focus) focus.focus();
+            }, 10);
             
             Ticker.dbg("ModalDialog.showBare1");
         }

@@ -2679,7 +2679,12 @@ a.md-bigbutton:hover {
   position: relative;
 }
 
+.slListHeaderHider {
+  display:none;
+}
+
 .portrait .slListHeaderHider {
+  display:unset;
   background: white;
   position: absolute;
   top: 0;
