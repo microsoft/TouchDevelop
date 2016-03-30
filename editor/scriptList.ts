@@ -920,6 +920,8 @@
                         elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
                                         
+                    this.initMoreDiv(path);
+                    elts.push(this.moreDiv)
                     sd.setChildren(elts);
                 }, true);
             }
@@ -1883,7 +1885,7 @@
         
         private initMoreDiv(path: string) {
             this.moreDiv.setChildren([]);            
-            if (/^installed/.test(path)) {
+            if (/^(installed|scripts)/.test(path)) {
                 this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
                     tick(Ticks.browseCreateCode);
                     TemplateManager.createScript()
