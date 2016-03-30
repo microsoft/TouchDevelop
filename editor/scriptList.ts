@@ -75,6 +75,7 @@
                         li.id = "siteMenuBtn" + mi.id;
                         if (mi.id == "signin" || mi.id == "settings")
                             li.style.fontWeight = "bold";
+                        li.setAttribute("role", "menuitem");
                         return li;
                     }));
                 var siteMore = elt("siteMore");

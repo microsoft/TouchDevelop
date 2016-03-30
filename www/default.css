@@ -539,7 +539,7 @@ input::-moz-placeholder {
 }
 
 ::placeholder {
-   color: #333333;    
+   color: #333333;
 }
 
 :-ms-input-placeholder {
