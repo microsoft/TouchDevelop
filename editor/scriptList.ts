@@ -22,7 +22,6 @@
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
             this.hdContainer.tabIndex = 0;
             this.theRoot = div("slRoot", this.leftPane, this.rightPane);
-            elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
             this.populateSiteHeader(false);
         }
@@ -180,6 +179,8 @@
 
             this.setBackButton();            
             this.initMeAsync().done(() => { }, () => { });
+
+            elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
             if (dbg) bugsEnabled = true;
         }
