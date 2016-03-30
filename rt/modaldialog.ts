@@ -192,9 +192,10 @@ module TDev {
             }
 
             // find first input field or buttondiv
-            var focus = this.dialog.getElementsByTagName("input")[0]
-                || this.dialog.getElementsByTagName("button")[0];
-            if (focus) focus.focus();
+            setTimeout(() => {
+                var focus = this.dialog.getElementsByTagName("input")[0] || this.dialog.getElementsByTagName("button")[0];
+                if (focus) focus.focus();
+            }, 10);
             
             Ticker.dbg("ModalDialog.showBare1");
         }
