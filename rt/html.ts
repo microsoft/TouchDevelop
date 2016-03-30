@@ -774,6 +774,8 @@ module TDev.HTML {
             f();
         } else if (msgText) {
             msg = div(className, msgText);
+            msg.setAttribute("role", "alert");
+            msg.setAttribute("aria-live", "status")
             se.appendChild(msg);
             progressNotificationAnimation = Animation.fadeIn(msg);
             progressNotificationAnimation.completed = f;
@@ -792,8 +794,10 @@ module TDev.HTML {
             return;
         }
 
-        var info = div('info', msgText);        
+        var info = div('info', msgText);
         var msg = div("warningNotification", info);
+        msg.setAttribute("role", "alert");
+        msg.setAttribute("aria-label", msgText);
         var a = Animation.fadeOut(msg);
         a.delay = 6000;
         a.duration = 500;
@@ -817,6 +821,8 @@ module TDev.HTML {
 
     export function showPluginNotification(msgText: string) {
         var msg = div("pluginNotification", div('info', msgText));
+        msg.setAttribute("role", "alert");
+        msg.setAttribute("aria-live", "status")
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
         a.delay = 6000;
@@ -849,6 +855,8 @@ module TDev.HTML {
         }
 
         var msg = div("errorNotification", msgText);
+        msg.setAttribute("role", "alert");
+        msg.setAttribute("alert-label", msgText);
         elt("root").appendChild(msg);
         var a = Animation.fadeOut(msg);
         a.delay = 2000;
