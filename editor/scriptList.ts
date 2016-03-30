@@ -21,8 +21,7 @@
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
             this.hdContainer.tabIndex = 0;
-            this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            elt("root").appendChild(EditorSettings.mkCopyrightNote());
+            this.theRoot = div("slRoot", this.leftPane, this.rightPane);
 
             this.populateSiteHeader(false);
         }
@@ -75,6 +74,7 @@
                         li.id = "siteMenuBtn" + mi.id;
                         if (mi.id == "signin" || mi.id == "settings")
                             li.style.fontWeight = "bold";
+                        li.setAttribute("role", "menuitem");
                         return li;
                     }));
                 var siteMore = elt("siteMore");
@@ -179,6 +179,8 @@
 
             this.setBackButton();            
             this.initMeAsync().done(() => { }, () => { });
+
+            elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
             if (dbg) bugsEnabled = true;
         }
@@ -919,6 +921,8 @@
                         elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
                                         
+                    this.initMoreDiv(path);
+                    elts.push(this.moreDiv)
                     sd.setChildren(elts);
                 }, true);
             }
@@ -1882,7 +1886,7 @@
         
         private initMoreDiv(path: string) {
             this.moreDiv.setChildren([]);            
-            if (/^installed/.test(path)) {
+            if (/^(installed|scripts)/.test(path)) {
                 this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
                     tick(Ticks.browseCreateCode);
                     TemplateManager.createScript()
@@ -5390,7 +5394,6 @@
                     div("hubTileSubtitle",
                         div("hubTileAuthor", spanDirAuto(a.username))))])
             });
-            return d;
         }
 
         public mkBoxCore(big: boolean) {
@@ -6503,7 +6506,7 @@
             if (big) screenShot = null;
             var res = div("sdHeaderOuter",
                             div("sdHeader", icon, screenShot,
-                                div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers,
+                                div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo),  numbers,
                         facebook, abuseDiv)));
             
             if (big)
@@ -6513,7 +6516,7 @@
                 var deleted = this.isDeleted();
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
-                res.setAttribute("aria-label", deleted ? lf("deleted script") : lf("script {0}", this.app.getName()))
+                if (deleted) res.setAttribute("aria-label", lf("deleted script"))
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
                 if (deleted) author.setChildren([]);
