@@ -175,7 +175,9 @@ module TDev
                     break;
                 case "keydown":
                     var ke = <KeyboardEvent>e;
-                    if (!this.cleared && ke.target == this.helt && (ke.which == 13 || ke.which == 32)) this.fireClick(e);
+                    if (!this.cleared && ke.target == this.helt && (ke.which == 13 || ke.which == 32)) {
+                        this.f(e);
+                    }
                     break;
                 /*
                 case "click":
@@ -269,7 +271,8 @@ module TDev
             }
 
             var oldH = (<any>e).clickHandler;
-            if (oldH) oldH.unhook();
+            if (oldH)
+                oldH.unhook();
 
             var handler = new ClickHandler(e, newCb);
             (<any>e).clickHandler = handler;
