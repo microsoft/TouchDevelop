@@ -184,7 +184,7 @@ button.navItem[data-selected^="yes"]
   border-color: #09655E;
 }
 
-div.sdHeaderOuter[data-current^="yes"],
+div.sdHeaderOuter:focus,
 button.navItem[data-current^="yes"]
 {
   background: #09655E;

@@ -17,7 +17,7 @@ module TDev {
                 this.add(div("wall-dialog-header", header));
             this.fullWhite();
         }
-        
+
         public setAlert() {
             this.dialog.setAttribute("role", "alertdialog");
             this.applyAria();
@@ -36,7 +36,7 @@ module TDev {
                     founddesc = true;
                     if (!el.id) el.id = Util.guidGen();
                     this.dialog.setAttribute("aria-describedby", el.id);
-                }                
+                }
             })
         }
 
@@ -153,7 +153,7 @@ module TDev {
                 if (e.className == "wall-dialog-buttons")
                     btnsDiv = e;
                 if (e.withClick && !(<any>e).clickHandler && !(<any>e).onselectstart)
-                 e.tabIndex = -1;
+                    e.tabIndex = -1;
             });
 
             if (!what) {
@@ -185,7 +185,7 @@ module TDev {
             elt("root").setFlag("modal-visible", true);
 
             this.dialog.removeAttribute("aria-labelledby");
-            var  h1 = this.dialog.getElementsByTagName("h1")[0];
+            var h1 = this.dialog.getElementsByTagName("h1")[0];
             if (h1) {
                 h1.id = Util.guidGen();
                 this.dialog.setAttribute("aria-labelledby", h1.id);
@@ -196,7 +196,7 @@ module TDev {
                 var focus = this.dialog.getElementsByTagName("input")[0] || this.dialog.getElementsByTagName("button")[0];
                 if (focus) focus.focus();
             }, 10);
-            
+
             Ticker.dbg("ModalDialog.showBare1");
         }
 
@@ -483,6 +483,7 @@ module TDev {
             var list = this.list = HTML.mkModalList([]);
             var search = HTML.mkTextInput("text", lf("choose..."));
             search.id = "chooseSearch"
+            search.setAttribute("role", "search");
             search.placeholder = options.searchHint || (options.queryAsync ? lf("Type to search online...") : lf("Type to search..."));
             var autoKeyboard = KeyboardAutoUpdate.mkInput(search, Util.catchErrors("chooseSearch", () => refresh(true)));
             autoKeyboard.attach()
@@ -493,9 +494,9 @@ module TDev {
 
             var needKbd = false;
 
-            function selectedItem(): HTMLElement { return Util.children(list).filter(el => el.getFlag("current"))[0]; }
+            function selectedItem(): HTMLElement { return Util.children(list).filter(el => el == document.activeElement)[0]; }
 
-            function refresh(onlineOK: boolean) {
+            function refresh(onlineOK: boolean, focus?: boolean) {
                 var allTerms = search.value;
                 var terms = allTerms.split(/\s+/).map((s: string) => s.toLowerCase()).filter((s) => s != "");
                 var res = []
@@ -548,8 +549,12 @@ module TDev {
                             });
                         }
                     }).done();
-                }
+                }   
 
+                if (focus && !!list.firstElementChild) {
+                    var fe = <HTMLElement>list.firstElementChild;
+                    Util.setTimeout(10, () => fe.focus());
+                }
                 if (options.afterRefresh)
                     options.afterRefresh();
             }
@@ -580,33 +585,41 @@ module TDev {
 
             this.show();
 
-            // this has to happen after show() - show() saves the keyboard state so later this handler is removed
-            // always capture keyboard in modal dialog
-            KeyboardMgr.instance.register("Down", e => {
+            function keyDown() {
                 var selected = selectedItem();
-                if (!selected && list.firstElementChild) list.firstElementChild.setFlag("current", true);
+                if (!selected && list.firstElementChild) {
+                    (<HTMLElement>list.firstElementChild).focus();
+                }
                 else if (selected && selected.nextElementSibling) {
-                    selected.setFlag("current", false);
-                    selected.nextElementSibling.setFlag("current", true);
+                    (<HTMLElement>selected.nextElementSibling).focus();
                     (<HTMLElement>selected.nextElementSibling).scrollIntoView(false);
                 }
                 return true;
-            });
-            KeyboardMgr.instance.register("Up", e => {
+            }
+
+            function keyUp() {
                 var selected = selectedItem();
-                if (!selected && list.lastElementChild) list.lastElementChild.setFlag("current", true);
+                if (!selected && list.lastElementChild) {
+                    (<HTMLElement>list.lastElementChild).focus();
+                }
                 else if (selected && selected.previousElementSibling) {
-                    selected.setFlag("current", false);
-                    selected.previousElementSibling.setFlag("current", true);
+                    (<HTMLElement>selected.previousElementSibling).focus();
                     (<HTMLElement>selected.previousElementSibling).scrollIntoView(false);
                 }
                 return true;
-            });
+            }
+
+            // this has to happen after show() - show() saves the keyboard state so later this handler is removed
+            // always capture keyboard in modal dialog
+            KeyboardMgr.instance.register("Down", keyDown);
+            KeyboardMgr.instance.register("Up", keyUp);
             KeyboardMgr.instance.register("Enter", e => {
                 var selected = selectedItem();
                 if (selected && (<any>selected).clickHandler) {
                     (<any>selected).clickHandler.fireClick(e);
-                } else if (list.firstElementChild) list.firstElementChild.setFlag("current", true);
+                } else if (list.firstElementChild) {
+                    (<HTMLElement>list.firstElementChild).focus();
+                }
                 return true;
             });
             KeyboardMgr.instance.register("***", (e: KeyboardEvent) => {
@@ -626,13 +639,17 @@ module TDev {
             if (options.adjustListSize)
                 this.adjustlistsize();
 
+            var needFocus = true;
             if (options.initialQuery !== undefined) {
                 options.initialEmptyQuery = true
                 search.value = options.initialQuery
-                Util.setKeyboardFocus(search, true)
+                if (needKbd) {
+                    Util.setKeyboardFocus(search, true)
+                    needFocus = false;
+                }
             }
 
-            refresh(options.initialEmptyQuery);
+            refresh(options.initialEmptyQuery, needFocus);
         }
 
 
