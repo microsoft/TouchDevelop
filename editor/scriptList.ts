@@ -1993,6 +1993,7 @@
                 return;
             }
 
+            var shouldFocus = !!this.detailsLoadedFor;            
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -2032,6 +2033,8 @@
             Util.showRightPanel(this.rightPane);
             if (!SizeMgr.phoneMode)
                 this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
+
+            if (shouldFocus) this.rightPane.focus();            
         }
 
         private getLocation(id:string) : BrowserPage { return this.locationCache[id]; }
