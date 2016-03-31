@@ -39,7 +39,11 @@
                         TemplateManager.createScript();
                     } },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
+                            this.showList("installed-scripts");
+                            setTimeout(10, this.searchBox.focus());
+                        }
+                    }
                 ];
                 if (settings && Cloud.hasPermission("post-group"))
                     menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
