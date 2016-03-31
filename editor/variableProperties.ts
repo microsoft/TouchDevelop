@@ -708,7 +708,10 @@ module TDev
             input.accept = ".hex,.json,.jsz";
             
             m.add(div('wall-dialog-header', lf("import code")));
-            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .jsz files. Hint: you can also drag and drop the files in the editor to import them!")));
+            var inputLabel;
+            m.add(inputLabel = div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .jsz files. Hint: you can also drag and drop the files in the editor to import them!")));
+            inputLabel.id = "importCodeInputLabel";
+            input.setAttribute("aria-labelledby", inputLabel.id);
             if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
                 m.add(div('wall-dialog-body',
                     lf("To import files to your iPhone or iPad, you need to have the latest software installed. Files can only be imported from a cloud storage app.")));

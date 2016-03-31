@@ -17,9 +17,11 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
+            this.leftPane.setAttribute("role", "complimentary");
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
+            this.rightPane.setAttribute("role", "main");
             this.hdContainer.tabIndex = 0;
             this.theRoot = div("slRoot", this.leftPane, this.rightPane);
 
@@ -37,7 +39,11 @@
                         TemplateManager.createScript();
                     } },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
+                            this.showList("installed-scripts");
+                            setTimeout(10, this.searchBox.focus());
+                        }
+                    }
                 ];
                 if (settings && Cloud.hasPermission("post-group"))
                     menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
@@ -1987,6 +1993,7 @@
                 return;
             }
 
+            var shouldFocus = !!this.detailsLoadedFor;            
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -2026,6 +2033,8 @@
             Util.showRightPanel(this.rightPane);
             if (!SizeMgr.phoneMode)
                 this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
+
+            if (shouldFocus) this.rightPane.focus();            
         }
 
         private getLocation(id:string) : BrowserPage { return this.locationCache[id]; }

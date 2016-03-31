@@ -177,7 +177,7 @@ module TDev {
 
     export function div(cl: string, ...children: any[]): HTMLElement {
         var tag = "div";
-        if (cl == "wall-dialog-header") tag = "h1"
+        if (cl == "wall-dialog-header" || cl == "modalSearchHeader") tag = "h1"
         var elt = <HTMLDivElement>document.createElement(tag);
         if (cl)
             elt.className = cl;

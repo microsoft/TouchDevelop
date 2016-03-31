@@ -4,7 +4,6 @@ meta icon "controller";
 meta color "#ff9955bb";
 meta rootId "F18otGXDXq4l5kwcjDwwlg1w";
 meta isLibrary "yes";
-meta allowExport "yes";
 meta hasIds "yes";
 meta platform "current";
 meta parentIds "";
@@ -324,6 +323,7 @@ action game_over() {
   }
   #TU2xkLuKEQOh3DbW time→sleep(2);
   #cMsaragG8BtT1kXr $text→delete;
+  #vXI7tWrlPSWirI47 app→stop;
   #uRIMBM6HQm2N2Nxd data→\_board→update_on_wall;
   meta private;
 }
