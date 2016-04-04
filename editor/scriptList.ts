@@ -91,15 +91,31 @@
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
+                        var nav = document.createElement("nav");
+                        nav.setAttribute("role", "navigation");
+                        var menu = document.createElement("ul");
+                        menu.className = "nav-list";
+                        var firstmii: HTMLElement = undefined;
                         menuItems.forEach(mi => {
-                            m.add(divId('siteMenuMore' + mi.id, 'siteMenuBtn', mi.name).withClick(() => {
+                            var li = HTML.li('nav-list__item', mi.name).withClick(() => {
                                 m.dismiss();
                                 tick(mi.tick);
                                 mi.handler();
-                            }));
+                            });
+                            li.id = 'siteMenuMore' + mi.id;
+                            li.className = 'siteMenuBtn';
+                            if (!firstmii) firstmii = li;
+                            li.setAttribute("role", "menuitem");
+                            menu.appendChild(li);
                         });
+
+                        nav.appendChild(menu);                        
+                        m.add(nav);                        
                         m.fullBlack();
                         m.show();
+                        if (firstmii) {
+                            Util.setTimeout(1, () => firstmii.focus());
+                        }
                     })
                 }
             }
