@@ -1207,7 +1207,6 @@ module TDev.HTML {
 "html": -1,         // The root of an HTML document
 "body": -1,         // The document's body
 "head": -1,         // Information about the document
-"title": -1,        // A title for the document
 "form": -1,         // An HTML form for user input
 "style": -1,        // Style information for a document
 
@@ -1261,6 +1260,7 @@ module TDev.HTML {
 "path": 1,
 "circle": 1,
 "g": 1,
+"title": 1,        // A title for the document
 
 // Supported outside markdown
 "abbr": 2,          // An abbreviation
