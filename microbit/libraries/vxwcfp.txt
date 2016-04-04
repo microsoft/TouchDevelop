@@ -2961,6 +2961,7 @@ action on_gamepad_button(#D3QUCj7BfHCBhap4 name: String, #xI9Zgf22rh0WuyDZ body:
   #huR2efoZWTsLGE6k $evid := "on gamepad button " ∥ $name;
   #NIoxxw4REvwe9Fac code→notify_event_registration($evid);
   #FVzCwPmbtYNq7UzA code→pairing_warning;
+  meta private;
   meta sync;
 }
 #dYquo5vKBlFTf010
