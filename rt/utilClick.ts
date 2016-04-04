@@ -244,7 +244,6 @@ module TDev
             else
                 this.helt.addEventListener("mousedown", <any>this, false);
             this.helt.addEventListener("keypress", <any>this, true);
-            console.log('register keypress')
         }
 
         public unhook()
@@ -253,7 +252,6 @@ module TDev
             this.helt.removeEventListener("touchstart", <any>this, false);
             this.helt.removeEventListener("mousedown", <any>this, false);
             this.helt.removeEventListener("keypress", <any>this, true);
-            console.log('unregister keypress')
         }
     }
 
