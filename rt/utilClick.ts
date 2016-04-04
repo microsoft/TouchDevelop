@@ -175,8 +175,7 @@ module TDev
                     break;
                 case "keypress":
                     var ke = <KeyboardEvent>e;
-                    if (!this.cleared && ke.target == this.helt && (ke.which == 13 || ke.which == 32)) {
-                        this.clear();
+                    if (ke.target == this.helt && (ke.which == 13 || ke.which == 32)) {
                         this.f(e);
                     }
                     break;

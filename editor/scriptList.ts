@@ -98,6 +98,7 @@
                         var firstmii: HTMLElement = undefined;
                         menuItems.forEach(mi => {
                             var li = HTML.li('nav-list__item', mi.name).withClick(() => {
+                                m.dismiss();
                                 tick(mi.tick);
                                 mi.handler();
                             });
