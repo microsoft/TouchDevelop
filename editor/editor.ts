@@ -125,6 +125,9 @@ module TDev
                         var d = div('');
                         d.style.height = '100%';
                         d.style.width = 'calc(100% - 4em)';
+                        d.withClick(() => {
+
+                        })
                         m.add(d);
                         var editor = ace.edit(d);
                         if (mode) editor.getSession().setMode("ace/mode/" + mode);
