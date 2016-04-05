@@ -3198,7 +3198,7 @@
   "select cloud session for this script":"",
   "select more":"选择更多",
   "select that line":"选择此行",
-  "select type of this {0}":"",
+  "select type of this {0}":"请选择此 {0} 类型",
   "select {0}":"",
   "send feedback":"",
   "send pull request":"",
