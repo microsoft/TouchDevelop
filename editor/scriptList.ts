@@ -53,8 +53,6 @@
                     menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
-                var siteLogo = elt("siteLogo");
-                if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
