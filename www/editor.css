@@ -981,7 +981,7 @@ textarea.commentEdit {
 }
 
 .portrait .apiBackContainer {
-    max-width: 7em; 
+    max-width: 7em;
 }
 
 .landscape .apiBackContainer {
@@ -1698,6 +1698,7 @@ div.insertStmtHint
   font-size: 0.9em;
 }
 
+/*
 .stmt[data-current^="yes"] > .line > .hintMessage,
 .stmt[data-current^="yes"] > .hintMessage,
 .stmt[data-current^="yes"] > .line > .errorBr,
@@ -1705,7 +1706,7 @@ div.insertStmtHint
 .stmt[data-current^="yes"] > .line > .errorMessage,
 .stmt[data-current^="yes"] > .errorMessage
 {
-}
+} */
 
 .stmt[data-current^="yes"]
 {
