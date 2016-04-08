@@ -38,6 +38,9 @@
                         // always use in-app menu selection
                         TemplateManager.createScript();
                     } },
+                    { id: "importcode", name: lf("Import Code"), tick: Ticks.siteMenuImportCode, handler: () => {
+                        ArtUtil.importFileDialog();                        
+                    }},
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
                             this.showList("installed-scripts");
