@@ -174,7 +174,10 @@ module TDev {
             elt("root").style.height = h + "px";
             if (phoneSimulationW > 0)
                 elt("root").style.width = w + "px";
-            elt("root").style.fontSize = Browser.isMobile ? topFontSize +"px" : "16px";
+
+            if (!Browser.isMobile) topFontSize = 16; // allow zooming;
+
+            elt("root").style.fontSize = topFontSize +"px";
 
             var rootClass = portraitMode ? "portrait" : "landscape";
             if (phoneMode) rootClass += " phone";
