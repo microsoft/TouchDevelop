@@ -584,6 +584,14 @@ input.wall-textbox:hover, input.wall-textbox:focus {
   border-color: white;
 }
 
+.modalDialog .trap {
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:1px;
+  height:1px;
+}
+
 .modalFullYellow .modalDialog .wall-button,
 .modalFullWhite .modalDialog .wall-button
 {

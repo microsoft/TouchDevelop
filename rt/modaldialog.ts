@@ -154,7 +154,7 @@ module TDev {
                     btnsDiv = e;
                 if (e.withClick && !(<any>e).clickHandler && !(<any>e).onselectstart)
                     e.tabIndex = -1;
-            });
+            });           
 
             if (!what) {
                 Util.showPopup(this.floating);
@@ -191,14 +191,32 @@ module TDev {
                 this.dialog.setAttribute("aria-labelledby", h1.id);
             }
 
-            // find first input field or buttondiv
-            setTimeout(() => {
-                var focus = this.dialog.getElementsByTagName("input")[0] || this.dialog.getElementsByTagName("button")[0];
-                if (focus) focus.focus();
-            }, 10);
+
+            // add one more fake element to trap the keyboard focus and reset it to the first focusable element
+            var trap = div('focustrap');
+            trap.tabIndex = 0;
+            trap.setAttribute("aria-hidden", "true");
+            trap.onfocus = () => this.focusFirstAsync().done();
+            this.dialog.appendChild(trap)
+
+            this.focusFirstAsync().done();            
 
             Ticker.dbg("ModalDialog.showBare1");
         }
+
+        public focusFirstAsync() {
+            return new Promise((onSuccess, onError, onProgress) => {
+                // find first input field or buttondiv
+                setTimeout(() => {
+                    try {
+                        var focus = this.dialog.getElementsByTagName("input")[0] || this.dialog.getElementsByTagName("button")[0];
+                        if (focus) focus.focus();
+                    } catch (e) {
+                    }
+                    onSuccess(undefined);
+                }, 10);
+            });
+        }        
 
         public dismiss() {
             if (!this.canDismiss) {
