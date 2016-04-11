@@ -708,7 +708,10 @@ module TDev
             input.accept = ".hex,.json,.jsz";
             
             m.add(div('wall-dialog-header', lf("import code")));
-            m.add(div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .jsz files. Hint: you can also drag and drop the files in the editor to import them!")));
+            var inputLabel;
+            m.add(inputLabel = div('wall-dialog-body', lf("Imports the code from .hex files created for the BBC micro:bit or saved .jsz files. Hint: you can also drag and drop the files in the editor to import them!")));
+            inputLabel.id = "importCodeInputLabel";
+            input.setAttribute("aria-labelledby", inputLabel.id);
             if (Browser.isMobileSafari || Browser.isMobileSafariOld) {
                 m.add(div('wall-dialog-body',
                     lf("To import files to your iPhone or iPad, you need to have the latest software installed. Files can only be imported from a cloud storage app.")));
@@ -766,6 +769,8 @@ module TDev
                     if (guids.length > 0) {
                         HTML.showProgressNotification(lf("{0} file{0:s} imported", guids.length));
                         Util.setHash("#list:installed-scripts:script:" + guids[0] + ":overview");
+                    } else {
+                        HTML.showWarningNotification(lf("Oops, no files were imported."));
                     }
                     return guids;
                 }, e => ProgressOverlay.hide());

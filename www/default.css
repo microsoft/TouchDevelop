@@ -534,11 +534,11 @@ p.wall-record
    color: #333333;
 }
 
-:-moz-placeholder { /* Firefox 18- */
-   color: #333333;
+input::-moz-placeholder {
+  color: black;
 }
 
-::-moz-placeholder {  /* Firefox 19+ */
+::placeholder {
    color: #333333;
 }
 
@@ -582,6 +582,14 @@ input.wall-textbox:hover, input.wall-textbox:focus {
 {
   color: white;
   border-color: white;
+}
+
+.modalDialog .trap {
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:1px;
+  height:1px;
 }
 
 .modalFullYellow .modalDialog .wall-button,

@@ -3579,7 +3579,7 @@ function fetchlibraries(args) {
         , 'xnkmqj' // micro:bit senses
         , 'drdxps' // micro:bit screen
         , 'zbiwoq' // micro:bit music
-        , 'fgkphf' // micro:bit radio
+       // , 'fgkphf' // micro:bit radio
         , 'lyusma' // micro:bit profile
         , 'xczaux' // blocks new
         , 'dceiba' // blocks blink

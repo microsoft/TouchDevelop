@@ -184,7 +184,7 @@ button.navItem[data-selected^="yes"]
   border-color: #09655E;
 }
 
-div.sdHeaderOuter[data-current^="yes"],
+div.sdHeaderOuter:focus,
 button.navItem[data-current^="yes"]
 {
   background: #09655E;
@@ -980,6 +980,10 @@ textarea.commentEdit {
   height: auto;
 }
 
+.portrait .apiBackContainer {
+    max-width: 7em;
+}
+
 .landscape .apiBackContainer {
   display: inline-block;
   margin-top: 0.5em;
@@ -1694,6 +1698,7 @@ div.insertStmtHint
   font-size: 0.9em;
 }
 
+/*
 .stmt[data-current^="yes"] > .line > .hintMessage,
 .stmt[data-current^="yes"] > .hintMessage,
 .stmt[data-current^="yes"] > .line > .errorBr,
@@ -1701,7 +1706,7 @@ div.insertStmtHint
 .stmt[data-current^="yes"] > .line > .errorMessage,
 .stmt[data-current^="yes"] > .errorMessage
 {
-}
+} */
 
 .stmt[data-current^="yes"]
 {
@@ -2537,6 +2542,11 @@ div.decl > div.stmt {
 .editorSearchContainer {
   position: absolute;
   top: 0;
+  text-align: right;
+}
+
+.editorSearchContainer input {
+  max-width: 8em;
 }
 
 .editorSearchContainer .wall-textbox {
@@ -2679,7 +2689,12 @@ a.md-bigbutton:hover {
   position: relative;
 }
 
+.slListHeaderHider {
+  display:none;
+}
+
 .portrait .slListHeaderHider {
+  display:unset;
   background: white;
   position: absolute;
   top: 0;

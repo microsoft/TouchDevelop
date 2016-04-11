@@ -17,12 +17,13 @@
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
+            this.leftPane.setAttribute("role", "complimentary");
             this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
+            this.rightPane.setAttribute("role", "main");
             this.hdContainer.tabIndex = 0;
-            this.theRoot = div("slRoot", this.rightPane, this.leftPane);
-            elt("root").appendChild(EditorSettings.mkCopyrightNote());
+            this.theRoot = div("slRoot", this.leftPane, this.rightPane);
 
             this.populateSiteHeader(false);
         }
@@ -37,8 +38,15 @@
                         // always use in-app menu selection
                         TemplateManager.createScript();
                     } },
+                    { id: "importcode", name: lf("Import Code"), tick: Ticks.siteMenuImportCode, handler: () => {
+                        ArtUtil.importFileDialog();                        
+                    }},
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => this.showList("installed-scripts") }
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
+                            this.showList("installed-scripts");
+                            setTimeout(10, this.searchBox.focus());
+                        }
+                    }
                 ];
                 if (settings && Cloud.hasPermission("post-group"))
                     menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
@@ -48,8 +56,6 @@
                     menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
-                var siteLogo = elt("siteLogo");
-                if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
@@ -75,6 +81,7 @@
                         li.id = "siteMenuBtn" + mi.id;
                         if (mi.id == "signin" || mi.id == "settings")
                             li.style.fontWeight = "bold";
+                        li.setAttribute("role", "menuitem");
                         return li;
                     }));
                 var siteMore = elt("siteMore");
@@ -85,15 +92,31 @@
                     ])
                     siteMore.withClick(() => {
                         var m = new ModalDialog();
+                        var nav = document.createElement("nav");
+                        nav.setAttribute("role", "navigation");
+                        var menu = document.createElement("ul");
+                        menu.className = "nav-list";
+                        var firstmii: HTMLElement = undefined;
                         menuItems.forEach(mi => {
-                            m.add(divId('siteMenuMore' + mi.id, 'siteMenuBtn', mi.name).withClick(() => {
+                            var li = HTML.li('nav-list__item', mi.name).withClick(() => {
                                 m.dismiss();
                                 tick(mi.tick);
                                 mi.handler();
-                            }));
+                            });
+                            li.id = 'siteMenuMore' + mi.id;
+                            li.className = 'siteMenuBtn';
+                            if (!firstmii) firstmii = li;
+                            li.setAttribute("role", "menuitem");
+                            menu.appendChild(li);
                         });
+
+                        nav.appendChild(menu);                        
+                        m.add(nav);                        
                         m.fullBlack();
                         m.show();
+                        if (firstmii) {
+                            Util.setTimeout(1, () => firstmii.focus());
+                        }
                     })
                 }
             }
@@ -101,7 +124,7 @@
         private theList = div("slList");
         private header = div("sdListLabel");
         private botDiv = div(null);
-        private searchBox = HTML.mkTextInput("search", lf("Search..."), "search", lf("Search"));
+        private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
         private autoUpdate:KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
         private backContainer = div("slBackContainer");
@@ -179,6 +202,8 @@
 
             this.setBackButton();            
             this.initMeAsync().done(() => { }, () => { });
+
+            elt("root").appendChild(EditorSettings.mkCopyrightNote());
 
             if (dbg) bugsEnabled = true;
         }
@@ -919,6 +944,8 @@
                         elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
                                         
+                    this.initMoreDiv(path);
+                    elts.push(this.moreDiv)
                     sd.setChildren(elts);
                 }, true);
             }
@@ -1882,7 +1909,7 @@
         
         private initMoreDiv(path: string) {
             this.moreDiv.setChildren([]);            
-            if (/^installed/.test(path)) {
+            if (/^(installed|scripts)/.test(path)) {
                 this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
                     tick(Ticks.browseCreateCode);
                     TemplateManager.createScript()
@@ -1983,6 +2010,7 @@
                 return;
             }
 
+            var shouldFocus = !!this.detailsLoadedFor;            
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -2022,6 +2050,8 @@
             Util.showRightPanel(this.rightPane);
             if (!SizeMgr.phoneMode)
                 this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
+
+            if (shouldFocus) this.rightPane.focus();            
         }
 
         private getLocation(id:string) : BrowserPage { return this.locationCache[id]; }
@@ -5390,7 +5420,6 @@
                     div("hubTileSubtitle",
                         div("hubTileAuthor", spanDirAuto(a.username))))])
             });
-            return d;
         }
 
         public mkBoxCore(big: boolean) {
@@ -6503,7 +6532,7 @@
             if (big) screenShot = null;
             var res = div("sdHeaderOuter",
                             div("sdHeader", icon, screenShot,
-                                div("sdHeaderInner", hd, div("sdAddInfoOuter", addInfo), div("sdAuthor", author), numbers,
+                                div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo),  numbers,
                         facebook, abuseDiv)));
             
             if (big)
@@ -6513,7 +6542,7 @@
                 var deleted = this.isDeleted();
                 nameBlock.setChildren([deleted ? lf("deleted script") : this.app.getName()]);
                 dirAuto(nameBlock);
-                res.setAttribute("aria-label", deleted ? lf("deleted script") : lf("script {0}", this.app.getName()))
+                if (deleted) res.setAttribute("aria-label", lf("deleted script"))
                 icon.style.backgroundColor = deleted ? "#999999" : this.iconBgColor();
                 icon.setChildren([this.iconImg(true), !this.cloudHeader ? null : div("sdInstalled")]);
                 if (deleted) author.setChildren([]);

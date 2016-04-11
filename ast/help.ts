@@ -886,6 +886,8 @@ module TDev {
                         height = 40;
                     }
                     var caption = m[7];
+                    if (caption) caption = caption.slice(1)
+                    else caption = ""
                     if (artId && !url) {
                         artId = MdComments.findArtId(artId);
                         url = Cloud.artUrl(artId);
@@ -896,13 +898,14 @@ module TDev {
                     url = Cloud.toCdnUrl(url);
                     url = HTML.proxyResource(url);
                     var r = "<div class='md-img'><div class='md-img-inner'>";
-                    r += Util.fmt("<img src=\"{0:q}\" alt='picture'", url);
+                    r += Util.fmt("<img src=\"{0:q}\" alt='{1:q}'", url, caption);
                     if (m[6] || (!this.forWeb && !this.print))
                         r += Util.fmt(" style='height:{0}em'", height);
                     r += "/></div>";
-                    if (caption) {
-                        r += "<div class='md-caption'>" + this.formatText(caption.slice(1)) + "</div>";
-                    }
+                    // Used as alt-text now.
+                    //if (caption) {
+                    //    r += "<div class='md-caption'>" + this.formatText(caption.slice(1)) + "</div>";
+                    //}
                     r += "</div>";
                     return r;
                 } else {
@@ -1049,20 +1052,25 @@ module TDev {
                         url += suff
                         posterUrl += suff
                     }
+                    var alt = args.slice(1).join(":") || ""
                     // TODO: support looping
                     // return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-videosrc='{1:url}'>{2}</div>", posterUrl, url, SVG.getVideoPlay(posterUrl));
-                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}'>{2}</div>", posterUrl, playerUrl, SVG.getVideoPlay(posterUrl));
+                    return Util.fmt("<div class='md-video-link' data-videoposter='{0:url}' data-playerurl='{1:url}' data-alt='{3:q}'>{2}</div>", 
+                        posterUrl, playerUrl, SVG.getVideoPlay(posterUrl, alt), alt);
                 }
             } else if (macro == "bbc") {
                 if (!this.allowVideos) return "";
                 if (this.blockExternal()) return this.blockLink("")
-                if (!arg)
+                var args = arg.split(/:/);
+                var id = args[0]
+                var caption = args.slice(1).join(":")
+                if (!id)
                     return MdComments.error("bbc: missing video id");
                 else {
-                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}'>{1}</div>",
-                        Util.fmt("https://files.microbit.co.uk/clips/{0:uri}/embed", arg),
-                        SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', arg))
-                        );
+                    return Util.fmt("<div class='md-video-link' data-playerurl='{0:q}' data-alt='{2:q}'>{1}</div>",
+                        Util.fmt("https://files.microbit.co.uk/clips/{0:uri}/embed", id),
+                        SVG.getVideoPlay(Util.fmt('https://files.microbit.co.uk/clips/{0:uri}/thumb', id), caption),
+                        caption);
                 }
             } else if (macro == "vimeo") {
                 if (!this.allowVideos) return "";
@@ -1534,7 +1542,7 @@ module TDev {
                         var boxCss = "md-box";
                         switch (boxClass) {
                             case "card":
-                                boxHd = "<div class='md-box-header'>" + this.expandInline(parts.slice(1).join(':'), true, false) + "</div>";
+                                boxHd = "<h3 class='md-box-header'>" + this.expandInline(parts.slice(1).join(':'), true, false) + "</h3>";
                                 break;
                             case "hint":
                                 boxHd = "<div class='md-box-header'>" + lf("hint") + "</div>";

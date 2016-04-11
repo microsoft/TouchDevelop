@@ -26,6 +26,7 @@ backend/built
 build/locales
 data
 microbit/bytecode.js
+*.db
 
 # visual studio
 *.suo
