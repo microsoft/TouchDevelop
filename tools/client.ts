@@ -3711,7 +3711,7 @@ function dllite(args:string[])
         tdevGet(k.liteUrl + "api/" + store + "?count=1000" + cont + k.key, resp => {
             var parsed = JSON.parse(resp)
             var fn = "dl/" + store + "-" + Date.now() + ".json"
-            fs.writeFileSync(fn, resp)
+            fs.writeFileSync(fn, JSON.stringify(parsed, null, 1))
 
             total += parsed.items.length
 
