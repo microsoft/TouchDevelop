@@ -404,6 +404,20 @@ module TDev.AST {
             }
         }
 
+        private bitop(p:IProperty) {
+            if (p.parentKind.getName() != "Bits") return null
+
+            switch (p.getName().replace(/ u?int32$/, "")) {
+                case "or": return "|,4.1";
+                case "xor": return "^,4.2";
+                case "and": return "&,4.3";
+                case "shift left": return "<<,7";
+                case "shift right": return ">>>,7";
+            }
+
+            return null
+        }
+
         private infixPri(e:Expr)
         {
             var p = e.getCalledProperty()
@@ -429,6 +443,8 @@ module TDev.AST {
                 }
             } else if (p.getName() == "mod" && p.parentKind.getName() == "Math") {
                 return 20
+            } else if (this.bitop(p)) {
+                return parseFloat(this.bitop(p).split(/,/)[1])
             } else if (e instanceof Call && e.awaits()) {
                 return 40
             }
@@ -463,7 +479,7 @@ module TDev.AST {
               "Json Builder->keys": "Object.keys",
               "Json Object->keys": "Object.keys",
               "String Map->keys": "Object.keys",
-              "Contract->assert": "assert",
+              "Contract->assert": "control.assert",
               "Bits->string to buffer": "new Buffer",
               "Time->sleep": "basic.sleep",
               "String->to number": "parseInt",
@@ -472,6 +488,10 @@ module TDev.AST {
               "Web->encode uri component": "encodeURIComponent",
               "Web->encode url": "encodeURIComponent",
               "Math->clamp": "Math.clamp",
+              "Math->abs": "Math.abs",
+              "Math->sign": "Math.sign",
+              "Math->pow": "Math.pow",
+              "Math->sqrt": "Math.sqrt",
               "Math->min": "Math.min",
               "Math->max": "Math.max",
               "Math->round": "Math.round",
@@ -485,6 +505,15 @@ module TDev.AST {
               "Json Object->to number": "td.toNumber",
               "♻ micro:bit->plot image": "basic.showLeds",
               "♻ micro:bit->create image": "images.createImage",
+              "♻ micro:bit->note": "music.noteFrequency",
+              "♻ micro:bit music->note": "music.noteFrequency",
+              "♻ micro:bit->ring": "music.ringTone",
+              "♻ micro:bit->play note": "music.playTone",
+              "♻ micro:bit music->play note": "music.playTone",
+              // these moved namespaces
+              "♻ micro:bit->forever": "basic.forever",
+              "♻ micro:bit->show string": "basic.showString",
+              "♻ micro:bit->clear screen": "basic.clearScreen",
         }
 
         static methodRepl:StringMap<string> = {
@@ -588,7 +617,8 @@ module TDev.AST {
                 return
             }
 
-            this.fixupArgs(e, Converter.prefixGlue[pn])
+            if (!infixPri)
+                this.fixupArgs(e, Converter.prefixGlue[pn])
 
             if (infixPri) {
                 if (p.getName() == "-" && e.args[0].getLiteral() === 0.0) {
@@ -653,11 +683,16 @@ module TDev.AST {
                     this.tw.op0("] =").sep()
                     this.dispatch(e.args[1])
                 } else {
-                    doParen(e.args[0])
+                    var binopArgs = e.args
+                    if (binopArgs.length == 3)
+                        binopArgs.shift()
+                    doParen(binopArgs[0])
                     var nn = p.getName()
                     if (nn == "equals") nn = "=="
+                    if (this.bitop(p))
+                        nn = this.bitop(p).split(",")[0]
                     this.printOp(nn)
-                    doParen(e.args[1])
+                    doParen(binopArgs[1])
                 }
 
             } else if (e.referencedData()) {
