@@ -3633,6 +3633,8 @@ function dlscripttext(args:string[])
 
     var pushMode = args[1] == "push"
 
+    var liteMode = true
+
     var tm0 = 1420099200 
     var start = Date.now();
     var k = tdliteKey()
@@ -3645,12 +3647,21 @@ function dlscripttext(args:string[])
         var oneup = () => {
             if (--num == 0) {
                 var tm = ("00000" + Math.round((Date.now() - start) / 1000)).slice(-6)
-                console.log(tm, "DONE", files[i], i + "/" + files.length)
+                console.log(tm, "DONE", files[i], i + "/" + files.length, items.length)
                 loop(i+1)
             }
         }
 
         var pref = "https://www.touchdevelop.com/api/"
+        var suff = ""
+
+        if (liteMode) {
+            var kk = tdliteKey();
+            suff = kk.key
+            pref = kk.liteUrl + "api/"
+            var now = Date.now()/1000
+            items = items.filter(it => it.updateid == it.id && !it.editor && now - it.time < 9*30*24*3600)
+        }
 
         items.forEach(s => {
             ++num;
@@ -3669,11 +3680,11 @@ function dlscripttext(args:string[])
                     }
                 })
             } else {
-                tdevGet(pref + s.id + "/text?original=true", text => {
+                tdevGet(pref + s.id + "/text?original=true" + suff, text => {
                     if (!text) {
                         console.log("ERROR", s.id)
                         oneup()
-                    } else if (/^meta hasIds "yes"/m.test(text)) {
+                    } else if (liteMode || /^meta hasIds "yes"/m.test(text)) {
                         fs.writeFileSync("dls/" + s.id, text)
                         oneup()
                     } else {

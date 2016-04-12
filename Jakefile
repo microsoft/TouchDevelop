@@ -302,6 +302,16 @@ var concatMap = {
         "build/embedded",
         "build/editor" ,
     ],
+    "build/tdast.js": [
+        "build/browser",
+        "build/rt",
+        "build/ast",
+        "build/storage",
+        "build/embedded",
+        "build/api.js",
+        "generated/langs.js",
+        "build/libraries.js",
+    ],
 };
 
 // Just a dumb concatenation

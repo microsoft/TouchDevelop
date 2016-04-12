@@ -153,6 +153,7 @@ module TDev.AST {
 
         visitAstNode(n:AstNode)
         {
+            delete n._converterValue
             this.visitChildren(n);
         }
 
@@ -177,6 +178,106 @@ module TDev.AST {
             if (eh.isAwait) 
                 this.numAwaits++
         }
+
+        visitThingRef(t:ThingRef) {
+            var l = t.referencedLocal()
+            if (l && typeof l._converterUses == "number")
+                l._converterUses++
+        }
+
+        visitAction(a:Action) {
+            a.getOutParameters().forEach(op => {
+                op.local._converterUses = 0
+            })
+            super.visitAction(a)
+        }
+    }
+
+    export interface Td2TsOptions {
+        text?: string;
+        useExtensions?: boolean;
+        apiInfo?: ApisInfo;
+    }
+
+    export interface ParameterDesc {
+        name: string;
+        description: string;
+        type: string;
+        initializer?: string;
+        defaults?: string[];
+    }
+
+    export enum SymbolKind {
+        None,
+        Method,
+        Property,
+        Function,
+        Variable,
+        Module,
+        Enum,
+        EnumMember
+    }
+
+    export interface CommentAttrs {
+        shim?: string;
+        enumval?: string;
+        helper?: string;
+        help?: string;
+        async?: boolean;
+        block?: string;
+        blockId?: string;
+        blockGap?: string;
+        blockExternalInputs?: boolean;
+        blockStatement?: boolean;
+        blockImportId?: string;
+        color?: string;
+        icon?: string;
+        imageLiteral?: number;
+        weight?: number;
+        
+        // on interfaces
+        indexerGet?: string;
+        indexerSet?: string;
+
+        _name?: string;
+        jsDoc?: string;
+        paramHelp?: StringMap<string>;
+        // foo.defl=12 -> paramDefl: { foo: "12" }
+        paramDefl: StringMap<string>;
+    }
+    
+
+    export interface SymbolInfo {
+        attributes: CommentAttrs;
+        name: string;
+        namespace: string;
+        kind: SymbolKind;
+        parameters: ParameterDesc[];
+        retType: string;
+        isContextual?: boolean;
+    }
+
+    export interface ApisInfo {
+        byQName: StringMap<SymbolInfo>;
+    }
+    
+
+    export function td2ts(options:Td2TsOptions) {
+        AST.reset();
+        AST.loadScriptAsync((s) => Promise.as(s == "" ? options.text : null));
+        var r = new TDev.AST.Converter(Script, options).run()
+        return r;
+    }
+
+    export function testConverterAsync() {
+        return Util.httpGetJsonAsync("http://localhost:4242/editor/local/apiinfo.json")
+            .then(json => {
+                var r = new TDev.AST.Converter(Script, {
+                    useExtensions: true,
+                    apiInfo: json
+                }).run()
+                return r.text;
+            })
     }
 
     export class Converter 
@@ -187,9 +288,8 @@ module TDev.AST {
         private currAsync:Call;
         private apis:StringMap<number> = {};
         private allEnums:StringMap<number> = {};
-        public useExtensions = false;
 
-        constructor(private app:App)
+        constructor(private app:App, private options:Td2TsOptions = {})
         {
             super()
         }
@@ -202,8 +302,9 @@ module TDev.AST {
             keys.sort((a, b) => this.apis[a] - this.apis[b])
             var newApis = {}
             keys.forEach(k => newApis[k] = this.apis[k])
+            var txt = (this.tw.finalize().trim() + "\n").replace(/\n+/g, "\n")
             return {
-                text: this.tw.finalize(),
+                text: txt,
                 apis: newApis,
             }
         }
@@ -235,8 +336,8 @@ module TDev.AST {
             "Boolean": "boolean",
             "Nothing": "void",
             "DateTime": "Date",
-            "Json Object": "JsonObject",
-            "Json Builder": "JsonBuilder",
+            "Json Object": "{}",
+            "Json Builder": "{}",
             "Buffer": "Buffer",
         }
 
@@ -280,6 +381,11 @@ module TDev.AST {
             return this.type(l.getKind())
         }
 
+        private globalName(n:string)
+        {
+            return this.tw.globalCtx.quote(n, 0)
+        }
+
         visitAstNode(n:AstNode)
         {
             this.visitChildren(n);
@@ -321,6 +427,8 @@ module TDev.AST {
                         return 5 // '!= ""'
                     return 50
                 }
+            } else if (p.getName() == "mod" && p.parentKind.getName() == "Math") {
+                return 20
             } else if (e instanceof Call && e.awaits()) {
                 return 40
             }
@@ -350,52 +458,40 @@ module TDev.AST {
         }
 
         static prefixGlue:StringMap<string> = {
-              "String->replace": "td.replaceAll",
-              "String->starts with": "td.startsWith",
-              "App->server setting": "td.serverSetting",
-              "App->log": "td.log",
+              "App->log": "console.log",
               "Time->now": "new Date",
               "Json Builder->keys": "Object.keys",
               "Json Object->keys": "Object.keys",
               "String Map->keys": "Object.keys",
               "Contract->assert": "assert",
               "Bits->string to buffer": "new Buffer",
-              "Time->sleep": "td.sleepAsync",
-              "String->to number": "parseFloat",
-              "Json Builder->copy from": "td.jsonCopyFrom",
-              "String->contains": "td.stringContains",
-              "Collection->to json": "td.arrayToJson",
-              "Collection->ordered by": "td.orderedBy",
+              "Time->sleep": "basic.sleep",
+              "String->to number": "parseInt",
               "Web->decode url": "decodeURIComponent",
               "Web->decode uri component": "decodeURIComponent",
               "Web->encode uri component": "encodeURIComponent",
               "Web->encode url": "encodeURIComponent",
-              "Json Object->to collection": "asArray",
-              "Json Builder->to collection": "asArray",
-              "Math->clamp": "td.clamp",
+              "Math->clamp": "Math.clamp",
               "Math->min": "Math.min",
               "Math->max": "Math.max",
               "Math->round": "Math.round",
               "Math->floor": "Math.floor",
-              "Math->random": "td.randomInt",
-              "Math->random range": "td.randomRange",
-              "Math->random normalized": "td.randomNormalized",
+              "Math->random": "Math.random",
+              "Math->random range": "Math.randomRange",
+              "Math->random normalized": "Math.randomNormalized",
               "Json Builder->to string": "td.toString",
               "Json Object->to string": "td.toString",
               "Json Builder->to number": "td.toNumber",
               "Json Object->to number": "td.toNumber",
-              "App->create logger": "td.createLogger",
-              "Web->create request": "td.createRequest",
-              "Web->download json": "td.downloadJsonAsync",
-              "Web->download": "td.downloadTextAsync",
-              "Contract->requires": "assert",
-              "Buffer->sha256": "td.sha256",
+              "♻ micro:bit->plot image": "basic.showLeds",
+              "♻ micro:bit->create image": "images.createImage",
         }
 
         static methodRepl:StringMap<string> = {
           "Buffer->concat": "concat",
           "Buffer->to string": "toString",
           "Number->to string": "toString",
+          "String->replace": "replaceAll",
           "String->split": "split",
           "String->substring": "substr",
           "String->to upper case": "toUpperCase",
@@ -421,6 +517,55 @@ module TDev.AST {
             })
         }
 
+        fixupArgs(e:Call, nameOverride:string) {
+            if (!e.args[0])
+                return
+
+            var th = e.args[0].getThing()
+
+            if (!(th instanceof SingletonDef))
+                return
+
+            if (th.getKind() instanceof ThingSetKind)
+                return
+
+            if (!this.options.apiInfo)
+                return
+
+            var p = e.getCalledProperty()
+            var fullName = nameOverride || this.globalName(e.args[0].getThing().getName()) + "." + this.globalName(p.getName())
+
+            var apiInfo = this.options.apiInfo.byQName[fullName]
+            if (!apiInfo) {
+                this.tw.write("/*WARN: no api " + fullName + "*/")
+                return
+            } 
+
+            e.args.slice(1).forEach((a, i) => {
+                var litVal:string = a.getLiteral()
+                if (!litVal || typeof litVal != "string") return;
+                litVal = litVal.toLowerCase()
+                var pi = apiInfo.parameters[i]
+                if (!pi) return
+
+                var enumInfo = this.options.apiInfo.byQName[pi.type]
+                if (enumInfo && enumInfo.kind == SymbolKind.Enum) {
+                    var members = Util.values(this.options.apiInfo.byQName)
+                        .filter(e => e.namespace == pi.type &&
+                            (e.name.toLowerCase() == litVal ||
+                             (e.attributes.block || "").toLowerCase() == litVal))
+                    if (members.length >= 1) {
+                        a._converterValue = members[0].namespace + "." + members[0].name
+                        if (members.length > 1) {
+                            a._converterValue += " /*WARN: more possible!*/"
+                        }
+                    } else {
+                        a._converterValue = pi.type + "." + a.getLiteral() +  " /*WARN: not found*/"
+                    }
+                }
+            })
+        }
+
         visitCallInner(e:Call)
         {
             var p = e.getCalledProperty()
@@ -442,6 +587,8 @@ module TDev.AST {
                 }
                 return
             }
+
+            this.fixupArgs(e, Converter.prefixGlue[pn])
 
             if (infixPri) {
                 if (p.getName() == "-" && e.args[0].getLiteral() === 0.0) {
@@ -713,6 +860,7 @@ module TDev.AST {
             "\u2260": "!=",
             "\u2264": "<=",
             "\u2265": ">=",
+            "mod": "%",
         }
 
         printOp(s:string)
@@ -736,6 +884,11 @@ module TDev.AST {
 
         visitLiteral(l:Literal)
         {
+            if (l._converterValue) {
+                this.tw.write(l._converterValue)
+                return
+            }
+
             if (l.data === undefined) return
             if (typeof l.data == "number")
                 this.tw.write(l.stringForm || l.data.toString())
@@ -915,14 +1068,14 @@ module TDev.AST {
 
         isOwnExtension(a:Action)
         {
-            if (!this.useExtensions || !this.isExtension(a)) return false
+            if (!this.options.useExtensions || !this.isExtension(a)) return false
             var r = this.getFirstRecord(a)
             return (r && r.parent == this.app)
         }
 
         isExtension(a:Action)
         {
-            if (!this.useExtensions && a.parent == this.app)
+            if (!this.options.useExtensions && a.parent == this.app)
                 return false
 
             if (a.isActionTypeDef())
@@ -1085,8 +1238,8 @@ module TDev.AST {
                 this.tw.globalId(a)
                 this.pcommaSep(a.getInParameters().slice(1), printP)
             } else {
-                if (!a.isPrivate)
-                    this.tw.kw("export")
+                //if (!a.isPrivate)
+                //    this.tw.kw("export")
                 if (useAsync && !a.isAtomic)
                     this.tw.kw("async")
                 this.tw.kw("function")
@@ -1131,15 +1284,21 @@ module TDev.AST {
                 this.tw.jsid(info.optsName).op0(");").nl()
             }
 
-            a.getOutParameters().forEach(p => {
-                this.tw.kw("let")
-                this.localDef(p.local)
-                this.tw.semiNL()
-            })
+            var hasOutP = !!a.getOutParameters().filter(p => p.local._converterUses > 0)[0]
+
+
+            if (hasOutP)
+                a.getOutParameters().forEach(p => {
+                    this.tw.kw("let")
+                    this.localDef(p.local)
+                    this.tw.semiNL()
+                })
 
             this.codeBlockInner(info.stmts)
 
-            if (a.getOutParameters().length == 1) {
+            if (!hasOutP) {
+                // nothing to do
+            } else if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
                 this.localName(a.getOutParameters()[0].local).semiNL()
             } else if (a.getOutParameters().length > 1) {
@@ -1187,18 +1346,14 @@ module TDev.AST {
 
         visitLibraryRef(l:LibraryRef)
         {
-            var modName = JSON.stringify("./" + l.getName().replace(/\s/g, "-"))
-            this.tw.kw("import * as ");
-            this.tw.globalId(l).keyword("from").sep().write(modName).nl();
         }
 
         visitRecordDef(r:RecordDef)
         {
-            this.tw.kw("export class").sep()
-            this.tw.globalId(r).nl()
-            this.tw.kw("    extends td.JsonRecord").nl().beginBlock()
+            this.tw.kw("class").sep()
+            this.tw.globalId(r).beginBlock()
             r.getFields().forEach(f => {
-                this.tw.kw("@json public").sep()
+                this.tw.kw("public").sep()
                 this.simpleId(f.getName())
                 this.tw.op0(":").sep()
                 this.type(f.dataKind)
@@ -1208,26 +1363,10 @@ module TDev.AST {
                 this.tw.semiNL()
             })
 
-            this.tw.write("static createFromJson(o:JsonObject) { let r = new ")
-            this.tw.globalId(r).write("(); r.fromJson(o); return r; }").nl()
-
             var exts = this.app.actions().filter(a => this.isOwnExtension(a) && this.getFirstRecord(a) == r)
             exts.forEach(e => this.visitAction(e))
 
             this.tw.endBlock()
-            this.tw.nl()
-
-            this.tw.kw("export interface").sep()
-            this.tw.globalId(r, "I")
-            this.tw.beginBlock()
-            r.getFields().forEach(f => {
-                this.simpleId(f.getName())
-                this.tw.op0("?:").sep()
-                this.type(f.dataKind)
-                this.tw.semiNL()
-            })
-            this.tw.endBlock()
-
             this.tw.nl()
         }
 
