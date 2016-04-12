@@ -356,8 +356,8 @@ module TDev.AST {
                     this.tw.globalId(parL).op0(".");
                 this.tw.globalId(t.getRecord())
             } else if (t.parentLibrary()) {
-                if (!t.parentLibrary().isThis())
-                    this.tw.globalId(t.parentLibrary()).op0(".");
+                //if (!t.parentLibrary().isThis())
+                //    this.tw.globalId(t.parentLibrary()).op0(".");
                 var n = t.getName()
                 n = n[0].toUpperCase() + n.slice(1)
                 this.tw.jsid(this.tw.globalCtx.quote(n, 0))
@@ -481,6 +481,7 @@ module TDev.AST {
               "String Map->keys": "Object.keys",
               "Contract->assert": "control.assert",
               "Bits->string to buffer": "new Buffer",
+              "Bits->create buffer": "pins.createBuffer",
               "Time->sleep": "basic.sleep",
               "String->to number": "parseInt",
               "Web->decode url": "decodeURIComponent",
@@ -504,16 +505,11 @@ module TDev.AST {
               "Json Builder->to number": "td.toNumber",
               "Json Object->to number": "td.toNumber",
               "♻ micro:bit->plot image": "basic.showLeds",
-              "♻ micro:bit->create image": "images.createImage",
               "♻ micro:bit->note": "music.noteFrequency",
               "♻ micro:bit music->note": "music.noteFrequency",
               "♻ micro:bit->ring": "music.ringTone",
               "♻ micro:bit->play note": "music.playTone",
               "♻ micro:bit music->play note": "music.playTone",
-              // these moved namespaces
-              "♻ micro:bit->forever": "basic.forever",
-              "♻ micro:bit->show string": "basic.showString",
-              "♻ micro:bit->clear screen": "basic.clearScreen",
         }
 
         static methodRepl:StringMap<string> = {
@@ -532,6 +528,7 @@ module TDev.AST {
           "Collection->where": "filter",
           "DateTime->milliseconds since epoch": "getTime",
           "Web Request->send": "sendAsync",
+          "♻ micro:bit->show image": "showImage",
           "String->to json": "",
           "Number->to json": "",
           "Task->await": "",
@@ -617,8 +614,26 @@ module TDev.AST {
                 return
             }
 
-            if (!infixPri)
-                this.fixupArgs(e, Converter.prefixGlue[pn])
+
+            var realargs = e.args.slice(0)
+            if (realargs[0] && 
+                (realargs[0].getThing() instanceof SingletonDef ||
+                 realargs[0].referencedLibrary()))
+                realargs.shift()
+
+            var prefixName = Converter.prefixGlue[pn]
+
+            if (!prefixName && p.parentKind instanceof LibraryRefKind &&
+                /micro:bit/.test(p.parentKind.getName()))
+            {
+                var tmpname = this.globalName(p.getName())
+                var elt = Util.values(this.options.apiInfo.byQName)
+                    .filter(e => e.namespace && e.name == tmpname)[0]
+                if (elt) prefixName = elt.namespace + "." + elt.name
+            }
+
+            if (!infixPri && !Converter.methodRepl.hasOwnProperty(pn) && !/^Invalid->/.test(pn))
+                this.fixupArgs(e, prefixName)
 
             if (infixPri) {
                 if (p.getName() == "-" && e.args[0].getLiteral() === 0.0) {
@@ -695,6 +710,16 @@ module TDev.AST {
                     doParen(binopArgs[1])
                 }
 
+            } else if (prefixName) {
+                this.tw.write(prefixName)
+                params(realargs)
+            } else if (Converter.methodRepl.hasOwnProperty(pn)) {
+                this.tightExpr(realargs[0])
+                realargs.shift()
+                if (Converter.methodRepl[pn] != "") {
+                    this.tw.write("." + Converter.methodRepl[pn])
+                    params(realargs)
+                }
             } else if (e.referencedData()) {
                 this.tw.globalId(e.referencedData())
             } else if (e.referencedLibrary()) {
@@ -732,9 +757,9 @@ module TDev.AST {
                 this.type(e.getKind())
                 params([])
             } else if (/^Invalid->/.test(pn) || (p.parentKind instanceof RecordDefKind && p.getName() == "invalid")) {
-                this.tw.write("(<");
+                this.tw.write("(null as ");
                 this.type(e.getKind())
-                this.tw.write(">null)");
+                this.tw.write(")");
             } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
                        /->set at$/.test(pn)) {
                 this.tightExpr(e.args[0])
@@ -781,9 +806,9 @@ module TDev.AST {
                         e.args[0].getCalledProperty().getName() == "Collection of")
                        || /->create collection$/.test(pn)
                        || /^Collections->.* collection$/.test(pn)) {
-                this.tw.op0("(<")
+                this.tw.op0("([] as ")
                 this.type(e.getKind())
-                this.tw.op0(">[])")
+                this.tw.op0(")")
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "map to")) {
                 this.tightExpr((<Call>e.args[0]).args[0])
@@ -831,18 +856,6 @@ module TDev.AST {
             } else if (p.parentKind.isAction && p.getName() == "run") {
                 this.tightExpr(e.args[0])
                 params(e.args.slice(1))
-            } else if (Converter.prefixGlue.hasOwnProperty(pn)) {
-                this.tw.write(Converter.prefixGlue[pn])
-                var tmpargs = e.args.slice(0)
-                if (tmpargs[0] && tmpargs[0].getThing() instanceof SingletonDef)
-                    tmpargs.shift()
-                params(tmpargs)
-            } else if (Converter.methodRepl.hasOwnProperty(pn)) {
-                this.tightExpr(e.args[0])
-                if (Converter.methodRepl[pn] != "") {
-                    this.tw.write("." + Converter.methodRepl[pn])
-                    params(e.args.slice(1))
-                }
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
                     this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
