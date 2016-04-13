@@ -453,7 +453,7 @@ module TDev.AST {
                 return 5 // '== null'
             if (e instanceof Call && e.funAction)
                 return 0.1 // => function
-            if (p.parentKind == api.core.String) {
+            if (p.parentKind == api.core.String || p.parentKind == api.core.Boolean) {
                 if (p.getName() == "equals" || p.getName() == "is empty")
                     return 5
                 // + in JS
@@ -653,8 +653,9 @@ module TDev.AST {
                 realargs.shift()
 
             var prefixName = Converter.prefixGlue[pn]
+            var methodName = Converter.methodRepl[pn]
 
-            if (!prefixName && p.parentKind instanceof LibraryRefKind &&
+            if (!methodName && !prefixName && p.parentKind instanceof LibraryRefKind &&
                 /micro:bit/.test(p.parentKind.getName()))
             {
                 var tmpname = this.builtinName(p.getName())
@@ -663,7 +664,7 @@ module TDev.AST {
                 if (elt) prefixName = elt.namespace + "." + elt.name
             }
 
-            if (!infixPri && !Converter.methodRepl.hasOwnProperty(pn) && !/^Invalid->/.test(pn))
+            if (!infixPri && !methodName && !/^Invalid->/.test(pn))
                 this.fixupArgs(e, prefixName)
 
             if (infixPri) {
@@ -744,7 +745,7 @@ module TDev.AST {
             } else if (prefixName) {
                 this.tw.write(prefixName)
                 params(realargs)
-            } else if (Converter.methodRepl.hasOwnProperty(pn)) {
+            } else if (methodName != null) {
                 this.tightExpr(realargs[0])
                 realargs.shift()
                 if (Converter.methodRepl[pn] != "") {
@@ -1223,6 +1224,12 @@ module TDev.AST {
             this.tw.semiNL()
         }
 
+        private setupQuoting() {
+            this.localCtx = new TsQuotingCtx()
+            this.localCtx.reservedNames = this.tw.globalCtx.snapshotUsed();
+            this.thisLocal = null;
+        }
+
         printActionHeader(a:Action)
         {
             if (a.isActionTypeDef()) {
@@ -1232,9 +1239,8 @@ module TDev.AST {
 
             var isExtension = this.isOwnExtension(a)
 
-            this.localCtx = new TsQuotingCtx()
-            this.localCtx.reservedNames = this.tw.globalCtx.snapshotUsed();
-            this.thisLocal = null;
+            this.setupQuoting()
+
             var optsName = ""
             var optsLocal:LocalDef = null
 
@@ -1352,6 +1358,7 @@ module TDev.AST {
             var isMain = a.getInParameters().length == 0 && /^main/.test(a.getName())
 
             if (isMain) {
+                this.setupQuoting()
                 this.codeBlockInner(a.body.stmts)
                 this.tw.nl()
                 return
