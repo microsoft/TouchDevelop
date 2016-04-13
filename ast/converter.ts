@@ -375,7 +375,7 @@ module TDev.AST {
             } else if (Converter.kindMap.hasOwnProperty(t.toString())) {
                 this.tw.kw(Converter.kindMap[t.toString()])
             } else {
-                this.tw.write("td.").id(this.localCtx.unUnicode(t.getRoot().toString()))
+                this.tw.id(this.localCtx.unUnicode(t.getRoot().toString()))
                 var len = t.getParameterCount()
                 if (len > 0) {
                     this.tw.write("<")
