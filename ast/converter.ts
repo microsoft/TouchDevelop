@@ -282,8 +282,12 @@ module TDev.AST {
 
     export function td2ts(options:Td2TsOptions) {
         AST.reset();
-        AST.loadScriptAsync((s) => Promise.as(s == "" ? options.text : null));
-        var r = new TDev.AST.Converter(Script, options).run()
+        var errRes = null
+        var okRes = null
+        AST.loadScriptAsync((s) => Promise.as(s == "" ? options.text : null)).then(r => { okRes = r }, err => { errRes = err });
+        if (errRes) throw errRes
+        var r = new TDev.AST.Converter(Script, options).run();
+        (<any>r).tdres = okRes
         return r;
     }
 

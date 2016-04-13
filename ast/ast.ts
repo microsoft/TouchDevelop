@@ -4985,18 +4985,18 @@ module TDev.AST {
 
     export function loadScriptAsync(getText:(s:string)=>Promise, currentId = ""):Promise
     {
-        var rp = new PromiseInv();
         var res:LoadScriptResult = { numErrors: 0, status: "", parseErrs: [], errLibs: [], prevScript: Script, numLibErrors: 0 }
 
         var problem = (msg) => {
             res.numErrors++;
             res.status += "    " + msg + "\n";
         }
-
-        getText(currentId).done((text) => {
-            if (!text) rp.error(new Error("cannot get script text: " + currentId));
+        
+        return getText(currentId).then((text) => {
+            if (!text) throw new Error("cannot get script text: " + currentId);
 
             var app = Parser.parseScript(text, res.parseErrs);
+
             var byId:any = {}
             app.libraries().forEach((lib) => {
                 var id = lib.getId();
@@ -5011,7 +5011,7 @@ module TDev.AST {
                             return "";
                         })
             })
-            Promise.join(byId).then((byId) => {
+            return Promise.join(byId).then((byId) => {
                 res.prevScript = Script;
                 setGlobalScript(app);
                 Script.isTopLevel = true;
@@ -5074,11 +5074,9 @@ module TDev.AST {
                 if (res.numErrors && hasEmptyLib)
                     res.numLibErrors++;
 
-                rp.success(res);
-            }, rp.error).done(x => x, rp.error);
-        }, rp.error)
-
-        return rp;
+                return res;
+            })
+        })
     }
 
     class ErrorChecker
