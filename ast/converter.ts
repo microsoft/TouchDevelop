@@ -453,7 +453,7 @@ module TDev.AST {
                 return 5 // '== null'
             if (e instanceof Call && e.funAction)
                 return 0.1 // => function
-            if (p.parentKind == api.core.String || p.parentKind == api.core.Boolean) {
+            if (p.parentKind == api.core.String) {
                 if (p.getName() == "equals" || p.getName() == "is empty")
                     return 5
                 // + in JS
@@ -467,6 +467,8 @@ module TDev.AST {
                     if (a0 && a0.parentKind == api.core.String && (a0.getName() == "is empty" || a0.getName() == "equals"))
                         return 5 // '!= ""'
                     return 50
+                } else if (p.getName() == "equals") {
+                    return 5
                 }
             } else if (p.getName() == "mod" && p.parentKind.getName() == "Math") {
                 return 20
@@ -729,6 +731,8 @@ module TDev.AST {
                     this.commaSep(e._assignmentInfo.targets, p => this.dispatch(p))
                     this.tw.op0("] =").sep()
                     this.dispatch(e.args[1])
+                } else if (p == api.core.AssignmentProp && e.args[0].getLiftedSetter()) {
+                    this.visitCallInner(mkFakeCall(PropertyRef.mkProp(e.args[0].getLiftedSetter()), [(<Call>e.args[0]).args[0], e.args[1]]))
                 } else {
                     var binopArgs = e.args
                     if (binopArgs.length == 3)
@@ -963,7 +967,8 @@ module TDev.AST {
 
         private simpleId(n:string)
         {
-            return this.tw.jsid(this.localCtx.unUnicode(n))
+            var x = this.localCtx.unUnicode(n)
+            return this.tw.jsid(x)
         }
 
         visitPropertyRef(p:PropertyRef)
@@ -1021,7 +1026,10 @@ module TDev.AST {
                 if (a) {
                     this.inlineAction(a)
                 } else {
-                    this.localName(<LocalDef>d)
+                    if (d.getKind() == api.core.Unknown)
+                        this.simpleId(d.getName())
+                    else
+                        this.localName(<LocalDef>d)
                 }
             } else if (d instanceof SingletonDef) {
                 // this.tw.write("TD.")
