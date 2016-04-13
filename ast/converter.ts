@@ -73,7 +73,6 @@ module TDev.AST {
     {
         public globalCtx = new TsQuotingCtx();
         public highlight = 0
-        public options:Td2TsOptions;
 
         constructor()
         {
@@ -88,7 +87,7 @@ module TDev.AST {
             return ret
         }
 
-        public globalId(d:Decl, pref = "")
+        public getGlobalId(d:Decl, pref = "")
         {
             var n = d.getName()
             
@@ -100,13 +99,12 @@ module TDev.AST {
                     n += "Async"
             }
 
-            var quoted = this.globalCtx.quote(pref + n, 0)
+            return this.globalCtx.quote(pref + n, 0)
+        }
 
-            if (this.options && this.options.apiInfo && this.options.apiInfo.byQName.hasOwnProperty(quoted)) {
-                n += "_"
-                quoted = this.globalCtx.quote(pref + n, 0)
-            }
-
+        public globalId(d:Decl, pref = "")
+        {
+            var quoted = this.getGlobalId(d, pref)
             return this.jsid(quoted)
         }
 
@@ -159,6 +157,11 @@ module TDev.AST {
     {
         private numAwaits = 0;
 
+        constructor(private tw:TsTokenWriter)
+        {
+            super()
+        }
+
         visitAstNode(n:AstNode)
         {
             delete n._converterValue
@@ -199,6 +202,12 @@ module TDev.AST {
                 op.local._converterUses = 0
             })
             super.visitAction(a)
+        }
+
+        visitDecl(d:Decl) {
+            // make sure we record this global name use
+            this.tw.getGlobalId(d)
+            super.visitDecl(d)
         }
     }
 
@@ -293,6 +302,7 @@ module TDev.AST {
         extends NodeVisitor 
     {
         private tw = new TsTokenWriter();
+        private builtinCtx = new TsQuotingCtx();
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
         private apis:StringMap<number> = {};
@@ -302,12 +312,18 @@ module TDev.AST {
         constructor(private app:App, private options:Td2TsOptions = {})
         {
             super()
-            this.tw.options = this.options;
+            if (this.options.apiInfo) {
+                Object.keys(this.options.apiInfo.byQName)
+                    .forEach(k => {
+                        if (k.indexOf(".") == -1)
+                            this.tw.globalCtx.reservedNames[k] = 1
+                    })
+            }
         }
 
         public run()
         {
-            new ConverterPrep().dispatch(this.app)
+            new ConverterPrep(this.tw).dispatch(this.app)
             this.dispatch(this.app)
             var keys = Object.keys(this.apis)
             keys.sort((a, b) => this.apis[a] - this.apis[b])
@@ -371,7 +387,7 @@ module TDev.AST {
                 //    this.tw.globalId(t.parentLibrary()).op0(".");
                 var n = t.getName()
                 n = n[0].toUpperCase() + n.slice(1)
-                this.tw.jsid(this.tw.globalCtx.quote(n, 0))
+                this.tw.jsid(this.builtinName(n))
             } else if (Converter.kindMap.hasOwnProperty(t.toString())) {
                 this.tw.kw(Converter.kindMap[t.toString()])
             } else {
@@ -392,9 +408,9 @@ module TDev.AST {
             return this.type(l.getKind())
         }
 
-        private globalName(n:string)
+        private builtinName(n:string)
         {
-            return this.tw.globalCtx.quote(n, 0)
+            return this.builtinCtx.quote(n, 0)
         }
 
         visitAstNode(n:AstNode)
@@ -573,7 +589,7 @@ module TDev.AST {
                 return
 
             var p = e.getCalledProperty()
-            var fullName = nameOverride || this.globalName(e.args[0].getThing().getName()) + "." + this.globalName(p.getName())
+            var fullName = nameOverride || this.builtinName(e.args[0].getThing().getName()) + "." + this.builtinName(p.getName())
 
             var apiInfo = this.options.apiInfo.byQName[fullName]
             if (!apiInfo) {
@@ -641,7 +657,7 @@ module TDev.AST {
             if (!prefixName && p.parentKind instanceof LibraryRefKind &&
                 /micro:bit/.test(p.parentKind.getName()))
             {
-                var tmpname = this.globalName(p.getName())
+                var tmpname = this.builtinName(p.getName())
                 var elt = Util.values(this.options.apiInfo.byQName)
                     .filter(e => e.namespace && e.name == tmpname)[0]
                 if (elt) prefixName = elt.namespace + "." + elt.name
@@ -1217,6 +1233,7 @@ module TDev.AST {
             var isExtension = this.isOwnExtension(a)
 
             this.localCtx = new TsQuotingCtx()
+            this.localCtx.reservedNames = this.tw.globalCtx.snapshotUsed();
             this.thisLocal = null;
             var optsName = ""
             var optsLocal:LocalDef = null
@@ -1296,7 +1313,7 @@ module TDev.AST {
                         var thisEnum = "enum TODO {\n" +
                         Object.keys(p.enumMap).map(k =>
                             "    //% enumval=" + p.enumMap[k] + "\n    " +
-                            this.tw.globalCtx.quote(k, 0) + ",\n").join("") +
+                            this.builtinName(k) + ",\n").join("") +
                         "}\n"
                         this.allEnums[thisEnum] = 1
                     }
