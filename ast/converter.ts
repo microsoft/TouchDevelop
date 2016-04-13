@@ -283,11 +283,13 @@ module TDev.AST {
     export function td2ts(options:Td2TsOptions) {
         AST.reset();
         var errRes = null
-        var okRes = null
+        var okRes:LoadScriptResult = null
         AST.loadScriptAsync((s) => Promise.as(s == "" ? options.text : null)).then(r => { okRes = r }, err => { errRes = err });
         if (errRes) throw errRes
         var r = new TDev.AST.Converter(Script, options).run();
         (<any>r).tdres = okRes
+        okRes.errLibs = null
+        okRes.prevScript = null
         return r;
     }
 
@@ -333,7 +335,7 @@ module TDev.AST {
             keys.sort((a, b) => this.apis[a] - this.apis[b])
             var newApis = {}
             keys.forEach(k => newApis[k] = this.apis[k])
-            var txt = (this.tw.finalize().trim() + "\n").replace(/\n+/g, "\n")
+            var txt = (this.tw.finalize().trim() + "\n").replace(/\n\n+/g, "\n\n")
             return {
                 text: txt,
                 apis: newApis,
