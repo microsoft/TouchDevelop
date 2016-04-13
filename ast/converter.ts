@@ -73,6 +73,7 @@ module TDev.AST {
     {
         public globalCtx = new TsQuotingCtx();
         public highlight = 0
+        public options:Td2TsOptions;
 
         constructor()
         {
@@ -99,7 +100,14 @@ module TDev.AST {
                     n += "Async"
             }
 
-            return this.jsid(this.globalCtx.quote(pref + n, 0))
+            var quoted = this.globalCtx.quote(pref + n, 0)
+
+            if (this.options && this.options.apiInfo && this.options.apiInfo.byQName.hasOwnProperty(quoted)) {
+                n += "_"
+                quoted = this.globalCtx.quote(pref + n, 0)
+            }
+
+            return this.jsid(quoted)
         }
 
         public sep():TokenWriter
@@ -177,6 +185,7 @@ module TDev.AST {
         {
             if (eh.isAwait) 
                 this.numAwaits++
+            super.visitExprHolder(eh)
         }
 
         visitThingRef(t:ThingRef) {
@@ -288,10 +297,12 @@ module TDev.AST {
         private currAsync:Call;
         private apis:StringMap<number> = {};
         private allEnums:StringMap<number> = {};
+        private isReachable = true;
 
         constructor(private app:App, private options:Td2TsOptions = {})
         {
             super()
+            this.tw.options = this.options;
         }
 
         public run()
@@ -521,6 +532,7 @@ module TDev.AST {
           "String->substring": "substr",
           "String->to upper case": "toUpperCase",
           "String->to lower case": "toLowerCase",
+          "String->code at": "charCodeAt",
           "Json Builder->add": "push",
           "Json Builder->contains key": "hasOwnProperty",
           "Json Object->contains key": "hasOwnProperty",
@@ -547,13 +559,15 @@ module TDev.AST {
             if (!e.args[0])
                 return
 
-            var th = e.args[0].getThing()
+            if (!nameOverride) {
+                var th = e.args[0].getThing()
 
-            if (!(th instanceof SingletonDef))
-                return
+                if (!(th instanceof SingletonDef))
+                    return
 
-            if (th.getKind() instanceof ThingSetKind)
-                return
+                if (th.getKind() instanceof ThingSetKind)
+                    return
+            }
 
             if (!this.options.apiInfo)
                 return
@@ -611,6 +625,7 @@ module TDev.AST {
                     this.tw.sep()
                     this.dispatch(e.args[0])
                 }
+                this.isReachable = false
                 return
             }
 
@@ -775,6 +790,16 @@ module TDev.AST {
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
                 this.tw.op0("]")
+            } else if (pn == "String->to character code") {
+                var innerProp = e.args[0].getCalledProperty()
+                if (innerProp && innerProp.parentKind == api.core.String && innerProp.getName() == "at") {
+                    this.tightExpr((<Call>e.args[0]).args[0])
+                    this.tw.write(".charCodeAt");
+                    params([(<Call>e.args[0]).args[1]])
+                } else {
+                    this.tightExpr(e.args[0])
+                    this.tw.write(".charCodeAt(0)");
+                }
             } else if (/^Web->json array$/.test(pn)) {
                 this.tw.write("[]")
             } else if (/^Web->json object$/.test(pn)) {
@@ -1036,6 +1061,7 @@ module TDev.AST {
                     tw.op0(")")
                     this.dispatch(b.body)
                 }
+                this.isReachable = true
             })
         }
 
@@ -1099,6 +1125,7 @@ module TDev.AST {
             this.tw.beginBlock()
             this.codeBlockInner(b.stmts)
             this.tw.endBlock()
+            this.isReachable = true
         }
 
         pcommaSep<T>(l:T[], f:(v:T)=>void) {
@@ -1342,9 +1369,10 @@ module TDev.AST {
                     this.tw.semiNL()
                 })
 
+            this.isReachable = true
             this.codeBlockInner(info.stmts)
 
-            if (!hasOutP) {
+            if (!hasOutP || !this.isReachable) {
                 // nothing to do
             } else if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
@@ -1376,9 +1404,13 @@ module TDev.AST {
 
         visitGlobalDef(g:GlobalDef)
         {
-            this.tw.kw("var");
+            if (g.getKind() == api.core.Picture)
+                return
+
+            this.tw.kw("let");
             this.tw.globalId(g).op0(": ");
             this.type(g.getKind())
+            /*
             var d = this.defaultValue(g.getKind())
             if (g.isResource) {
                 if (g.getKind() == api.core.JsonObject) {
@@ -1389,6 +1421,7 @@ module TDev.AST {
             }
             if (d != null)
                 this.tw.op("=").write(d)
+            */
             this.tw.semiNL()
         }
 
@@ -1405,9 +1438,9 @@ module TDev.AST {
                 this.simpleId(f.getName())
                 this.tw.op0(":").sep()
                 this.type(f.dataKind)
-                var d = this.defaultValue(f.dataKind)
-                if (d != null)
-                    this.tw.write(" = " + d)
+                //var d = this.defaultValue(f.dataKind)
+                //if (d != null)
+                //    this.tw.write(" = " + d)
                 this.tw.semiNL()
             })
 
