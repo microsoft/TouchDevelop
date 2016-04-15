@@ -14,6 +14,9 @@
             super()
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
             this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
+            this.listHeader.setAttribute("aria-controls", "leftList");
+            this.theList.setAttribute("aria-live", "polite");
+            this.theList.setAttribute("aria-relevant", "additions");
             this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
@@ -125,7 +128,7 @@
                 }
             }
         }
-        private theList = div("slList");
+        private theList = divId("leftList", "slList");
         private header = div("sdListLabel");
         private botDiv = div(null);
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
