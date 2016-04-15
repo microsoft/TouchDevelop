@@ -6301,3 +6301,13 @@ table.dashboard tr td[data-completed^="yes"] {
   font-size:0.8em;
   color:#333;
 }
+
+li.skip
+{
+position:absolute;
+left:-10000px;
+top:auto;
+width:1px;
+height:1px;
+overflow:hidden;
+}

@@ -31,7 +31,18 @@
         private populateSiteHeader(settings = false, username = "") {
             var siteHeader = elt("siteHeader")
             if (siteHeader) {
-                var menuItems = [
+                var skipToMyScripts = () => {
+                    this.showList("installed-scripts");
+                    setTimeout(10, this.searchBox.focus());
+                };
+                var menuItems: {
+                    id:string;
+                    name: string;
+                    tick: Ticks;
+                    cls?: string;
+                    handler: () => void
+                }[] = [
+                    { id: "Skip", name: lf("Skip to content"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls:"skip" },
                     { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
                         // we cannot detect reliably that we are offline,
@@ -39,11 +50,7 @@
                         TemplateManager.createScript();
                     } },
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
-                            this.showList("installed-scripts");
-                            setTimeout(10, this.searchBox.focus());
-                        }
-                    }
+                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: skipToMyScripts }
                 ];
                 if (settings && Cloud.hasPermission("post-group"))
                     menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
@@ -71,7 +78,7 @@
                 var siteMenu = elt("siteMenu");
                 if (siteMenu)
                     siteMenu.setChildren(menuItems.map(mi => {
-                        var li = HTML.li('nav-list__item', mi.name).withClick(() => {
+                        var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
                             tick(mi.tick);
                             mi.handler();
                         });
@@ -2255,12 +2262,16 @@
             s = s.replace(/\n+$/, "");
 
             if (s.replace(/[^\n]/g, "").length > 3 || s.length > maxLen) {
+                var btn;
                 var r:HTMLElement =
                     div("sdExpandableText",
                             s.slice(0, shortLen) + " ",
-                            div("sdExpandButton", "...", div("sdExpandButtonTarget").withClick(() => {
-                                    Browser.setInnerHTML(r, Util.formatText(s));
-                                })));
+                            div("sdExpandButton", "...", btn = div("sdExpandButtonTarget").withClick(() => {
+                                Browser.setInnerHTML(r, Util.formatText(s));
+                                r.focus();
+                            })));
+                r.tabIndex = 0;
+                btn.setAttribute("role", "button");
                 return r;
             } else {
                 return Host.textBox(s);
@@ -8277,7 +8288,6 @@
                                      div("hubTileSubtitle",
                                         div("hubTileAuthor", u.score.toString(), nums)))])
             });
-            return d;
         }
 
         public thumbnail(showName = true, onClick : () => void = undefined) : HTMLElement
@@ -9044,7 +9054,6 @@
                     div("hubTileSubtitle",
                         div("hubTileAuthor", spanDirAuto(u.username), nums)))])
             });
-            return d;
         }
 
         public thumbnail() {
