@@ -45,7 +45,8 @@
                     cls?: string;
                     handler: () => void
                 }[] = [
-                    { id: "Skip", name: lf("Skip to content"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls:"skip" },
+                    { id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls:"skip" },
+                    { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls:"skip" },
                     { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                     { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
                         // we cannot detect reliably that we are offline,
