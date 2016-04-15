@@ -182,6 +182,7 @@ module TDev {
         siteMenuGroups,
         siteMenuTutorials,
         siteMenuProjects,
+        siteMenuSkip,
         siteMenuHome,
         siteMenuHelp,
         siteMenuGettingStarted,

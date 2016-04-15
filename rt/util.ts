@@ -182,9 +182,9 @@ module TDev {
         if (cl)
             elt.className = cl;
         elt.tabIndex = -1;
-        elt.appendChildren(children.filter(e => e != undefined));
         if (cl == "sdLoadingMore")
             elt.setAttribute("aria-live", "polite");
+        elt.appendChildren(children.filter(e => e != undefined));
         return elt;
     }
 
