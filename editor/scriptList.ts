@@ -107,8 +107,8 @@
                                 tick(mi.tick);
                                 mi.handler();
                             });
-                            li.id = 'siteMenuMore' + mi.id;
-                            li.className = 'siteMenuBtn';
+                            li.id = '' + mi.id;
+                            li.className = 'siteMenuBtn '+ (mi.cls || '');
                             if (!firstmii) firstmii = li;
                             li.setAttribute("role", "menuitem");
                             menu.appendChild(li);
