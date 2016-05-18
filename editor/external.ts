@@ -314,9 +314,9 @@ module TDev {
             TheChannel.post(<Message_TypeCheck> {
                 type: MessageType.TypeCheck,
                 ast: AST.Json.dump(a),
-            });            
+            });
         }
-          
+
         // The compiler expects this global to be set. However, this is
         // dangerous, since the sync code might want to write the *translated*
         // script text to storage for us. Fortunately, the compiler is
@@ -353,6 +353,7 @@ module TDev {
       constructor(
         public editor: ExternalEditor,
         private iframe: HTMLIFrameElement,
+        private iframeFocused: Boolean,
         public guid: string) {
       }
 
@@ -366,6 +367,8 @@ module TDev {
       }
 
       public receive(event) {
+
+        if (!this.iframeFocused) { this.iframe.focus(); this.iframeFocused = true; }
         if (event.origin != this.editor.origin)
           return;
         Util.log('editor: received ' + JSON.stringify(event, null, 2));
@@ -379,7 +382,7 @@ module TDev {
               World.getInstalledScriptAsync(this.guid),
               World.getInstalledEditorStateAsync(this.guid)
             ]).then((res: any[]) => {
-              var header: Cloud.Header = <Cloud.Header>res[0];              
+              var header: Cloud.Header = <Cloud.Header>res[0];
               var installedState = JSON.stringify(res);
 
               var scriptText = message.script.scriptText;
@@ -404,7 +407,7 @@ module TDev {
               // don't update if no changes
               var backgroundUpdate = installedState == JSON.stringify([header, scriptText, editorState]);
               var hasChanges = !backgroundUpdate;
-              
+
               // Writes into local storage. Also clears the scriptVersionInCloud
               // field (fifth argument).
               World.updateInstalledScriptAsync(header, scriptText, editorState, backgroundUpdate).then(() => {
@@ -584,8 +587,8 @@ module TDev {
           case MessageType.Upgrade:
             var message2 = <Message_Upgrade> event.data;
             this.receiveUpgrade(message2);
-            break;                
-                
+            break;
+
           case MessageType.Help:
             var msgh = <Message_Help>event.data;
             var path = msgh.path;
@@ -605,7 +608,7 @@ module TDev {
                     rend.stringLimit = 90;
                     rend.mdComments.useExternalLinks = true;
                     rend.mdComments.showCopy = false;
-                    rend.mdComments.forWeb = true;                    
+                    rend.mdComments.forWeb = true;
                     return ht.renderAsync(rend.mdComments);
                 }).done((html:string) => {
                     var doc = div("externalEditorHelp");
@@ -616,16 +619,16 @@ module TDev {
                         m.stretchWide();
                         m.setScroll();
                         m.addOk();
-                        m.show();                
+                        m.show();
                     } else {
                         editorSide.setChildren([doc]);
-                        editorSide.classList.remove("dismissed");                
+                        editorSide.classList.remove("dismissed");
                     }
                 }, e => {
                     Util.reportError("help", e, false);
                     editorSide.setChildren([div("externalEditorHelp",lf("oops, could not load the documentation."))]);
                     window.open(path);
-                });                
+                });
             break;
           case MessageType.Run:
             tick(Ticks.externalRun);
@@ -658,27 +661,27 @@ module TDev {
             break;
         }
       }
-      
+
       private receiveUpgrade(message2: Message_Upgrade) {
             var ast: AST.Json.JApp = message2.ast;
             fixupLibs(message2.libs);
             addLibraries(ast, message2.libs).then(() => {;
               console.log("Attempting to serialize", ast);
               var text = J.serialize(ast);
-              console.log("Attempting to edit script text", text);                            
-              
+              console.log("Attempting to edit script text", text);
+
               var m = new ModalDialog();
               m.add(div('wall-dialog-header', lf("here is your code")))
               m.add(div('wall-dialog-body',
                 lf("By dragging and placing blocks, you've created the following code.")))
-              var preview = div('');              
+              var preview = div('');
               m.add(preview);
               Embedded.parseScript(text)
                 .done((app: AST.App) => {
                   var main = app.mainAction();
                   var r = new Renderer();
                   Browser.setInnerHTML(preview, r.dispatch(main));
-                });    
+                });
               m.add(div('wall-dialog-buttons', [
                 HTML.mkButton(lf("convert"), () => {
                   m.dismiss();
@@ -691,15 +694,15 @@ module TDev {
                     if (document.activeElement instanceof HTMLElement)
                       (<HTMLElement> document.activeElement).blur();
                     TheChannel = null;
-                  });                  
+                  });
                 }),
                 HTML.mkButton(lf("cancel"), () => m.dismiss())
               ]))
               m.setScroll();
-              m.show();              
-            }).done();        
+              m.show();
+            }).done();
       }
-    }    
+    }
 
     export interface ScriptData {
       guid: string;
@@ -750,6 +753,7 @@ module TDev {
       // rename variable prompt
       iframe.setAttribute("sandbox", "allow-modals allow-scripts allow-same-origin allow-popups");
       iframe.addEventListener("load", () => {
+
         TheChannel = new Channel(editor, iframe, data.guid);
 
         // Start the simulator. This assumes that [TheChannel] is properly
