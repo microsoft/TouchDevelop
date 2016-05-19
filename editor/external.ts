@@ -350,10 +350,10 @@ module TDev {
     }
 
     export class Channel {
+      private iframeFocused: Boolean = false;
       constructor(
         public editor: ExternalEditor,
         private iframe: HTMLIFrameElement,
-        private iframeFocused: Boolean,
         public guid: string) {
       }
 
