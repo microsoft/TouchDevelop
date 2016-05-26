@@ -38,6 +38,9 @@
                         // always use in-app menu selection
                         TemplateManager.createScript();
                     } },
+                    { id: "importcode", name: lf("Import Code"), tick: Ticks.siteMenuImportCode, handler: () => {
+                        ArtUtil.importFileDialog();                        
+                    }},
                     { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                     { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: () => {
                             this.showList("installed-scripts");
@@ -53,8 +56,6 @@
                     menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
-                var siteLogo = elt("siteLogo");
-                if (siteLogo) siteLogo.withClick(() => window.location.href = "/");
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
@@ -123,7 +124,7 @@
         private theList = div("slList");
         private header = div("sdListLabel");
         private botDiv = div(null);
-        private searchBox = HTML.mkTextInput("search", lf("Search..."), "search", lf("Search"));
+        private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
         private autoUpdate:KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
         private backContainer = div("slBackContainer");
