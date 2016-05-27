@@ -87,7 +87,7 @@ module TDev.AST {
             return ret
         }
 
-        public globalId(d:Decl, pref = "")
+        public getGlobalId(d:Decl, pref = "")
         {
             var n = d.getName()
             
@@ -99,7 +99,13 @@ module TDev.AST {
                     n += "Async"
             }
 
-            return this.jsid(this.globalCtx.quote(pref + n, 0))
+            return this.globalCtx.quote(pref + n, 0)
+        }
+
+        public globalId(d:Decl, pref = "")
+        {
+            var quoted = this.getGlobalId(d, pref)
+            return this.jsid(quoted)
         }
 
         public sep():TokenWriter
@@ -151,8 +157,14 @@ module TDev.AST {
     {
         private numAwaits = 0;
 
+        constructor(private tw:TsTokenWriter)
+        {
+            super()
+        }
+
         visitAstNode(n:AstNode)
         {
+            delete n._converterValue
             this.visitChildren(n);
         }
 
@@ -176,34 +188,156 @@ module TDev.AST {
         {
             if (eh.isAwait) 
                 this.numAwaits++
+            super.visitExprHolder(eh)
         }
+
+        visitThingRef(t:ThingRef) {
+            var l = t.referencedLocal()
+            if (l && typeof l._converterUses == "number")
+                l._converterUses++
+        }
+
+        visitAction(a:Action) {
+            a.getOutParameters().forEach(op => {
+                op.local._converterUses = 0
+            })
+            super.visitAction(a)
+        }
+
+        visitDecl(d:Decl) {
+            // make sure we record this global name use
+            this.tw.getGlobalId(d)
+            super.visitDecl(d)
+        }
+    }
+
+    export interface Td2TsOptions {
+        text?: string;
+        useExtensions?: boolean;
+        apiInfo?: ApisInfo;
+    }
+
+    export interface ParameterDesc {
+        name: string;
+        description: string;
+        type: string;
+        initializer?: string;
+        defaults?: string[];
+    }
+
+    export enum SymbolKind {
+        None,
+        Method,
+        Property,
+        Function,
+        Variable,
+        Module,
+        Enum,
+        EnumMember
+    }
+
+    export interface CommentAttrs {
+        shim?: string;
+        enumval?: string;
+        helper?: string;
+        help?: string;
+        async?: boolean;
+        block?: string;
+        blockId?: string;
+        blockGap?: string;
+        blockExternalInputs?: boolean;
+        blockStatement?: boolean;
+        blockImportId?: string;
+        color?: string;
+        icon?: string;
+        imageLiteral?: number;
+        weight?: number;
+        
+        // on interfaces
+        indexerGet?: string;
+        indexerSet?: string;
+
+        _name?: string;
+        jsDoc?: string;
+        paramHelp?: StringMap<string>;
+        // foo.defl=12 -> paramDefl: { foo: "12" }
+        paramDefl: StringMap<string>;
+    }
+    
+
+    export interface SymbolInfo {
+        attributes: CommentAttrs;
+        name: string;
+        namespace: string;
+        kind: SymbolKind;
+        parameters: ParameterDesc[];
+        retType: string;
+        isContextual?: boolean;
+    }
+
+    export interface ApisInfo {
+        byQName: StringMap<SymbolInfo>;
+    }
+    
+
+    export function td2ts(options:Td2TsOptions) {
+        AST.reset();
+        var errRes = null
+        var okRes:LoadScriptResult = null
+        AST.loadScriptAsync((s) => Promise.as(s == "" ? options.text : null)).then(r => { okRes = r }, err => { errRes = err });
+        if (errRes) throw errRes
+        var r = new TDev.AST.Converter(Script, options).run();
+        (<any>r).tdres = okRes
+        okRes.errLibs = null
+        okRes.prevScript = null
+        return r;
+    }
+
+    export function testConverterAsync() {
+        return Util.httpGetJsonAsync("http://localhost:4242/editor/local/apiinfo.json")
+            .then(json => {
+                var r = new TDev.AST.Converter(Script, {
+                    useExtensions: true,
+                    apiInfo: json
+                }).run()
+                return r.text;
+            })
     }
 
     export class Converter 
         extends NodeVisitor 
     {
         private tw = new TsTokenWriter();
+        private builtinCtx = new TsQuotingCtx();
         private localCtx = new TsQuotingCtx();
         private currAsync:Call;
         private apis:StringMap<number> = {};
         private allEnums:StringMap<number> = {};
-        public useExtensions = false;
+        private isReachable = true;
 
-        constructor(private app:App)
+        constructor(private app:App, private options:Td2TsOptions = {})
         {
             super()
+            if (this.options.apiInfo) {
+                Object.keys(this.options.apiInfo.byQName)
+                    .forEach(k => {
+                        if (k.indexOf(".") == -1)
+                            this.tw.globalCtx.reservedNames[k] = 1
+                    })
+            }
         }
 
         public run()
         {
-            new ConverterPrep().dispatch(this.app)
+            new ConverterPrep(this.tw).dispatch(this.app)
             this.dispatch(this.app)
             var keys = Object.keys(this.apis)
             keys.sort((a, b) => this.apis[a] - this.apis[b])
             var newApis = {}
             keys.forEach(k => newApis[k] = this.apis[k])
+            var txt = (this.tw.finalize().trim() + "\n").replace(/\n\n+/g, "\n\n")
             return {
-                text: this.tw.finalize(),
+                text: txt,
                 apis: newApis,
             }
         }
@@ -235,8 +369,8 @@ module TDev.AST {
             "Boolean": "boolean",
             "Nothing": "void",
             "DateTime": "Date",
-            "Json Object": "JsonObject",
-            "Json Builder": "JsonBuilder",
+            "Json Object": "{}",
+            "Json Builder": "{}",
             "Buffer": "Buffer",
         }
 
@@ -255,15 +389,15 @@ module TDev.AST {
                     this.tw.globalId(parL).op0(".");
                 this.tw.globalId(t.getRecord())
             } else if (t.parentLibrary()) {
-                if (!t.parentLibrary().isThis())
-                    this.tw.globalId(t.parentLibrary()).op0(".");
+                //if (!t.parentLibrary().isThis())
+                //    this.tw.globalId(t.parentLibrary()).op0(".");
                 var n = t.getName()
                 n = n[0].toUpperCase() + n.slice(1)
-                this.tw.jsid(this.tw.globalCtx.quote(n, 0))
+                this.tw.jsid(this.builtinName(n))
             } else if (Converter.kindMap.hasOwnProperty(t.toString())) {
                 this.tw.kw(Converter.kindMap[t.toString()])
             } else {
-                this.tw.write("td.").id(this.localCtx.unUnicode(t.getRoot().toString()))
+                this.tw.id(this.localCtx.unUnicode(t.getRoot().toString()))
                 var len = t.getParameterCount()
                 if (len > 0) {
                     this.tw.write("<")
@@ -278,6 +412,11 @@ module TDev.AST {
         {
             this.localName(l).op0(":")
             return this.type(l.getKind())
+        }
+
+        private builtinName(n:string)
+        {
+            return this.builtinCtx.quote(n, 0)
         }
 
         visitAstNode(n:AstNode)
@@ -296,6 +435,20 @@ module TDev.AST {
                     this.tw.write(", " + JSON.stringify(flags))
                 this.tw.write(")")
             }
+        }
+
+        private bitop(p:IProperty) {
+            if (p.parentKind.getName() != "Bits") return null
+
+            switch (p.getName().replace(/ u?int32$/, "")) {
+                case "or": return "|,4.1";
+                case "xor": return "^,4.2";
+                case "and": return "&,4.3";
+                case "shift left": return "<<,7";
+                case "shift right": return ">>>,7";
+            }
+
+            return null
         }
 
         private infixPri(e:Expr)
@@ -320,7 +473,13 @@ module TDev.AST {
                     if (a0 && a0.parentKind == api.core.String && (a0.getName() == "is empty" || a0.getName() == "equals"))
                         return 5 // '!= ""'
                     return 50
+                } else if (p.getName() == "equals") {
+                    return 5
                 }
+            } else if (p.getName() == "mod" && p.parentKind.getName() == "Math") {
+                return 20
+            } else if (this.bitop(p)) {
+                return parseFloat(this.bitop(p).split(/,/)[1])
             } else if (e instanceof Call && e.awaits()) {
                 return 40
             }
@@ -350,56 +509,54 @@ module TDev.AST {
         }
 
         static prefixGlue:StringMap<string> = {
-              "String->replace": "td.replaceAll",
-              "String->starts with": "td.startsWith",
-              "App->server setting": "td.serverSetting",
-              "App->log": "td.log",
+              "App->log": "console.log",
               "Time->now": "new Date",
               "Json Builder->keys": "Object.keys",
               "Json Object->keys": "Object.keys",
               "String Map->keys": "Object.keys",
-              "Contract->assert": "assert",
+              "Contract->assert": "control.assert",
               "Bits->string to buffer": "new Buffer",
-              "Time->sleep": "td.sleepAsync",
-              "String->to number": "parseFloat",
-              "Json Builder->copy from": "td.jsonCopyFrom",
-              "String->contains": "td.stringContains",
-              "Collection->to json": "td.arrayToJson",
-              "Collection->ordered by": "td.orderedBy",
+              "Bits->create buffer": "pins.createBuffer",
+              "Time->sleep": "basic.sleep",
+              "String->to number": "parseInt",
               "Web->decode url": "decodeURIComponent",
               "Web->decode uri component": "decodeURIComponent",
               "Web->encode uri component": "encodeURIComponent",
               "Web->encode url": "encodeURIComponent",
-              "Json Object->to collection": "asArray",
-              "Json Builder->to collection": "asArray",
-              "Math->clamp": "td.clamp",
+              "Math->clamp": "Math.clamp",
+              "Math->abs": "Math.abs",
+              "Math->sign": "Math.sign",
+              "Math->pow": "Math.pow",
+              "Math->sqrt": "Math.sqrt",
               "Math->min": "Math.min",
               "Math->max": "Math.max",
               "Math->round": "Math.round",
               "Math->floor": "Math.floor",
-              "Math->random": "td.randomInt",
-              "Math->random range": "td.randomRange",
-              "Math->random normalized": "td.randomNormalized",
+              "Math->random": "Math.random",
+              "Math->random range": "Math.randomRange",
+              "Math->random normalized": "Math.randomNormalized",
               "Json Builder->to string": "td.toString",
               "Json Object->to string": "td.toString",
               "Json Builder->to number": "td.toNumber",
               "Json Object->to number": "td.toNumber",
-              "App->create logger": "td.createLogger",
-              "Web->create request": "td.createRequest",
-              "Web->download json": "td.downloadJsonAsync",
-              "Web->download": "td.downloadTextAsync",
-              "Contract->requires": "assert",
-              "Buffer->sha256": "td.sha256",
+              "♻ micro:bit->plot image": "basic.showLeds",
+              "♻ micro:bit->note": "music.noteFrequency",
+              "♻ micro:bit music->note": "music.noteFrequency",
+              "♻ micro:bit->ring": "music.ringTone",
+              "♻ micro:bit->play note": "music.playTone",
+              "♻ micro:bit music->play note": "music.playTone",
         }
 
         static methodRepl:StringMap<string> = {
           "Buffer->concat": "concat",
           "Buffer->to string": "toString",
           "Number->to string": "toString",
+          "String->replace": "replaceAll",
           "String->split": "split",
           "String->substring": "substr",
           "String->to upper case": "toUpperCase",
           "String->to lower case": "toLowerCase",
+          "String->code at": "charCodeAt",
           "Json Builder->add": "push",
           "Json Builder->contains key": "hasOwnProperty",
           "Json Object->contains key": "hasOwnProperty",
@@ -407,6 +564,7 @@ module TDev.AST {
           "Collection->where": "filter",
           "DateTime->milliseconds since epoch": "getTime",
           "Web Request->send": "sendAsync",
+          "♻ micro:bit->show image": "showImage",
           "String->to json": "",
           "Number->to json": "",
           "Task->await": "",
@@ -418,6 +576,57 @@ module TDev.AST {
             s.split("\n").forEach(l => {
                 l = l.replace(/(TDev\.Util|lib)\.userError\(/g, "throw new Error(")
                 this.tw.write(l).nl()
+            })
+        }
+
+        fixupArgs(e:Call, nameOverride:string) {
+            if (!e.args[0])
+                return
+
+            if (!nameOverride) {
+                var th = e.args[0].getThing()
+
+                if (!(th instanceof SingletonDef))
+                    return
+
+                if (th.getKind() instanceof ThingSetKind)
+                    return
+            }
+
+            if (!this.options.apiInfo)
+                return
+
+            var p = e.getCalledProperty()
+            var fullName = nameOverride || this.builtinName(e.args[0].getThing().getName()) + "." + this.builtinName(p.getName())
+
+            var apiInfo = this.options.apiInfo.byQName[fullName]
+            if (!apiInfo) {
+                this.tw.write("/*WARN: no api " + fullName + "*/")
+                return
+            } 
+
+            e.args.slice(1).forEach((a, i) => {
+                var litVal:string = a.getLiteral()
+                if (!litVal || typeof litVal != "string") return;
+                litVal = litVal.toLowerCase()
+                var pi = apiInfo.parameters[i]
+                if (!pi) return
+
+                var enumInfo = this.options.apiInfo.byQName[pi.type]
+                if (enumInfo && enumInfo.kind == SymbolKind.Enum) {
+                    var members = Util.values(this.options.apiInfo.byQName)
+                        .filter(e => e.namespace == pi.type &&
+                            (e.name.toLowerCase() == litVal ||
+                             (e.attributes.block || "").toLowerCase() == litVal))
+                    if (members.length >= 1) {
+                        a._converterValue = members[0].namespace + "." + members[0].name
+                        if (members.length > 1) {
+                            a._converterValue += " /*WARN: more possible!*/"
+                        }
+                    } else {
+                        a._converterValue = pi.type + "." + a.getLiteral() +  " /*WARN: not found*/"
+                    }
+                }
             })
         }
 
@@ -440,8 +649,31 @@ module TDev.AST {
                     this.tw.sep()
                     this.dispatch(e.args[0])
                 }
+                this.isReachable = false
                 return
             }
+
+
+            var realargs = e.args.slice(0)
+            if (realargs[0] && 
+                (realargs[0].getThing() instanceof SingletonDef ||
+                 realargs[0].referencedLibrary()))
+                realargs.shift()
+
+            var prefixName = Converter.prefixGlue[pn]
+            var methodName = Converter.methodRepl[pn]
+
+            if (!methodName && !prefixName && p.parentKind instanceof LibraryRefKind &&
+                /micro:bit/.test(p.parentKind.getName()))
+            {
+                var tmpname = this.builtinName(p.getName())
+                var elt = Util.values(this.options.apiInfo.byQName)
+                    .filter(e => e.namespace && e.name == tmpname)[0]
+                if (elt) prefixName = elt.namespace + "." + elt.name
+            }
+
+            if (!infixPri && !methodName && !/^Invalid->/.test(pn))
+                this.fixupArgs(e, prefixName)
 
             if (infixPri) {
                 if (p.getName() == "-" && e.args[0].getLiteral() === 0.0) {
@@ -505,14 +737,31 @@ module TDev.AST {
                     this.commaSep(e._assignmentInfo.targets, p => this.dispatch(p))
                     this.tw.op0("] =").sep()
                     this.dispatch(e.args[1])
+                } else if (p == api.core.AssignmentProp && e.args[0].getLiftedSetter()) {
+                    this.visitCallInner(mkFakeCall(PropertyRef.mkProp(e.args[0].getLiftedSetter()), [(<Call>e.args[0]).args[0], e.args[1]]))
                 } else {
-                    doParen(e.args[0])
+                    var binopArgs = e.args
+                    if (binopArgs.length == 3)
+                        binopArgs.shift()
+                    doParen(binopArgs[0])
                     var nn = p.getName()
                     if (nn == "equals") nn = "=="
+                    if (this.bitop(p))
+                        nn = this.bitop(p).split(",")[0]
                     this.printOp(nn)
-                    doParen(e.args[1])
+                    doParen(binopArgs[1])
                 }
 
+            } else if (prefixName) {
+                this.tw.write(prefixName)
+                params(realargs)
+            } else if (methodName != null) {
+                this.tightExpr(realargs[0])
+                realargs.shift()
+                if (Converter.methodRepl[pn] != "") {
+                    this.tw.write("." + Converter.methodRepl[pn])
+                    params(realargs)
+                }
             } else if (e.referencedData()) {
                 this.tw.globalId(e.referencedData())
             } else if (e.referencedLibrary()) {
@@ -550,9 +799,9 @@ module TDev.AST {
                 this.type(e.getKind())
                 params([])
             } else if (/^Invalid->/.test(pn) || (p.parentKind instanceof RecordDefKind && p.getName() == "invalid")) {
-                this.tw.write("(<");
+                this.tw.write("(null as ");
                 this.type(e.getKind())
-                this.tw.write(">null)");
+                this.tw.write(")");
             } else if (/^Json Builder->set (string|number|boolean|field|builder)$/.test(pn) ||
                        /->set at$/.test(pn)) {
                 this.tightExpr(e.args[0])
@@ -568,6 +817,16 @@ module TDev.AST {
                 this.tw.op0("[")
                 this.dispatch(e.args[1])
                 this.tw.op0("]")
+            } else if (pn == "String->to character code") {
+                var innerProp = e.args[0].getCalledProperty()
+                if (innerProp && innerProp.parentKind == api.core.String && innerProp.getName() == "at") {
+                    this.tightExpr((<Call>e.args[0]).args[0])
+                    this.tw.write(".charCodeAt");
+                    params([(<Call>e.args[0]).args[1]])
+                } else {
+                    this.tightExpr(e.args[0])
+                    this.tw.write(".charCodeAt(0)");
+                }
             } else if (/^Web->json array$/.test(pn)) {
                 this.tw.write("[]")
             } else if (/^Web->json object$/.test(pn)) {
@@ -599,9 +858,9 @@ module TDev.AST {
                         e.args[0].getCalledProperty().getName() == "Collection of")
                        || /->create collection$/.test(pn)
                        || /^Collections->.* collection$/.test(pn)) {
-                this.tw.op0("(<")
+                this.tw.op0("([] as ")
                 this.type(e.getKind())
-                this.tw.op0(">[])")
+                this.tw.op0(")")
             } else if ((e.getKind().getRoot() == api.core.Collection && e.args[0].getCalledProperty() &&
                         e.args[0].getCalledProperty().getName() == "map to")) {
                 this.tightExpr((<Call>e.args[0]).args[0])
@@ -649,18 +908,6 @@ module TDev.AST {
             } else if (p.parentKind.isAction && p.getName() == "run") {
                 this.tightExpr(e.args[0])
                 params(e.args.slice(1))
-            } else if (Converter.prefixGlue.hasOwnProperty(pn)) {
-                this.tw.write(Converter.prefixGlue[pn])
-                var tmpargs = e.args.slice(0)
-                if (tmpargs[0] && tmpargs[0].getThing() instanceof SingletonDef)
-                    tmpargs.shift()
-                params(tmpargs)
-            } else if (Converter.methodRepl.hasOwnProperty(pn)) {
-                this.tightExpr(e.args[0])
-                if (Converter.methodRepl[pn] != "") {
-                    this.tw.write("." + Converter.methodRepl[pn])
-                    params(e.args.slice(1))
-                }
             } else if (pn == "Web->json") {
                 if (e.args[1].getLiteral())
                     this.tw.op0("(").write(e.args[1].getLiteral()).op0(")")
@@ -713,6 +960,7 @@ module TDev.AST {
             "\u2260": "!=",
             "\u2264": "<=",
             "\u2265": ">=",
+            "mod": "%",
         }
 
         printOp(s:string)
@@ -725,7 +973,8 @@ module TDev.AST {
 
         private simpleId(n:string)
         {
-            return this.tw.jsid(this.localCtx.unUnicode(n))
+            var x = this.localCtx.unUnicode(n)
+            return this.tw.jsid(x)
         }
 
         visitPropertyRef(p:PropertyRef)
@@ -736,6 +985,11 @@ module TDev.AST {
 
         visitLiteral(l:Literal)
         {
+            if (l._converterValue) {
+                this.tw.write(l._converterValue)
+                return
+            }
+
             if (l.data === undefined) return
             if (typeof l.data == "number")
                 this.tw.write(l.stringForm || l.data.toString())
@@ -778,7 +1032,10 @@ module TDev.AST {
                 if (a) {
                     this.inlineAction(a)
                 } else {
-                    this.localName(<LocalDef>d)
+                    if (d.getKind() == api.core.Unknown)
+                        this.simpleId(d.getName())
+                    else
+                        this.localName(<LocalDef>d)
                 }
             } else if (d instanceof SingletonDef) {
                 // this.tw.write("TD.")
@@ -835,6 +1092,7 @@ module TDev.AST {
                     tw.op0(")")
                     this.dispatch(b.body)
                 }
+                this.isReachable = true
             })
         }
 
@@ -898,6 +1156,7 @@ module TDev.AST {
             this.tw.beginBlock()
             this.codeBlockInner(b.stmts)
             this.tw.endBlock()
+            this.isReachable = true
         }
 
         pcommaSep<T>(l:T[], f:(v:T)=>void) {
@@ -915,14 +1174,14 @@ module TDev.AST {
 
         isOwnExtension(a:Action)
         {
-            if (!this.useExtensions || !this.isExtension(a)) return false
+            if (!this.options.useExtensions || !this.isExtension(a)) return false
             var r = this.getFirstRecord(a)
             return (r && r.parent == this.app)
         }
 
         isExtension(a:Action)
         {
-            if (!this.useExtensions && a.parent == this.app)
+            if (!this.options.useExtensions && a.parent == this.app)
                 return false
 
             if (a.isActionTypeDef())
@@ -979,6 +1238,12 @@ module TDev.AST {
             this.tw.semiNL()
         }
 
+        private setupQuoting() {
+            this.localCtx = new TsQuotingCtx()
+            this.localCtx.reservedNames = this.tw.globalCtx.snapshotUsed();
+            this.thisLocal = null;
+        }
+
         printActionHeader(a:Action)
         {
             if (a.isActionTypeDef()) {
@@ -988,8 +1253,8 @@ module TDev.AST {
 
             var isExtension = this.isOwnExtension(a)
 
-            this.localCtx = new TsQuotingCtx()
-            this.thisLocal = null;
+            this.setupQuoting()
+
             var optsName = ""
             var optsLocal:LocalDef = null
 
@@ -1068,7 +1333,7 @@ module TDev.AST {
                         var thisEnum = "enum TODO {\n" +
                         Object.keys(p.enumMap).map(k =>
                             "    //% enumval=" + p.enumMap[k] + "\n    " +
-                            this.tw.globalCtx.quote(k, 0) + ",\n").join("") +
+                            this.builtinName(k) + ",\n").join("") +
                         "}\n"
                         this.allEnums[thisEnum] = 1
                     }
@@ -1085,8 +1350,8 @@ module TDev.AST {
                 this.tw.globalId(a)
                 this.pcommaSep(a.getInParameters().slice(1), printP)
             } else {
-                if (!a.isPrivate)
-                    this.tw.kw("export")
+                //if (!a.isPrivate)
+                //    this.tw.kw("export")
                 if (useAsync && !a.isAtomic)
                     this.tw.kw("async")
                 this.tw.kw("function")
@@ -1107,6 +1372,7 @@ module TDev.AST {
             var isMain = a.getInParameters().length == 0 && /^main/.test(a.getName())
 
             if (isMain) {
+                this.setupQuoting()
                 this.codeBlockInner(a.body.stmts)
                 this.tw.nl()
                 return
@@ -1131,15 +1397,22 @@ module TDev.AST {
                 this.tw.jsid(info.optsName).op0(");").nl()
             }
 
-            a.getOutParameters().forEach(p => {
-                this.tw.kw("let")
-                this.localDef(p.local)
-                this.tw.semiNL()
-            })
+            var hasOutP = !!a.getOutParameters().filter(p => p.local._converterUses > 0)[0]
 
+
+            if (hasOutP)
+                a.getOutParameters().forEach(p => {
+                    this.tw.kw("let")
+                    this.localDef(p.local)
+                    this.tw.semiNL()
+                })
+
+            this.isReachable = true
             this.codeBlockInner(info.stmts)
 
-            if (a.getOutParameters().length == 1) {
+            if (!hasOutP || !this.isReachable) {
+                // nothing to do
+            } else if (a.getOutParameters().length == 1) {
                 this.tw.kw("return")
                 this.localName(a.getOutParameters()[0].local).semiNL()
             } else if (a.getOutParameters().length > 1) {
@@ -1169,9 +1442,13 @@ module TDev.AST {
 
         visitGlobalDef(g:GlobalDef)
         {
-            this.tw.kw("var");
+            if (g.getKind() == api.core.Picture)
+                return
+
+            this.tw.kw("let");
             this.tw.globalId(g).op0(": ");
             this.type(g.getKind())
+            /*
             var d = this.defaultValue(g.getKind())
             if (g.isResource) {
                 if (g.getKind() == api.core.JsonObject) {
@@ -1182,52 +1459,33 @@ module TDev.AST {
             }
             if (d != null)
                 this.tw.op("=").write(d)
+            */
             this.tw.semiNL()
         }
 
         visitLibraryRef(l:LibraryRef)
         {
-            var modName = JSON.stringify("./" + l.getName().replace(/\s/g, "-"))
-            this.tw.kw("import * as ");
-            this.tw.globalId(l).keyword("from").sep().write(modName).nl();
         }
 
         visitRecordDef(r:RecordDef)
         {
-            this.tw.kw("export class").sep()
-            this.tw.globalId(r).nl()
-            this.tw.kw("    extends td.JsonRecord").nl().beginBlock()
+            this.tw.kw("class").sep()
+            this.tw.globalId(r).beginBlock()
             r.getFields().forEach(f => {
-                this.tw.kw("@json public").sep()
+                this.tw.kw("public").sep()
                 this.simpleId(f.getName())
                 this.tw.op0(":").sep()
                 this.type(f.dataKind)
-                var d = this.defaultValue(f.dataKind)
-                if (d != null)
-                    this.tw.write(" = " + d)
+                //var d = this.defaultValue(f.dataKind)
+                //if (d != null)
+                //    this.tw.write(" = " + d)
                 this.tw.semiNL()
             })
-
-            this.tw.write("static createFromJson(o:JsonObject) { let r = new ")
-            this.tw.globalId(r).write("(); r.fromJson(o); return r; }").nl()
 
             var exts = this.app.actions().filter(a => this.isOwnExtension(a) && this.getFirstRecord(a) == r)
             exts.forEach(e => this.visitAction(e))
 
             this.tw.endBlock()
-            this.tw.nl()
-
-            this.tw.kw("export interface").sep()
-            this.tw.globalId(r, "I")
-            this.tw.beginBlock()
-            r.getFields().forEach(f => {
-                this.simpleId(f.getName())
-                this.tw.op0("?:").sep()
-                this.type(f.dataKind)
-                this.tw.semiNL()
-            })
-            this.tw.endBlock()
-
             this.tw.nl()
         }
 

@@ -1734,15 +1734,42 @@ function mergetest(args:string[])
     })
 }
 
+function td2tsOpts() {
+    var f = fs.readFileSync("c:/dev/temp/apiinfo.json", "utf8")
+    return {
+        text: "",
+        useExtensions: true,
+        apiInfo: JSON.parse(f)
+    }
+}
+
+function tsall(files:string[])
+{
+    var used = {}
+    var opts = td2tsOpts()
+    fs.readdirSync("dls").forEach(fn => {
+        console.log(fn)
+        var t = fs.readFileSync("dls/" + fn, "utf8")
+        opts.text = t
+        var r = TDev.AST.td2ts(opts)
+        var tt = r.text.replace(/".*?"/g, "STR").replace(/[^a-zA-Z]/g, "")
+        //if (used[tt]) return;
+        used[tt] = 1
+
+        fs.writeFileSync("tss/" + fn + ".ts", r.text)
+        // fs.writeFileSync("apis.json", JSON.stringify(r.apis, null, 2))
+        //console.log("out.ts and apis.json written")
+    })
+}
+
 function ts(files:string[])
 {
     var t = fs.readFileSync(files[0], "utf8")
-    TDev.AST.reset();
-    TDev.AST.loadScriptAsync((s) => TDev.Promise.as(s == "" ? t : null));
-    var r = new TDev.AST.Converter(TDev.Script).run()
+    var opts = td2tsOpts()
+    opts.text = t
+    var r = TDev.AST.td2ts(opts)
     fs.writeFileSync("out.ts", r.text)
-    fs.writeFileSync("apis.json", JSON.stringify(r.apis, null, 2))
-    console.log("out.ts and apis.json written")
+    // fs.writeFileSync("apis.json", JSON.stringify(r.apis, null, 2))
 }
 
 function mddocs(files:string[])
@@ -2097,6 +2124,8 @@ export function globalInit()
         compilerTest();
     } else if (process.argv[2] == "ts") {
         ts(process.argv.slice(3))
+    } else if (process.argv[2] == "tsall") {
+        tsall(process.argv.slice(3))
     } else if (process.argv[2] == "mddocs") {
         mddocs(process.argv.slice(3))
     } else {

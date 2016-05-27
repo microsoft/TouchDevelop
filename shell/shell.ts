@@ -811,7 +811,7 @@ function deploy(d:any, cb:(err:any,resp:any) => void, isScript = true)
         if (numFiles == 0 || --numFiles == 0) {
             if (runNpm) {
                 runNpm = false
-                executeNpm(["install"], oneUp)
+                executeNpm(["install", "--production"], oneUp)
             } else if (runPython) {
                 runPython = false;
                 initPython(runPip, oneUp);
@@ -1178,7 +1178,8 @@ var mgmt:StringMap<(ar:ApiRequest)=>void> = {
             numContentRequests: numResponses,
             dmeta: tdstate.dmeta,
             encryption: !!key,
-            versionStamp: "v10",
+            onlyEncrypted: onlyEncrypted,
+            versionStamp: "v11",
         })
     },
 
@@ -2221,6 +2222,7 @@ function proxyEditor(cmds:string[], req, resp)
 }
 
 var key:Buffer = null;
+var onlyEncrypted = false;
 
 function decipherReq(req) {
     var err = function(m) {
@@ -2281,7 +2283,7 @@ function specHandleReq(req, resp)
                 if (cmd[1] === "encrypted") {
                     ar.handleEncryptedMgmt()
                 } else if (cmd[1] === config.deploymentKey) {
-                    if (key)
+                    if (onlyEncrypted)
                         ar.error(418, "only encrypted allowed")
                     else
                         ar.handleMgmt(cmd.slice(2))
@@ -2378,7 +2380,7 @@ function handleReq(req, resp)
         return;
     }
 
-    if (key) {
+    if (onlyEncrypted) {
         resp.writeHead(418, "Only encrypted allowed")
         resp.end("Only encrypted allowed")
         return
@@ -2823,7 +2825,7 @@ function main()
 
     config = JSON.parse(fs.readFileSync(tdConfigJson, "utf8"))
 
-    var onlyEncrypted = false
+    onlyEncrypted = false
     if (/^\*/.test(process.env['TD_DEPLOYMENT_KEY'])) {
         onlyEncrypted = true
         process.env['TD_DEPLOYMENT_KEY'] = process.env['TD_DEPLOYMENT_KEY'].slice(1)
@@ -2833,7 +2835,7 @@ function main()
         config.deploymentKey = process.env['TD_DEPLOYMENT_KEY']
     }
 
-    if (onlyEncrypted) {
+    {
         var h = crypto.createHash("sha256")
         h.update(config.deploymentKey)
         key = h.digest()

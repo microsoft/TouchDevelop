@@ -47,11 +47,26 @@ module TDev.AST
         private nameMapping: any = {};
         private usedNames:any = {};
 
+        public reservedNames:any = {};
+
         public unUnicode(s:string)
         {
             s = s.replace(/[^a-zA-Z0-9]+/g, "_");
             if (s == "" || /^[0-9]/.test(s)) s = "_" + s;
             return s;
+        }
+
+        public isUsed(s:string)
+        {
+            return this.usedNames.hasOwnProperty(s) || this.reservedNames.hasOwnProperty(s)
+        }
+
+        public snapshotUsed()
+        {
+            var r = {}
+            Object.keys(this.reservedNames).forEach(k => r[k] = 1)
+            Object.keys(this.usedNames).forEach(k => r[k] = 1)
+            return r
         }
 
         public quote(s:string, id:number)
@@ -62,9 +77,9 @@ module TDev.AST
                 return this.mapping[si];
             }
             s = this.unUnicode(s);
-            if (this.usedNames.hasOwnProperty(s)) {
+            if (this.isUsed(s)) {
                 var n = 1;
-                while (this.usedNames.hasOwnProperty(s + n.toString())) {
+                while (this.isUsed(s + n.toString())) {
                     n++;
                 }
                 s = s + n.toString();

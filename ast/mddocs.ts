@@ -54,7 +54,7 @@ module TDev.AST.MdDocs {
                     if (l.getName() == m[0])
                         act = act || l.getPublicActions().filter(a => a.getName() == m[1])[0]
                 })
-                if (act) {
+                if (act && converter) {
                     return quoteCode(converter.renderSig(act))
                 } else {
                     warn("cannot find lib action: " + arg)
@@ -143,6 +143,7 @@ module TDev.AST.MdDocs {
 
     function mkSnippet(stmts:Stmt[])
     {
+        if (!converter) return "[" + stmts.length + " stmts]"
         return quoteCode(converter.renderSnippet(stmts))
     }
 
