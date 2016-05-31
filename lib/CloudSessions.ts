@@ -429,13 +429,13 @@ module TDev.RT {
                 var msg: string;
                 var mr = session.user_get_missing_rounds();
                 if (mr) {
-                    msg = mr + lf(" remaining.")
+                    msg = lf("%0 remaining", mr);
                 }
                 var rt = session.user_get_next_connection_attempt();
                 if (rt) {
                     var secs = Math.floor((rt - 700 - new Date().getTime()) / 1000);
                     var msg = (secs < 1) ? lf("connection attempt in progress...") :
-                        lf("next connection attempt in ") + secs.toString() + lf(" seconds");
+						lf("next connection attempt in %0 seconds", secs.toString());
                 }
                 sessionretrydiv.setChildren([msg]);
             }, 50);
