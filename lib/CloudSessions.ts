@@ -53,7 +53,7 @@ module TDev.RT {
         }
 
         public toString(): string {
-            return "cloud session: " + this._id + (this._title ? "(" + this._title + ")" : "");
+            return lf("cloud session: ") + this._id + (this._title ? "(" + this._title + ")" : "");
         }
 
         public static fromDescriptor(desc: Revisions.ISessionParams) {
@@ -346,24 +346,24 @@ module TDev.RT {
 
             var percentfull = (cloudSession.sessionimpl && cloudSession.sessionimpl.user_get_percent_full()) ? cloudSession.sessionimpl.user_get_percent_full() :
                 (cloudSession.serverinfo && cloudSession.serverinfo.percentfull) ? cloudSession.serverinfo.percentfull : 0;
-            var percentfullstring = percentfull ? (" (" + percentfull + "% full)") : "";
-            var title = (!showscriptname && cloudSession.isEveryoneSession()) ? "everyone session" :
-                (!showscriptname && cloudSession.isJustMeSession()) ? "just-me session" :
-                (cloudSession._title || ("session \"" + cloudSession._id + "\""));  // SEBTODO keep more info about script association, to improve display
-            var owner = (cloudSession.ownerid === Cloud.getUserId()) ? "I" : user ? (user.name + " (/" + cloudSession.ownerid + ")") : ("user /" + cloudSession.ownerid);
-            var permissions = (cloudSession.isEveryoneSession() || cloudSession.isShareableSession()) ? "everyone can read and modify" :
-                (cloudSession.isJustMeSession() || cloudSession.isPrivateSession()) ? "only " + owner + " can read and modify" :
-                ("only " + owner + " can modify, but everyone can read");
+            var percentfullstring = percentfull ? (" (" + percentfull + lf("% full") + ")") : "";
+            var title = (!showscriptname && cloudSession.isEveryoneSession()) ? lf("everyone session") :
+                (!showscriptname && cloudSession.isJustMeSession()) ? lf("just-me session") :
+                (cloudSession._title || (lf("session \"") + cloudSession._id + "\""));  // SEBTODO keep more info about script association, to improve display
+            var owner = (cloudSession.ownerid === Cloud.getUserId()) ? lf("I") : user ? (user.name + " (/" + cloudSession.ownerid + ")") : (lf("user /") + cloudSession.ownerid);
+            var permissions = (cloudSession.isEveryoneSession() || cloudSession.isShareableSession()) ? lf("everyone can read and modify") :
+                (cloudSession.isJustMeSession() || cloudSession.isPrivateSession()) ? lf("only ") + owner + lf(" can read and modify") :
+                (lf("only ") + owner + lf(" can modify, but everyone can read"));
             var connected = cloudSession.sessionimpl && cloudSession.sessionimpl.user_is_websocket_open();
             var localname = cloudSession.sessionimpl ? cloudSession.sessionimpl.localname : cloudSession.localname;
             var existence = (includesserverdata || connected)
                 ? ((cloudSession.serverinfo || connected)
                 ? localname
-                ? "stored in cloud" + percentfullstring + " and locally cached" //+ (cloudSession.membernumber > -1 ? " (participant number " + cloudSession.membernumber + ")" : "")
-                : "stored in cloud" + percentfullstring + ", not locally cached"
+                ? lf("stored in cloud") + percentfullstring + lf(" and locally cached") //+ (cloudSession.membernumber > -1 ? " (participant number " + cloudSession.membernumber + ")" : "")
+                : lf("stored in cloud") + percentfullstring + lf(", not locally cached")
                 : localname  //SEBTODO add marooned scenario here
-                ? "not stored in cloud, local only"
-                : "not created yet"
+                ? lf("not stored in cloud, local only")
+                : lf("not created yet")
                 ) + "\n"
                 : "";
 
@@ -371,10 +371,10 @@ module TDev.RT {
             var icon = div("navImg", SVG.getCloudSymbol("black", cloudSession.type(), true));
             var titleelt = (preselected) ? HTML.span("bold", title) : HTML.span("", title);
             var information =
-                ((owner === "I") ? "" : "owned by " + owner + "\n")
+                ((owner === lf("I")) ? "" : lf("owned by ") + owner + "\n")
                 + permissions + "\n"
                 //+ ((cloudSession.tag[0] === "c" && cloudSession.guidhash[0] === "a") ? ("accessible from other scripts\n") : "")
-                + /*(cloudSession.isBroadcastSession() || cloudSession.isShareableSession()?*/ ("session id: " + cloudSession._id + "\n")
+                + /*(cloudSession.isBroadcastSession() || cloudSession.isShareableSession()?*/ (lf("session id: ") + cloudSession._id + "\n")
                 + existence;
 
             return HTML.mkButtonElt("navItem cloudSession",
@@ -416,26 +416,26 @@ module TDev.RT {
                 sessionstatusdiv,
                 sessionretrydiv])
             if (session.isMarooned() || session.isClosed() || session.isFaulted()) {
-                m.addOk("discard locally cached data, and try again", () => {
+                m.addOk(lf("discard locally cached data, and try again"), () => {
                     rt.sessions.resetCurrentSession();
                     m.dismiss();
                 });
-                m.addOk("cancel");
+                m.addOk(lf("cancel"));
             }
             else
-                m.addOk("ok");
+                m.addOk(lf("ok"));
 
             var retrytimeindicatorinterval = setInterval(() => {
                 var msg: string;
                 var mr = session.user_get_missing_rounds();
                 if (mr) {
-                    msg = mr + " remaining."
+                    msg = lf("{0} remaining", mr);
                 }
                 var rt = session.user_get_next_connection_attempt();
                 if (rt) {
                     var secs = Math.floor((rt - 700 - new Date().getTime()) / 1000);
-                    var msg = (secs < 1) ? "connection attempt in progress..." :
-                        "next connection attempt in " + secs.toString() + " seconds";
+                    var msg = (secs < 1) ? lf("connection attempt in progress...") :
+						lf("next connection attempt in {0} seconds", secs.toString());
                 }
                 sessionretrydiv.setChildren([msg]);
             }, 50);
@@ -467,7 +467,7 @@ module TDev.RT {
             var p = Cloud.getUserId() ? Promise.as() : Cloud.authenticateAsync(lf("cloud data"));
             return p.thenalways((x) => {
                 if (Cloud.getUserId())
-                    return sessionDialogAsync(undefined, "manage cloud sessions", false, rt);
+                    return sessionDialogAsync(undefined, lf("manage cloud sessions"), false, rt);
             });
         }
         export function scriptSessionsDialog(rt: Runtime): Promise {
@@ -614,7 +614,7 @@ module TDev.RT {
                     addCreateElt("private");
                     addCreateElt("broadcast");
 
-                    var connectToShareableElt = HTML.mkButtonElt("wall-button", "connect");
+                    var connectToShareableElt = HTML.mkButtonElt("wall-button", lf("connect"));
                     connectToShareableElt.withClick(() => {
                         var cs = new CloudSession();
                         cs._id = sharableId.textarea.value;
@@ -642,9 +642,9 @@ module TDev.RT {
                     var sharableMsgDiv = div("wall-dialog-body");
 
 
-                    var createbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", "create");
-                    var connectbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", "enter code");
-                    var cancelbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", "cancel");
+                    var createbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", lf("create"));
+                    var connectbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", lf("enter code"));
+                    var cancelbutton = <HTMLButtonElement> HTML.mkButtonElt("wall-button", lf("cancel"));
 
                     var innested = false;
 
@@ -752,14 +752,14 @@ module TDev.RT {
             // don't ask for private sessions
             if (session.isPrivateSession() || session.ownerid === r.rt.sessions.getUserId()) return Promise.as(session);
 
-            var p = r.rt.host.askSourceAccessAsync("shared cloud data owned by " + owner,
-                "and share data in the cloud. " + owner + " administers the data, and can share it with other users or delete it.", secondchance);
+            var p = r.rt.host.askSourceAccessAsync(lf("shared cloud data owned by ") + owner,
+                lf("and share data in the cloud. ") + owner + lf(" administers the data, and can share it with other users or delete it."), secondchance);
 
             return p.then((allow) => {
                 if (!allow) {
                     var mdp = new PromiseInv();
-                    ModalDialog.askMany("Fall-back session",
-                        "Because you have indicated that this script should not participate in cloud sessions owned by " + owner + ", we are using a private just-me session instead.",
+                    ModalDialog.askMany(lf("Fall-back session"),
+                        lf("Because you have indicated that this script should not participate in cloud sessions owned by ") + owner + (", we are using a private just-me session instead."),
                         {
                             ok: () => mdp.success(previoussession.getCloudSession()),
                             reconsider: () => askSwitchAccessAsync(previoussession, session, owner, r, true).then((s) => mdp.success(s))
@@ -793,7 +793,7 @@ module TDev.RT {
                 var ownerinfo;
                 p = p.then(() => RT.User.getJsonAsync(session.ownerid).then((user) => ownerinfo = user, (e) => ownerinfo = undefined));
                 p = p.then(() => {
-                    var ownername = ownerinfo ? (ownerinfo.name + " (/" + session.ownerid + ")") : ("user /" + session.ownerid);
+                    var ownername = ownerinfo ? (ownerinfo.name + " (/" + session.ownerid + ")") : (lf("user /") + session.ownerid);
                     return askSwitchAccessAsync(ls, session, ownername, r, false);
                     });
                 p.then(s => {
@@ -809,7 +809,7 @@ module TDev.RT {
         export function switch_sessions(r: ResumeCtx) {
             var session = r.rt.sessions.getCurrentSession();
             session.user_yield();
-            var p = sessionDialogAsync(session.getCloudSession(), "choose a cloud session", true, r.rt, r);
+            var p = sessionDialogAsync(session.getCloudSession(), lf("choose a cloud session"), true, r.rt, r);
             p.then((s:CloudSession) => {
                     r.rt.sessions.connectCurrent(r.rt.sessions.getCloudSessionDescriptor(s._id, s._title, s._permissions)).then(() => r.resumeVal(undefined));
             }).done();

@@ -4356,7 +4356,7 @@ module TDev
             betaDiv = div("wall-dialog-body", 
                 Editor.mkHelpLink("beta"), 
                 HTML.mkCheckBox( 
-                    lf("always use beta version of TouchDevelop"), 
+                    lf("always use beta version of Touch Develop"), 
                     Editor.setAlwaysBeta, Editor.isAlwaysBeta()), 
                 div("clear")); 
             if (World.switchToChannel) { 

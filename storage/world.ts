@@ -698,7 +698,7 @@ module TDev {
                 if (!v) TDev.RT.Perf.stop(totalCounter);
                 if (syncVersion != mySyncVersion) return;
                 syncVersion = undefined;
-                HTML.showProgressNotification(v ? undefined : "syncing done", true, 0, 1000);
+                HTML.showProgressNotification(v ? undefined : lf("syncing done"), true, 0, 1000);
                 if (askBeta && onAskBeta && !/localhost/.test(window.location.href)) onAskBeta();
                 else if (askSomething && onAskSomething) onAskSomething(askSomething);
                 else if (onNoOtherAsk) onNoOtherAsk();
