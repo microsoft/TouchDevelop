@@ -352,15 +352,15 @@ module TDev.RT {
                 (cloudSession._title || (lf("session \"") + cloudSession._id + "\""));  // SEBTODO keep more info about script association, to improve display
             var owner = (cloudSession.ownerid === Cloud.getUserId()) ? lf("I") : user ? (user.name + " (/" + cloudSession.ownerid + ")") : (lf("user /") + cloudSession.ownerid);
             var permissions = (cloudSession.isEveryoneSession() || cloudSession.isShareableSession()) ? lf("everyone can read and modify") :
-                (cloudSession.isJustMeSession() || cloudSession.isPrivateSession()) ? lf("only ") + owner + lf(" can read and modify") :
-                (lf("only ") + owner + lf(" can modify, but everyone can read"));
+                (cloudSession.isJustMeSession() || cloudSession.isPrivateSession()) ? lf("only {0} can read and modify", owner) :
+                (lf("only {0} can modify, but everyone can read", owner));
             var connected = cloudSession.sessionimpl && cloudSession.sessionimpl.user_is_websocket_open();
             var localname = cloudSession.sessionimpl ? cloudSession.sessionimpl.localname : cloudSession.localname;
             var existence = (includesserverdata || connected)
                 ? ((cloudSession.serverinfo || connected)
                 ? localname
-                ? lf("stored in cloud") + percentfullstring + lf(" and locally cached") //+ (cloudSession.membernumber > -1 ? " (participant number " + cloudSession.membernumber + ")" : "")
-                : lf("stored in cloud") + percentfullstring + lf(", not locally cached")
+                ? lf("stored in cloud {0} and locally cached", percentfullstring) //+ (cloudSession.membernumber > -1 ? " (participant number " + cloudSession.membernumber + ")" : "")
+                : lf("stored in cloud {0}, not locally cached", percentfullstring)
                 : localname  //SEBTODO add marooned scenario here
                 ? lf("not stored in cloud, local only")
                 : lf("not created yet")
@@ -758,12 +758,12 @@ module TDev.RT {
             return p.then((allow) => {
                 if (!allow) {
                     var mdp = new PromiseInv();
+					var bts = {}; 
+					bts[lf("ok")] = () => mdp.success(previoussession.getCloudSession());
+					bts[lf("reconsider")]= () => askSwitchAccessAsync(previoussession, session, owner, r, true).then((s) => mdp.success(s));
                     ModalDialog.askMany(lf("Fall-back session"),
                         lf("Because you have indicated that this script should not participate in cloud sessions owned by ") + owner + (", we are using a private just-me session instead."),
-                        {
-                            ok: () => mdp.success(previoussession.getCloudSession()),
-                            reconsider: () => askSwitchAccessAsync(previoussession, session, owner, r, true).then((s) => mdp.success(s))
-                        });
+						bts);
                     return mdp;
                 }
                 return Promise.as(session);
