@@ -752,8 +752,8 @@ module TDev.RT {
             // don't ask for private sessions
             if (session.isPrivateSession() || session.ownerid === r.rt.sessions.getUserId()) return Promise.as(session);
 
-            var p = r.rt.host.askSourceAccessAsync(lf("shared cloud data owned by ") + owner,
-                lf("and share data in the cloud. ") + owner + lf(" administers the data, and can share it with other users or delete it."), secondchance);
+            var p = r.rt.host.askSourceAccessAsync(lf("shared cloud data owned by {0}", owner),
+                lf("and share data in the cloud. {0} administers the data, and can share it with other users or delete it.", owner), secondchance);
 
             return p.then((allow) => {
                 if (!allow) {
@@ -762,7 +762,7 @@ module TDev.RT {
 					bts[lf("ok")] = () => mdp.success(previoussession.getCloudSession());
 					bts[lf("reconsider")]= () => askSwitchAccessAsync(previoussession, session, owner, r, true).then((s) => mdp.success(s));
                     ModalDialog.askMany(lf("Fall-back session"),
-                        lf("Because you have indicated that this script should not participate in cloud sessions owned by ") + owner + (", we are using a private just-me session instead."),
+                        lf("Because you have indicated that this script should not participate in cloud sessions owned by {0}, we are using a private just-me session instead.", owner),
 						bts);
                     return mdp;
                 }
