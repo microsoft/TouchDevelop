@@ -2005,8 +2005,6 @@ function compilerTest() {
                 console.log(logMsg("touchdevelop → hex (bitvm) ✓"));
                 return TDev.Hex.cliCompileAsync(theApp);
             }
-        }).then(() => {
-            return TDev.Embedded.compile(TDev.AST.Json.dump(theApp))
         }).then((cpp: string) => {
             console.log(logMsg("touchdevelop → cpp ✓"));
 
