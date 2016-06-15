@@ -1958,6 +1958,10 @@ function getScriptAsync(id:string)
 // It also exercises the bitvm compiler (once) for each script.
 function compilerTest() {
     var tdUplKey = process.env['TD_UPLOAD_KEY'] || process.env['TD_UPLOAD_LITE_KEY']
+    if (!tdUplKey) {
+        console.log('tests for microbit.co.uk, skipping')
+        return;
+    }
     if (/touchdevelop/.test(apiEndpoint) && tdUplKey) {
         var mm = /^(http.*\/)(\?access_token=.*)/.exec(tdUplKey)
         if (mm) {
