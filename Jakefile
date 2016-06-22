@@ -439,8 +439,7 @@ task('test', [ 'info', 'build/client.js', 'default' ], { async: true }, function
   var task = this;
   console.log("[I] running tests")
   runAndComplete([
-    'node build/client.js buildtest',
-    'node build/noderunner.js compilertest'
+    'node build/client.js buildtest'
   ], this);
 });
 
