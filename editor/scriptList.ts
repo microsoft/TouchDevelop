@@ -7,6 +7,11 @@
 
     var bugsEnabled = false;
 
+    function sdName(big: boolean, e:string = null) {
+        if (big) return divLike("h1", "sdName", e)
+        else return div('sdName', e)
+    }
+
     export class Host
         extends Screen
     {
@@ -3709,7 +3714,7 @@
                     div("sdHeader",
                         icon,
                         div("sdHeaderInner",
-                            div("sdNameBlock", div("sdName", spanDirAuto((it.entryNo === undefined ? "" : "#" + it.entryNo + " ") + it.scriptname))),
+                            div("sdNameBlock", div('sdName', spanDirAuto((it.entryNo === undefined ? "" : "#" + it.entryNo + " ") + it.scriptname))),
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
                                     Util.timeSince(it.time)
@@ -5442,7 +5447,7 @@
 
         public mkBoxCore(big: boolean) {
             var icon = div("sdIcon");
-            var nameBlock = dirAuto(div("sdName", lf("screenshot")));
+            var nameBlock = dirAuto(sdName(big, lf("screenshot")));
             var hd = div("sdNameBlock", nameBlock);
             var author = div("sdAuthorInner");
             var addInfo = div("sdAddInfoInner", "/" + this.publicId);
@@ -5693,7 +5698,7 @@
         public mkBoxCore(big:boolean)
         {
             var icon = div("sdIcon");
-            var nameBlock = dirAuto(div("sdName", this.name));
+            var nameBlock = dirAuto(sdName(big, this.name));
             var hd = div("sdNameBlock", nameBlock);
             var numbers = div("sdNumbers"); // TODO
             var author = div("sdAuthorInner");
@@ -5966,7 +5971,7 @@
         public mkBoxCore(big:boolean)
         {
             var icon = div("sdIcon hubDocTile", this.getIcon());
-            var nameBlock = dirAuto(div("sdName", this.name));
+            var nameBlock = dirAuto(sdName(big, this.name));
             var hd = div("sdNameBlock", nameBlock);
             var pubId = div("sdAddInfoOuter", this.getMimeTypeName());
             if (this.views > 0)
@@ -6532,7 +6537,7 @@
         public mkBoxExt(big:boolean, isTopic:boolean)
         {
             var icon = div("sdIcon");
-            var nameBlock = div("sdName");
+            var nameBlock = sdName(big);
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -8244,7 +8249,7 @@
         public mkBoxCore(big:boolean)
         {
             var icon = this.userPicture();
-            var nameBlock = dirAuto(div("sdName", this.userName));
+            var nameBlock = dirAuto(sdName(big, this.userName));
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -8997,7 +9002,7 @@
         public mkBoxCore(big: boolean) {
             var icon = this.groupPicture();
 
-            var nameBlock = dirAuto(div("sdName", this.name));
+            var nameBlock = dirAuto(sdName(big, this.name));
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -9902,7 +9907,7 @@
             icon.style.background = j.iconbackground;
             var nameText = j.name
             if (!big) nameText = nameText.replace(/.*\u2192/, "\u2192")
-            var nameBlock = dirAuto(div("sdName", nameText))
+            var nameBlock = dirAuto(sdName(big, nameText))
             var hd = div("sdNameBlock", nameBlock);
             var desc = div("sdTopicExpansion", dirAuto(div("sdTopicExpansionInner", (big && this.topic.isApiHelp()) ? "" : j.description)))
             var res = div("sdHeaderOuter",
@@ -10308,7 +10313,7 @@
         public mkBoxCore(big: boolean) {
             var icon = div("sdIcon", HTML.mkImg("svg:fa-upload,white"));
             icon.style.background = "#1731B8";
-            var nameBlock = div("sdName");
+            var nameBlock = sdName(big);
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -10413,7 +10418,7 @@
         public mkBoxCore(big: boolean) : HTMLElement {
             var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
             icon.style.background = "#1731B8";
-            var nameBlock = div("sdName");
+            var nameBlock = sdName(big);
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -10706,7 +10711,7 @@
         public mkBoxCore(big: boolean) {
             var icon = div("sdIcon", HTML.mkImg("svg:fa-external-link,white"));
             icon.style.background = "#1731B8";
-            var nameBlock = div("sdName");
+            var nameBlock = sdName(big);
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
@@ -10789,7 +10794,7 @@
 
             var icon = div("sdIcon", HTML.mkImg("svg:undo,white"));
             icon.style.background = "#1731B8";
-            var nameBlock = div("sdName");
+            var nameBlock = sdName(false);
             var hd = div("sdNameBlock", nameBlock);
 
             var numbers = div("sdNumbers");
