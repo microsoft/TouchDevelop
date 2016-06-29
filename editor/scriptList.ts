@@ -20,7 +20,7 @@
             this.leftPane = divLike("aside", "slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
-            this.leftPane.setAttribute("role", "complementary");
+            this.leftPane.setAttribute("role", "application");
             this.rightPane = divLike("main", "slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
