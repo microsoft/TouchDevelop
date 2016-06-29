@@ -285,6 +285,7 @@ export module SVG {
         var svg = <HTMLElement> d.firstChild;
         HTML.setRole(svg, "presentation");
         svg.setAttribute("aria-label", title);
+        svg.setAttribute("focusable", "false");
         var tt = <SVGTextElement>document.createElementNS("http://www.w3.org/2000/svg", 'title')
         tt.textContent = title;
         svg.insertBefore(tt, svg.firstElementChild)
