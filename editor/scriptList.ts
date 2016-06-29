@@ -17,11 +17,11 @@
             this.listHeader.setAttribute("aria-controls", "leftList");
             this.theList.setAttribute("aria-live", "polite");
             this.theList.setAttribute("aria-relevant", "additions");
-            this.leftPane = div("slLeft", this.listHeader, this.theList, this.progressBar);
+            this.leftPane = divLike("aside", "slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
-            this.leftPane.setAttribute("role", "complimentary");
-            this.rightPane = div("slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
+            this.leftPane.setAttribute("role", "complementary");
+            this.rightPane = divLike("main", "slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
             this.rightPane.setAttribute("role", "main");
