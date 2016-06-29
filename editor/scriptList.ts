@@ -2265,6 +2265,11 @@
             s = s.replace(/\r/g, "\n");
             s = s.replace(/\n+$/, "");
 
+            var r = div("sdExpandableText")
+            Browser.setInnerHTML(r, Util.formatText(s))
+            return r
+            
+            /* ACC: problems with button            
             if (s.replace(/[^\n]/g, "").length > 3 || s.length > maxLen) {
                 var btn;
                 var r:HTMLElement =
@@ -2280,6 +2285,7 @@
             } else {
                 return Host.textBox(s);
             }
+            */
         }
 
         static textBox(s: string)
