@@ -283,7 +283,7 @@ export module SVG {
         var d = div(null);
         d.innerHTML = getIconSVGCore(name);
         var svg = <HTMLElement> d.firstChild;
-        HTML.setRole(svg, "img");
+        HTML.setRole(svg, "presentation");
         svg.setAttribute("aria-label", title);
         var tt = <SVGTextElement>document.createElementNS("http://www.w3.org/2000/svg", 'title')
         tt.textContent = title;
