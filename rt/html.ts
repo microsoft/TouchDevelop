@@ -796,6 +796,7 @@ module TDev.HTML {
 
         var info = div('info', msgText);
         var msg = div("warningNotification", info);
+        msg.tabIndex = 0
         msg.setAttribute("role", "alert");
         msg.setAttribute("aria-label", msgText);
         var a = Animation.fadeOut(msg);
@@ -817,6 +818,7 @@ module TDev.HTML {
         }));
         
         elt("root").appendChild(msg);
+        msg.focus()
     }
 
     export function showPluginNotification(msgText: string) {
