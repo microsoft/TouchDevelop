@@ -85,7 +85,7 @@
                     }
                 }
                 var siteMenu = elt("siteMenu");
-                if (siteMenu)
+                if (siteMenu) {
                     siteMenu.setChildren(menuItems.map(mi => {
                         var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
                             tick(mi.tick);
@@ -97,6 +97,8 @@
                         li.setAttribute("role", "menuitem");
                         return li;
                     }));
+                    HTML.setRole(siteMenu, "menu")
+                }
                 var siteMore = elt("siteMore");
                 if (siteMore) {
                     siteMore.setChildren([
@@ -109,6 +111,7 @@
                         nav.setAttribute("role", "navigation");
                         var menu = document.createElement("ul");
                         menu.className = "nav-list";
+                        HTML.setRole(menu, "menu")
                         var firstmii: HTMLElement = undefined;
                         menuItems.forEach(mi => {
                             var li = HTML.li('nav-list__item', mi.name).withClick(() => {
