@@ -29,7 +29,7 @@
             this.rightPane = divLike("main", "slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
-            this.rightPane.setAttribute("role", "main");
+            this.rightPane.setAttribute("role", "document");
             this.hdContainer.tabIndex = 0;
             this.theRoot = div("slRoot", this.leftPane, this.rightPane);
 
