@@ -6312,3 +6312,12 @@ width:1px;
 height:1px;
 overflow:hidden;
 }
+
+li.skip:focus {  
+  position:inherit;
+  left:inherit;
+  top:inherit;
+  width:auto;
+  height:auto;
+  overflow:inherit;
+}
