@@ -20,6 +20,8 @@ module TDev.Browser {
             this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
             this.listHeader.setAttribute("aria-controls", "leftList");
             this.listHeader.setAttribute("role", "header");
+            this.theList.setAttribute("aria-label", lf("Search results"));
+            this.theList.setAttribute("aria-described", "");
             this.theList.setAttribute("aria-live", "polite");
             this.theList.setAttribute("aria-relevant", "additions");
             this.theList.setAttribute("role", "listbox");
