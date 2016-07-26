@@ -140,7 +140,7 @@ module TDev.Browser {
             }
         }
         private theList = divId("leftList", "slList");
-        private header = div("sdListLabel");
+        private header = divLike("h2", "sdListLabel");
         private botDiv = div(null);
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
         private autoUpdate: KeyboardAutoUpdate;
@@ -962,7 +962,7 @@ module TDev.Browser {
 
             if (searchMode) {
                 if (!scriptMod) {
-                    this.listDivs.push(div("sdListLabel", spanDirAuto(lf("online"))));
+                    this.listDivs.push(divLike("h2", "sdListLabel", spanDirAuto(lf("online"))));
                     this.searchOnline = () => { searchFrom("") };
                     this.autoUpdate.update = this.searchOnline;
                     this.autoUpdate.lastValue = null;
@@ -988,6 +988,8 @@ module TDev.Browser {
                     switch (ev.keyName) {
                         case "Down":
                             var next = <HTMLElement>d.nextElementSibling;
+                            while (next && next.getAttribute("role") != "option")
+                                next = <HTMLElement>next.nextElementSibling;
                             if (next) {
                                 next.focus();
                                 ev.preventDefault();
@@ -996,6 +998,8 @@ module TDev.Browser {
                             break;
                         case "Up":
                             var up = <HTMLElement>d.previousElementSibling;
+                            while (up && up.getAttribute("role") != "option")
+                                up = <HTMLElement>up.previousElementSibling;
                             if (up) {
                                 up.focus();
                                 ev.preventDefault();
@@ -4909,9 +4913,9 @@ module TDev.Browser {
 
         public topContainer(): HTMLElement {
             if (this.parent instanceof NotificationsPage)
-                return div("sdListLabel", spanDirAuto(lf("notifications")))
+                return divLike("h2", "sdListLabel", spanDirAuto(lf("notifications")))
             if (this.parent instanceof GroupInfo)
-                return div("sdListLabel", spanDirAuto(lf("members activity")))
+                return divLike("h2", "sdListLabel", spanDirAuto(lf("members activity")))
             return div(null)
         }
 
@@ -5509,7 +5513,6 @@ module TDev.Browser {
                         div("hubTileSubtitle",
                             div("hubTileAuthor", spanDirAuto(a.username), nums)))])
             });
-            return d;
         }
 
         public mkBoxCore(big: boolean) {
