@@ -1055,7 +1055,7 @@ module TDev.Browser {
         }
 
         export function mkCopyrightNote(): HTMLElement {
-            var beta = div("beta-note");
+            var beta = divLike("footer", "beta-note");
             beta.setAttribute("role", "contentinfo");
             var versionId = (<any>window).betaFriendlyId || Cloud.config.tdVersion;
             var versionNote = versionId ? ("<b>" + versionId + "</b> ") : "";

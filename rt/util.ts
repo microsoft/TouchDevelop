@@ -175,9 +175,7 @@ module TDev {
         return el;
     }
 
-    export function div(cl: string, ...children: any[]): HTMLElement {
-        var tag = "div";
-        if (cl == "wall-dialog-header" || cl == "modalSearchHeader") tag = "h1"
+    export function divLike(tag:string, cl: string, ...children: any[]): HTMLElement {
         var elt = <HTMLDivElement>document.createElement(tag);
         if (cl)
             elt.className = cl;
@@ -188,6 +186,12 @@ module TDev {
         return elt;
     }
 
+    export function div(cl: string, ...children: any[]): HTMLElement {
+        var tag = "div";
+        if (cl == "wall-dialog-header" || cl == "modalSearchHeader") tag = "h1"
+        return divLike.apply(null, [tag, cl].concat(children))
+    }
+    
     export function divId(id:string, cls:string, ...args:any[])
     {
         var d = div(cls, args);

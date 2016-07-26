@@ -3100,6 +3100,7 @@ div.iconThumb {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  margin: 0;
 }
 
 .sdNumbers {
@@ -6314,4 +6315,13 @@ top:auto;
 width:1px;
 height:1px;
 overflow:hidden;
+}
+
+li.skip:focus {
+  position:inherit;
+  left:inherit;
+  top:inherit;
+  width:auto;
+  height:auto;
+  overflow:inherit;
 }
