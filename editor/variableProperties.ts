@@ -721,8 +721,12 @@ module TDev
             m.add(err);
             m.add(div('wall-dialog-buttons',
                 HTML.mkButton(lf("import"), () => {
-                    if (!input.files.length)
-                        err.setChildren([lf("Please select a file before importing.")]);
+                    if (!input.files.length) {
+                        var errd = div('', [lf("Please select a file before importing.")]);
+                        errd.setAttribute("role", "alert");
+                        errd.setAttribute("aria-live", "assertive");
+                        err.setChildren(errd);
+                    }
                     else {
                         m.dismiss();
                         handleImportFilesAsync(Util.toArray(input.files))
