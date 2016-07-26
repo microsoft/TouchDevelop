@@ -1,31 +1,31 @@
 ///<reference path='refs.ts'/>
 
-    module TDev.Browser {
+module TDev.Browser {
 
-    export var TheHost:Host;
-    export var TheApiCacheMgr:ApiCacheMgr;
+    export var TheHost: Host;
+    export var TheApiCacheMgr: ApiCacheMgr;
 
     var bugsEnabled = false;
 
-    function sdName(big: boolean, e:string = null) {
+    function sdName(big: boolean, e: string = null) {
         if (big) return divLike("h1", "sdName", e)
         else return div('sdName', e)
     }
 
     export class Host
-        extends Screen
-    {
+        extends Screen {
         constructor() {
             super()
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
             this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
             this.listHeader.setAttribute("aria-controls", "leftList");
+            this.listHeader.setAttribute("role", "header");
             this.theList.setAttribute("aria-live", "polite");
             this.theList.setAttribute("aria-relevant", "additions");
+            this.theList.setAttribute("role", "listbox");
             this.leftPane = divLike("aside", "slLeft", this.listHeader, this.theList, this.progressBar);
             this.leftPane.tabIndex = -1;
             this.leftPane.setAttribute("aria-label", lf("Script list"));
-            this.leftPane.setAttribute("role", "application");
             this.rightPane = divLike("main", "slRight", this.hdContainer, this.tabLabelContainer, this.containerMarker, this.tabContainer);
             this.rightPane.tabIndex = -1;
             this.rightPane.setAttribute("aria-label", lf("Script description pane"));
@@ -44,23 +44,25 @@
                     setTimeout(10, this.searchBox.focus());
                 };
                 var menuItems: {
-                    id:string;
+                    id: string;
                     name: string;
                     tick: Ticks;
                     cls?: string;
                     handler: () => void
                 }[] = [
-                    { id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls:"skip" },
-                    { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls:"skip" },
-                    { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
-                    { id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
-                        // we cannot detect reliably that we are offline,
-                        // always use in-app menu selection
-                        TemplateManager.createScript();
-                    } },
-                    { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
-                    { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: skipToMyScripts }
-                ];
+                        { id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
+                        { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" },
+                        { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
+                        {
+                            id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
+                                // we cannot detect reliably that we are offline,
+                                // always use in-app menu selection
+                                TemplateManager.createScript();
+                            }
+                        },
+                        { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
+                        { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: skipToMyScripts }
+                    ];
                 if (settings && Cloud.hasPermission("post-group"))
                     menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
                 if (settings && EditorSettings.widgets().hubChannels)
@@ -120,14 +122,14 @@
                                 mi.handler();
                             });
                             li.id = '' + mi.id;
-                            li.className = 'siteMenuBtn '+ (mi.cls || '');
+                            li.className = 'siteMenuBtn ' + (mi.cls || '');
                             if (!firstmii) firstmii = li;
                             li.setAttribute("role", "menuitem");
                             menu.appendChild(li);
                         });
 
-                        nav.appendChild(menu);                        
-                        m.add(nav);                        
+                        nav.appendChild(menu);
+                        m.add(nav);
                         m.fullBlack();
                         m.show();
                         if (firstmii) {
@@ -141,45 +143,45 @@
         private header = div("sdListLabel");
         private botDiv = div(null);
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
-        private autoUpdate:KeyboardAutoUpdate;
+        private autoUpdate: KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
         private backContainer = div("slBackContainer");
         private listHeaderHider = div("slListHeaderHider");
         private progressBar = HTML.mkProgressBar();
-        private listHeader:HTMLElement;
-        private leftPane:HTMLElement;
+        private listHeader: HTMLElement;
+        private leftPane: HTMLElement;
         public tabContainer = div("slTabContainer");
         private hdContainer = div("slHeaderContainer");
         private tabLabelContainer = div("slTabLabelContainer");
         private containerMarker = div("slContainerMarker");
-        private rightPane:HTMLElement;
+        private rightPane: HTMLElement;
         private bottomButtons = div("bottomButtons");
-        private theRoot:HTMLElement;
+        private theRoot: HTMLElement;
         private visible = false;
-        private locationCache:any = {};
-        public picturelessUsers:any = {};
-        private detailsLoadedFor:BrowserPage;
-        private installedHeaders:Cloud.Header[];
-        private scriptTexts:any;
-        private searchOnline:()=>void;
+        private locationCache: any = {};
+        public picturelessUsers: any = {};
+        private detailsLoadedFor: BrowserPage;
+        private installedHeaders: Cloud.Header[];
+        private scriptTexts: any;
+        private searchOnline: () => void;
         public initialSearch = "";
         public emphInstall = true;
         private firstLoad = true;
         public skipOneSync = false;
-        private reloadInstalled:()=>void;
+        private reloadInstalled: () => void;
         private searchVersion = 1;
         public backToEditor = false;
-        public runOnReload:()=>void = null;
-        private reloadHelpTopic:()=>void = null;
+        public runOnReload: () => void = null;
+        private reloadHelpTopic: () => void = null;
 
-        private topLocations:BrowserPage[] = [];
-        private topLocationsOverride:BrowserPage[] = null;
-        private helpLocations:BrowserPage[] = [];
+        private topLocations: BrowserPage[] = [];
+        private topLocationsOverride: BrowserPage[] = null;
+        private helpLocations: BrowserPage[] = [];
         private displayLimit = 0;
         private hasMore = false;
         static maxDisplayAtOnce = 40;
-        private moreDiv:HTMLElement;
-        private listDivs:HTMLElement[] = [];
+        private moreDiv: HTMLElement;
+        private listDivs: HTMLElement[] = [];
         private apiPath = "???";
         private topTitleHidden = false;
         private topTitle = "???";
@@ -197,8 +199,7 @@
                 .then(() => TheEditor.historyMgr.reload(HistoryMgr.windowHash()));
         }
 
-        public init()
-        {
+        public init() {
             this.theRoot.style.display = "none";
             this.theRoot.id = "slRoot";
             Util.setupDragToScroll(this.theList);
@@ -210,13 +211,13 @@
 
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
             this.searchBox.placeholder = lf("Search here...");
-
+            this.searchBox.setAttribute("aria-owns", "leftList");
 
             this.rightPane.withClick(() => this.hideSidePane(), true);
             this.listHeaderHider.setAttribute("aria-hidden", "true")
             this.listHeaderHider.withClick(() => this.hideSidePane());
 
-            this.setBackButton();            
+            this.setBackButton();
             this.initMeAsync().done(() => { }, () => { });
 
             elt("root").appendChild(EditorSettings.mkCopyrightNote());
@@ -224,12 +225,11 @@
             if (dbg) bugsEnabled = true;
         }
 
-        private initSignin(username:string = "") {
+        private initSignin(username: string = "") {
             this.populateSiteHeader(true, username);
         }
 
-        private updateScroll()
-        {
+        private updateScroll() {
             // SizeMgr.phoneMode is not set on init
             if (SizeMgr.phoneMode || Browser.isCellphone) {
                 Util.resetDragToScroll(this.tabContainer);
@@ -241,15 +241,13 @@
             }
         }
 
-        public applySizes()
-        {
+        public applySizes() {
             TipManager.setTip(null);
             this.updateSidePane();
             this.updateScroll();
         }
 
-        private setBackButton()
-        {
+        private setBackButton() {
             var icon = "svg:back,currentColor";
             var btn: HTMLElement;
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething)
@@ -273,7 +271,7 @@
                 } catch (e) {
                 }
         }
-        
+
         public initMeAsync(): Promise {
             Util.setUserLanguageSetting("", true)
             var id = Cloud.getUserId();
@@ -304,8 +302,7 @@
         }
 
         static updateIsWaiting = false;
-        static tryUpdate()
-        {
+        static tryUpdate() {
             if (this.updateIsWaiting && !Storage.temporary) {
                 this.updateIsWaiting = false;
                 tick(Ticks.appUpdate);
@@ -321,7 +318,7 @@
         public createChannel() {
             if (Cloud.anonMode(lf("creating channels"))) return;
 
-            var name = "ADJ scripts".replace(/ADJ/g,() => TopicInfo.getAwesomeAdj());
+            var name = "ADJ scripts".replace(/ADJ/g, () => TopicInfo.getAwesomeAdj());
             var nameBox = HTML.mkTextInput("text", lf("Enter a script name..."));
             var progress = HTML.mkProgressBar();
             var createBtn: HTMLElement = null;
@@ -333,8 +330,8 @@
                 div("wall-dialog-header", lf("create a new channel")),
                 div("wall-dialog-body", lf("Organize your scripts with channels!")),
                 div("wall-dialog-line-textbox", nameBox),
-               div("wall-dialog-buttons",
-                    createBtn = HTML.mkButton(lf("create"),() => {
+                div("wall-dialog-buttons",
+                    createBtn = HTML.mkButton(lf("create"), () => {
                         createBtn.removeSelf();
                         progress.start();
                         Cloud.postPrivateApiAsync("channels", { name: nameBox.value })
@@ -355,7 +352,7 @@
         }
 
         private notificationsCount = -1;
-        public addNotificationCounter(notificationBox : HTMLElement) {
+        public addNotificationCounter(notificationBox: HTMLElement) {
             var notificationsBtn = HTML.mkImg('svg:gel-alert,currentColor', '', lf("notifications"));
             notificationsBtn.id = "notificationsBtn";
             var notificationsCounterDiv = div('notificationCounter');
@@ -376,15 +373,14 @@
             });
             World.onNewNotificationChanged = (n: number) => {
                 if (n > 0 && this.notificationsCount != n) {
-                    HTML.showWebNotification(Runtime.appName, { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: Runtime.notificationIcon  });
+                    HTML.showWebNotification(Runtime.appName, { tag: "notifications", body: lf("You have {0} notification{0:s}", n), icon: Runtime.notificationIcon });
                 }
                 this.notificationsCount = n;
                 updateCount();
             };
         }
 
-        public showLegalNotice()
-        {
+        public showLegalNotice() {
             if (!Runtime.legalNotice ||
                 localStorage["legalNotice"] == Runtime.legalNotice)
                 return;
@@ -395,8 +391,8 @@
             var d = new ModalDialog();
             var noticeHTML = Runtime.legalNoticeHeader ||
                 (lf("<h3>welcome to Touch Develop</h3>") +
-                lf("<p>Touch Develop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
-                lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
+                    lf("<p>Touch Develop lets you <b>create apps easily</b> from your phone, tablet or PC.</p>") +
+                    lf("<p>You can share your apps with others, so they can <b>run and edit</b> them on Windows Phone, iPad, iPhone, Android, PC, or Mac.</p>"));
             d.addHTML(noticeHTML);
 
             var msgHolder = div(null);
@@ -412,8 +408,8 @@
                     Runtime.legalNotice = null;
                     if (Cloud.lite) {
                         if (!/ckns_policy=.0./.test(document.cookie))
-                            document.cookie = "ckns_accept=111; path=/; expires=" + 
-                                new Date(Date.now()+365*3600*24*1000).toUTCString();
+                            document.cookie = "ckns_accept=111; path=/; expires=" +
+                                new Date(Date.now() + 365 * 3600 * 24 * 1000).toUTCString();
                     } else
                         localStorage["legalNotice"] = notice;
                     d.canDismiss = true;
@@ -425,8 +421,7 @@
             d.show();
         }
 
-        public showHub(forceHub = false)
-        {
+        public showHub(forceHub = false) {
             if (this.autoHide() && this.sidePaneVisibleNow() && this.shownSomething) {
                 this.hideSidePane();
                 return;
@@ -446,8 +441,7 @@
             }
         }
 
-        public startSearch(s:string)
-        {
+        public startSearch(s: string) {
             if (currentScreen)
                 currentScreen.hide()
             this.initialSearch = s;
@@ -455,8 +449,7 @@
             this.searchBox.style.opacity = "0"
         }
 
-        private show()
-        {
+        private show() {
             this.searchBox.style.opacity = "1"
             currentScreen = this;
 
@@ -475,8 +468,7 @@
             }
         }
 
-        public hide()
-        {
+        public hide() {
             this.backToEditor = false;
             if (this.visible) {
                 this.theRoot.style.display = "none";
@@ -486,16 +478,14 @@
             World.cancelContinuouslySync();
         }
 
-        public restoreTopics()
-        {
+        public restoreTopics() {
             this.show();
         }
 
-        private setCurrent(scroll = true)
-        {
+        private setCurrent(scroll = true) {
             var theOne = null;
             if (this.detailsLoadedFor)
-                this.listDivs.forEach((e:HTMLElement) => {
+                this.listDivs.forEach((e: HTMLElement) => {
                     var bx = (<any>e).theBoxable;
                     if (bx && bx.equals(this.detailsLoadedFor)) {
                         e.setFlag("selected", true);
@@ -509,9 +499,8 @@
             if (!!theOne && scroll) Util.ensureVisible(theOne);
         }
 
-        public quickSearch(query:string):string[]
-        {
-            var res:ScriptInfo[] = []
+        public quickSearch(query: string): string[] {
+            var res: ScriptInfo[] = []
             var terms = query.toLowerCase().split(/\s+/);
             var fullName = terms.join("");
             this.installedHeaders.forEach((h) => {
@@ -520,11 +509,10 @@
                 if (info.lastScore > 0)
                     res.push(info)
             })
-            return res.sort((a, b) => BrowserPage.comparePages(a,b)).slice(0, 5).map((inf) => inf.app.getName())
+            return res.sort((a, b) => BrowserPage.comparePages(a, b)).slice(0, 5).map((inf) => inf.app.getName())
         }
 
-        public headersWithUpdates():Cloud.Header[]
-        {
+        public headersWithUpdates(): Cloud.Header[] {
             return this.installedHeaders.filter((h) => !!World.updateFor(h))
         }
 
@@ -532,8 +520,7 @@
 
         static fileLinesCache: StringMap<string[]> = {}
 
-        static highlightLine(e:HTMLElement, fn:string, ln:number)
-        {
+        static highlightLine(e: HTMLElement, fn: string, ln: number) {
             var ctx = 4;
 
             if (!e) return;
@@ -547,8 +534,7 @@
             }
         }
 
-        static showBugReport(bug: BugReport)
-        {
+        static showBugReport(bug: BugReport) {
             var bb = Util.flatClone(bug);
             bb.eventTrace = "";
             bb.logMessages = []
@@ -557,7 +543,7 @@
 
             if (bug.attachments) {
                 bug.attachments.forEach((a, i) => {
-                    var e = div("stackTraceEntry", lf("Attachment #{0} ({1} chars): {2}...", i, a.length, 
+                    var e = div("stackTraceEntry", lf("Attachment #{0} ({1} chars): {2}...", i, a.length,
                         a.replace(/\s+/g, " ").slice(0, 20)))
                     e.withClick(() => {
                         ModalDialog.showText(a)
@@ -599,7 +585,7 @@
             view.charts(false)
             view.reversed(false)
             view.append(bug.logMessages);
-            
+
             view.prependHTML(div(null, stack))
 
             var pre = div(null, str)
@@ -610,9 +596,8 @@
             return view.showAsync().done()
         }
 
-        private syncView(showCurrent = true)
-        {
-            var lst:BrowserPage[] = this.topLocations;
+        private syncView(showCurrent = true) {
+            var lst: BrowserPage[] = this.topLocations;
             this.listDivs = [];
 
             var terms: string[] = this.lastSearchValue.split(/\s+/)
@@ -736,7 +721,7 @@
             var searchAdd = []
             switch (this.apiPath) {
                 case "installed-scripts":
-                    // if (Cloud.isRestricted()) break
+                // if (Cloud.isRestricted()) break
                 case "recent-scripts":
                     searchPath = "scripts";
                     break;
@@ -750,7 +735,7 @@
                 case "art":
                 case "users":
                 case "comments":
-                case "pointers":    
+                case "pointers":
                     searchPath = this.apiPath;
                     break;
                 case "myart":
@@ -770,33 +755,33 @@
             var meid = Cloud.getUserId();
             if (searchMode) {
                 if (scriptMod)
-                (() => {
-                    var now = Util.now()/1000;
+                    (() => {
+                        var now = Util.now() / 1000;
 
-                    lst = lst.filter((b) => {
-                        if (!(b instanceof ScriptInfo)) return false;
-                        var si = <ScriptInfo>b;
-                        var ch = si.getCloudHeader();
-                        if (!ch) return false;
-                        if (ageLimit && (now - ch.recentUse) < ageLimit) return false;
-                        if (ageUpLimit && (now - ch.recentUse) > ageUpLimit) return false;
-                        if (onlyPublished && ch.status != "published") return false;
-                        if (onlyUnpublished && ch.status == "published") return false;
-                        if (smallerThan || largerThan) {
-                            var lines = 0;
-                            var empties = 0;
-                            this.scriptTexts[ch.guid].split(/\r?\n/).forEach((line) => {
-                                if (/^\s*(\}|meta .*)\s*$/.test(line)) empties++;
-                                else lines++;
-                            });
-                            if (smallerThan && lines >= smallerThan) return false;
-                            if (largerThan && lines <= largerThan) return false;
-                        }
-                        if (onlyMe && meid && ch.userId != meid) return false;
-                        if (onlyNotMe && meid && ch.userId == meid) return false;
-                        return true;
-                    });
-                })()
+                        lst = lst.filter((b) => {
+                            if (!(b instanceof ScriptInfo)) return false;
+                            var si = <ScriptInfo>b;
+                            var ch = si.getCloudHeader();
+                            if (!ch) return false;
+                            if (ageLimit && (now - ch.recentUse) < ageLimit) return false;
+                            if (ageUpLimit && (now - ch.recentUse) > ageUpLimit) return false;
+                            if (onlyPublished && ch.status != "published") return false;
+                            if (onlyUnpublished && ch.status == "published") return false;
+                            if (smallerThan || largerThan) {
+                                var lines = 0;
+                                var empties = 0;
+                                this.scriptTexts[ch.guid].split(/\r?\n/).forEach((line) => {
+                                    if (/^\s*(\}|meta .*)\s*$/.test(line)) empties++;
+                                    else lines++;
+                                });
+                                if (smallerThan && lines >= smallerThan) return false;
+                                if (largerThan && lines <= largerThan) return false;
+                            }
+                            if (onlyMe && meid && ch.userId != meid) return false;
+                            if (onlyNotMe && meid && ch.userId == meid) return false;
+                            return true;
+                        });
+                    })()
 
                 if (bugStatus) lst = []
 
@@ -817,13 +802,13 @@
             this.listDivs = [this.header];
             if (scriptMod && lst.length > 0) {
                 this.listDivs.push(div(null, HTML.mkButton(Util.fmt("uninstall {0} script{0:s}", lst.length), () => {
-                    this.massUninstall(lst.map((si:ScriptInfo) => si.getCloudHeader()));
+                    this.massUninstall(lst.map((si: ScriptInfo) => si.getCloudHeader()));
                 })))
             }
-            var seen:any = {}
+            var seen: any = {}
             var len = 0
             this.hasMore = false;
-            lst.forEach((s:BrowserPage) => {
+            lst.forEach((s: BrowserPage) => {
                 var id = (<BrowserPage>s).persistentId();
                 if (seen[id]) return;
                 seen[id] = 1;
@@ -841,15 +826,15 @@
             });
 
             this.searchOnline = null;
-            var searchDiv:HTMLElement = div(null);
-            var seenSearch:any = {}
+            var searchDiv: HTMLElement = div(null);
+            var seenSearch: any = {}
             var direct = div(null)
             var searchCount = Browser.isMobile ? 20 : 50;
 
-            var searchFrom = (cont:string) => {
+            var searchFrom = (cont: string) => {
                 var version = ++this.searchVersion;
 
-                var addEntry = (b:BrowserPage) => {
+                var addEntry = (b: BrowserPage) => {
                     var id = b.persistentId();
                     if (seenSearch[id]) return null;
                     seenSearch[id] = 1;
@@ -863,7 +848,7 @@
                 this.progressBar.start();
                 if (!cont && terms.length == 1) {
                     if (/^\/?[a-zA-Z\-]+$/i.test(terms[0])) {
-                        TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e:JsonPublication) => {
+                        TheApiCacheMgr.getAnd(terms[0].replace("/", ""), (e: JsonPublication) => {
                             if (!e || version != this.searchVersion) return;
                             var inf = this.getAnyInfoByPub(e, "");
                             if (inf) {
@@ -872,29 +857,29 @@
                         });
                     } else if (/^\d{9,64}$/i.test(terms[0])) {
                         Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + terms[0] : terms[0])
-                            .done((rc : JsonCode) => {
+                            .done((rc: JsonCode) => {
                                 if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
-                            }, e => {});
+                            }, e => { });
                     } else if (/^BuG\d{14}\w{8,}$/.test(terms[0])) {
                         Cloud.getPrivateApiAsync("bug/" + terms[0])
-                            .done(Host.showBugReport, e => {})
+                            .done(Host.showBugReport, e => { })
                     }
 
                     if (Cloud.lite && /^[a-z]{10}$/.test(terms[0])) {
                         Cloud.getPrivateApiAsync("me/code/" + terms[0])
-                            .done((rc : JsonCode) => {
+                            .done((rc: JsonCode) => {
                                 if (rc.verb == "ActivationCode") {
                                     var m = ModalDialog.ask(
                                         lf("You've entered a valid activation code with {0} credit(s). Do you want to apply it?",
                                             rc.credit || 0),
-                                        lf("apply code"), 
+                                        lf("apply code"),
                                         () => {
                                             m.dismiss()
                                             Cloud.postPrivateApiAsync("me/code/" + terms[0], {})
                                                 .done(() => {
                                                     Cloud.getUserSettingsAsync()
-                                                    .done(r => HTML.showProgressNotification(
-                                                        lf("You now have {0} credit(s).", r.credit || 0)))
+                                                        .done(r => HTML.showProgressNotification(
+                                                            lf("You now have {0} credit(s).", r.credit || 0)))
                                                 }, e => Cloud.handlePostingError(e, lf("apply code")))
                                         })
                                 } else if (rc.verb == "SpentActivationCode") {
@@ -902,31 +887,31 @@
                                 } else if (rc.verb == "MultiActivationCode") {
                                     ModalDialog.info(lf("code can't be used here"), lf("This code can be only used in creation of new accounts."))
                                 }
-                            }, e => {});
+                            }, e => { });
                     }
                 }
-                
+
                 if (Cloud.isOffline()) {
                     this.progressBar.stop();
-                    searchDiv.setChildren([div("sdLoadingMore", lf("can't search, are you connected to internet?"))]);    
+                    searchDiv.setChildren([div("sdLoadingMore", lf("can't search, are you connected to internet?"))]);
                     return;
                 }
-                
-                searchDiv.setChildren([div("sdLoadingMore", lf("searching..."))]);                
+
+                searchDiv.setChildren([div("sdLoadingMore", lf("searching..."))]);
 
                 var path = searchPath + "?" + cont + "count=" + searchCount + "&q=" + encodeURIComponent(terms.concat(searchAdd).join(" "))
                 if (bugStatus)
                     path = "bugs/" + bugStatus
                 searchCount = 50;
 
-                this.getLocationList(path, (items:BrowserPage[], xcont:string) => {
+                this.getLocationList(path, (items: BrowserPage[], xcont: string) => {
                     this.progressBar.stop();
                     if (version != this.searchVersion) return;
                     this.searchOnline = null;
                     var sd = searchDiv;
 
                     if (bugStatus) {
-                        var bugCompare = (a:BrowserPage, b:BrowserPage) => {
+                        var bugCompare = (a: BrowserPage, b: BrowserPage) => {
                             if (a instanceof CommentInfo) {
                                 if (b instanceof CommentInfo) {
                                     return (<CommentInfo>a).bugCompareTo(<CommentInfo>b, bugOrder)
@@ -938,10 +923,10 @@
 
                         if (bugUser) {
                             var bu = bugUser == "me" ? Cloud.getUserId()
-                                   : bugUser == "none" ? ""
-                                   : bugUser;
+                                : bugUser == "none" ? ""
+                                    : bugUser;
                             items = items.filter(i => {
-                                var j:JsonComment = TheApiCacheMgr.getCached(i.publicId)
+                                var j: JsonComment = TheApiCacheMgr.getCached(i.publicId)
                                 if (j && (j.assignedtoid || "") != bu)
                                     return false
                                 return true
@@ -950,7 +935,7 @@
                         items.sort(bugCompare)
                     }
 
-                    var elts:HTMLElement[] = items.map(addEntry);
+                    var elts: HTMLElement[] = items.map(addEntry);
                     if (xcont) {
                         searchDiv = div(null, HTML.mkButton(lf("load more"), () => { searchFrom("continuation=" + xcont + "&") }));
                         elts.push(searchDiv);
@@ -959,7 +944,7 @@
                     } else {
                         elts.unshift(div("sdLoadingMore", lf("found {0} result{0:s}", items.length)))
                     }
-                                        
+
                     this.initMoreDiv(path);
                     elts.push(this.moreDiv)
                     sd.setChildren(elts);
@@ -990,12 +975,48 @@
 
             if (allHelpBtn) this.listDivs.push(allHelpBtn)
 
+            // patch role="button" to role="option"
+            this.listDivs
+                .filter(d => d.getAttribute("role") == "button")
+                .forEach(d => d.setAttribute("role", "option"));
+            // only first element is tab stop
+            this.listDivs.filter(d => d.tabIndex == 0).slice(1).forEach(d => d.tabIndex = -1);
+            // handle key up and down
+            this.listDivs.forEach(d => {
+                d.onkeyup = (ev) => {
+                    Util.normalizeKeyEvent(ev);
+                    switch (ev.keyName) {
+                        case "Down":
+                            var next = <HTMLElement>d.nextElementSibling;
+                            if (next) {
+                                next.focus();
+                                ev.preventDefault();
+                                return false;
+                            }
+                            break;
+                        case "Up":
+                            var up = <HTMLElement>d.previousElementSibling;
+                            if (up) {
+                                up.focus();
+                                ev.preventDefault();
+                                return false;
+                            }
+                            break;
+                        case "Tab":
+                            ev.preventDefault();
+                            return false;
+                        default:
+                            break;
+                    }
+                }
+            })
+
             this.theList.setChildren(this.listDivs);
 
             this.setCurrent(showCurrent);
         }
 
-        public poweredByElements(): HTMLElement[]{
+        public poweredByElements(): HTMLElement[] {
             if (Cloud.isRestricted()) {
                 return [
                     div("powered-by powered-by-first",
@@ -1007,28 +1028,25 @@
                     , div("powered-by",
                         div("text", lf("Technology services by")),
                         div("img", HTML.mkA("", "https://mbed.org", "_blank", HTML.mkImg(Cloud.artUrl("zujxfuah"), null, lf("ARM logo")))))
-                    ];
+                ];
             }
             return [];
         }
 
-        private massUninstall(items:Cloud.Header[])
-        {
+        private massUninstall(items: Cloud.Header[]) {
             ModalDialog.ask(Util.fmt("really uninstall all these {0} scripts?", items.length), lf("uninstall scripts"), () => {
                 HTML.showProgressNotification(lf("uninstalling..."));
-                Promise.sequentialMap(items, (h:Cloud.Header) => World.uninstallAsync(h.guid))
+                Promise.sequentialMap(items, (h: Cloud.Header) => World.uninstallAsync(h.guid))
                     .then(() => this.clearAsync(false))
                     .done(() => { TheEditor.historyMgr.reload(HistoryMgr.windowHash()) });
             })
         }
 
-        private sortHeaders(items:Cloud.Header[], recent = false)
-        {
+        private sortHeaders(items: Cloud.Header[], recent = false) {
             function getNormalizedName(a: Cloud.Header) {
                 return (typeof a.name == "string") ? a.name.toLowerCase() : "";
             }
-            function cmp(a:Cloud.Header, b:Cloud.Header)
-            {
+            function cmp(a: Cloud.Header, b: Cloud.Header) {
                 if (recent) {
                     var d = b.recentUse - a.recentUse;
                     if (d) return d;
@@ -1039,8 +1057,7 @@
             items.sort(cmp)
         }
 
-        public clearAsync(skipSync: boolean)
-        {
+        public clearAsync(skipSync: boolean) {
             this.emphInstall = true;
             this.locationCache = {};
             this.detailsLoadedFor = null;
@@ -1135,7 +1152,7 @@
                                     HTML.mkButton(lf("not today"), () => {
                                         m.dismiss();
                                     })
-                                    )
+                                )
                             ]);
                             m.onDismiss = () => {
                                 if (postAskBetaFalse)
@@ -1173,8 +1190,8 @@
                             m.add([
                                 div("wall-dialog-header", askSomething.title),
                                 (!askSomething.picture) ? null :
-                                div("introThumb introLarge",
-                                    HTML.mkImg(askSomething.picture)),
+                                    div("introThumb introLarge",
+                                        HTML.mkImg(askSomething.picture)),
                                 div("wall-dialog-body", askSomething.message),
                                 div("wall-dialog-buttons", buttons)
                             ]);
@@ -1184,14 +1201,14 @@
                                         .done(undefined, () => { }); // ignore network errors
                             };
                             m.show();
-                      }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
-                      .then(() =>
-                        World.continuouslySyncAsync(false, () => {
-                            return this.updateInstalledHeaderCacheAsync().then(() => {
-                                this.syncDone();
-                            });
-                        }))
-                      .done();
+                        }, noOtherAsk).then(message => { Browser.TheHost.notifySyncDone() })
+                        .then(() =>
+                            World.continuouslySyncAsync(false, () => {
+                                return this.updateInstalledHeaderCacheAsync().then(() => {
+                                    this.syncDone();
+                                });
+                            }))
+                        .done();
                 }
                 else {
                     // user never registered; just skip
@@ -1203,8 +1220,7 @@
             return this.updateInstalledHeaderCacheAsync();
         }
 
-        public updateInstalledHeaderCacheAsync()
-        {
+        public updateInstalledHeaderCacheAsync() {
             return World.getInstalledAsync().then((objs) => {
                 this.installedHeaders = []
                 this.scriptTexts = null;
@@ -1212,13 +1228,12 @@
             });
         }
 
-        public getTutorialsStateAsync()
-        {
+        public getTutorialsStateAsync() {
             if (!this.installedHeaders)
                 return this.updateInstalledHeaderCacheAsync().then(() => this.getTutorialsStateAsync())
 
-            var limit = Util.now() / 1000 - 14*24*3600
-            var headers = <AST.HeaderWithState[]> this.installedHeaders.filter(h => h.status != "deleted" && h.recentUse >= limit)
+            var limit = Util.now() / 1000 - 14 * 24 * 3600
+            var headers = <AST.HeaderWithState[]>this.installedHeaders.filter(h => h.status != "deleted" && h.recentUse >= limit)
             return Promise.join(headers.map(h => World.getInstalledEditorStateAsync(h.guid).then(text => {
                 if (!text) return null
                 var st = <AST.AppEditorState>JSON.parse(text || "{}")
@@ -1231,9 +1246,8 @@
             }))).then(arr => arr.filter(h => h != null))
         }
 
-        public newScriptName(basename:string) : string
-        {
-            var names:any = {};
+        public newScriptName(basename: string): string {
+            var names: any = {};
             this.installedHeaders.forEach((h) => {
                 if (h.status != "deleted")
                     names[h.name] = h;
@@ -1249,7 +1263,7 @@
             return name;
         }
 
-        public joinGroup(code : string) {
+        public joinGroup(code: string) {
             if (Cloud.anonMode(lf("joining groups"))) return;
 
             var name = HTML.mkTextInput("text", lf("enter invitation code"));
@@ -1261,7 +1275,7 @@
             var groupid = "";
             var progressBar = HTML.mkProgressBar();
             var errorDiv = div('');
-            function setError(error : string) {
+            function setError(error: string) {
                 errorDiv.setChildren([error]);
             }
             var btn = HTML.mkButton(lf("join group"), () => {
@@ -1278,7 +1292,7 @@
                         }
                         TheApiCacheMgr.invalidate("groups");
                         TheApiCacheMgr.invalidate("me/groups");
-                        TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
+                        TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
                         var groupInfo = this.getGroupInfoById(groupid);
                         TheHost.loadDetails(groupInfo);
                     }, e => {
@@ -1306,13 +1320,13 @@
 
             var autoKeyboard = KeyboardAutoUpdate.mkInput(name, Util.catchErrors("getCode", () => {
                 codeid = name.value.trim();
-                var lastCode : JsonCode = null;
+                var lastCode: JsonCode = null;
                 if (/\d{9,64}/.test(codeid)) {
                     progressBar.start();
                     Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid)
                         .then((code: JsonCode) => {
                             lastCode = code;
-                            if(code.verb == 'JoinGroup')
+                            if (code.verb == 'JoinGroup')
                                 return Cloud.getPrivateApiAsync(Cloud.lite ? code.data + "?code=" + codeid : code.data)
                             else
                                 return Promise.as(undefined);
@@ -1370,7 +1384,7 @@
 
             var div1, cancelBtn;
             var m = new ModalDialog();
-            var groupInfo : GroupInfo;
+            var groupInfo: GroupInfo;
             m.add([
                 progressBar,
                 div("wall-dialog-header", lf("create new group")),
@@ -1396,7 +1410,7 @@
                             .then((r: Cloud.PostApiGroupsResponse) => {
                                 TheApiCacheMgr.invalidate("groups");
                                 TheApiCacheMgr.invalidate("me/groups");
-                                TheApiCacheMgr.invalidate(Cloud.getUserId()+ "/groups");
+                                TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
                                 groupInfo = this.getGroupInfoById(r.id);
                                 return groupInfo.newInvitationCodeAsync();
                             }).then(() => {
@@ -1407,14 +1421,14 @@
                                 return groupInfo.changePictureAsync();
                             })
                             .done(() => TheHost.loadDetails(groupInfo, "settings"),
-                                e => {
-                                    if (e && e.status == 405) {
-                                        ModalDialog.info(lf("we need your email"), 
-                                            lf("You need to have your email address set and verified to create groups."));
-                                    } else {
-                                        Cloud.handlePostingError(e, lf("create group"));
-                                    }
-                                })
+                            e => {
+                                if (e && e.status == 405) {
+                                    ModalDialog.info(lf("we need your email"),
+                                        lf("You need to have your email address set and verified to create groups."));
+                                } else {
+                                    Cloud.handlePostingError(e, lf("create group"));
+                                }
+                            })
                     }))
             ]);
             m.show();
@@ -1429,13 +1443,11 @@
                 TheEditor.newScriptAndLoadAsync(stub, t));
         }
 
-        public getInstalledByPubId(id:string)
-        {
+        public getInstalledByPubId(id: string) {
             return this.installedHeaders.filter((k) => k.status == "published" && k.scriptId == id)[0];
         }
 
-        public createInstalled(h:Cloud.Header):ScriptInfo
-        {
+        public createInstalled(h: Cloud.Header): ScriptInfo {
             if (!h || h.status == "deleted") return undefined;
 
             var si = new ScriptInfo(this);
@@ -1444,17 +1456,15 @@
             return si;
         }
 
-        public getInstalledByGuid(guid:string):ScriptInfo
-        {
-            var si = <ScriptInfo> this.locationCache[guid];
+        public getInstalledByGuid(guid: string): ScriptInfo {
+            var si = <ScriptInfo>this.locationCache[guid];
             if (si) return si;
-            var h = this.installedHeaders.filter((h:Cloud.Header) => h.guid == guid)[0];
+            var h = this.installedHeaders.filter((h: Cloud.Header) => h.guid == guid)[0];
             return this.createInstalled(h);
         }
 
         /* new-scripts top-scripts search?text=[text] users comments screenshots reviews tags */
-        public getLocationList(apiPath:string, f:(itms:BrowserPage[], cont:string)=>void, noCache = false, includeETags = true) : Promise
-        {
+        public getLocationList(apiPath: string, f: (itms: BrowserPage[], cont: string) => void, noCache = false, includeETags = true): Promise {
             TheApiCacheMgr.initMassiveReview();
 
             if (!this.installedHeaders) {
@@ -1466,7 +1476,7 @@
                 items = items.filter((h) => h && h.status != "deleted")
                 this.sortHeaders(items, true) // apiPath == "recent-scripts")
 
-                var res:BrowserPage[] = [];
+                var res: BrowserPage[] = [];
                 Object.keys(items).forEach((k) => {
                     var s = this.createInstalled(items[k]);
                     if (s) res.push(s);
@@ -1477,22 +1487,22 @@
 
             var suspended = <ApiCacheEntry[]>[];
 
-            var handle = (lst:JsonList, opts?:DataOptions) => {
+            var handle = (lst: JsonList, opts?: DataOptions) => {
                 var isDefinitive = !opts || opts.isDefinitive;
-                var res:BrowserPage[] = [];
+                var res: BrowserPage[] = [];
 
                 if (lst.items) {
-                    lst.items.forEach((e:JsonPublication, i:number) => {
+                    lst.items.forEach((e: JsonPublication, i: number) => {
                         var k = this.getAnyInfoByPub(e, lst.etags ? lst.etags[i].ETag : "");
                         if (k) res.push(k);
                     });
                 } else {
                     if (!isDefinitive)
-                        lst.etags.forEach((e:JsonEtag) => {
+                        lst.etags.forEach((e: JsonEtag) => {
                             suspended.push(TheApiCacheMgr.getSuspended(e.id));
                         });
 
-                    lst.etags.forEach((e:JsonEtag) => {
+                    lst.etags.forEach((e: JsonEtag) => {
                         var k = this.getAnyInfoByEtag(e);
                         if (k) res.push(k);
                     });
@@ -1500,7 +1510,7 @@
 
                 if (isDefinitive) {
                     if (lst.etags)
-                        lst.etags.forEach((e:JsonEtag) => {
+                        lst.etags.forEach((e: JsonEtag) => {
                             TheApiCacheMgr.validate(e.id, e.ETag);
                         });
 
@@ -1525,13 +1535,13 @@
                 apiPath += "&etagsmode=includeetags";
                 return Cloud.getPublicApiAsync(apiPath).then((s) => { handle(s) });
             } else {
-                apiPath += "&etagsmode=" + (includeETags ? "includeetags" : "etagsonly") ;
+                apiPath += "&etagsmode=" + (includeETags ? "includeetags" : "etagsonly");
                 TheApiCacheMgr.getAndEx(apiPath, handle);
                 return Promise.as();
             }
         }
 
-        public getReferencedPubInfo(e:JsonPubOnPub):BrowserPage {
+        public getReferencedPubInfo(e: JsonPubOnPub): BrowserPage {
             if (e.kind == "notification") {
                 var jn = <JsonNotification>e
                 return this.getAnyInfoByEtag({ id: jn.supplementalid, kind: jn.supplementalkind, ETag: "" });
@@ -1539,8 +1549,7 @@
             return this.getAnyInfoByEtag({ id: e.publicationid, kind: e.publicationkind, ETag: "" });
         }
 
-        public getAnyInfoByEtag(e:JsonEtag):BrowserPage
-        {
+        public getAnyInfoByEtag(e: JsonEtag): BrowserPage {
             if (!e) return null;
             else if (e.kind == "script") return this.getScriptInfoById(e.id);
             else if (e.kind == "forum") return this.getForumInfo();
@@ -1557,14 +1566,12 @@
             else return null;
         }
 
-        public getAnyInfoByPub(e:JsonPublication, etag:string):BrowserPage
-        {
+        public getAnyInfoByPub(e: JsonPublication, etag: string): BrowserPage {
             TheApiCacheMgr.store(e.id, e, etag);
             return this.getAnyInfoByEtag(<JsonEtag>(<any>e));
         }
 
-        public getForumInfo()
-        {
+        public getForumInfo() {
             var si = <ForumInfo>this.getLocation("theForum");
             if (!si) {
                 si = new ForumInfo(this);
@@ -1573,19 +1580,16 @@
             return si;
         }
 
-        private showInstalledAsync()
-        {
+        private showInstalledAsync() {
             this.showList("installed-scripts");
             return Promise.wrap(null);
         }
 
-        public clearHelp()
-        {
+        public clearHelp() {
             this.reloadHelpTopic = null;
         }
 
-        public loadHash(h:string[])
-        {
+        public loadHash(h: string[]) {
             TipManager.update();
             if (h[0] == "help") {
                 if (this.reloadHelpTopic) {
@@ -1609,7 +1613,7 @@
             this.clearAsync(skipSync).done(() => {
                 this.emphInstall = this.firstLoad;
                 this.firstLoad = false;
-                var pg:BrowserPage = null;
+                var pg: BrowserPage = null;
 
                 if (h[2] == "script" && /-/.test(h[3])) {
                     var hd = this.installedHeaders.filter((hd) => hd.guid == h[3])[0];
@@ -1676,7 +1680,7 @@
                                 });
                     });
                 } else {
-                    var etag = <JsonEtag> { kind: h[2], id: h[3], ETag: "" }
+                    var etag = <JsonEtag>{ kind: h[2], id: h[3], ETag: "" }
                     if (etag.kind == "script" && !etag.id) {
                         Util.setHash(TDev.hubHash)
                         return
@@ -1694,8 +1698,7 @@
             });
         }
 
-        public overrideSideList(items:BrowserPage[])
-        {
+        public overrideSideList(items: BrowserPage[]) {
             this.topLocationsOverride = items
             this.syncView()
         }
@@ -1706,13 +1709,12 @@
             noCache?: boolean;
             includeETags?: boolean;
             header?: string;
-            } = {})
-        {
+        } = {}) {
             var item = options.item;
             var tab = options.tab || "";
             var noCache = !!options.noCache;
             var includeETags = !!options.includeETags;
-            
+
             this.setSearch("");
             var listKind = path.replace(/-scripts/, "").replace(/\/scripts/, "");
             var header = options.header || listKind;
@@ -1758,7 +1760,7 @@
                 case "myart":
                     tick(Ticks.browseListMyArt);
                     header = lf("my art");
-                    if(Cloud.getUserId()) path = Cloud.getUserId() + "/art";
+                    if (Cloud.getUserId()) path = Cloud.getUserId() + "/art";
                     else path = null;
                     break;
                 case "mygroups":
@@ -1830,7 +1832,7 @@
             if (path == "help")
                 this.helpLocations = HelpTopic.contextTopics.map(TopicInfo.mk);
 
-            var loadEntries = (cont:string):void => {
+            var loadEntries = (cont: string): void => {
                 var lpath = path;
                 if (cont) {
                     if (/\?/.test(path)) lpath += "&continuation=" + cont;
@@ -1863,8 +1865,8 @@
                         if (!item)
                             this.showSidePane();
                     }
-                    
-                    this.initMoreDiv(path);                                        
+
+                    this.initMoreDiv(path);
 
                     if (/^pointers$/.test(path) && Cloud.hasPermission("global-list")) {
                         this.moreDiv.appendChild(HTML.mkButton(lf("create pointer"), () => {
@@ -1902,7 +1904,7 @@
                             this.syncView(false)
                         }));
                     }
-                    
+
                 }, noCache, includeETags);
             }
 
@@ -1922,9 +1924,9 @@
 
             this.showLegalNotice();
         }
-        
+
         private initMoreDiv(path: string) {
-            this.moreDiv.setChildren([]);            
+            this.moreDiv.setChildren([]);
             if (/^(installed|scripts)/.test(path)) {
                 this.moreDiv.appendChild(TemplateManager.mkEditorBox(TemplateManager.createEditor).withClick(() => {
                     tick(Ticks.browseCreateCode);
@@ -1937,13 +1939,11 @@
             }
         }
 
-        public deletePaneAnimAsync()
-        {
+        public deletePaneAnimAsync() {
             return Util.animAsync("delete", 1000, this.rightPane).then(() => { this.clearRightPane() });
         }
 
-        private clearRightPane()
-        {
+        private clearRightPane() {
             this.detailsLoadedFor = null;
             this.tabLabelContainer.setChildren([]);
             this.hdContainer.setChildren([]);
@@ -1951,10 +1951,9 @@
             this.setCurrent();
         }
 
-        private tabLabels:TabLabel[];
+        private tabLabels: TabLabel[];
 
-        public moreLink(name:string, t:BrowserTab)
-        {
+        public moreLink(name: string, t: BrowserTab) {
             return div("slMoreLink", name).withClick(() => {
                 if (t instanceof BrowserPage)
                     this.loadDetails(<BrowserPage>t);
@@ -1965,14 +1964,13 @@
 
         public getApiPath() { return this.apiPath }
 
-        public loadTab(t:BrowserTab, anim = true)
-        {
+        public loadTab(t: BrowserTab, anim = true) {
             var s = t.parent;
             var setHash = () => {
                 TheEditor.historyMgr.setHash("list:" + this.apiPath + ":" + s.persistentId() + ":" + t.getId() + s.additionalHash(),
                     s.getTitle()
-                        + (t.getId() == "overview" ? "" : " " + t.getName())
-                        + " (" + this.topTitle + ")");
+                    + (t.getId() == "overview" ? "" : " " + t.getName())
+                    + " (" + this.topTitle + ")");
             }
             setHash();
 
@@ -1998,8 +1996,7 @@
                 Util.showBottomPanel(this.tabContainer);
         }
 
-        public syncTabVisibility()
-        {
+        public syncTabVisibility() {
             if (!!this.tabLabels)
                 this.tabLabels.forEach((l) => {
                     if (l.theTab.isEmpty)
@@ -2011,8 +2008,7 @@
 
         public sidePane() { return this.theList; }
 
-        public loadDetails(s:BrowserPage, tab = ""):void
-        {
+        public loadDetails(s: BrowserPage, tab = ""): void {
             AbuseReview.hide()
             TipManager.setTip(null);
             ModalDialog.dismissCurrent();
@@ -2022,11 +2018,11 @@
             if (currentScreen != this) {
                 if (currentScreen)
                     currentScreen.hide();
-                this.showList("installed-scripts",  { item:s, tab: tab});
+                this.showList("installed-scripts", { item: s, tab: tab });
                 return;
             }
 
-            var shouldFocus = !!this.detailsLoadedFor;            
+            var shouldFocus = !!this.detailsLoadedFor;
             this.detailsLoadedFor = s;
             s = s.currentlyForwardsTo();
             var tabs = s.getTabs();
@@ -2038,7 +2034,7 @@
                 this.tabLabelContainer.style.display = "none";
             } else {
                 this.tabLabelContainer.style.display = "block";
-                tabs.forEach((t:BrowserTab, i:number) => {
+                tabs.forEach((t: BrowserTab, i: number) => {
                     var n = t.getName();
                     if (!n) return;
                     var e = <TabLabel>div("sdTabLabel", n);
@@ -2053,7 +2049,7 @@
             this.hdContainer.setChildren([s.mkBigBox()]);
 
             var allTabs = s.getAllTabs();
-            var tabToLoad:BrowserTab = allTabs[0];
+            var tabToLoad: BrowserTab = allTabs[0];
             if (tab)
                 tabToLoad = allTabs.filter((t) => t.getId() == tab)[0] || tabToLoad;
             this.loadTab(tabToLoad, false);
@@ -2061,19 +2057,18 @@
             /*if (!this.lastSearchValue)
                 this.syncView();
             else*/
-                this.setCurrent();
+            this.setCurrent();
 
             Util.showRightPanel(this.rightPane);
             if (!SizeMgr.phoneMode)
                 this.tabContainer.style.top = (this.containerMarker.offsetTop / SizeMgr.topFontSize) + "em";
 
-            if (shouldFocus) this.rightPane.focus();            
+            if (shouldFocus) this.rightPane.focus();
         }
 
-        private getLocation(id:string) : BrowserPage { return this.locationCache[id]; }
+        private getLocation(id: string): BrowserPage { return this.locationCache[id]; }
 
-        public getCreatorInfo(pub:JsonPublication)
-        {
+        public getCreatorInfo(pub: JsonPublication) {
             var id = pub.userid;
             Util.check(!!id, "no id on " + JSON.stringify(pub));
             var si = <UserInfo>this.getLocation(id);
@@ -2089,8 +2084,7 @@
             return si;
         }
 
-        public getUserInfo(c:JsonUser)
-        {
+        public getUserInfo(c: JsonUser) {
             var si = <UserInfo>this.getLocation(c.id);
             if (!si) {
                 si = new UserInfo(this);
@@ -2101,8 +2095,7 @@
             return si;
         }
 
-        public getUserInfoById(id:string, username:string)
-        {
+        public getUserInfoById(id: string, username: string) {
             var si = <UserInfo>this.getLocation(id);
             if (!si) {
                 si = new UserInfo(this);
@@ -2112,8 +2105,7 @@
             return si;
         }
 
-        public getScreenshotInfoById(id: string)
-        {
+        public getScreenshotInfoById(id: string) {
             var si = <ScreenshotInfo>this.getLocation(id);
             if (!si) {
                 si = new ScreenshotInfo(this);
@@ -2123,8 +2115,7 @@
             return si;
         }
 
-        public getArtInfoById(id:string)
-        {
+        public getArtInfoById(id: string) {
             var si = <ArtInfo>this.getLocation(id);
             if (!si) {
                 si = new ArtInfo(this);
@@ -2134,8 +2125,7 @@
             return si;
         }
 
-        public getScriptInfoById(id:string)
-        {
+        public getScriptInfoById(id: string) {
             var si = <ScriptInfo>this.getLocation(id);
             if (!si) {
                 si = new ScriptInfo(this);
@@ -2145,8 +2135,7 @@
             return si;
         }
 
-        public getScriptInfo(c:JsonScript)
-        {
+        public getScriptInfo(c: JsonScript) {
             var si = <ScriptInfo>this.getLocation(c.id);
             if (!si) {
                 si = new ScriptInfo(this);
@@ -2167,9 +2156,8 @@
             }
             return si;
         }
-        
-        public getChannelInfoById(id:string)
-        {
+
+        public getChannelInfoById(id: string) {
             var si = <ChannelInfo>this.getLocation(id);
             if (!si) {
                 si = new ChannelInfo(this);
@@ -2177,7 +2165,7 @@
                 this.saveLocation(si);
             }
             return si;
-        }        
+        }
 
         public getChannelInfo(c: JsonChannel) {
             var si = <ChannelInfo>this.getLocation(c.id);
@@ -2190,8 +2178,7 @@
             return si;
         }
 
-        public getArtInfo(c:JsonArt)
-        {
+        public getArtInfo(c: JsonArt) {
             var si = <ArtInfo>this.getLocation(c.id);
             if (!si) {
                 si = new ArtInfo(this);
@@ -2202,8 +2189,7 @@
             return si;
         }
 
-        public getDocumentInfo(c: any)
-        {
+        public getDocumentInfo(c: any) {
             var id = (<JsonEtag>c).id || ('document:' + (<JsonDocument>c).url);
             var isEtag = !!(<JsonEtag>c).id;
             var si = <DocumentInfo>this.getLocation(id);
@@ -2222,8 +2208,7 @@
             return si;
         }
 
-        public getCommentInfoById(id:string)
-        {
+        public getCommentInfoById(id: string) {
             var si = <CommentInfo>this.getLocation(id);
             if (!si) {
                 si = new CommentInfo(this);
@@ -2243,8 +2228,7 @@
             return si;
         }
 
-        public getSpecificInfoById(id:string, cl:any)
-        {
+        public getSpecificInfoById(id: string, cl: any) {
             var si = this.getLocation(id);
             if (!si) {
                 si = new cl(this);
@@ -2254,8 +2238,7 @@
             return si;
         }
 
-        private saveLocation(b:BrowserPage)
-        {
+        private saveLocation(b: BrowserPage) {
             if (b.publicId)
                 this.locationCache[b.publicId] = b;
             else if (b instanceof ScriptInfo) {
@@ -2263,8 +2246,7 @@
             }
         }
 
-        static expandableTextBox(s:string)
-        {
+        static expandableTextBox(s: string) {
             if (!s) s = "";
             var maxLen = 300;
             var shortLen = maxLen - 50;
@@ -2276,7 +2258,7 @@
             var r = div("sdExpandableText")
             Browser.setInnerHTML(r, Util.formatText(s))
             return r
-            
+
             /* ACC: problems with button            
             if (s.replace(/[^\n]/g, "").length > 3 || s.length > maxLen) {
                 var btn;
@@ -2296,21 +2278,18 @@
             */
         }
 
-        static textBox(s: string)
-        {
+        static textBox(s: string) {
             var r = div("sdExpandableText");
             Browser.setInnerHTML(r, Util.htmlEscape(s).replace(/\n/g, "<br/>"));
             return r;
         }
 
-        public showSidePane()
-        {
+        public showSidePane() {
             super.showSidePane();
             this.setBackButton();
         }
 
-        public hideSidePane()
-        {
+        public hideSidePane() {
             super.hideSidePane();
             this.setBackButton()
         }
@@ -2320,8 +2299,7 @@
         // Search
         //
 
-        private searchKey()
-        {
+        private searchKey() {
             //Util.normalizeKeyEvent(e);
             this.showSidePane();
             if (this.lastSearchValue != this.searchBox.value) {
@@ -2330,23 +2308,20 @@
             }
             //if (e.keyName == "Enter" && !!this.searchOnline) {
             //    this.searchOnline();
-           // }
+            // }
         }
 
-        private setSearch(s:string)
-        {
+        private setSearch(s: string) {
             this.searchBox.value = s;
             this.lastSearchValue = s;
         }
 
-        public searchFor(s:string)
-        {
+        public searchFor(s: string) {
             this.setSearch(s);
             this.syncView();
         }
 
-        public keyDown(e:KeyboardEvent)
-        {
+        public keyDown(e: KeyboardEvent) {
             var s = Util.keyEventString(e);
             if (s && !e.ctrlKey && !e.metaKey) {
                 this.setSearch(s);
@@ -2357,26 +2332,25 @@
 
 
             switch (e.keyName) {
-            case "Esc":
-                if (this.lastSearchValue != "") {
-                    this.setSearch("");
-                    this.syncView();
-                    this.searchBox.blur();
-                } else {
-                    this.showHub();
-                }
-                break;
+                case "Esc":
+                    if (this.lastSearchValue != "") {
+                        this.setSearch("");
+                        this.syncView();
+                        this.searchBox.blur();
+                    } else {
+                        this.showHub();
+                    }
+                    break;
 
-            default:
-                return false;
+                default:
+                    return false;
             }
 
 
             return true;
         }
 
-        public syncDone()
-        {
+        public syncDone() {
             if (this.reloadInstalled)
                 this.reloadInstalled();
         }
@@ -2386,8 +2360,7 @@
         /// In portrait mode, if you click on hub- > my scripts- > see more, you go to #list: installed - scripts,
         /// and then immediately to #modal - side, with the actual list.
         /// When you hit back, without this hack you would see an empty screen
-        public hashReloaded()
-        {
+        public hashReloaded() {
             var h = HistoryMgr.windowHash().split(/:/)
             if (SizeMgr.portraitMode && h[0] == "#list" && !h[2]) {
                 Ticker.dbg("history.back from Host.hashReloaded");
@@ -2395,8 +2368,7 @@
             }
         }
 
-        public notifySyncDone()
-        {
+        public notifySyncDone() {
             this.updateInstalledHeaderCacheAsync().done(() => {
                 this.syncDone();
                 if (currentScreen)
@@ -2404,8 +2376,7 @@
             });
         }
 
-        public getTutorialUpdateKeyAsync(ht:HelpTopic)
-        {
+        public getTutorialUpdateKeyAsync(ht: HelpTopic) {
             if (ht.json.rootid == "none" &&
                 ht.json.id && ht.json.id != "none") {
                 return TheApiCacheMgr.getAsync(ht.json.id, true).then(scr => {
@@ -2417,48 +2388,43 @@
         }
     }
 
-    export enum EntryState
-    {
+    export enum EntryState {
         stale,
         fetching,
         current,
     }
 
-    export interface SerializedApiCacheEntry
-    {
-        path:string;
-        lastUse:number;
-        etag?:string;
-        currentData?:any;
+    export interface SerializedApiCacheEntry {
+        path: string;
+        lastUse: number;
+        etag?: string;
+        currentData?: any;
     }
 
     // this is not a promise - it may trigger updates twice
-    export class ApiCacheEntry
-    {
-        public currentData:any = null;
-        public etag:string;
+    export class ApiCacheEntry {
+        public currentData: any = null;
+        public etag: string;
         private callbacks = [];
         private state = EntryState.stale;
         public hardSerialized = 0; // 0 - no, 1 - done, negative - in progress
         public lastUse = 0;
         private suspended = false;
-        private attachedIds:string[] = [];
-        private lastFetch:number;
+        private attachedIds: string[] = [];
+        private lastFetch: number;
 
-        static timeout = 60*1000;
+        static timeout = 60 * 1000;
 
-        constructor(public path:string, public mgr:ApiCacheMgr) {
+        constructor(public path: string, public mgr: ApiCacheMgr) {
         }
-        public getReqObj()
-        {
-            var reqObj:any = { "relative_url": this.path }
+        public getReqObj() {
+            var reqObj: any = { "relative_url": this.path }
             if (this.etag)
                 reqObj["If-None-Match"] = this.etag;
             return reqObj;
         }
 
-        public gotRespObj(resp:Cloud.BatchResponse)
-        {
+        public gotRespObj(resp: Cloud.BatchResponse) {
             if (resp.code == 304)
                 this.gotData(this.currentData, this.etag);
             else if (resp.code == 200)
@@ -2482,22 +2448,19 @@
             return true;
         }
 
-        public fetch()
-        {
+        public fetch() {
             this.state = EntryState.fetching;
             if (!this.suspended)
                 this.mgr.queueRequest(this);
         }
 
-        public suspend()
-        {
+        public suspend() {
             if (!this.isCurrent()) {
                 this.suspended = true;
             }
         }
 
-        public resume()
-        {
+        public resume() {
             if (this.suspended) {
                 this.suspended = false;
                 if (this.state == EntryState.fetching)
@@ -2505,28 +2468,24 @@
             }
         }
 
-        public validate()
-        {
+        public validate() {
             this.state = EntryState.current;
             this.lastFetch = Date.now();
         }
 
-        public invalidate(poke = false)
-        {
+        public invalidate(poke = false) {
             this.state = EntryState.stale;
             if (poke) this.refresh()
         }
 
-        public got404()
-        {
+        public got404() {
             if (/^me\/reviewed/.test(this.path))
                 this.gotData({ id: "" }, "");
             else
                 this.gotData(false, "");
         }
 
-        public gotData(data:any, etag:string)
-        {
+        public gotData(data: any, etag: string) {
             var wasSame = false;
             this.etag = etag;
             var newDataStr = JSON.stringify(data)
@@ -2551,13 +2510,11 @@
             });
         }
 
-        public gotError(err:any)
-        {
+        public gotError(err: any) {
             this.callbacks = [];
         }
 
-        public set(d:any, weak = false)
-        {
+        public set(d: any, weak = false) {
             this.hardSerialized = 0
             this.currentData = d
             this.mgr.logData(JSON.stringify(d).length)
@@ -2569,8 +2526,7 @@
             }
         }
 
-        public refresh()
-        {
+        public refresh() {
             this.lastUse = Date.now();
             this.isCurrent();
             if (this.state == EntryState.stale)
@@ -2579,23 +2535,20 @@
 
         private currentOptions() { return <DataOptions>{ isDefinitive: this.isCurrent(), isSame: false }; }
 
-        public whenUpdated(f:(x:any, opts:DataOptions) => void)
-        {
+        public whenUpdated(f: (x: any, opts: DataOptions) => void) {
             if (this.state == EntryState.fetching)
                 this.callbacks.push(f);
             if (this.currentData != null)
                 f(this.currentData, this.currentOptions());
         }
 
-        public attachAutoUpdate(elt:HTMLElement)
-        {
+        public attachAutoUpdate(elt: HTMLElement) {
             if (this.currentData != null)
                 (<any>elt).autoUpdate(elt, this.currentData, this.currentOptions());
             this.attachedIds.push(elt.id);
         }
 
-        public toJson(justTime:boolean):SerializedApiCacheEntry
-        {
+        public toJson(justTime: boolean): SerializedApiCacheEntry {
             if (justTime)
                 return { path: this.path, lastUse: this.lastUse }
             else
@@ -2607,8 +2560,7 @@
                 }
         }
 
-        public updateWithJson(j:SerializedApiCacheEntry)
-        {
+        public updateWithJson(j: SerializedApiCacheEntry) {
             this.lastUse = j.lastUse;
             if (j.currentData != null) {
                 this.etag = j.etag
@@ -2619,56 +2571,51 @@
     }
 
     export class BogusApiCacheEntry
-        extends ApiCacheEntry
-    {
-        constructor(par:ApiCacheMgr) {
+        extends ApiCacheEntry {
+        constructor(par: ApiCacheMgr) {
             super("*bogus*", par)
         }
-        public fetch() {}
+        public fetch() { }
     }
 
-    export interface DataOptions
-    {
-        isDefinitive:boolean;
-        isSame:boolean;
+    export interface DataOptions {
+        isDefinitive: boolean;
+        isSame: boolean;
     }
 
     interface MassiveJsonList
-        extends JsonList
-    {
-        disableMassiveReview:boolean;
+        extends JsonList {
+        disableMassiveReview: boolean;
     }
 
-    export class ApiCacheMgr
-    {
-        private entriesByPath:StringMap<ApiCacheEntry> = {};
+    export class ApiCacheMgr {
+        private entriesByPath: StringMap<ApiCacheEntry> = {};
         private offlineErrorReported = false;
-        private pendingReqs:ApiCacheEntry[] = [];
+        private pendingReqs: ApiCacheEntry[] = [];
         private massiveReviewObject = {};
         private massiveReviewInitDone = false;
         private lastHardRefreshTime = 0;
         static massiveReviewUrl = "me/reviews?count=199";
-        private hardStorage:Promise;
+        private hardStorage: Promise;
         private currentSerializationId = -1;
         private unflushedDataSize = 0;
 
-        private websocket:WebSocket;
-        private websocketReady:WebSocket;
-        private websocketAuthenticated:boolean;
-        private websocketLastOpen:number;
+        private websocket: WebSocket;
+        private websocketReady: WebSocket;
+        private websocketAuthenticated: boolean;
+        private websocketLastOpen: number;
         private websocketMsgCount = 0;
-        private websocketWaiters:StringMap<ApiCacheEntry> = {};
+        private websocketWaiters: StringMap<ApiCacheEntry> = {};
 
 
-        static maxLocalStorageSize = 512*1024;
-        static maxEntrySize = 32*1024;
-        static maxHardStorageSize = 4*1024*1024;
+        static maxLocalStorageSize = 512 * 1024;
+        static maxEntrySize = 32 * 1024;
+        static maxHardStorageSize = 4 * 1024 * 1024;
         static localStorageFlushThreshold = ApiCacheMgr.maxLocalStorageSize / 4;
 
         private autoUpdateId = 0;
 
-        public initMassiveReview()
-        {
+        public initMassiveReview() {
             if (Cloud.lite) {
                 this.massiveReviewObject = null
                 return
@@ -2682,7 +2629,7 @@
                 this.massiveReviewObject = null
             } else {
                 e.refresh();
-                e.whenUpdated((lst:MassiveJsonList, opts:DataOptions) => {
+                e.whenUpdated((lst: MassiveJsonList, opts: DataOptions) => {
                     if (lst.continuation) {
                         lst.disableMassiveReview = true;
                         this.massiveReviewObject = null
@@ -2696,7 +2643,7 @@
                             delete curr[k];
                     });
 
-                    lst.items = lst.items.map((r:JsonReview):any => {
+                    lst.items = lst.items.map((r: JsonReview): any => {
                         if (!curr[r.publicationid])
                             curr[r.publicationid] = { id: r.id };
                         return { id: r.id, publicationid: r.publicationid }
@@ -2705,8 +2652,7 @@
             }
         }
 
-        public registerAutoUpdate(url:string, elt:HTMLElement, update:(elt:HTMLElement, data:any, options:DataOptions)=>void)
-        {
+        public registerAutoUpdate(url: string, elt: HTMLElement, update: (elt: HTMLElement, data: any, options: DataOptions) => void) {
             elt.id = "autoUpdate-" + this.autoUpdateId++;
             (<any>elt).autoUpdate = update;
             var entry = this.get(url);
@@ -2714,8 +2660,7 @@
             return elt;
         }
 
-        public storeHeart(id:string, hid:string)
-        {
+        public storeHeart(id: string, hid: string) {
             this.initMassiveReview();
             if (this.massiveReviewObject)
                 this.massiveReviewObject[id] = { id: hid, stored: true };
@@ -2724,15 +2669,13 @@
             this.invalidate(id);
         }
 
-        private heartId(id:string)
-        {
+        private heartId(id: string) {
             var res = this.massiveReviewObject[id];
             if (!res) return "";
             else return res.id;
         }
 
-        public getHeart(id:string, changedMyMind:(reviewId:string)=>void)
-        {
+        public getHeart(id: string, changedMyMind: (reviewId: string) => void) {
             var late = false;
             var res = "";
 
@@ -2763,9 +2706,8 @@
             return res;
         }
 
-        public compressList(l:JsonList) : any
-        {
-            var compress = (i:JsonIdObject):any => {
+        public compressList(l: JsonList): any {
+            var compress = (i: JsonIdObject): any => {
                 if (i && this.entriesByPath.hasOwnProperty(i.id))
                     return i.id;
                 else
@@ -2776,14 +2718,13 @@
 
             if (l.items) {
                 // STRBUG what's the cast to JsonIdObject?
-               return <JsonList>{ continuation: l.continuation, items: <JsonIdObject[]>l.items.map(compress), etags: null };
+                return <JsonList>{ continuation: l.continuation, items: <JsonIdObject[]>l.items.map(compress), etags: null };
             } else return l;
         }
 
-        private flushReqArray(reqs:ApiCacheEntry[])
-        {
+        private flushReqArray(reqs: ApiCacheEntry[]) {
             Cloud.postApiBatch({ array: reqs.map((e) => e.getReqObj()) }).done(
-                (resps:Cloud.BatchResponses) => {
+                (resps: Cloud.BatchResponses) => {
                     reqs.forEach((entry, i) => {
                         var resp = resps.array[i];
                         if (!resp)
@@ -2791,7 +2732,7 @@
                         else entry.gotRespObj(resp)
                     });
                 },
-                (err:any) => {
+                (err: any) => {
                     try {
                         Cloud.handlePostingError(err, lf("sync"), false)
                     } catch (err) {
@@ -2800,8 +2741,7 @@
                 });
         }
 
-        private flushRequests()
-        {
+        private flushRequests() {
             var max = 40;
             while (this.pendingReqs.length > 0) {
                 var arr = this.pendingReqs.slice(0, max);
@@ -2810,8 +2750,7 @@
             }
         }
 
-        public queueRequest(entry:ApiCacheEntry)
-        {
+        public queueRequest(entry: ApiCacheEntry) {
             if (this.websocketReady) {
                 var obj = entry.getReqObj();
                 obj.reqid = ++this.websocketMsgCount + "";
@@ -2840,10 +2779,9 @@
             }
         }
 
-        private decompressLists()
-        {
+        private decompressLists() {
             var oops = false;
-            var decompress = (v:any):any => {
+            var decompress = (v: any): any => {
                 if (typeof v == "string") {
                     var d = this.entriesByPath.hasOwnProperty(v) ? this.entriesByPath[v].currentData : null;
                     if (!d) oops = true;
@@ -2871,13 +2809,11 @@
             });
         }
 
-        public refetch(path:string, rec = false)
-        {
+        public refetch(path: string, rec = false) {
             this.invalidate(path, rec, true)
         }
 
-        public invalidate(path:string, rec = false, poke = false)
-        {
+        public invalidate(path: string, rec = false, poke = false) {
             this.forEachEntry((e) => {
                 if (Util.startsWith(e.path, path)) {
                     if (rec && e.currentData && e.currentData.etags) {
@@ -2893,9 +2829,8 @@
             })
         }
 
-        public validate(path:string, etag:string)
-        {
-            var e = <ApiCacheEntry> this.entriesByPath[path];
+        public validate(path: string, etag: string) {
+            var e = <ApiCacheEntry>this.entriesByPath[path];
             if (e) {
                 if (e.etag == etag) {
                     e.validate();
@@ -2903,9 +2838,8 @@
             }
         }
 
-        public store(path:string, resp:any, etag = "", weak = false) : ApiCacheEntry
-        {
-            var e:ApiCacheEntry;
+        public store(path: string, resp: any, etag = "", weak = false): ApiCacheEntry {
+            var e: ApiCacheEntry;
             if (this.entriesByPath.hasOwnProperty(path)) {
                 e = this.entriesByPath[path];
                 if (!etag && JSON.stringify(resp) == JSON.stringify(e.currentData))
@@ -2919,23 +2853,20 @@
             return e;
         }
 
-        public getSuspended(path:string) : ApiCacheEntry
-        {
+        public getSuspended(path: string): ApiCacheEntry {
             var e = this.getCore(path);
             e.suspend();
             return e;
         }
 
-        private get(path:string) : ApiCacheEntry
-        {
+        private get(path: string): ApiCacheEntry {
             var e = this.getCore(path);
             e.refresh();
             return e;
         }
 
-        private getCore(path:string) : ApiCacheEntry
-        {
-            var e:ApiCacheEntry;
+        private getCore(path: string): ApiCacheEntry {
+            var e: ApiCacheEntry;
             if (this.entriesByPath.hasOwnProperty(path)) {
                 e = this.entriesByPath[path];
             } else {
@@ -2945,35 +2876,30 @@
             return e;
         }
 
-        public has(path:string)
-        {
-            var e = <ApiCacheEntry> this.entriesByPath[path];
+        public has(path: string) {
+            var e = <ApiCacheEntry>this.entriesByPath[path];
             return (!!e && !!e.currentData);
         }
 
-        public getCached(path:string)
-        {
-            var e = <ApiCacheEntry> this.entriesByPath[path];
+        public getCached(path: string) {
+            var e = <ApiCacheEntry>this.entriesByPath[path];
             if (e) return e.currentData;
             else return undefined;
         }
 
-        public getAndEx(path:string, f:(x:any,opts:DataOptions)=>void)
-        {
+        public getAndEx(path: string, f: (x: any, opts: DataOptions) => void) {
             var e = this.get(path);
             e.whenUpdated(f);
             return e;
         }
 
-        public getAnd(path:string, f:(x:any)=>void)
-        {
+        public getAnd(path: string, f: (x: any) => void) {
             var e = this.get(path);
             e.whenUpdated((d, o) => { if (!o.isSame) f(d); });
             return e;
         }
 
-        public getAsync(path:string, cachedOK = false)
-        {
+        public getAsync(path: string, cachedOK = false) {
             var called = false;
 
             return new Promise((onSuccess: (v: any) => any, onError: (v: any) => any, onProgress: (v: any) => any) => {
@@ -2986,11 +2912,10 @@
             });
         }
 
-        private stringify(id:number)
-        {
+        private stringify(id: number) {
             var forLocal = id == 0
             var maxSize = forLocal ? ApiCacheMgr.maxLocalStorageSize : ApiCacheMgr.maxHardStorageSize;
-            var entries:ApiCacheEntry[] = Object.keys(this.entriesByPath).map((k) => this.entriesByPath[k]);
+            var entries: ApiCacheEntry[] = Object.keys(this.entriesByPath).map((k) => this.entriesByPath[k]);
             entries.sort((a, b) => b.lastUse - a.lastUse);
             var res = "[";
             var first = true;
@@ -2998,7 +2923,7 @@
                 var entry = entries[i]
                 if (entry.currentData == null) continue;
 
-                var s:string;
+                var s: string;
                 if (forLocal && entry.hardSerialized == 1) {
                     if (entry.lastUse > this.lastHardRefreshTime)
                         s = JSON.stringify(entry.toJson(true))
@@ -3020,32 +2945,29 @@
             return res;
         }
 
-        public snapshotCacheAsync(storage:any)
-        {
+        public snapshotCacheAsync(storage: any) {
             return this.flushToHardStorageAsync()
                 .then(() => this.hardStorage)
-                .then((table:Storage.Table) => table.getValueAsync("data"))
+                .then((table: Storage.Table) => table.getValueAsync("data"))
                 .then(data => {
                     storage.apiCache = JSON.parse(data)
                     return
                 })
         }
 
-        public restoreCacheAsync(storage:any)
-        {
+        public restoreCacheAsync(storage: any) {
             if (!storage.apiCache) return Promise.as()
             return Storage.getTableAsync("ApiCache")
-                .then((table:Storage.Table) => table.setItemsAsync({ data: JSON.stringify(storage.apiCache) }))
+                .then((table: Storage.Table) => table.setItemsAsync({ data: JSON.stringify(storage.apiCache) }))
         }
 
-        public flushToHardStorageAsync()
-        {
+        public flushToHardStorageAsync() {
             var id = this.currentSerializationId--
             this.unflushedDataSize = 0
 
-            return this.hardStorage.then((table:Storage.Table) =>
+            return this.hardStorage.then((table: Storage.Table) =>
                 table.setItemsAsync({ data: this.stringify(id) }))
-            .then(() => {
+                .then(() => {
                     this.forEachEntry((entry) => {
                         if (entry.hardSerialized == id) {
                             entry.hardSerialized = 1
@@ -3056,21 +2978,19 @@
                 });
         }
 
-        private forEachEntry(f:(e:ApiCacheEntry)=>void)
-        {
+        private forEachEntry(f: (e: ApiCacheEntry) => void) {
             Object.keys(this.entriesByPath).forEach((k) => {
                 f(this.entriesByPath[k])
             })
         }
 
-        private loadEntries(s:string)
-        {
+        private loadEntries(s: string) {
             if (!s) return;
             try {
-                var entries:SerializedApiCacheEntry[] = JSON.parse(s);
+                var entries: SerializedApiCacheEntry[] = JSON.parse(s);
                 entries.forEach((j) => {
                     var path = j.path;
-                    var e:ApiCacheEntry = this.entriesByPath[path];
+                    var e: ApiCacheEntry = this.entriesByPath[path];
                     if (!e) {
                         e = new ApiCacheEntry(path, this)
                         this.entriesByPath[path] = e
@@ -3081,8 +3001,7 @@
             } catch (e) { }
         }
 
-        public closeWebsocket()
-        {
+        public closeWebsocket() {
             if (this.websocket) {
                 var ws = this.websocket
                 this.websocket = null
@@ -3094,8 +3013,7 @@
 
         static useWebsockets = false;
 
-        public initWebsocketAsync()
-        {
+        public initWebsocketAsync() {
             if (!ApiCacheMgr.useWebsockets || !Cloud.lite) return Promise.as()
 
             var r = new PromiseInv()
@@ -3145,16 +3063,15 @@
             } else return Promise.as()
         }
 
-        public initAsync()
-        {
+        public initAsync() {
             this.hardStorage = Storage.getTableAsync("ApiCache")
             Ticker.dbg("ApiCacheMgr.initAsync: got table promise");
             return this.hardStorage.
-                then((table:Storage.Table) => {
+                then((table: Storage.Table) => {
                     Ticker.dbg("ApiCacheMgr.initAsync: got table");
                     return table.getValueAsync("data")
                 }).
-                then((v:string) => {
+                then((v: string) => {
                     Ticker.dbg("ApiCacheMgr.initAsync: got data");
                     this.entriesByPath = {} // just in case
                     this.loadEntries(v);
@@ -3171,36 +3088,32 @@
                 .then(() => this.initWebsocketAsync())
         }
 
-        public save()
-        {
+        public save() {
             var s = this.stringify(0);
             Util.log("saving cache mgr, {0} bytes", s.length);
             window.localStorage["cacheMgrState"] = s;
             this.unflushedDataSize = s.length;
         }
 
-        public logData(size:number)
-        {
+        public logData(size: number) {
             this.unflushedDataSize += size + 50;
             if (this.unflushedDataSize > ApiCacheMgr.localStorageFlushThreshold)
                 this.flushToHardStorageAsync().done();
         }
     }
 
-    export interface TabLabel extends HTMLElement
-    {
-        theTab:BrowserTab;
+    export interface TabLabel extends HTMLElement {
+        theTab: BrowserTab;
     }
 
-    export class BrowserTab
-    {
-        public inlineContent:HTMLElement;
-        public inlineContentContainer:HTMLElement;
-        public tabContent:HTMLElement;
+    export class BrowserTab {
+        public inlineContent: HTMLElement;
+        public inlineContentContainer: HTMLElement;
+        public tabContent: HTMLElement;
         public tabLoaded = false;
         public isEmpty = false;
 
-        constructor(public parent:BrowserPage) {
+        constructor(public parent: BrowserPage) {
         }
         public browser() { return this.parent.parentBrowser; }
         public getName() { return ""; }
@@ -3210,13 +3123,11 @@
         public bgIcon() { return ""; }
         public noneText() { return ""; }
 
-        public setVisibility(v:boolean)
-        {
+        public setVisibility(v: boolean) {
             this.inlineContentContainer.style.display = v ? (this.inlineIsTile() ? "inline-block" : "block") : "none";
         }
 
-        public initElements()
-        {
+        public initElements() {
             this.inlineContent = <HTMLElement>div(this.inlineIsTile() ? "sdTabTile" : "sdInlineTab").withClick(() => {
                 this.browser().loadTab(this);
             });
@@ -3224,11 +3135,10 @@
             this.tabContent = div("sdTab");
         }
 
-        public initInline() {}
-        public initTab() : void { Util.abstract() }
+        public initInline() { }
+        public initTab(): void { Util.abstract() }
 
-        public update()
-        {
+        public update() {
             this.initInline();
             if (this.tabLoaded)
                 this.initTab();
@@ -3286,23 +3196,22 @@
 
     export interface Boxable {
         mkSmallBox(): HTMLElement;
-        match(terms:string[], fullName:string):number;
-        lastScore:number;
+        match(terms: string[], fullName: string): number;
+        lastScore: number;
     }
 
     export class BrowserPage
         extends BrowserTab
-        implements Boxable
-    {
-        private tabsCache:BrowserTab[];
-        public publicId:string;
-        public currentTab:BrowserTab;
-        public lastScore:number;
+        implements Boxable {
+        private tabsCache: BrowserTab[];
+        public publicId: string;
+        public currentTab: BrowserTab;
+        public lastScore: number;
 
         public getPublicationId() { return this.publicId; }
         public additionalHash() { return "" }
 
-        constructor(public parentBrowser:Host) {
+        constructor(public parentBrowser: Host) {
             super(null);
             this.parent = this;
         }
@@ -3310,8 +3219,8 @@
 
         public currentlyForwardsTo() { return this; }
 
-        public persistentId():string { return ""; }
-        public getTitle():string { return this.publicId; }
+        public persistentId(): string { return ""; }
+        public getTitle(): string { return this.publicId; }
         public showInList() { return true; }
 
         static comparePages(a: BrowserPage, b: BrowserPage): number {
@@ -3327,22 +3236,19 @@
                 return c;
         }
 
-        public activateTab(t:BrowserTab)
-        {
+        public activateTab(t: BrowserTab) {
             this.currentTab = t;
         }
 
-        public equals(other:BrowserPage) { return other && (this == other || this.persistentId() == other.persistentId()); }
+        public equals(other: BrowserPage) { return other && (this == other || this.persistentId() == other.persistentId()); }
 
-        public isDeleted()
-        {
+        public isDeleted() {
             return false;
         }
 
-        public mkSmallBox():HTMLElement
-        {
+        public mkSmallBox(): HTMLElement {
             var box = this.mkBoxCore(false)
-            return box.withClick(() => { 
+            return box.withClick(() => {
                 if (this.isDeleted()) {
                     HTML.wrong(box);
                     return;
@@ -3350,27 +3256,23 @@
 
                 if (!Cloud.isRestricted() && !/ visited/.test(box.className))
                     box.className += " visited";
-                this.parentBrowser.loadDetails(this) 
+                this.parentBrowser.loadDetails(this)
             });
         }
 
-        public showSelf()
-        {
+        public showSelf() {
             this.parentBrowser.loadDetails(this)
         }
 
-        public mkSmallBoxNoClick():HTMLElement
-        {
+        public mkSmallBoxNoClick(): HTMLElement {
             return this.mkBoxCore(false);
         }
 
-        public mkBigBox():HTMLElement
-        {
+        public mkBigBox(): HTMLElement {
             return this.mkBoxCore(true);
         }
 
-        public reportAbuse(big:boolean, doubleConfirm = false, onDeleted : () => void = undefined):HTMLElement
-        {
+        public reportAbuse(big: boolean, doubleConfirm = false, onDeleted: () => void = undefined): HTMLElement {
             if (!big || !this.getPublicationId()) return null;
 
             if (Cloud.lite) {
@@ -3386,10 +3288,9 @@
         }
 
         // sizes are 1 (smallest), 2, 3
-        public mkTile(size:number) : HTMLElement { return Util.abstract() }
+        public mkTile(size: number): HTMLElement { return Util.abstract() }
 
-        public getAllTabs():BrowserTab[]
-        {
+        public getAllTabs(): BrowserTab[] {
             var tabs = this.getTabs()
             var res = tabs.slice(0)
             tabs.forEach(t => {
@@ -3399,34 +3300,30 @@
             return res
         }
 
-        public getTabs():BrowserTab[]
-        {
+        public getTabs(): BrowserTab[] {
             if (!this.tabsCache) {
                 this.tabsCache = this.mkTabsCore().filter((t) => !!t);
-                this.tabsCache.forEach((t:BrowserTab) => t.initElements());
-                this.tabsCache.forEach((t:BrowserTab) => t.initInline());
+                this.tabsCache.forEach((t: BrowserTab) => t.initElements());
+                this.tabsCache.forEach((t: BrowserTab) => t.initInline());
             }
             return this.tabsCache;
         }
 
-        public mkBoxCore(big:boolean):HTMLElement { return Util.abstract() }
-        public mkTabsCore():BrowserTab[] { return [this]; }
-        private loadDetails():HTMLElement[] { return Util.abstract() }
+        public mkBoxCore(big: boolean): HTMLElement { return Util.abstract() }
+        public mkTabsCore(): BrowserTab[] { return [this]; }
+        private loadDetails(): HTMLElement[] { return Util.abstract() }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             return 0;
         }
 
-        public withUpdate(elt:HTMLElement, update:(data:any)=>void)
-        {
+        public withUpdate(elt: HTMLElement, update: (data: any) => void) {
             return TheApiCacheMgr.registerAutoUpdate(this.publicId, elt, (elt, data, opts) => {
                 if (!opts.isSame) update(data);
             });
         }
 
-        public twitterMessage()
-        {
+        public twitterMessage() {
             return " " + Cloud.config.hashtag;
         }
 
@@ -3439,13 +3336,13 @@
             var url = Cloud.config.shareUrl + "/" + id;
             var text = this.twitterMessage();
 
-            if (EditorSettings.widgets().scriptEmail)         
+            if (EditorSettings.widgets().scriptEmail)
                 btns.push(div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:email,currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
 
             if (!Cloud.isRestricted()) {
                 btns.pushRange(["twitter", "facebook"].map(network =>
                     div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:" + network + ",currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-                    ));
+                ));
             }
             if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
                 btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100", '', lf("add to channel"))).withClick(() => {
@@ -3454,7 +3351,7 @@
                         custombuttons: [
                             HTML.mkButton(lf("create channel"), () => this.browser().createChannel())
                         ]
-                        }).done((info: ChannelInfo) => {
+                    }).done((info: ChannelInfo) => {
                         var si = (<ScriptInfo>this.parent);
                         if (info) info.addScriptAsync(si).done();
                     });
@@ -3465,26 +3362,24 @@
     }
 
     export class ListTab
-        extends BrowserTab
-    {
-        public numElts:string;
-        private eltsSoFar:JsonPublication[] = [];
+        extends BrowserTab {
+        public numElts: string;
+        private eltsSoFar: JsonPublication[] = [];
 
-        constructor(par:BrowserPage, public urlSuff:string) {
+        constructor(par: BrowserPage, public urlSuff: string) {
             super(par)
         }
-        public script():ScriptInfo { return this.parent instanceof ScriptInfo ? <ScriptInfo>this.parent : null; }
+        public script(): ScriptInfo { return this.parent instanceof ScriptInfo ? <ScriptInfo>this.parent : null; }
 
         public hideOnEmpty() { return false; }
         public needsJsonScript() { return false; }
         public getPreciseCount() { return -1; }
-        public topContainer():HTMLElement { return null; }
+        public topContainer(): HTMLElement { return null; }
 
-        public inlineText(e:JsonIdObject) : any[] { return null; }
-        public tabBox(e:JsonIdObject) : HTMLElement { return null; }
+        public inlineText(e: JsonIdObject): any[] { return null; }
+        public tabBox(e: JsonIdObject): HTMLElement { return null; }
 
-        static limitLength(s:string, max:number)
-        {
+        static limitLength(s: string, max: number) {
             return s.length > max ? s.slice(0, max) + "..." : s;
         }
 
@@ -3499,14 +3394,13 @@
             else // user asked for more
                 return Browser.isCellphone ? 20 : Browser.isMobile ? 25 : 30;
         }
-        public loadMoreElementsAnd(cont:string, f:(items:any[], cont:string)=>void)
-        {
+        public loadMoreElementsAnd(cont: string, f: (items: any[], cont: string) => void) {
             var id = this.getParentId();
             if (!id) return;
 
             var count = this.nextCount(cont);
             var path = this.getUrl() + (/\?/.test(this.getUrl()) ? "&" : "?") + "count=" + count + (!cont ? "" : "&continuation=" + cont);
-            TheApiCacheMgr.getAnd(path, (l:JsonList) => {
+            TheApiCacheMgr.getAnd(path, (l: JsonList) => {
                 if (!l) l = { items: [], etags: [], continuation: "" }
 
                 if (!cont) {
@@ -3522,35 +3416,31 @@
                     var prom = this.script().getJsonScriptPromise();
                     if (!prom.currentData)
                         f(l.items, c);
-                    prom.whenUpdated((dat,opts) => { if (!opts.isSame) f(l.items, c); });
+                    prom.whenUpdated((dat, opts) => { if (!opts.isSame) f(l.items, c); });
                 } else {
                     f(l.items, c);
                 }
             });
         }
 
-        public getTileLabel(c:string)
-        {
+        public getTileLabel(c: string) {
             var nm = this.getName();
             if (c == "1") nm = nm.replace(/s$/, "");
             return div("sdTabTileLabel", span(null, nm));
         }
 
-        public getTileContent(c:string):any[]
-        {
+        public getTileContent(c: string): any[] {
             var img = null;
             if (this.bgIcon())
                 img = HTML.mkImg(this.bgIcon() + ",black,clip=80");
             return [div("sdTabTileCount", span(null, c), img), this.getTileLabel(c)];
         }
 
-        private setCount(c:string)
-        {
+        private setCount(c: string) {
             this.inlineContent.setChildren(this.getTileContent(c));
         }
 
-        public initElements()
-        {
+        public initElements() {
             super.initElements();
             this.inlineContentContainer.className = "sdInlineContentContainer sdList-" + this.getId();
             if (!!this.parent.getPublicationId()) {
@@ -3562,9 +3452,8 @@
             }
         }
 
-        public initInline()
-        {
-            this.loadMoreElementsAnd(null, (cmts:JsonPublication[]) => {
+        public initInline() {
+            this.loadMoreElementsAnd(null, (cmts: JsonPublication[]) => {
                 if (this.hideOnEmpty() && cmts.length == 0) {
                     this.setVisibility(false);
                     this.isEmpty = true;
@@ -3607,15 +3496,14 @@
             });
         }
 
-        public finalListElt():HTMLElement { return div(null) }
+        public finalListElt(): HTMLElement { return div(null) }
 
-        private loadMoreBtn(cont:string) : HTMLElement
-        {
-            var btn:HTMLElement = HTML.mkButton(lf("load more"), () => {
+        private loadMoreBtn(cont: string): HTMLElement {
+            var btn: HTMLElement = HTML.mkButton(lf("load more"), () => {
                 btn.removeSelf();
                 var loading = div("sdLoadingMore", lf("loading more..."));
                 this.tabContent.appendChild(loading);
-                this.loadMoreElementsAnd(cont, (elts:JsonPublication[], cont:string) => {
+                this.loadMoreElementsAnd(cont, (elts: JsonPublication[], cont: string) => {
                     loading.removeSelf();
                     elts.map(c => this.tabBox(c)).filter(elt => !!elt).forEach(elt => this.tabContent.appendChild(elt));
                     if (!!cont) this.tabContent.appendChild(this.loadMoreBtn(cont));
@@ -3625,10 +3513,9 @@
             return btn;
         }
 
-        public initTab()
-        {
+        public initTab() {
             var tc = this.topContainer()
-            this.loadMoreElementsAnd(null, (cmts:JsonPublication[], cont:string) => {
+            this.loadMoreElementsAnd(null, (cmts: JsonPublication[], cont: string) => {
                 var children = cmts.map((c) => this.tabBox(c));
                 if (tc) children.unshift(tc);
                 this.tabContent.setChildren(children);
@@ -3666,22 +3553,20 @@
                     if (!Runtime.theRuntime || !Runtime.theRuntime.sessions.enable_script_session_mgt)
                         ModalDialog.info(lf("not available"),
                             lf("No runtime information found. Please run some script first."))
-                     else {
+                    else {
                         Cloud.authenticateAsync(lf("cloud data")).then((authenticated) => {
                             if (authenticated)
                                 // check if last session matches
                                 return TDev.RT.CloudData.managementDialog(Runtime.theRuntime);
                         }).done();
                     }
-           })]);
+                })]);
         }
     }
 
     export class HistoryTab
-        extends BrowserTab
-    {
-        constructor(par:BrowserPage)
-        {
+        extends BrowserTab {
+        constructor(par: BrowserPage) {
             super(par)
         }
 
@@ -3693,20 +3578,18 @@
             return "svg:fa-history";
         }
 
-        static historicalTextAsync(uid:string, guid:string, it:JsonHistoryItem)
-        {
+        static historicalTextAsync(uid: string, guid: string, it: JsonHistoryItem) {
             if (Cloud.lite)
                 return World.getScriptBlobAsync(it.historyid)
                     .then(resp => resp ? resp.script : null)
 
             var scrid = it.scriptstatus == "published" ? it.scriptid : null
             return scrid ? ScriptCache.getScriptAsync(scrid) :
-                    Cloud.getPrivateApiAsync(uid + "/installed/" + guid + "/history/" + it.historyid)
+                Cloud.getPrivateApiAsync(uid + "/installed/" + guid + "/history/" + it.historyid)
                     .then(resp => resp && resp.bodies && resp.bodies[0] ? resp.bodies[0].script : null);
         }
 
-        private boxFor(it:JsonHistoryItem)
-        {
+        private boxFor(it: JsonHistoryItem) {
             var s = this.script()
             var guid = s.getGuid()
             var scrid = it.scriptstatus == "published" ? it.scriptid : null
@@ -3721,17 +3604,17 @@
                             div("sdAddInfoOuter",
                                 div("sdAddInfoInner",
                                     Util.timeSince(it.time)
-                                        + (scrid ? " /" + scrid : "")
-                                        + (it.scriptsize ? lf(", size: {0} characters", it.scriptsize) : ""))),
+                                    + (scrid ? " /" + scrid : "")
+                                    + (it.scriptsize ? lf(", size: {0} characters", it.scriptsize) : ""))),
                             div("sdAuthor", div("sdAuthorInner showWhenSelected", lf("current"))))))
             box.setFlag("selected", it.isactive)
 
             box.withClick(() => {
-                var currentHeader = (<ScriptInfo> this.parent).cloudHeader;
+                var currentHeader = (<ScriptInfo>this.parent).cloudHeader;
                 var scrProm = new PromiseInv();
                 // The script text for the old item in the history.
                 var htext = "";
-                var m:ModalDialog = ScriptProperties.showDiff(scrProm, {
+                var m: ModalDialog = ScriptProperties.showDiff(scrProm, {
                     "restore": () => {
                         var prog = HTML.mkProgressBar()
                         prog.start()
@@ -3751,12 +3634,12 @@
                             // to an external editor, the metadata set below is used.
                             currentHeader.meta = hMeta;
                             World.updateInstalledScriptAsync(currentHeader, htext, null)
-                            .then(() => {
-                                prog.stop()
-                                m.dismiss()
-                                this.browser().loadTab(this.parent)
-                            })
-                            .done()
+                                .then(() => {
+                                    prog.stop()
+                                    m.dismiss()
+                                    this.browser().loadTab(this.parent)
+                                })
+                                .done()
                         } else {
                             Util.childNodes(<HTMLElement>box.parentNode).forEach(n => n.setFlag("selected", false));
                             Cloud.postPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history/" + it.historyid, {})
@@ -3778,27 +3661,26 @@
                 }, false, currentHeader)
 
                 Promise.join([HistoryTab.historicalTextAsync(Cloud.getUserId(), this.script().getGuid(), it),
-                              s.getScriptTextAsync()]).done(texts => {
-                    if (!texts[0] || !texts[1])
-                        return;
-                    htext = texts[0]
-                    if (!currentHeader.editor) {
-                        var app0 = AST.Parser.parseScript(texts[0]);
-                        var app1 = AST.Parser.parseScript(texts[1]);
-                        AST.Diff.diffApps(app0, app1)
-                        scrProm.success(app1)
-                    } else {
-                        // no-op if there's an external editor (because the call
-                        // [showDiff] above returns immediately and doesn't wait on
-                        // [scrProm] to complete)
-                    }
-                })
+                    s.getScriptTextAsync()]).done(texts => {
+                        if (!texts[0] || !texts[1])
+                            return;
+                        htext = texts[0]
+                        if (!currentHeader.editor) {
+                            var app0 = AST.Parser.parseScript(texts[0]);
+                            var app1 = AST.Parser.parseScript(texts[1]);
+                            AST.Diff.diffApps(app0, app1)
+                            scrProm.success(app1)
+                        } else {
+                            // no-op if there's an external editor (because the call
+                            // [showDiff] above returns immediately and doesn't wait on
+                            // [scrProm] to complete)
+                        }
+                    })
             })
             return box
         }
 
-        static showMicroEditsAsync(uid:string, guid:string, allItems:JsonHistoryItem[])
-        {
+        static showMicroEditsAsync(uid: string, guid: string, allItems: JsonHistoryItem[]) {
             var numItems = allItems.length
             return Promise.join(allItems.map((it, i) => HistoryTab.historicalTextAsync(uid, guid, it).then(t => {
                 HTML.showProgressNotification("history, " + numItems + " to go...")
@@ -3828,20 +3710,20 @@
             this.tabContent.setChildren([loadingDiv]);
 
             if (!Cloud.getUserId()) {
-                loadingDiv.setChildren([ HTML.mkLinkButton(lf("sign in required"), () => Login.show()) ])
+                loadingDiv.setChildren([HTML.mkLinkButton(lf("sign in required"), () => Login.show())])
                 return;
             }
 
-           // TDev.RT.Web.browseAsync(Cloud.getServiceUrl() + "/user/view/" + Script.localGuid).done(),
+            // TDev.RT.Web.browseAsync(Cloud.getServiceUrl() + "/user/view/" + Script.localGuid).done(),
 
-            var allItems:JsonHistoryItem[] = []
+            var allItems: JsonHistoryItem[] = []
 
             var buildBoxesAsync = (cont: string) => {
                 var guid = this.script().getGuid();
                 if (!guid) return Promise.as([lf("This script has not been synchronized with the cloud yet.")]);
 
                 return Cloud.getPrivateApiAsync(Cloud.getUserId() + "/installed/" + guid + "/history" +
-                                               (cont ? "?continuation=" + cont : ""))
+                    (cont ? "?continuation=" + cont : ""))
                     .then((resp) => {
                         resp.items.forEach((it, n) => {
                             it.entryNo = allItems.length + n
@@ -3863,7 +3745,7 @@
                         } else if (dbg) {
                             r.push(HTML.mkButton(lf("micro edits"), () => {
                                 HistoryTab.showMicroEditsAsync(Cloud.getUserId(), this.script().getGuid(), allItems)
-                                .done(s => ModalDialog.showText(s))
+                                    .done(s => ModalDialog.showText(s))
                             }))
                         }
                         return r
@@ -3914,25 +3796,24 @@
     }
 
     export class CommentsTab
-        extends ListTab
-    {
-        private seenComments:any = {}
+        extends ListTab {
+        private seenComments: any = {}
 
-        static topCommentInitialText : string = undefined;
+        static topCommentInitialText: string = undefined;
 
-        constructor(par:BrowserPage, private canDeleteAny : () => boolean = undefined, private headerRenderer : (el : HTMLElement) => void = undefined) {
+        constructor(par: BrowserPage, private canDeleteAny: () => boolean = undefined, private headerRenderer: (el: HTMLElement) => void = undefined) {
             super(par, "/comments")
         }
         public getId() { return this.forumId || "comments"; }
         public getName() { return this.forumName || lf("comments"); }
         public needsJsonScript() { return true; }
-        public getPreciseCount():number { return !this.script() || !this.script().jsonScript ? -1 : this.script().jsonScript.comments; }
-        private _topContainer:HTMLElement;
+        public getPreciseCount(): number { return !this.script() || !this.script().jsonScript ? -1 : this.script().jsonScript.comments; }
+        private _topContainer: HTMLElement;
 
         public isForum() { return !!this.forumName; }
 
-        public forumName:string;
-        public forumId:string;
+        public forumName: string;
+        public forumId: string;
 
         public getParentId() {
             if (this.isForum()) return this.forumId;
@@ -3953,20 +3834,19 @@
         public bgIcon() { return "svg:Email"; }
         public noneText() { return this.parent instanceof UserInfo ? lf("no comments written by this user") : lf("no comments, tap to write some!"); }
 
-        public resetEltsSoFar()
-        {
+        public resetEltsSoFar() {
             this.seenComments = {}
         }
 
         static bugStatuses = {
-                "bug": { icon: "bug", name: "bug" },
-                "feature": { icon: "chip", name: "feature" },
-                "fixed": { icon: "bandage", name: "fixed" },
-                "postponed": { icon: "Alram" /* sic! */, name: "postponed" },
-                "notabug": { icon: "Butterfly", name: "not a bug" },
-                "duplicate": { icon: "twobugs", name: "duplicate" },
+            "bug": { icon: "bug", name: "bug" },
+            "feature": { icon: "chip", name: "feature" },
+            "fixed": { icon: "bandage", name: "fixed" },
+            "postponed": { icon: "Alram" /* sic! */, name: "postponed" },
+            "notabug": { icon: "Butterfly", name: "not a bug" },
+            "duplicate": { icon: "twobugs", name: "duplicate" },
         }
-        static bugUsers = [ "gxfb", "wonm", "ajlk", "bqsl", "ikyp", "pboj", "jeiv", "expza" ]
+        static bugUsers = ["gxfb", "wonm", "ajlk", "bqsl", "ikyp", "pboj", "jeiv", "expza"]
 
         public finalListElt(): HTMLElement {
             if (!this.isForum() && this.parent instanceof ScriptInfo) {
@@ -3983,7 +3863,7 @@
                         if (!resp) return
                         var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
                         var loadMore = (cont: string) => {
-                            var dd = div(null, HTML.mkButton(lf("load more"),() => {
+                            var dd = div(null, HTML.mkButton(lf("load more"), () => {
                                 dd.setChildren(lf("loading..."))
                                 TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont, (lst: JsonList) => {
                                     if (!lst) lst = { items: [], etags: undefined, continuation: undefined };
@@ -3995,7 +3875,7 @@
                             return dd
                         }
 
-                        TheApiCacheMgr.getAnd(resp.id + "/comments",(lst: JsonList) => {
+                        TheApiCacheMgr.getAnd(resp.id + "/comments", (lst: JsonList) => {
                             d.className = ""
                             if (lst && lst.items.length > 0) {
                                 var ch = lst.items.map(j => this.tabBox(j))
@@ -4013,8 +3893,8 @@
                         hd.className += " sdBaseHeader"
                         if (EditorSettings.widgets().commentHistory) {
                             var btn = div("sdBaseCorner",
-                                div(null, HTML.mkButton(lf("diff curr"),() => this.script().diffToId(resp.id))),
-                                div(null, HTML.mkButton(lf("diff prev"),() => si.diffToBase())))
+                                div(null, HTML.mkButton(lf("diff curr"), () => this.script().diffToId(resp.id))),
+                                div(null, HTML.mkButton(lf("diff prev"), () => si.diffToBase())))
                             hd.appendChild(btn)
                         } else hd.setFlag("slim", true);
                         cont.appendChild(div(null, hd, d))
@@ -4022,7 +3902,7 @@
                         if (resp.rootid != resp.id) {
                             if (versionDepth < 5) getFor(Cloud.lite ? resp.baseid : resp.id)
                             else {
-                                var loadMoreVersion = HTML.mkButton(lf("load more"),() => {
+                                var loadMoreVersion = HTML.mkButton(lf("load more"), () => {
                                     loadMoreVersion.removeSelf();
                                     versionDepth = 0;
                                     getFor(Cloud.lite ? resp.baseid : resp.id);
@@ -4038,19 +3918,19 @@
                     // the call to /family is there to prefetch typical parents
                     TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
                         .done((prefetch) => {
-                        if (prefetch)
-                            prefetch.items.forEach((e, i) => {
-                                TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
-                            })
+                            if (prefetch)
+                                prefetch.items.forEach((e, i) => {
+                                    TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
+                                })
 
-                        if (this.parent.publicId) {
-                            if (!js.id)
-                                return cont; // script deleted?
-                            if (js.baseid) getFor(js.baseid)
-                        }
-                        else
-                            getFor(this.getParentId(), true)
-                    })
+                            if (this.parent.publicId) {
+                                if (!js.id)
+                                    return cont; // script deleted?
+                                if (js.baseid) getFor(js.baseid)
+                            }
+                            else
+                                getFor(this.getParentId(), true)
+                        })
                 else
                     getFor(this.getParentId())
 
@@ -4060,17 +3940,16 @@
             }
         }
 
-        private mkCommentPostWidget(reply:boolean, id:string, initialText : string = null):HTMLElement
-        {
+        private mkCommentPostWidget(reply: boolean, id: string, initialText: string = null): HTMLElement {
             Util.assert(!!id, "missing comment id");
 
             if (Cloud.isRestricted() && !Cloud.hasPermission("post-comment")) return div('');
 
-            var text =  HTML.mkTextArea();
+            var text = HTML.mkTextArea();
             var postBtn = div(null);
             text.rows = 1;
-            text.placeholder =  reply ? lf("Reply...") : lf("Post a comment...");
-            var postDiv:HTMLElement = div("commentPost", div(null, text), postBtn);
+            text.placeholder = reply ? lf("Reply...") : lf("Post a comment...");
+            var postDiv: HTMLElement = div("commentPost", div(null, text), postBtn);
 
             var post = () => {
                 if (text.value.length < 2) return;
@@ -4090,48 +3969,48 @@
                 var req = { kind: "comment", text: text.value, userplatform: Browser.platformCaps };
                 Cloud.postPrivateApiAsync(id + "/comments", req)
                     .done((resp: JsonComment) => {
-                    cmtBox.setFlag("working", false);
-                    if (reply)
-                        postDiv.setChildren([cmtBox, inner]);
-                    else
-                        postDiv.setChildren([inner, cmtBox]);
-                    if (resp.id) {
-                        TheApiCacheMgr.invalidate(id);
-                        TheApiCacheMgr.store(resp.id, resp);
-                        cmtBox.setChildren([this.commentBox(resp)]);
-                        Browser.Hub.askToEnableNotifications();
+                        cmtBox.setFlag("working", false);
+                        if (reply)
+                            postDiv.setChildren([cmtBox, inner]);
+                        else
+                            postDiv.setChildren([inner, cmtBox]);
+                        if (resp.id) {
+                            TheApiCacheMgr.invalidate(id);
+                            TheApiCacheMgr.store(resp.id, resp);
+                            cmtBox.setChildren([this.commentBox(resp)]);
+                            Browser.Hub.askToEnableNotifications();
 
 
-                        if (bugsEnabled) {
-                            var bugId = id
-                            if (!reply) bugId = resp.id
+                            if (bugsEnabled) {
+                                var bugId = id
+                                if (!reply) bugId = resp.id
 
-                            var bugReq = { assignedtoid: undefined, resolved: undefined }
-                            Util.getHashTags(req.text).forEach((h) => {
-                                h = h.toLowerCase()
-                                var m = /^assignedto(\w+)$/.exec(h)
-                                if (m) bugReq.assignedtoid = m[1]
-                                if (CommentsTab.bugStatuses.hasOwnProperty(h))
-                                    bugReq.resolved = h
-                            })
-
-                            if (bugReq.assignedtoid || bugReq.resolved) {
-                                return Cloud.postPrivateApiAsync(bugId, bugReq).then((resp) => {
-                                    TheApiCacheMgr.invalidate(bugId);
-                                    // debugger;
+                                var bugReq = { assignedtoid: undefined, resolved: undefined }
+                                Util.getHashTags(req.text).forEach((h) => {
+                                    h = h.toLowerCase()
+                                    var m = /^assignedto(\w+)$/.exec(h)
+                                    if (m) bugReq.assignedtoid = m[1]
+                                    if (CommentsTab.bugStatuses.hasOwnProperty(h))
+                                        bugReq.resolved = h
                                 })
+
+                                if (bugReq.assignedtoid || bugReq.resolved) {
+                                    return Cloud.postPrivateApiAsync(bugId, bugReq).then((resp) => {
+                                        TheApiCacheMgr.invalidate(bugId);
+                                        // debugger;
+                                    })
+                                }
                             }
                         }
-                    }
-                }, (e: any) => {
-                    cmtBox.setFlag("working", false);
-                    postDiv.className = "commentPost";
-                    postDiv.setChildren([div(null, text), postBtn]);
-                    if (e && e.status == 400)
-                        ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
-                    else
-                        Cloud.handlePostingError(e, lf("post comment"));
-                });
+                    }, (e: any) => {
+                        cmtBox.setFlag("working", false);
+                        postDiv.className = "commentPost";
+                        postDiv.setChildren([div(null, text), postBtn]);
+                        if (e && e.status == 400)
+                            ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
+                        else
+                            Cloud.handlePostingError(e, lf("post comment"));
+                    });
 
                 var cmtBox = div("sdCmtPosting", lf("posting..."));
                 cmtBox.setFlag("working", true);
@@ -4140,7 +4019,7 @@
                 postDiv.setChildren([cmtBox]);
             }
 
-            var addText = (s:string) => {
+            var addText = (s: string) => {
                 if (s) {
                     if (text.value) s = " " + s;
                     text.value += s + " ";
@@ -4153,12 +4032,12 @@
                 if (!attaching) {
                     attaching = true;
                     tick(Ticks.commentAttach);
-                    Meta.chooseScriptAsync({ header : lf("pick a script to attach"), filter : s => !!s.publicId })
+                    Meta.chooseScriptAsync({ header: lf("pick a script to attach"), filter: s => !!s.publicId })
                         .done(s => {
                             attaching = false;
                             if (s) {
                                 var x = "/" + s.publicId
-                                if(s.app)
+                                if (s.app)
                                     x = "'" + s.app.getName() + "' " + x;
                                 addText(x)
                             }
@@ -4181,7 +4060,7 @@
                     }))
                 }
 
-                var mkUser = (name:string) => {
+                var mkUser = (name: string) => {
                     var ui = this.browser().getUserInfoById(name, name)
                     boxes.push(ui.mkSmallBox().withClick(() => {
                         addText(Util.toHashTag("assigned to " + name))
@@ -4218,17 +4097,16 @@
             return postDiv;
         }
 
-        private addBugControls()
-        {
+        private addBugControls() {
             var assignedto = ""
             var assignedtoBtn = HTML.mkLinkButton(lf("any assignment"), () => {
                 var m = new ModalDialog()
                 var boxes = []
 
-                var add = (b:HTMLElement, f:()=>void) =>
+                var add = (b: HTMLElement, f: () => void) =>
                     boxes.push(b.withClick(() => { f(); m.dismiss(); }));
 
-                var mkUser = (name:string) => {
+                var mkUser = (name: string) => {
                     var ui = this.browser().getUserInfoById(name, name)
                     add(ui.mkSmallBox(), () => {
                         assignedto = name;
@@ -4236,7 +4114,7 @@
                     })
                 }
 
-                var mkEntry = (name:string, at:string) => {
+                var mkEntry = (name: string, at: string) => {
                     var e = new DeclEntry(name)
                     add(e.mkBox(), () => {
                         assignedto = at
@@ -4263,7 +4141,7 @@
                 }
             })
 
-            var mk = (n:string) =>
+            var mk = (n: string) =>
                 HTML.mkLinkButton(n + "s", () => {
                     var srch = "issue:" + n
                     if (assignedto)
@@ -4283,15 +4161,14 @@
                 this._topContainer)
         }
 
-        public topContainer()
-        {
+        public topContainer() {
             if (!this._topContainer) {
                 if (this.forumName && !this.forumId)
                     this._topContainer = div(null);
                 else {
                     var t = CommentsTab.topCommentInitialText;
                     CommentsTab.topCommentInitialText = undefined;
-                    this._topContainer = this.mkCommentPostWidget(false, this.getParentId() , t);
+                    this._topContainer = this.mkCommentPostWidget(false, this.getParentId(), t);
                 }
                 if (this.forumName == lf("issues"))
                     this.addBugControls();
@@ -4309,8 +4186,7 @@
 
         public hideOnEmpty() { return false; }
 
-        inlineText(cc:JsonIdObject)
-        {
+        inlineText(cc: JsonIdObject) {
             var c = <JsonComment>cc;
             return <any[]>[span("sdBold", c.username), ": " + ListTab.limitLength(c.text, 60)];
         }
@@ -4322,8 +4198,7 @@
                 return Browser.isCellphone ? 5 : Browser.isMobile ? 10 : 15;
         }
 
-        private getNestedComments(elt:HTMLElement, id:string, cont:string)
-        {
+        private getNestedComments(elt: HTMLElement, id: string, cont: string) {
             Util.assert(!!id, "missing nested replies");
             elt.setChildren([lf("loading replies...")]);
             var count = this.nestedCommentsCount(cont);
@@ -4367,8 +4242,7 @@
             });
         }
 
-        public tabBox(cc:JsonIdObject) : HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonComment>cc;
 
             if (!this.isForum())
@@ -4403,10 +4277,9 @@
                 });
         }
 
-        public commentBox(c:JsonComment, includePosting = false) : HTMLElement
-        {
+        public commentBox(c: JsonComment, includePosting = false): HTMLElement {
             if (!c) return undefined; // deleted comment
-            
+
             var uid = this.browser().getCreatorInfo(c);
             var nestedComments = div(null);
             var nestedPubs = div(null);
@@ -4432,18 +4305,18 @@
             while ((pubM = pubRx.exec(c.text)) != null) {
                 TheApiCacheMgr.getAsync(pubM[3], true)
                     .done(
-                        j => {
-                            var jd = this.browser().getAnyInfoByEtag(j);
-                            if (jd) {
-                                var box = jd.mkSmallBox()
-                                nestedPubs.appendChild(box);
-                                if (isPull && jd instanceof ScriptInfo) {
-                                    box.appendChild(
-                                        div("sdBaseCorner", HTML.mkButton(lf("pull"), () => (<ScriptInfo>jd).mergeScript())))
-                                }
+                    j => {
+                        var jd = this.browser().getAnyInfoByEtag(j);
+                        if (jd) {
+                            var box = jd.mkSmallBox()
+                            nestedPubs.appendChild(box);
+                            if (isPull && jd instanceof ScriptInfo) {
+                                box.appendChild(
+                                    div("sdBaseCorner", HTML.mkButton(lf("pull"), () => (<ScriptInfo>jd).mergeScript())))
                             }
-                        },
-                        e => {});
+                        }
+                    },
+                    e => { });
             }
             // parsing user id
             var userRx = /(^|[^\w@])@([a-z]{4,})/g;
@@ -4451,11 +4324,11 @@
             while ((userM = userRx.exec(c.text)) != null) {
                 TheApiCacheMgr.getAsync(userM[2], true)
                     .done(
-                        j => {
-                            var jd = this.browser().getAnyInfoByEtag(j);
-                            if (jd) nestedPubs.appendChild(jd.mkSmallBox());
-                        },
-                        e => {});
+                    j => {
+                        var jd = this.browser().getAnyInfoByEtag(j);
+                        if (jd) nestedPubs.appendChild(jd.mkSmallBox());
+                    },
+                    e => { });
             }
 
             // parsing social network links
@@ -4474,11 +4347,11 @@
                         translateBtn.setFlag("working", false);
                         translateBtn.removeSelf();
                         textDiv.appendChild(trDiv);
-                });
+                    });
             }
             translateBtn = EditorSettings.widgets().translateComments ? div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000", '', '', true), lf("translate")).withClick(translateCmt) : null;
 
-            var delBtn:HTMLElement = null;
+            var delBtn: HTMLElement = null;
             var deleteCmt = () => {
                 if (Cloud.anonMode(lf("deleting comments"))) return;
                 ModalDialog.ask(lf("are you sure you want to delete this comment?"), lf("delete it"), () => {
@@ -4503,8 +4376,8 @@
             }
 
             var likeBtn = div("sdCmtBtnOuter");
-            function setLikeBtn(s:number, h:string, f:()=>void) {
-                var btn:HTMLElement;
+            function setLikeBtn(s: number, h: string, f: () => void) {
+                var btn: HTMLElement;
                 if (s < 0)
                     btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), h)
                 else
@@ -4515,26 +4388,26 @@
             ScriptInfo.setupLike(c.id, setLikeBtn);
 
             var r = div("sdCmt", uid.thumbnail(),
-                        div("sdCmtTopic",
-                            span("sdBold", c.username),
-                            c.resolved ? div("sdCmtResolved", c.resolved + (c.assignedtoid ? " (" + c.assignedtoid + ")" : "")) : null,
-                            this.parent.getPublicationId() == c.publicationid || this.forumId == c.publicationid || c.nestinglevel > 0 ? null
-                              : <any[]>[" on ", div("sdCmtScriptName", c.publicationname).withClick(() => {
-                                            var b = this.browser();
-                                            b.loadDetails(b.getReferencedPubInfo(c))
-                                        })
-                                    ]),
-                        textDiv,
-                        div("sdCmtMeta",
-                                Util.timeSince(c.time),
-                                c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
-                                c.comments > 0 ? " " + c.comments + " replies " : null,
-                                span("sdCmtId", " /" + c.id),
-                            div("sdCmtBtns", translateBtn, likeBtn, delBtn)),
-                        nestedPubs,
-                        nestedComments,
-                        includePosting ? this.mkCommentPostWidget(true, c.id) : null
-                        );
+                div("sdCmtTopic",
+                    span("sdBold", c.username),
+                    c.resolved ? div("sdCmtResolved", c.resolved + (c.assignedtoid ? " (" + c.assignedtoid + ")" : "")) : null,
+                    this.parent.getPublicationId() == c.publicationid || this.forumId == c.publicationid || c.nestinglevel > 0 ? null
+                        : <any[]>[" on ", div("sdCmtScriptName", c.publicationname).withClick(() => {
+                            var b = this.browser();
+                            b.loadDetails(b.getReferencedPubInfo(c))
+                        })
+                        ]),
+                textDiv,
+                div("sdCmtMeta",
+                    Util.timeSince(c.time),
+                    c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
+                    c.comments > 0 ? " " + c.comments + " replies " : null,
+                    span("sdCmtId", " /" + c.id),
+                    div("sdCmtBtns", translateBtn, likeBtn, delBtn)),
+                nestedPubs,
+                nestedComments,
+                includePosting ? this.mkCommentPostWidget(true, c.id) : null
+            );
             if (c.nestinglevel == 0) {
                 r.className += " sdCmtTop";
                 if (!includePosting) {
@@ -4552,9 +4425,8 @@
     }
 
     export class SuccessorsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/successors")
         }
         public getId() { return "forks"; }
@@ -4563,28 +4435,24 @@
         public bgIcon() { return "svg:code-fork"; }
         public noneText() { return lf("no forks, install, edit and re-publish script to create one!"); }
         // public bgIcon() => "svg:WritePage";
-        inlineText(cc:JsonIdObject)
-        {
+        inlineText(cc: JsonIdObject) {
             var c = <JsonScript>cc;
             return <any[]>[c.name == this.script().app.getName() ? null : c.name, " by\u00A0", span("sdBold", c.username)];
         }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonScript>cc;
             return this.browser().getScriptInfo(c).mkSmallBox();
         }
     }
 
-    interface JsonScriptWithBase extends JsonScript
-    {
-        baseid:string;
+    interface JsonScriptWithBase extends JsonScript {
+        baseid: string;
     }
 
     export class DerivativesTab
-        extends BrowserTab
-    {
-        constructor(par:BrowserPage) {
+        extends BrowserTab {
+        constructor(par: BrowserPage) {
             super(par)
         }
         public getId() { return "derivatives"; }
@@ -4593,8 +4461,8 @@
         public bgIcon() { return "svg:Binoculars"; }
 
         public initTab() {
-            var infos:StringMap<JsonScriptWithBase> = {}
-            var boxes:HTMLElement[] = []
+            var infos: StringMap<JsonScriptWithBase> = {}
+            var boxes: HTMLElement[] = []
             var numQueries = 0
             var numDiffs = 0
 
@@ -4605,7 +4473,7 @@
                 statDiv.setChildren(Util.fmt("{2}. {0} server request(s), {1} diff(s) computed", numQueries, numDiffs, done ? "Done" : "Working"))
             }
 
-            var addDiffAsync = (scr:JsonScriptWithBase) => {
+            var addDiffAsync = (scr: JsonScriptWithBase) => {
                 // find first script up with a different update id
                 var diffTo = scr.baseid
                 while (infos.hasOwnProperty(diffTo)) {
@@ -4618,8 +4486,7 @@
                 return Promise.join([ScriptCache.getScriptAsync(diffTo), ScriptCache.getScriptAsync(scr.id)]).then(scrs => {
                     if (!scrs[0] || !scrs[1]) return;
 
-                    function prep(s:string)
-                    {
+                    function prep(s: string) {
                         var app = AST.Parser.parseScript(s, [])
                         //app.isTopLevel = true;
                         //AST.TypeChecker.tcScript(app, true);
@@ -4635,7 +4502,7 @@
                     var info = this.browser().getScriptInfoById(scr.id)
                     var box = div(null, info.mkSmallBox())
                     box.appendChild(HTML.mkButton(lf("diff"), () => info.diffToId(diffTo)))
-                    var addNum = (n:number, sym:string) => { box.appendChildren([ScriptInfo.mkNum(n, sym)]) }
+                    var addNum = (n: number, sym: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym)]) }
 
                     addNum(st.numOtherChanges, "svg:Wrench")
                     addNum(st.numCommentChanges, "svg:callout")
@@ -4644,7 +4511,7 @@
                     addNum(st.numNumberChanges, "svg:123");
 
                     (<any>box).score = [st.numOtherChanges, st.numCommentChanges + st.numStringChanges + st.numNumberChanges,
-                                        st.numArtChanges, -scr.time]
+                        st.numArtChanges, -scr.time]
                     var cmpBox = (a, b) => {
                         if (!a.score) return -1
                         if (!b.score) return 1
@@ -4664,24 +4531,24 @@
                 })
             }
 
-            var processAsync : (p:string)=>Promise = (parid:string) => {
-                var withContAsync = (cont:string) =>
+            var processAsync: (p: string) => Promise = (parid: string) => {
+                var withContAsync = (cont: string) =>
                     TheApiCacheMgr.getAsync(parid + "/successors?count=100" + cont)
-                      .then((resp:JsonList) => {
-                          numQueries++
-                          updateStats()
-                          var promises:Promise[] = []
-                          resp.items.forEach((scr:JsonScriptWithBase) => {
-                              scr.baseid = parid
-                              infos[scr.id] = scr
-                              if (scr.updateid == scr.id)
-                                  promises.push(addDiffAsync(scr))
-                              promises.push(processAsync(scr.id))
-                          })
-                          if (resp.continuation)
-                              promises.push(withContAsync("&continuation=" + resp.continuation))
-                          return Promise.join(promises)
-                      })
+                        .then((resp: JsonList) => {
+                            numQueries++
+                            updateStats()
+                            var promises: Promise[] = []
+                            resp.items.forEach((scr: JsonScriptWithBase) => {
+                                scr.baseid = parid
+                                infos[scr.id] = scr
+                                if (scr.updateid == scr.id)
+                                    promises.push(addDiffAsync(scr))
+                                promises.push(processAsync(scr.id))
+                            })
+                            if (resp.continuation)
+                                promises.push(withContAsync("&continuation=" + resp.continuation))
+                            return Promise.join(promises)
+                        })
                 return withContAsync("")
             }
             processAsync(this.parent.publicId).done(() => updateStats(true))
@@ -4690,15 +4557,13 @@
         }
     }
 
-    export class TagsTab extends ListTab
-    {
-        tagBtns:any = {};
-        ownTags:any = {};
+    export class TagsTab extends ListTab {
+        tagBtns: any = {};
+        ownTags: any = {};
         askedForTagList = false;
-        _topContainer:HTMLElement = null;
+        _topContainer: HTMLElement = null;
 
-        constructor(par:BrowserPage)
-        {
+        constructor(par: BrowserPage) {
             super(par, "/tags");
         }
 
@@ -4707,24 +4572,22 @@
         getId() { return "tags"; }
         getName() { return lf("tags"); }
 
-        private fullName(c:JsonTag) { return c.category ? c.category + " " + c.name : c.name; }
+        private fullName(c: JsonTag) { return c.category ? c.category + " " + c.name : c.name; }
 
-        inlineText(cc:JsonIdObject)
-        {
+        inlineText(cc: JsonIdObject) {
             var c = <JsonTag>cc;
             return <any[]>[c.instances + "x ", span("sdBold", this.fullName(c))];
         }
 
         noneText() { return lf("no tags, tap to add some!"); }
 
-        initInline()
-        {
-            this.loadMoreElementsAnd(null, (tags:JsonTag[]) => {
+        initInline() {
+            this.loadMoreElementsAnd(null, (tags: JsonTag[]) => {
                 this.setVisibility(true);
                 if (tags.length == 0) {
                     this.inlineContent.setChildren([div("sdTabTileNothing", span(null, this.noneText())), this.getTileLabel("")])
                 } else {
-                    tags.sort((a,b) => b.instances - a.instances);
+                    tags.sort((a, b) => b.instances - a.instances);
                     var ptfn = this.fullName(tags[0]);
                     var prim = div("sdTabTilePrimaryTag " + (ptfn.length < 10 ? " sdTabTilePrimaryTagBig" : ""), span(null, ptfn));
                     var ch = [prim];
@@ -4740,19 +4603,17 @@
         }
 
 
-        resetEltsSoFar()
-        {
+        resetEltsSoFar() {
             this.tagBtns = {}
         }
 
 
-        topContainer():HTMLElement
-        {
+        topContainer(): HTMLElement {
             if (this._topContainer) return this._topContainer;
 
             var tagContainer = div(null);
 
-            var addTag = (e:JsonTag) => {
+            var addTag = (e: JsonTag) => {
                 if (Cloud.anonMode(lf("adding tags"))) return;
 
                 var id = e.id;
@@ -4763,49 +4624,47 @@
 
                 var req = { kind: "tag", id: id }
                 Cloud.postPrivateApiAsync(this.parent.getPublicationId() + "/tags", req)
-                .done((resp) => {
-                    this.updateTagTo(id, true);
-                    Browser.Hub.askToEnableNotifications();
-                }, (e: any) => {
-                    this.tagBtns[id].firstChild.setFlag("working", false);
-                    Cloud.handlePostingError(e, "add tag");
-                });
+                    .done((resp) => {
+                        this.updateTagTo(id, true);
+                        Browser.Hub.askToEnableNotifications();
+                    }, (e: any) => {
+                        this.tagBtns[id].firstChild.setFlag("working", false);
+                        Cloud.handlePostingError(e, "add tag");
+                    });
             }
 
             var btn = HTML.mkButton(lf("add new tag"), () => {
                 var done = false;
-                TheApiCacheMgr.getAnd("tags?count=1000", (lst:JsonList) => {
+                TheApiCacheMgr.getAnd("tags?count=1000", (lst: JsonList) => {
                     if (done) return;
                     done = true;
-                    var seenTags:any = {}
-                    var items = lst.items.filter((e:JsonTag) => {
+                    var seenTags: any = {}
+                    var items = lst.items.filter((e: JsonTag) => {
                         if (this.tagBtns[e.id] || seenTags[e.id]) return false;
                         seenTags[e.id] = true;
                         return true;
                     });
-                    items.sort((a:JsonTag,b:JsonTag) => b.instances - a.instances);
+                    items.sort((a: JsonTag, b: JsonTag) => b.instances - a.instances);
                     var m = new ModalDialog();
-                    m.choose(items.map((e:JsonTag) => this.bareBox(e, null).withClick(() => { m.dismiss(); addTag(e) })));
+                    m.choose(items.map((e: JsonTag) => this.bareBox(e, null).withClick(() => { m.dismiss(); addTag(e) })));
                 });
             });
 
             return this._topContainer = div(null, div(null, btn),
-                    Host.expandableTextBox(lf("tap a checkmark to add (or remove) your 'vote' to an existing tag")), tagContainer);
+                Host.expandableTextBox(lf("tap a checkmark to add (or remove) your 'vote' to an existing tag")), tagContainer);
         }
 
-        private bareBox(c:JsonTag, btn:HTMLElement)
-        {
+        private bareBox(c: JsonTag, btn: HTMLElement) {
             return div("sdCmt",
-                    btn,
-                    div("sdCmtTopic",
-                        span("sdBold", this.fullName(c)),
-                        " x" + c.instances + ""
-                        ),
-                    Host.expandableTextBox(c.description));
+                btn,
+                div("sdCmtTopic",
+                    span("sdBold", this.fullName(c)),
+                    " x" + c.instances + ""
+                ),
+                Host.expandableTextBox(c.description));
         }
 
-        updateTagTo(id:string, hasIt:boolean)
-        {
+        updateTagTo(id: string, hasIt: boolean) {
             var sid = this.parent.getPublicationId();
             TheApiCacheMgr.invalidate("me/tagged/" + sid);
             TheApiCacheMgr.invalidate(sid + "/tags");
@@ -4813,8 +4672,7 @@
             this.updateTag(id);
         }
 
-        updateTag(id:string)
-        {
+        updateTag(id: string) {
             var sid = this.parent.getPublicationId();
             var btn = this.tagBtns[id];
             if (!btn) return;
@@ -4834,25 +4692,24 @@
                     if (Cloud.anonMode(lf("adding tags"))) return;
                     var req = { kind: "tag", id: id }
                     Cloud.postPrivateApiAsync(sid + "/tags", req)
-                    .done((resp) => {
-                        this.updateTagTo(id, true);
-                        Browser.Hub.askToEnableNotifications();
-                    }, (e: any) => {
-                        elt.setFlag("working", false);
-                        Cloud.handlePostingError(e, "add tag");
-                    });
+                        .done((resp) => {
+                            this.updateTagTo(id, true);
+                            Browser.Hub.askToEnableNotifications();
+                        }, (e: any) => {
+                            elt.setFlag("working", false);
+                            Cloud.handlePostingError(e, "add tag");
+                        });
                 }
             });
             btn.setChildren([elt]);
         }
 
-        tabBox(cc:JsonIdObject)
-        {
+        tabBox(cc: JsonIdObject) {
             var c = <JsonTag>cc;
             if (!this.askedForTagList) {
-                TheApiCacheMgr.getAnd("me/tagged/" + this.parent.getPublicationId(), (resp:JsonList) => {
+                TheApiCacheMgr.getAnd("me/tagged/" + this.parent.getPublicationId(), (resp: JsonList) => {
                     this.ownTags = {}
-                    resp.items.forEach((t:JsonTag) => { this.ownTags[t.id] = true })
+                    resp.items.forEach((t: JsonTag) => { this.ownTags[t.id] = true })
                     Object.keys(this.tagBtns).forEach((t) => this.updateTag(t))
                 })
             }
@@ -4867,9 +4724,8 @@
     }
 
     export class AbuseReportsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/abusereports")
             this.isEmpty = true;
         }
@@ -4880,34 +4736,31 @@
         public noneText() { return lf("no abuse reports!"); }
         public hideOnEmpty() { return true }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             return AbuseReportInfo.box(<JsonAbuseReport>cc)
         }
     }
 
     export class AllAbuseReportsTab
-        extends AbuseReportsTab
-    {
-        constructor(par:BrowserPage) {
+        extends AbuseReportsTab {
+        constructor(par: BrowserPage) {
             super(par)
         }
         public getUrl() { return "abusereports" }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonAbuseReport>cc;
             var confirmed = false;
             var del = () => AbuseReportInfo.deletePubAsync(c.publicationid)
-                            .then(v => { if (v) delBtn.removeSelf() })
-            var delBtn = 
+                .then(v => { if (v) delBtn.removeSelf() })
+            var delBtn =
                 HTML.mkAsyncButton(lf("delete"), () => {
                     if (Cloud.isRestricted()) {
                         ModalDialog.ask(lf("Are you sure you want to delete '{0}' /{1}? No undo.", c.publicationname, c.publicationid),
-                                        lf("delete"),
-                                        () => {
-                                            del().done();
-                                        })
+                            lf("delete"),
+                            () => {
+                                del().done();
+                            })
                         return Promise.as();
                     } else if (confirmed) {
                         return del();
@@ -4920,7 +4773,7 @@
             var delDiv = div(null, delBtn)
             return div("abusePair",
                 ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
-                div("abuseButtons", 
+                div("abuseButtons",
                     HTML.mkAsyncButton(lf("ignore"), () => AbuseReportInfo.setAbuseStatusAsync(cc.id, "ignored")),
                     delBtn),
                 ScriptInfo.labeledBox(lf("on"), this.browser().getReferencedPubInfo(c).mkSmallBox()))
@@ -4928,9 +4781,8 @@
     }
 
     export class UserAbusesTab
-        extends AllAbuseReportsTab
-    {
-        constructor(par:BrowserPage) {
+        extends AllAbuseReportsTab {
+        constructor(par: BrowserPage) {
             super(par)
         }
         public getUrl() { return this.parent.getPublicationId() + "/abuses"; }
@@ -4941,8 +4793,7 @@
         public noneText() { return lf("no abuse reports!"); }
         public hideOnEmpty() { return true }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonAbuseReport>cc;
             return div(null,
                 ScriptInfo.labeledBox("", this.browser().getAnyInfoByEtag(<any>c).mkSmallBox()),
@@ -4951,25 +4802,22 @@
     }
 
     export class ScriptHeartsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/reviews")
         }
         public getId() { return "hearts"; }
         public getName() { return lf("hearts"); }
         public needsJsonScript() { return true; }
-        public getPreciseCount():number { return !this.script() || !this.script().jsonScript ? -1 : getScriptHeartCount(this.script().jsonScript); }
+        public getPreciseCount(): number { return !this.script() || !this.script().jsonScript ? -1 : getScriptHeartCount(this.script().jsonScript); }
 
         public bgIcon() { return "svg:wholeheart"; }
         public noneText() { return lf("no hearts. you can add one once you install the script!"); }
-        public inlineText(c:JsonReview)
-        {
+        public inlineText(c: JsonReview) {
             return <any[]>["by\u00A0", span("sdBold", c.username)];
         }
 
-        public getTileContent(c:string):any[]
-        {
+        public getTileContent(c: string): any[] {
             var r = super.getTileContent(c);
             if (!this.script()) return r;
             var j = this.script().jsonScript
@@ -4978,17 +4826,16 @@
             return r
         }
 
-        public tabBox(cc:JsonIdObject)
-        {
+        public tabBox(cc: JsonIdObject) {
             var c = <JsonReview>cc;
             var uid = this.browser().getCreatorInfo(c);
             var d = div("sdCmt", uid.thumbnail(),
-                        div("sdCmtTopic",
-                            span("sdBold", c.username)
-                            ),
-                        div("sdCmtMeta",
-                                Util.timeSince(c.time)
-                                ));
+                div("sdCmtTopic",
+                    span("sdBold", c.username)
+                ),
+                div("sdCmtMeta",
+                    Util.timeSince(c.time)
+                ));
             d.style.cursor = "pointer";
             d.withClick(() => { this.browser().loadDetails(uid) });
             return d;
@@ -4996,18 +4843,15 @@
     }
 
     export class SubscribersTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage)
-        {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/subscribers");
         }
 
         public getId() { return "subscribers"; }
         public getName() { return lf("subscribers"); }
         public needsJsonScript() { return true; }
-        public getPreciseCount():number
-        {
+        public getPreciseCount(): number {
             if (this.parent.publicId) {
                 var entry = TheApiCacheMgr.getCached(this.parent.publicId);
                 if (entry && entry.subscribers !== undefined)
@@ -5020,13 +4864,12 @@
         public bgIcon() { return "svg:Person"; }
         public noneText() { return this.parent.isMe() ? lf("no subscribers") : lf("no subscribers, tap to subscribe!"); }
 
-        public topContainer()
-        {
+        public topContainer() {
             if (this.parent.isMe()) return null;
 
             var id = this.parent.publicId;
 
-            var btnDiv:HTMLElement = div(null,
+            var btnDiv: HTMLElement = div(null,
                 HTML.mkButton(lf("subscribe to this user"), () => {
                     if (Cloud.anonMode(lf("user subscription"))) return;
                     btnDiv.style.opacity = "0.5"
@@ -5041,12 +4884,11 @@
 
             return div(null,
                 Host.expandableTextBox("After you subscribe to this user, you will recive notifications when they publish scripts or comments." +
-                                       " You can unsubscribe by going to your user page, and deleting the user from your list of subscriptions."),
+                    " You can unsubscribe by going to your user page, and deleting the user from your list of subscriptions."),
                 btnDiv);
         }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var c = <JsonUser>cc;
             TheApiCacheMgr.store(c.id, c);
             return this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
@@ -5054,10 +4896,8 @@
     }
 
     export class NotificationsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage)
-        {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/notifications");
         }
 
@@ -5067,8 +4907,7 @@
         public bgIcon() { return "svg:fa-bell"; }
         public noneText() { return lf("nothin' goin' on"); }
 
-        public topContainer():HTMLElement
-        {
+        public topContainer(): HTMLElement {
             if (this.parent instanceof NotificationsPage)
                 return div("sdListLabel", spanDirAuto(lf("notifications")))
             if (this.parent instanceof GroupInfo)
@@ -5076,13 +4915,12 @@
             return div(null)
         }
 
-        public tabBox(c:JsonPublication):HTMLElement
-        {
+        public tabBox(c: JsonPublication): HTMLElement {
             var jn = c.kind == "notification" ? <JsonNotification>c : null
             var pub = jn
                 ? this.browser().getAnyInfoByEtag({ id: jn.publicationid, kind: jn.publicationkind, ETag: "" })
                 : this.browser().getAnyInfoByPub(c, "");
-            var lab = (l:string, box = null, content = null) => ScriptInfo.labeledBox(l, box || pub.mkSmallBox())
+            var lab = (l: string, box = null, content = null) => ScriptInfo.labeledBox(l, box || pub.mkSmallBox())
             var own = c.userid == this.parent.publicId;
             var kind = jn ? jn.publicationkind : c.kind
             var notkind = jn ? jn.notificationkind : ""
@@ -5091,66 +4929,64 @@
                 return lab(lf("deleted"), AbuseReportInfo.pubDeleted(jn))
 
             switch (kind) {
-            case "script":
-                return div(null, lab(notkind == "moderated" ? lf("made public") :
-                                     notkind == "onmine" ? lf("forked") 
-                                     : lf("published")))
-            case "comment":
-                //return div(null, lab(own ? lf("wrote") : lf("reply")))
-                return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
-            case "review":
-                return div(null, lab(own ? lf("gave ♥") : lf("got ♥"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()))
-            case "screenshot":
-                if (jn) return div(null); // TODO
-                return div(null, lab(lf("screenshot"), ScreenShotTab.mkBox(this.browser(), <JsonScreenShot>c)),
-                                 lab(lf("of"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
-            case "art":
-                return div(null, lab(lf("art")));
-            case "group":
-                if (notkind == "groupapproval") {
-                    var grpuser = this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()
-                    var joinid = jn.supplementalid + "/groups/" + jn.publicationid
-                    var existing = <HTMLElement>grpuser.getElementsByClassName("sdNumbers")[0]
-                    if (existing)
-                        existing.removeSelf()
-                    var nums = div("sdNumbers")
-                    grpuser.appendChild(nums)
-                    TheApiCacheMgr.getAsync(joinid)
-                        .done(d => {
-                            nums.setChildren([
-                                d ? lf("approved") :
-                                HTML.mkButton(lf("approvals"), () => (<GroupInfo>pub).approvals())
-                            ])
-                        })
-                    return div(null, lab(lf("wants to join"), grpuser),
-                                     lab(lf("your group")))
-                }
-                if (notkind == "groupapproved")
-                    return div(null, lab(lf("approved")));
-                return div(null, lab(lf("group")));
-            case "leaderboardscore": // this one should not happen anymore
-                return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
-                    lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
-            case "abusereport":
-                return div(null, lab(lf("abuse report")),
-                                 lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
+                case "script":
+                    return div(null, lab(notkind == "moderated" ? lf("made public") :
+                        notkind == "onmine" ? lf("forked")
+                            : lf("published")))
+                case "comment":
+                    //return div(null, lab(own ? lf("wrote") : lf("reply")))
+                    return div(null, lab(own || notkind == "subscribed" || notkind == "onmine" ? lf("wrote") : lf("reply")))
+                case "review":
+                    return div(null, lab(own ? lf("gave ♥") : lf("got ♥"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()))
+                case "screenshot":
+                    if (jn) return div(null); // TODO
+                    return div(null, lab(lf("screenshot"), ScreenShotTab.mkBox(this.browser(), <JsonScreenShot>c)),
+                        lab(lf("of"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
+                case "art":
+                    return div(null, lab(lf("art")));
+                case "group":
+                    if (notkind == "groupapproval") {
+                        var grpuser = this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()
+                        var joinid = jn.supplementalid + "/groups/" + jn.publicationid
+                        var existing = <HTMLElement>grpuser.getElementsByClassName("sdNumbers")[0]
+                        if (existing)
+                            existing.removeSelf()
+                        var nums = div("sdNumbers")
+                        grpuser.appendChild(nums)
+                        TheApiCacheMgr.getAsync(joinid)
+                            .done(d => {
+                                nums.setChildren([
+                                    d ? lf("approved") :
+                                        HTML.mkButton(lf("approvals"), () => (<GroupInfo>pub).approvals())
+                                ])
+                            })
+                        return div(null, lab(lf("wants to join"), grpuser),
+                            lab(lf("your group")))
+                    }
+                    if (notkind == "groupapproved")
+                        return div(null, lab(lf("approved")));
+                    return div(null, lab(lf("group")));
+                case "leaderboardscore": // this one should not happen anymore
+                    return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
+                        lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
+                case "abusereport":
+                    return div(null, lab(lf("abuse report")),
+                        lab(lf("on"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
 
-            // missing: tag, crash buckets
-            default:
-                debugger;
-                if (!pub) return null;
-                else return pub.mkSmallBox();
+                // missing: tag, crash buckets
+                default:
+                    debugger;
+                    if (!pub) return null;
+                    else return pub.mkSmallBox();
             }
         }
     }
 
     export class NotificationsPage
-        extends BrowserPage
-    {
-        private _notifications:NotificationsTab;
+        extends BrowserPage {
+        private _notifications: NotificationsTab;
 
-        constructor(par:Host)
-        {
+        constructor(par: Host) {
             super(par)
             this.publicId = Cloud.getUserId() || "me";
             this._notifications = new NotificationsTab(this);
@@ -5162,18 +4998,15 @@
         public getId() { return "notifications"; }
         public getName() { return lf("notifications"); }
 
-        public loadFromWeb(id:string)
-        {
+        public loadFromWeb(id: string) {
             this.publicId = id;
         }
 
-        public mkBoxCore(big:boolean):HTMLElement
-        {
+        public mkBoxCore(big: boolean): HTMLElement {
             return null;
         }
 
-        public initTab()
-        {
+        public initTab() {
             this._notifications.initElements();
             this._notifications.tabLoaded = true;
             this._notifications.initTab();
@@ -5182,21 +5015,19 @@
                 if (Browser.isTrident)
                     try {
                         (<any>(window.external)).msSiteModeClearBadge();
-                    } catch (e) {}
+                    } catch (e) { }
             }, ex => { }).done();
             Util.setTimeout(1, () => this.browser().loadTab(this._notifications))
         }
 
-        public mkTabsCore():BrowserTab[] { return [this]; }
+        public mkTabsCore(): BrowserTab[] { return [this]; }
     }
 
     export class AbuseReportsPage
-        extends BrowserPage
-    {
-        private _reports:AllAbuseReportsTab;
+        extends BrowserPage {
+        private _reports: AllAbuseReportsTab;
 
-        constructor(par:Host)
-        {
+        constructor(par: Host) {
             super(par)
             this.publicId = "all";
             this._reports = new AllAbuseReportsTab(this);
@@ -5208,31 +5039,27 @@
         public getId() { return "abusereports"; }
         public getName() { return lf("abuse reports"); }
 
-        public mkBoxCore(big:boolean):HTMLElement
-        {
+        public mkBoxCore(big: boolean): HTMLElement {
             return null;
         }
 
-        public initOverlay()
-        {
+        public initOverlay() {
             this._reports.initElements();
             this._reports.tabLoaded = true;
             this._reports.initTab();
             return this._reports.tabContent;
         }
 
-        public initTab()
-        {
+        public initTab() {
             this._reports.initElements();
             this._reports.tabLoaded = true;
             this._reports.initTab();
             Util.setTimeout(1, () => this.browser().loadTab(this._reports))
         }
 
-        public mkTabsCore():BrowserTab[] { return [this]; }
+        public mkTabsCore(): BrowserTab[] { return [this]; }
 
-        public refresh()
-        {
+        public refresh() {
             this.invalidateCaches();
             this._reports.initTab();
         }
@@ -5243,10 +5070,8 @@
     }
 
     export class SubscriptionsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage)
-        {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/subscriptions");
         }
 
@@ -5256,15 +5081,14 @@
         public bgIcon() { return "svg:Person"; }
         public noneText() { return lf("no subscriptions"); }
 
-        public tabBox(c:JsonPublication):HTMLElement
-        {
+        public tabBox(c: JsonPublication): HTMLElement {
             var infoPage = this.browser().getAnyInfoByPub(c, "");
             if (!infoPage) return div('');
 
             var box = infoPage.mkSmallBox();
 
             if (this.parent.isMe()) {
-                var unsubDiv:HTMLElement;
+                var unsubDiv: HTMLElement;
                 box.firstChild.appendChild(
                     unsubDiv = <HTMLElement>div("sdReportAbuse", HTML.mkImg("svg:Person,#000,clip=100", '', '', true), lf("unsubscribe")).withClick(() => {
                         unsubDiv.style.opacity = "0.1";
@@ -5283,9 +5107,8 @@
     }
 
     export class UserHeartsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/reviews")
         }
         public getId() { return "given-hearts"; }
@@ -5293,20 +5116,18 @@
         public bgIcon() { return "svg:wholeheart"; }
         public noneText() { return lf("no hearts awarded by this user"); }
 
-        public inlineText(c:JsonReview)
-        {
+        public inlineText(c: JsonReview) {
             return <any[]>[lf("for\u00A0"), span("sdBold", c.publicationname)];
         }
 
-        public tabBox(c:JsonReview) : HTMLElement
-            { return this.browser().getReferencedPubInfo(c).mkSmallBox(); }
+        public tabBox(c: JsonReview): HTMLElement
+        { return this.browser().getReferencedPubInfo(c).mkSmallBox(); }
 
     }
 
     export class ScreenShotTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage, path = "screenshots") {
+        extends ListTab {
+        constructor(par: BrowserPage, path = "screenshots") {
             super(par, "/" + path)
         }
         public getId() { return "screens"; }
@@ -5336,9 +5157,9 @@
                     div(null, ScriptInfo.labeledBox(lf("featuring"), b.getScriptInfoById(c.publicationid).mkSmallBox())),
                     div(null, ScriptInfo.labeledBox(lf("taker"), b.getCreatorInfo(c).mkSmallBox())),
                     buttons = div("sdScreenShotButtons",
-                      div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000", '', '', true), lf("report abuse")).withClick(reportAbuse)
-                      )
-                    ));
+                        div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000", '', '', true), lf("report abuse")).withClick(reportAbuse)
+                    )
+                ));
 
                 var deleteScreenshot = () => {
                     HTML.showProgressNotification(lf("deleting..."), true);
@@ -5360,14 +5181,12 @@
             return d;
         }
 
-        public tabBox(c:JsonScreenShot)
-        {
+        public tabBox(c: JsonScreenShot) {
             return ScreenShotTab.mkBox(this.browser(), c);
         }
 
-        public initInline()
-        {
-            this.loadMoreElementsAnd(null, (cmts:JsonScreenShot[]) => {
+        public initInline() {
+            this.loadMoreElementsAnd(null, (cmts: JsonScreenShot[]) => {
                 if (cmts.length == 0) {
                     this.setVisibility(false);
                     // this.isEmpty = true;
@@ -5427,7 +5246,7 @@
         public mkTile(sz: number) {
             var d = div("hubTile hubArtTile hubTileSize" + sz);
             d.style.background = ScriptIcons.stableColorFromName(this.publicId);
-            return this.withUpdate(d,(a: JsonScreenShot) => {
+            return this.withUpdate(d, (a: JsonScreenShot) => {
                 this.loadFromJson(a);
 
                 var cont = [];
@@ -5437,14 +5256,14 @@
 
                 picDiv.style.backgroundImage = HTML.cssImage(a.pictureurl);
                 picDiv.style.backgroundRepeat = 'no-repeat';
-                    picDiv.style.backgroundPosition = 'center';
-                    picDiv.style.backgroundSize = picMode;
+                picDiv.style.backgroundPosition = 'center';
+                picDiv.style.backgroundSize = picMode;
 
                 d.setChildren([img,
                     div("hubTileTitleBar",
-                    div("hubTileTitle", spanDirAuto(a.publicationname)),
-                    div("hubTileSubtitle",
-                        div("hubTileAuthor", spanDirAuto(a.username))))])
+                        div("hubTileTitle", spanDirAuto(a.publicationname)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(a.username))))])
             });
         }
 
@@ -5461,7 +5280,7 @@
             if (big)
                 res.className += " sdBigHeader";
 
-            return this.withUpdate(res,(a: JsonScreenShot) => {
+            return this.withUpdate(res, (a: JsonScreenShot) => {
                 this.loadFromJson(a);
 
                 var time = 0;
@@ -5499,12 +5318,12 @@
 
             this.tabContent.setChildren(ch);
 
-            this.withUpdate(id,(a: JsonScreenShot) => {
+            this.withUpdate(id, (a: JsonScreenShot) => {
                 this.loadFromJson(a);
 
-                    var img = HTML.mkImg(a.pictureurl);
-                    img.className += " checker";
-                    id.setChildren([img]);
+                var img = HTML.mkImg(a.pictureurl);
+                img.className += " checker";
+                id.setChildren([img]);
 
                 var uid = this.browser().getCreatorInfo(a);
                 authorDiv.setChildren([ScriptInfo.labeledBox(lf("taker"), uid.mkSmallBox())]);
@@ -5531,12 +5350,11 @@
     }
 
     export class ArtInfo
-        extends BrowserPage
-    {
+        extends BrowserPage {
         public name: string;
         public art: JsonArt;
 
-        constructor(par:Host) {
+        constructor(par: Host) {
             super(par)
         }
         public persistentId() { return "art:" + this.publicId; }
@@ -5544,15 +5362,13 @@
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
 
-        public loadFromJson(a: JsonArt)
-        {
+        public loadFromJson(a: JsonArt) {
             this.loadFromWeb(a.id);
             this.name = a.name;
             this.art = a;
         }
 
-        static artReview(cont = "", back = null)
-        {
+        static artReview(cont = "", back = null) {
             var m = new ModalDialog();
             m.fullWhite();
             m.stretchWide();
@@ -5560,61 +5376,60 @@
             m.show()
 
             TDev.Cloud.getPrivateApiAsync("art?count=300&continuation=" + cont)
-            .done(resp => {
-                var entries = []
-                var ids = []
-                resp.items.forEach((ja:JsonArt) => {
-                    if (ja.arttype != "picture") return;
-                    var flag = div("art-link", 
-                        HTML.mkLinkButton("flag", () => {
-                            flag.setChildren("flagging...")
-                            Cloud.postPrivateApiAsync(ja.id + "/abusereports", { text: "#reviewFlag" })
-                            .done(
-                                () => {
-                                    flag.setChildren(HTML.mkLinkButton(lf("delete"),
-                                        () => {
-                                            flag.setChildren(lf("deleting..."))
-                                            Cloud.deletePrivateApiAsync(ja.id)
-                                                .done(() => e.setChildren([]),
+                .done(resp => {
+                    var entries = []
+                    var ids = []
+                    resp.items.forEach((ja: JsonArt) => {
+                        if (ja.arttype != "picture") return;
+                        var flag = div("art-link",
+                            HTML.mkLinkButton("flag", () => {
+                                flag.setChildren("flagging...")
+                                Cloud.postPrivateApiAsync(ja.id + "/abusereports", { text: "#reviewFlag" })
+                                    .done(
+                                    () => {
+                                        flag.setChildren(HTML.mkLinkButton(lf("delete"),
+                                            () => {
+                                                flag.setChildren(lf("deleting..."))
+                                                Cloud.deletePrivateApiAsync(ja.id)
+                                                    .done(() => e.setChildren([]),
                                                     e => Cloud.handlePostingError(e, lf("delete")))
-                                        }))
-                                },
-                                e => Cloud.handlePostingError(e, lf("report abuse")))
-                        })
-                    )
-                    var info = div("art-info", Math.round((Date.now()/1000 - ja.time) / 3600 / 24) + "d, by " + ja.username)
-                    var e = div("art-review",
-                        HTML.mkImg(ja.mediumthumburl || ja.pictureurl, '', lf("art picture")),
-                        info, flag)
-                    entries.push(e)
-                    ids.push(ja.id)
-                })
-                var next = HTML.mkButton(lf("next page"), () => {
-                    ArtInfo.artReview(resp.continuation, () => ArtInfo.artReview(cont, back))
-                })
-                if (!resp.continuation)
-                    next = null
-                var prev = HTML.mkButton(lf("prev page"), () => back())
-                if (!back)
-                    prev = null
-                var del = HTML.mkLinkButton(lf("delete all"), 
+                                            }))
+                                    },
+                                    e => Cloud.handlePostingError(e, lf("report abuse")))
+                            })
+                        )
+                        var info = div("art-info", Math.round((Date.now() / 1000 - ja.time) / 3600 / 24) + "d, by " + ja.username)
+                        var e = div("art-review",
+                            HTML.mkImg(ja.mediumthumburl || ja.pictureurl, '', lf("art picture")),
+                            info, flag)
+                        entries.push(e)
+                        ids.push(ja.id)
+                    })
+                    var next = HTML.mkButton(lf("next page"), () => {
+                        ArtInfo.artReview(resp.continuation, () => ArtInfo.artReview(cont, back))
+                    })
+                    if (!resp.continuation)
+                        next = null
+                    var prev = HTML.mkButton(lf("prev page"), () => back())
+                    if (!back)
+                        prev = null
+                    var del = HTML.mkLinkButton(lf("delete all"),
                         () => {
                             Promise.join(ids.map(id => Cloud.deletePrivateApiAsync(id)))
-                            .then(() => back())
+                                .then(() => back())
                         })
-                m.add(div(null, prev, next))
-                m.add(div(null, entries))
-            })
+                    m.add(div(null, prev, next))
+                    m.add(div(null, entries))
+                })
         }
 
-        public loadFromWeb(id:string)
-        {
+        public loadFromWeb(id: string) {
             this.publicId = id;
         }
 
         public getJsonAsync() {
             if (!this.art) {
-                var r:JsonArt = TheApiCacheMgr.getCached(this.publicId);
+                var r: JsonArt = TheApiCacheMgr.getCached(this.publicId);
                 if (r)
                     this.loadFromJson(r);
                 else {
@@ -5628,34 +5443,33 @@
 
         public mkTabsCore(): BrowserTab[] {
             return [
-             this
-           // these need more work
-           //  new CommentsTab(this),
-             , new ScriptsTab(this, lf("no scripts using this art"))
-           //  new SubscribersTab(this)
-             , new AbuseReportsTab(this)
+                this
+                // these need more work
+                //  new CommentsTab(this),
+                , new ScriptsTab(this, lf("no scripts using this art"))
+                //  new SubscribersTab(this)
+                , new AbuseReportsTab(this)
             ];
         }
 
-        public mkTile(sz:number)
-        {
+        public mkTile(sz: number) {
             var d = div("hubTile hubArtTile hubTileSize" + sz);
-            d.style.background =  ScriptIcons.stableColorFromName(this.publicId);
-            return this.withUpdate(d, (a:JsonArt) => {
+            d.style.background = ScriptIcons.stableColorFromName(this.publicId);
+            return this.withUpdate(d, (a: JsonArt) => {
                 this.loadFromJson(a);
 
                 var cont = [];
                 var audio = null;
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-               // addNum(a.positivereviews, "♥");
-               // if (sz > 1) {
-               //     addNum(a.comments, "✉");
-               // }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                // addNum(a.positivereviews, "♥");
+                // if (sz > 1) {
+                //     addNum(a.comments, "✉");
+                // }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = d.style.background;
 
-                var img : HTMLElement = null;
+                var img: HTMLElement = null;
                 if (a.mediumthumburl || a.pictureurl) {
                     var transparent = !!a.flags && a.flags.indexOf('transparent') > -1;
                     var picDiv = d;
@@ -5672,7 +5486,7 @@
                     picDiv.style.backgroundPosition = 'center';
                     picDiv.style.backgroundSize = picMode;
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay, () => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5690,16 +5504,15 @@
                 }
 
                 d.setChildren([img,
-                               div("hubTileTitleBar",
-                                   div("hubTileTitle", spanDirAuto(this.name)),
-                                     div("hubTileSubtitle",
-                                        div("hubTileAuthor", spanDirAuto(a.username), nums)))])
+                    div("hubTileTitleBar",
+                        div("hubTileTitle", spanDirAuto(this.name)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(a.username), nums)))])
             });
             return d;
         }
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             var icon = div("sdIcon");
             var nameBlock = dirAuto(sdName(big, this.name));
             var hd = div("sdNameBlock", nameBlock);
@@ -5708,13 +5521,13 @@
             var addInfo = div("sdAddInfoInner", "/" + this.publicId);
             var pubId = div("sdAddInfoOuter", addInfo);
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon,
-                              div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big))));
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big))));
             var audio = null;
             if (big)
                 res.className += " sdBigHeader";
 
-            return this.withUpdate(res, (a:JsonArt) => {
+            return this.withUpdate(res, (a: JsonArt) => {
                 this.loadFromJson(a);
 
                 var time = 0;
@@ -5731,7 +5544,7 @@
                     img = HTML.mkImg(a.thumburl);
                     img.className += " checker";
                 } else if (a.wavurl) {
-                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay,() => {
+                    var playBtn = HTML.mkRoundButton("svg:play,currentColor", lf("sound"), Ticks.artSoundPreviewPlay, () => {
                         if (!audio) {
                             playBtn.setFlag("disabled", true);
                             var aa = HTML.mkAudio(a.wavurl, a.aacurl);
@@ -5754,7 +5567,7 @@
                 author.setChildren([a.username]);
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 //addNum(a.receivedpositivereviews, "♥");
                 //addNum(a.subscribers, "svg:Person,black,clip=80");
                 //addNum(a.features, "svg:Award,black,clip=110");
@@ -5762,8 +5575,7 @@
             });
         }
 
-        public getContent(a:JsonArt):HTMLElement[]
-        {
+        public getContent(a: JsonArt): HTMLElement[] {
             if (a.mediumthumburl || a.pictureurl) {
                 var img = HTML.mkImg(a.mediumthumburl || a.pictureurl);
                 img.className += " checker";
@@ -5794,9 +5606,8 @@
             }
         }
 
-        public initTab()
-        {
-            var ch = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
+        public initTab() {
+            var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : t.inlineContentContainer);
             var hd = div("sdDesc");
             var id = div("sdImg");
             var runBtns = div(null);
@@ -5813,7 +5624,7 @@
 
             this.tabContent.setChildren(ch);
 
-            this.withUpdate(hd, (a:JsonArt) => {
+            this.withUpdate(hd, (a: JsonArt) => {
                 this.loadFromJson(a);
                 hd.setChildren([Host.expandableTextBox(a.description)]);
 
@@ -5827,15 +5638,14 @@
         }
 
         private mkButtons(): HTMLElement {
-            var mkBtn = (icon:string, desc:string, key:string, f:()=>void) =>
-            {
+            var mkBtn = (icon: string, desc: string, key: string, f: () => void) => {
                 var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)), div("sdBigButtonDesc sdHeartCounter", desc));
                 TheEditor.keyMgr.btnShortcut(b, key);
                 return b.withClick(f);
             }
             var heartButton: HTMLElement = span("sdHeart", "");
-            var setBtn = (state:number, hearts:string, f:()=>void) => {
-                var btn:HTMLElement;
+            var setBtn = (state: number, hearts: string, f: () => void) => {
+                var btn: HTMLElement;
                 if (state < 0)
                     btn = mkBtn("svg:wholeheart,white,opacity=0.3", hearts, null, f);
                 else
@@ -5848,11 +5658,10 @@
             return div("sdRunBtns", heartButton);
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
 
-            var json:JsonArt = TheApiCacheMgr.getCached(this.publicId);
+            var json: JsonArt = TheApiCacheMgr.getCached(this.publicId);
             if (!json) return 0; // not loaded yet
 
             var lowerName = json.name.toLowerCase();
@@ -5869,9 +5678,8 @@
     }
 
     export class ArtTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/art")
         }
         public getId() { return "art"; }
@@ -5886,21 +5694,19 @@
             return b.getArtInfo(c).mkSmallBox();
         }
 
-        public tabBox(c:JsonArt)
-        {
+        public tabBox(c: JsonArt) {
             return ArtTab.mkBox(this.browser(), c);
         }
     }
 
     export class DocumentInfo
-        extends BrowserPage
-    {
+        extends BrowserPage {
         private doc: JsonDocument;
         private name: string;
         private abstract: string;
         private views: number;
 
-        constructor(par:Host) {
+        constructor(par: Host) {
             super(par)
         }
         public persistentId() { return "doc:" + this.publicId; }
@@ -5908,8 +5714,7 @@
         public getId() { return "learn"; }
         public getName() { return lf("learn"); }
 
-        public loadFromJson(a: JsonDocument)
-        {
+        public loadFromJson(a: JsonDocument) {
             this.doc = a;
             this.publicId = a.name;
             this.name = a.name;
@@ -5919,7 +5724,7 @@
 
         public mkTabsCore(): BrowserTab[] {
             return [
-             this
+                this
             ];
         }
 
@@ -5944,20 +5749,20 @@
                 //nums.style.background = d.style.background;
             }
             var titleBar = div("hubTileTitleBar",
-                                 div("hubTileTitle", spanDirAuto(this.name)),
-                                 div("hubTileSubtitle", author, nums));
+                div("hubTileTitle", spanDirAuto(this.name)),
+                div("hubTileSubtitle", author, nums));
             titleBar.style.background = 'gray';
             d.setChildren([
-                        icon,
-                        titleBar
-                        ])
+                icon,
+                titleBar
+            ])
             return d;
         }
 
         private getIconUrl() {
             if (this.doc.thumburl)
                 return this.doc.thumburl;
-            if(/video\//.test(this.doc.mimetype))
+            if (/video\//.test(this.doc.mimetype))
                 return 'svg:movie,white';
             else if ("application/pdf" == this.doc.mimetype)
                 return 'svg:Book,white';
@@ -5971,8 +5776,7 @@
             return HTML.mkImg(this.getIconUrl());
         }
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             var icon = div("sdIcon hubDocTile", this.getIcon());
             var nameBlock = dirAuto(sdName(big, this.name));
             var hd = div("sdNameBlock", nameBlock);
@@ -5980,7 +5784,7 @@
             if (this.views > 0)
                 pubId.setChildren([div("sdAddInfoInner", this.views + " views")]);
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon, div("sdHeaderInner", hd, pubId)));
+                div("sdHeader", icon, div("sdHeaderInner", hd, pubId)));
             if (big)
                 res.className += " sdBigHeader";
             return res;
@@ -6001,9 +5805,8 @@
             return div("sdRunBtns", editB);
         }
 
-        public initTab()
-        {
-            var ch:HTMLElement[] = this.getTabs().map((t:BrowserTab) => t == this ? null : t.inlineContentContainer);
+        public initTab() {
+            var ch: HTMLElement[] = this.getTabs().map((t: BrowserTab) => t == this ? null : t.inlineContentContainer);
             var hd = div("sdDesc", this.abstract);
             var id = div("sdImg");
             var runBtns = this.mkButtons();
@@ -6017,11 +5820,10 @@
             this.tabContent.setChildren(ch);
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
 
-            var json:JsonDocument = TheApiCacheMgr.getCached(this.publicId);
+            var json: JsonDocument = TheApiCacheMgr.getCached(this.publicId);
             if (!json) return 0; // not loaded yet
 
             var lowerName = json.name.toLowerCase();
@@ -6038,9 +5840,8 @@
     }
 
     export class ScriptDetailsTab
-        extends BrowserTab
-    {
-        constructor(parent : ScriptInfo) {
+        extends BrowserTab {
+        constructor(parent: ScriptInfo) {
             super(parent);
         }
 
@@ -6057,140 +5858,140 @@
             this.tabContent.setChildren([loadingDiv]);
 
             var sc = this.script();
-            sc.withUpdate(loadingDiv,() => {
+            sc.withUpdate(loadingDiv, () => {
                 sc.getScriptTextAsync()
                     .done((scriptText: string) => {
-                    loadingDiv.removeSelf();
-                    if (!scriptText) return;
+                        loadingDiv.removeSelf();
+                        if (!scriptText) return;
 
-                    var divs = []
+                        var divs = []
 
-                    if (sc.editor()) {
-                        var app = AST.Parser.parseScript('action main() { }')
-                    } else {
-                        var app = AST.Parser.parseScript(scriptText);
-                        AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
-                    }
+                        if (sc.editor()) {
+                            var app = AST.Parser.parseScript('action main() { }')
+                        } else {
+                            var app = AST.Parser.parseScript(scriptText);
+                            AST.TypeChecker.tcApp(app); // typecheck to resolve symbols
+                        }
 
-                    if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
-                        (Cloud.hasPermission("post-script-meta") &&
-                          (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt") || Cloud.hasPermission("script-promo")))) {
-                        socialNetworks(EditorSettings.widgets()).forEach(sn => {
-                            var metaInput: HTMLInputElement;
-                            var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
-                                metaInput = HTML.mkTextInputWithOk("url", sn.description ,() => {
-                                    var id = sn.parseIds(metaInput.value, true)[0] || null;
-                                    metaInput.value = id ? sn.idToUrl(id) : "";
-                                    HTML.showProgressNotification(lf("saving..."));
-                                    var payload = {}; payload[sn.id] = id;
-                                    Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
-                                    TheApiCacheMgr.invalidate(sc.jsonScript.id);
-                                }, e => Cloud.handlePostingError(e, "saving metadata"));
-                            }));
-                            if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
-                        divs.push(meta);
-                        });
-                    }
+                        if (EditorSettings.widgets().socialNetworks && sc.jsonScript && sc.jsonScript.id &&
+                            (Cloud.hasPermission("post-script-meta") &&
+                                (sc.jsonScript.userid == Cloud.getUserId() || Cloud.hasPermission("pub-mgmt") || Cloud.hasPermission("script-promo")))) {
+                            socialNetworks(EditorSettings.widgets()).forEach(sn => {
+                                var metaInput: HTMLInputElement;
+                                var meta = div('sdSocialEmbed', HTML.mkImg("svg:" + sn.id + ",black,clip=100"),
+                                    metaInput = HTML.mkTextInputWithOk("url", sn.description, () => {
+                                        var id = sn.parseIds(metaInput.value, true)[0] || null;
+                                        metaInput.value = id ? sn.idToUrl(id) : "";
+                                        HTML.showProgressNotification(lf("saving..."));
+                                        var payload = {}; payload[sn.id] = id;
+                                        Cloud.postPrivateApiAsync(sc.jsonScript.id + "/meta", payload).done(() => {
+                                            TheApiCacheMgr.invalidate(sc.jsonScript.id);
+                                        }, e => Cloud.handlePostingError(e, "saving metadata"));
+                                    }));
+                                if (sc.jsonScript.meta && sc.jsonScript.meta[sn.id]) metaInput.value = sn.idToUrl(sc.jsonScript.meta[sn.id]);
+                                divs.push(meta);
+                            });
+                        }
 
-                    if (app.getPlatformRaw() & PlatformCapability.Current) {
-                    } else if (app.getPlatform()) {
-                        var caps = lf("This script uses the following capabilities: ") +
-                            AST.App.capabilityName(app.getPlatform())
-                        divs.push(Host.expandableTextBox(caps))
-                    }
+                        if (app.getPlatformRaw() & PlatformCapability.Current) {
+                        } else if (app.getPlatform()) {
+                            var caps = lf("This script uses the following capabilities: ") +
+                                AST.App.capabilityName(app.getPlatform())
+                            divs.push(Host.expandableTextBox(caps))
+                        }
 
-                    if (sc.jsonScript) {
-                        var uid = this.browser().getCreatorInfo(sc.jsonScript);
-                        divs.push(div("inlineBlock", ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())));
-                    }
+                        if (sc.jsonScript) {
+                            var uid = this.browser().getCreatorInfo(sc.jsonScript);
+                            divs.push(div("inlineBlock", ScriptInfo.labeledBox(lf("author"), uid.mkSmallBox())));
+                        }
 
-                    if (sc.jsonScript && sc.jsonScript.updateid && sc.jsonScript.id != sc.jsonScript.updateid)
-                        divs.push(ScriptInfo.labeledBox(lf("update"), this.browser().getScriptInfoById(sc.jsonScript.updateid).mkSmallBox()));
+                        if (sc.jsonScript && sc.jsonScript.updateid && sc.jsonScript.id != sc.jsonScript.updateid)
+                            divs.push(ScriptInfo.labeledBox(lf("update"), this.browser().getScriptInfoById(sc.jsonScript.updateid).mkSmallBox()));
 
-                    var basisDiv = div("inlineBlock");
-                    divs.push(basisDiv);
-                    var ch = sc.getCloudHeader();
-                    if (sc.publicId) {
-                        TheApiCacheMgr.getAndEx(sc.publicId + "/base",(d, opts) => {
-                            if (!d) return
-                            var j = <JsonScript>d;
-                            if (opts.isDefinitive)
-                                TheApiCacheMgr.store(j.id, j);
-                            divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
-                        });
-                    }
-                    else if (ch && ch.status != "published" && ch.scriptId)
-                        divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
+                        var basisDiv = div("inlineBlock");
+                        divs.push(basisDiv);
+                        var ch = sc.getCloudHeader();
+                        if (sc.publicId) {
+                            TheApiCacheMgr.getAndEx(sc.publicId + "/base", (d, opts) => {
+                                if (!d) return
+                                var j = <JsonScript>d;
+                                if (opts.isDefinitive)
+                                    TheApiCacheMgr.store(j.id, j);
+                                divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(j.id).mkSmallBox()));
+                            });
+                        }
+                        else if (ch && ch.status != "published" && ch.scriptId)
+                            divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
 
-                    if (sc.getCloudHeader() && !Cloud.isRestricted()) {
-                        var groupDiv = div("inlineBlock");
-                        divs.push(groupDiv);
-                        World.getInstalledEditorStateAsync(sc.getGuid()).done(text => {
-                            if (!text) return;
-                            // tutorial state
-                            var st = <AST.AppEditorState>JSON.parse(text)
+                        if (sc.getCloudHeader() && !Cloud.isRestricted()) {
+                            var groupDiv = div("inlineBlock");
+                            divs.push(groupDiv);
+                            World.getInstalledEditorStateAsync(sc.getGuid()).done(text => {
+                                if (!text) return;
+                                // tutorial state
+                                var st = <AST.AppEditorState>JSON.parse(text)
 
-                            // group mode?
-                            if (st.collabSessionId && st.groupId) {
-                                groupDiv.appendChild(
-                                    ScriptInfo.labeledBox(
-                                        lf("with group"),
-                                        Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
+                                // group mode?
+                                if (st.collabSessionId && st.groupId) {
+                                    groupDiv.appendChild(
+                                        ScriptInfo.labeledBox(
+                                            lf("with group"),
+                                            Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
                                         ));
+                                }
+                            })
+                        }
+
+                        var seen: any = {}
+                        app.libraries().forEach((lr: AST.LibraryRef) => {
+                            var b = this.browser();
+                            var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
+                            if (scriptInfo && !seen[scriptInfo.persistentId()]) {
+                                seen[scriptInfo.persistentId()] = 1;
+                                divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
                             }
-                        })
-                    }
+                        });
 
-                    var seen: any = {}
-                    app.libraries().forEach((lr: AST.LibraryRef) => {
-                        var b = this.browser();
-                        var scriptInfo = lr.pubid ? b.getScriptInfoById(lr.pubid) : b.getInstalledByGuid(lr.guid);
-                        if (scriptInfo && !seen[scriptInfo.persistentId()]) {
-                            seen[scriptInfo.persistentId()] = 1;
-                            divs.push(ScriptInfo.labeledBox(lf("library"), scriptInfo.mkSmallBox()))
+                        if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
+                            var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush, () => (<ScriptInfo>this.parent).mergeScript()) : null;
+                            var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase, () => (<ScriptInfo>this.parent).diffToBase()) : null;
+                            var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial, () => (<ScriptInfo>this.parent).convertToTutorial()) : null;
+                            var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson, () => (<ScriptInfo>this.parent).convertToLesson()) : null;
+                            //var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.script().editPromo()) : null;
+                            divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
                         }
+
+                        if (EditorSettings.widgets().scriptStats) {
+                            var stats = ""
+                            var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
+                            stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
+
+                            var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
+                            descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
+                            var stmts = 0
+                            descs.forEach((d) => { stmts += d.stmtCount })
+                            if (sc.jsonScript && sc.jsonScript.time) {
+                                stats += lf("Published on {0}. ", Util.isoTime(sc.jsonScript.time))
+                            }
+                            stats += lf("{0} function{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
+                            descs.slice(0, 20).forEach((d, i) => {
+                                if (i > 0)
+                                    stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
+                                else
+                                    stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
+                            })
+                            if (descs.length > 20)
+                                stats += ", ...";
+                            divs.push(Host.expandableTextBox(stats));
+
+                            TheEditor.refreshMode();
+                            var render = new EditorRenderer();
+                            var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
+                            divs.push(code);
+                        }
+
+                        this.tabContent.setChildren(divs);
                     });
-
-                    if (sc.jsonScript && sc.jsonScript.time && (!sc.jsonScript.editor || sc.jsonScript.editor == "touchdevelop")) {
-                        var pull = EditorSettings.widgets().scriptPullChanges ? HTML.mkButtonTick(lf("pull changes"), Ticks.browsePush,() => (<ScriptInfo>this.parent).mergeScript()) : null;
-                        var diff = EditorSettings.widgets().scriptDiffToBase ? HTML.mkButtonTick(lf("compare with previous version"), Ticks.browseDiffBase,() => (<ScriptInfo>this.parent).diffToBase()) : null;
-                        var convertToTutorial = EditorSettings.widgets().scriptConvertToTutorial && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to tutorial"), Ticks.browseConvertToTutorial,() => (<ScriptInfo>this.parent).convertToTutorial()) : null;
-                        var convertToDocs = EditorSettings.widgets().scriptConvertToDocs && !sc.app.isDocsTopic() ? HTML.mkButtonTick(lf("convert to lesson"), Ticks.browseConvertToLesson,() => (<ScriptInfo>this.parent).convertToLesson()) : null;
-                        //var promo = Cloud.hasPermission("script-promo") ? HTML.mkButton(lf("promo"), () => this.script().editPromo()) : null;
-                        divs.push(div('', convertToTutorial, convertToDocs, diff, pull));
-                    }
-
-                    if (EditorSettings.widgets().scriptStats) {
-                        var stats = ""
-                        var uplat = sc.jsonScript ? sc.jsonScript.userplatform : null;
-                        stats += ScriptDetailsTab.userPlatformDisplayText(uplat);
-
-                        var descs: AST.StatsComputer[] = app.allActions().map((a) => a.getStats());
-                        descs.sort((a, b) => a.weight == b.weight ? b.stmtCount - a.stmtCount : b.weight - a.weight)
-                        var stmts = 0
-                        descs.forEach((d) => { stmts += d.stmtCount })
-                        if (sc.jsonScript && sc.jsonScript.time) {
-                            stats += lf("Published on {0}. ", Util.isoTime(sc.jsonScript.time))
-                        }
-                        stats += lf("{0} function{0:s}, {1} line{1:s}, actions: ", descs.length, stmts)
-                        descs.slice(0, 20).forEach((d, i) => {
-                            if (i > 0)
-                                stats += Util.fmt(", {0} ({1})", d.action.getName(), d.stmtCount)
-                            else
-                                stats += lf("{0} ({1} line{1:s})", d.action.getName(), d.stmtCount)
-                        })
-                        if (descs.length > 20)
-                            stats += ", ...";
-                        divs.push(Host.expandableTextBox(stats));
-
-                        TheEditor.refreshMode();
-                        var render = new EditorRenderer();
-                        var code = div(''); Browser.setInnerHTML(code, render.visitApp(app));
-                        divs.push(code);
-                    }
-
-                    this.tabContent.setChildren(divs);
-                });
             });
         }
 
@@ -6231,28 +6032,27 @@
     }
 
     export class ScriptInfo
-        extends BrowserPage
-    {
-        public app:AST.App;
-        public jsonScript:JsonScript;
-        private _jsonScriptPromise:ApiCacheEntry;
-        private basedOnPub:string;
-        public cloudHeader:Cloud.Header;
-        private platform:PlatformCapability;
-        private correspondingTopic:TopicInfo;
+        extends BrowserPage {
+        public app: AST.App;
+        public jsonScript: JsonScript;
+        private _jsonScriptPromise: ApiCacheEntry;
+        private basedOnPub: string;
+        public cloudHeader: Cloud.Header;
+        private platform: PlatformCapability;
+        private correspondingTopic: TopicInfo;
 
-        constructor(par:Host) {
+        constructor(par: Host) {
             super(par)
         }
-        public isLibrary() :boolean { return this.app && this.app.isLibrary; }
-        public isCloud() : boolean { return this.app && this.app.isCloud; }
-        public persistentId() : string { return "script:" + (this.cloudHeader ? this.getGuid() : this.publicId); }
+        public isLibrary(): boolean { return this.app && this.app.isLibrary; }
+        public isCloud(): boolean { return this.app && this.app.isCloud; }
+        public persistentId(): string { return "script:" + (this.cloudHeader ? this.getGuid() : this.publicId); }
         public getTitle(): string { return this.app ? this.app.getName() : super.getTitle(); }
 
-        public additionalHash() : string { return this.cloudHeader && this.cloudHeader.scriptId ? ":id=" + this.cloudHeader.scriptId : "" }
+        public additionalHash(): string { return this.cloudHeader && this.cloudHeader.scriptId ? ":id=" + this.cloudHeader.scriptId : "" }
 
-        public getGuid() : string { return this.cloudHeader ? this.cloudHeader.guid : ""; }
-        public getAnyId() : string { return this.getGuid() || this.publicId; }
+        public getGuid(): string { return this.cloudHeader ? this.cloudHeader.guid : ""; }
+        public getAnyId(): string { return this.getGuid() || this.publicId; }
         public getPublicationIdOrBaseId() {
             if (this.publicId) return this.publicId;
             if (this.cloudHeader && this.cloudHeader.status != "published" && this.cloudHeader.scriptId)
@@ -6260,13 +6060,12 @@
             return undefined;
         }
         public getCloudHeader() { return this.cloudHeader; }
-        public getDescription() :string {
+        public getDescription(): string {
             return this.app ? this.app.getDescription() : "";
         }
-        public editor() : string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
+        public editor(): string { return this.cloudHeader ? this.cloudHeader.editor : this.jsonScript ? this.jsonScript.editor : undefined; }
 
-        public isDeleted()
-        {
+        public isDeleted() {
             return (<any>this.jsonScript) === false;
         }
 
@@ -6274,19 +6073,18 @@
             var btns = super.shareButtons();
             if (!this.editor() && EditorSettings.widgets().scriptPrintScript) btns.push(
                 div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { ScriptProperties.printScript(this.app) })
-                );
+            );
             return btns;
         }
 
-        static compareScripts(a: ScriptInfo, b: ScriptInfo) : number {
+        static compareScripts(a: ScriptInfo, b: ScriptInfo): number {
             var c = b.lastScore - a.lastScore;
             if (c == 0)
                 c = a.getJsonScriptPromise().lastUse - b.getJsonScriptPromise().lastUse;
             return c;
         }
 
-        public withUpdate(elt:HTMLElement, update:(data:any)=>void)
-        {
+        public withUpdate(elt: HTMLElement, update: (data: any) => void) {
             // this needs to deal with the fake jsonScript created from local header
             this.getJsonScriptPromise()
 
@@ -6301,8 +6099,7 @@
             return elt
         }
 
-        public editAsync() : Promise
-        {
+        public editAsync(): Promise {
             TheEditor.lastListPath = this.browser().getApiPath()
             if (!this.cloudHeader || this.cloudHeader.status == "deleted") {
                 if (!this.publicId) return Promise.as(); // hmm?
@@ -6320,16 +6117,14 @@
             }
         }
 
-        public edit()
-        {
+        public edit() {
             this.editAsync().done(
                 () => { },
                 e => Cloud.handlePostingError(e, "edit script")
-                );
+            );
         }
 
-        public update()
-        {
+        public update() {
             var id = World.updateFor(this.cloudHeader);
             if (!id) return;
             tick(Ticks.browseUpdate);
@@ -6341,14 +6136,12 @@
                 });
         }
 
-        public run()
-        {
+        public run() {
             TheEditor.runImmediately = true;
             this.edit();
         }
 
-        public getRealJsonScriptPromise() : Promise
-        {
+        public getRealJsonScriptPromise(): Promise {
             if (this.jsonScript) return Promise.as(this.jsonScript);
             var r = new PromiseInv();
             var done = false;
@@ -6361,9 +6154,8 @@
             return r;
         }
 
-        public getJsonScriptPromise() : ApiCacheEntry
-        {
-            var fromLocal = ():any => {
+        public getJsonScriptPromise(): ApiCacheEntry {
+            var fromLocal = (): any => {
                 var j = this.app.toJsonScript();
                 if (!!this.basedOnPub)
                     j.rootid = this.basedOnPub;
@@ -6389,13 +6181,11 @@
         public getName() { return lf("overview"); }
         public getId() { return "overview"; }
 
-        public twitterMessage()
-        {
+        public twitterMessage() {
             return (this.app ? this.app.getName() : "") + Cloud.config.hashtag;
         }
 
-        public loadLocalHeader(v:Cloud.Header)
-        {
+        public loadLocalHeader(v: Cloud.Header) {
             this.cloudHeader = v;
             var meta = !!v.meta ? Util.jsonClone(v.meta) : {};
             meta["name"] = v.name;
@@ -6408,8 +6198,7 @@
                 this.basedOnPub = v.scriptId;
         }
 
-        private buildTopic()
-        {
+        private buildTopic() {
             var j = this.jsonScript;
             if (j && !this.correspondingTopic && /#docs/i.test(j.description)) {
                 if (!j.id) {
@@ -6422,8 +6211,7 @@
             }
         }
 
-        private loadJsonScriptCore(j:JsonScript)
-        {
+        private loadJsonScriptCore(j: JsonScript) {
             if (!this.app)
                 this.app = AST.Parser.parseScript("")
             Util.assert(j.name != null); // unfortunately, some scripts have empty names
@@ -6446,25 +6234,24 @@
             this.buildTopic();
         }
 
-        public loadFromWeb(id:string)
-        {
+        public loadFromWeb(id: string) {
             this.publicId = id;
             this.app = AST.Parser.parseScript("")
             this.app.setMeta("name", id);
             if (!!id)
                 this.cloudHeader = this.browser().getInstalledByPubId(id);
-            this.getJsonScriptPromise().whenUpdated((j:JsonScript,opts:DataOptions) => {
+            this.getJsonScriptPromise().whenUpdated((j: JsonScript, opts: DataOptions) => {
                 if (j.id) {
                     if (opts.isDefinitive && j.updateid && j.id !== j.updateid && j.updatetime > j.time)
                         World.rememberUpdate(j.id, j.updateid);
-                    if(!opts.isSame) this.loadJsonScriptCore(j);
+                    if (!opts.isSame) this.loadJsonScriptCore(j);
                 }
             });
         }
 
-        static mkNum(n:number, sym:string) {
+        static mkNum(n: number, sym: string) {
             if (n > 0) {
-                var ch:any[] = [" " + n + " "];
+                var ch: any[] = [" " + n + " "];
                 if (/^svg:/.test(sym))
                     ch.push(div("inlineIcon", HTML.mkImg(sym)))
                 else if (sym.length > 1)
@@ -6477,13 +6264,11 @@
             }
         }
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             return this.mkBoxExt(big, false);
         }
 
-        public getScriptType():string
-        {
+        public getScriptType(): string {
             if (/#docs/.test(this.getDescription()))
                 return "docs"
 
@@ -6499,7 +6284,7 @@
             if (!editor) editor = "touchdevelop"
             return editor
         }
-        
+
         static editorIcons: StringMap<{
             icon: string;
             background: string;
@@ -6524,21 +6309,19 @@
 
             var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
 
-            var editor = getExternalEditors().filter(e => e.id == this.getScriptType())[0];           
+            var editor = getExternalEditors().filter(e => e.id == this.getScriptType())[0];
             return HTML.mkImg("svg:" + ic.icon + "," + (ic.color ? ic.color : "white"), '', editor ? editor.name : lf("script icon"))
         }
 
-        public iconBgColor():string
-        {
+        public iconBgColor(): string {
             if (Cloud.isRestricted()) {
                 var ic = ScriptInfo.editorIcons[this.getScriptType()] || ScriptInfo.editorIcons["*"]
                 return ic.background
             }
             return this.app.htmlColor()
         }
-        
-        public mkBoxExt(big:boolean, isTopic:boolean)
-        {
+
+        public mkBoxExt(big: boolean, isTopic: boolean) {
             var icon = div("sdIcon");
             var nameBlock = sdName(big);
             var hd = div("sdNameBlock", nameBlock);
@@ -6549,18 +6332,18 @@
             var abuseDiv = big ? div(null, this.reportAbuse(true, true, () => {
                 // upon deleting uninstall as well.
                 this.uninstallAsync(false)
-                // force a sync
-                .done(() => World.syncAsync());
+                    // force a sync
+                    .done(() => World.syncAsync());
             })) : null;
             var facebook = div("sdShare");
             //var pubId = div("sdPubId", !!publicId ? "/" + publicId : null);
             var screenShot = div("sdScriptShot");
             if (big) screenShot = null;
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon, screenShot,
-                                div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo),  numbers,
+                div("sdHeader", icon, screenShot,
+                    div("sdHeaderInner", hd, div("sdAuthor", author), div("sdAddInfoOuter", addInfo), numbers,
                         facebook, abuseDiv)));
-            
+
             if (big)
                 res.className += " sdBigHeader";
 
@@ -6577,7 +6360,7 @@
                 if (this.jsonScript) time = this.jsonScript.time;
                 if (!time && this.cloudHeader && this.cloudHeader.scriptVersion) time = this.cloudHeader.scriptVersion.time;
                 var timeStr = "";
-                if (!deleted) {                    
+                if (!deleted) {
                     if (time) timeStr = Util.timeSince(time);
                     if (this.publicId) timeStr += " /" + this.publicId;
                     if (this.publicId && this.jsonScript) {
@@ -6593,7 +6376,7 @@
                 if (!big) res.className = "sdHeaderOuter";
             }
 
-            var hideScriptAsync = (all : boolean, id : string) : Promise => {
+            var hideScriptAsync = (all: boolean, id: string): Promise => {
                 Util.log('script: hiding ' + id);
                 var rishidden = false;
                 return Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id), { kind: "script", ishidden: true })
@@ -6659,7 +6442,7 @@
                                     hideScriptAsync(true, this.publicId).done(() => m.dismiss());
                                 }),
                                 HTML.mkButton(lf("cancel"), () => m.dismiss())
-                                ));
+                            ));
                             m.show();
                         });
                 }
@@ -6677,7 +6460,7 @@
                 }
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 if (big && !isTopic) {
                     if (!SizeMgr.phoneMode)
                         addNum(this.jsonScript.installations, "users");
@@ -6703,7 +6486,7 @@
                     if (big)
                         cont.push(div("sdNumber",
                             HTML.mkLinkButton("★ " + (hasOne ? lf("edit promo") : lf("add promo")),
-                            () => this.editPromo())))
+                                () => this.editPromo())))
                     else if (hasOne) {
                         cont.push(div("sdNumber", " ★"))
                         nameBlock.setChildren([promo.name])
@@ -6712,13 +6495,13 @@
 
                 if (big && Cloud.hasPermission("root-ptr") && this.jsonScript.lastpointer) {
                     cont.push(div("sdNumber",
-                        HTML.mkLinkButton("pointer", () => 
-                        this.browser().getAnyInfoByEtag({ id: this.jsonScript.lastpointer, kind: "pointer", ETag: "" }).showSelf())))
+                        HTML.mkLinkButton("pointer", () =>
+                            this.browser().getAnyInfoByEtag({ id: this.jsonScript.lastpointer, kind: "pointer", ETag: "" }).showSelf())))
                 }
 
                 numbers.setChildren(cont);
                 if (!big)
-                    author.setChildren([ this.jsonScript.username ]);
+                    author.setChildren([this.jsonScript.username]);
 
                 if (screenShot && this.jsonScript.screenshotthumburl) {
                     res.className += " sdHasScriptShot";
@@ -6731,10 +6514,9 @@
             return this.withUpdate(res, setNumbers)
         }
 
-        public mkTile(sz:number)
-        {
+        public mkTile(sz: number) {
             var d = div("hubTile hubTileSize" + sz);
-            this.getJsonScriptPromise().whenUpdated((j,opts) => {
+            this.getJsonScriptPromise().whenUpdated((j, opts) => {
                 if (opts.isSame || !this.jsonScript) return;
 
                 d.style.background = this.cloudHeader && this.cloudHeader.editor == "blockly"
@@ -6742,7 +6524,7 @@
                     : this.app.htmlColor();
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(getScriptHeartCount(this.jsonScript), "♥");
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
@@ -6770,18 +6552,18 @@
                 }
 
                 d.setChildren([div("hubTileIcon", this.iconImg(true)),
-                               bigIcon,
-                               smallIcon,
-                               div("hubTileTitleBar",
-                                     div("hubTileTitle", spanDirAuto(this.app.getName())),
-                                     div("hubTileSubtitle",
-                                         div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
+                    bigIcon,
+                    smallIcon,
+                    div("hubTileTitleBar",
+                        div("hubTileTitle", spanDirAuto(this.app.getName())),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
                 ScriptInfo.addTutorialProgress(d, this.cloudHeader);
             });
             return d;
         }
 
-        static addTutorialProgress(d: HTMLElement, header : Cloud.Header, small = false) {
+        static addTutorialProgress(d: HTMLElement, header: Cloud.Header, small = false) {
             if (!header || !header.guid) return;
             World.getInstalledEditorStateAsync(header.guid).done(text => {
                 if (!text) return;
@@ -6791,14 +6573,14 @@
                 // considered a valid tutorial); external editors don't have
                 // that requirement.
                 if ((prog.tutorialId || header.editor) && num > 0) {
-                    var starSpan = span("bold",((prog.tutorialStep || 0) + 1) + "★");
+                    var starSpan = span("bold", ((prog.tutorialStep || 0) + 1) + "★");
                     var ofSteps = prog.tutorialNumSteps ? (small ? "/" : lf(" of ")) + (prog.tutorialNumSteps + 1) : "";
                     d.appendChild(div("tutProgress",
                         ((prog.tutorialStep && (prog.tutorialStep == prog.tutorialNumSteps)) ?
                             div("steps", lf("done!"), div("label", starSpan))
                             : div("steps", starSpan, ofSteps,
                                 small ? undefined : div("label", lf("tutorial progress"))))
-                        ))
+                    ))
                 }
             });
         }
@@ -6807,28 +6589,26 @@
             return !this.app || this.app.supportsAllPlatforms(api.core.currentPlatform);
         }
 
-        private commentsTab : CommentsTab;
-        public mkTabsCore():BrowserTab[]
-        {
-            var r:BrowserTab[];
+        private commentsTab: CommentsTab;
+        public mkTabsCore(): BrowserTab[] {
+            var r: BrowserTab[];
             if (!this.publicId)
                 r = [this,
                     new ScriptDetailsTab(this),
                     EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null];
             else
                 r =
-                [
-                    this,
-                    new ScriptDetailsTab(this),
-                    this.cloudHeader && EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
-                    EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
-                    Cloud.lite ? new AbuseReportsTab(this) : null,
-                ];
+                    [
+                        this,
+                        new ScriptDetailsTab(this),
+                        this.cloudHeader && EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
+                        EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
+                        Cloud.lite ? new AbuseReportsTab(this) : null,
+                    ];
             return r;
         }
 
-        static labeledBox(hd:string, elt:HTMLElement)
-        {
+        static labeledBox(hd: string, elt: HTMLElement) {
             var hdiv = div("sdInlineHd", span("sdInlineHdLabel", hd));
             var r = div("inlineBlock sdInlineContentContainer sdScriptBox sdBox-" + hd.replace(/ /g, "-"), hdiv, elt);
             return r.withClick(() => {
@@ -6837,12 +6617,10 @@
         }
 
 
-        private mkButtons()
-        {     
-            var clone : HTMLElement;
-            var save : HTMLElement;            
-            var mkBtn = (t:Ticks, icon:string, desc:string, key:string, f:()=>void) =>
-            {
+        private mkButtons() {
+            var clone: HTMLElement;
+            var save: HTMLElement;
+            var mkBtn = (t: Ticks, icon: string, desc: string, key: string, f: () => void) => {
                 var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)),
                     div("sdBigButtonDesc " + (desc.length > 7 ? "sdBigButtonLongDesc" : ""), desc));
                 b.setAttribute("aria-label", desc);
@@ -6857,7 +6635,7 @@
             var updateB = null
             var editB = mkBtn(Ticks.browseEdit, "svg:edit,white", lf("edit"), null, () => { this.edit() });
             if (TDev.RT.App.env().has_host() && this.publicId) {
-                pinB = mkBtn(Ticks.browsePin, "svg:arrowdownl,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });               
+                pinB = mkBtn(Ticks.browsePin, "svg:arrowdownl,white", lf("add to inventory"), null, () => { this.sendScriptIdToAppHost(); });
             }
             if (World.updateFor(this.cloudHeader)) {
                 updateB = mkBtn(Ticks.browseEdit, "svg:fa-refresh,white", lf("update"), null, () => { this.update() });
@@ -6870,10 +6648,10 @@
                 pinB = null;
             }
 
-            var likePub:HTMLElement;
+            var likePub: HTMLElement;
 
-            var setBtn = (state:number, hearts:string, f:()=>void) => {
-                var btn:HTMLElement;
+            var setBtn = (state: number, hearts: string, f: () => void) => {
+                var btn: HTMLElement;
                 if (state < 0)
                     btn = mkBtn(Ticks.browseHeart, "svg:wholeheart,white,opacity=0.3", hearts, null, f);
                 else
@@ -6889,10 +6667,10 @@
             } else {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
             }
-            
-            var uninstall:HTMLElement;
-            var moderate:HTMLElement;
-            var editWithGroup:HTMLElement;
+
+            var uninstall: HTMLElement;
+            var moderate: HTMLElement;
+            var editWithGroup: HTMLElement;
             var btns: HTMLElement = div("sdRunBtns");
 
             if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
@@ -6900,13 +6678,13 @@
             }
 
             if (this.cloudHeader) {
-                uninstall = mkBtn(Ticks.browseUninstall, "svg:uninstall,white", lf("remove"), null,() => this.uninstall());
+                uninstall = mkBtn(Ticks.browseUninstall, "svg:uninstall,white", lf("remove"), null, () => this.uninstall());
                 uninstall.classList.add("sdUninstall");
 
                 clone = mkBtn(Ticks.browseClone, "svg:clone,white", lf("clone"), null, () => this.cloneAsync().done());
                 clone.classList.add("sdUninstall");
                 save = mkBtn(Ticks.browseSave, "svg:save,white", lf("save"), null, () => this.saveAsync().done());
-                
+
                 World.getInstalledEditorStateAsync(this.getGuid()).done(text => {
                     if (!text) return;
 
@@ -6932,13 +6710,11 @@
             return btns;
         }
 
-        static mkBtn(icon:string, desc:string, f:()=>void)
-        {
+        static mkBtn(icon: string, desc: string, f: () => void) {
             return Editor.mkTopMenuItem(icon, desc, Ticks.noEvent, null, f);
         }
 
-        static mkSimpleBtnConfirm(desc:string, f:()=>void)
-        {
+        static mkSimpleBtnConfirm(desc: string, f: () => void) {
             var isRed = false
 
             var btn = HTML.mkButton(desc, () => {
@@ -6956,18 +6732,17 @@
             return btn
         }
 
-        static mkBtnConfirm(icon:string, desc:string, f:()=>void)
-        {
+        static mkBtnConfirm(icon: string, desc: string, f: () => void) {
             var restoreNormal = () => {
                 btn1.style.display = "inline-block";
                 btn2.style.display = "none";
             }
 
-            var btn2:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",red", "i'm sure!", () => {
+            var btn2: HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",red", "i'm sure!", () => {
                 restoreNormal();
                 f();
             })
-            var btn1:HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",currentColor", desc, () => {
+            var btn1: HTMLElement = ScriptInfo.mkBtn("svg:" + icon + ",currentColor", desc, () => {
                 btn1.style.display = "none";
                 btn2.style.display = "inline-block";
                 Util.setTimeout(3000, restoreNormal);
@@ -6976,18 +6751,16 @@
             return [btn1, btn2];
         }
 
-        public getScriptTextAsync() : Promise
-        {
+        public getScriptTextAsync(): Promise {
             if (this.cloudHeader)
                 return World.getInstalledScriptAsync(this.getGuid());
             else
                 return ScriptCache.getScriptAsync(this.publicId);
         }
 
-        public currentlyForwardsTo():BrowserPage
-        {
+        public currentlyForwardsTo(): BrowserPage {
             if (this.correspondingTopic) {
-                var tas = this.browser().treatAsScript 
+                var tas = this.browser().treatAsScript
                 if (!tas.hasOwnProperty(this.publicId))
                     tas[this.publicId] = Cloud.isRestricted() && Cloud.hasPermission("root-ptr")
                 if (!tas[this.publicId])
@@ -6995,7 +6768,7 @@
             }
             return this;
         }
-        
+
         public saveAsync(): Promise {
 
             if (Browser.isMobileSafari || Browser.isMobileSafariOld)
@@ -7004,8 +6777,8 @@
             else
                 return this.internalSaveAsync();
         }
-            
-        private internalSaveAsync() : Promise {
+
+        private internalSaveAsync(): Promise {
             var guid = this.getGuid();
             var json: string;
             var p = Promise.as();
@@ -7026,10 +6799,10 @@
                         var fileName = Util.toFileName(this.cloudHeader.name, 'script');
                         if (jsonz) HTML.browserDownloadUInt8Array(jsonz, fileName + ".jsz");
                         else HTML.browserDownloadText(json, fileName + ".json");
-                        });
-                });    
+                    });
+                });
         }
-        
+
         public cloneAsync(): Promise {
             var host = this.parent.parentBrowser;
             var header: Cloud.Header;
@@ -7054,8 +6827,7 @@
                 });
         }
 
-        public initTab()
-        {
+        public initTab() {
             this.browser().treatAsScript[this.publicId] = true;
 
             // don't show these for scripts
@@ -7081,28 +6853,27 @@
                 wontWork,
             ]);
 
-            var scriptBox = (hd:string, id:string) => {
+            var scriptBox = (hd: string, id: string) => {
                 if (!id || id == this.publicId) return null;
                 return ScriptInfo.labeledBox(hd, this.browser().getScriptInfoById(id).mkSmallBox());
             }
 
-            this.withUpdate(descDiv,() => {
+            this.withUpdate(descDiv, () => {
                 if (!this.jsonScript) return;
 
                 this.buildTopic();
 
-                if (this.publicId && Cloud.hasPermission("script-promo") && 
-                    this.jsonScript.promo)
-                {
-                    preDescDiv.setChildren([ 
+                if (this.publicId && Cloud.hasPermission("script-promo") &&
+                    this.jsonScript.promo) {
+                    preDescDiv.setChildren([
                         div("kw", this.jsonScript.promo.name),
-                        div(null, this.jsonScript.promo.description) ])
+                        div(null, this.jsonScript.promo.description)])
                 }
 
                 if (this.jsonScript.description) {
                     descDiv.classList.add('sdDesc');
                     if (this.app.isLibrary) {
-                        Browser.setInnerHTML(descDiv,(new MdComments()).formatText(this.jsonScript.description));
+                        Browser.setInnerHTML(descDiv, (new MdComments()).formatText(this.jsonScript.description));
                         HTML.fixWp8Links(descDiv);
                     }
                     else
@@ -7110,14 +6881,14 @@
                 }
 
                 if (this.correspondingTopic && !this.cloudHeader) {
-                    docsButtonDiv.setChildren([HTML.mkButton(lf("view as docs"),() => {
+                    docsButtonDiv.setChildren([HTML.mkButton(lf("view as docs"), () => {
                         this.browser().treatAsScript[this.publicId] = false;
                         TheEditor.historyMgr.reload(HistoryMgr.windowHash());
                     })])
                 }
 
                 if (this.correspondingTopic && this.correspondingTopic.topic && this.correspondingTopic.topic.isTutorial()) {
-                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"),() => {
+                    docsButtonDiv.appendChildren([HTML.mkButton(lf("follow tutorial in editor"), () => {
                         tick(Ticks.browseFollowTopic)
                         this.correspondingTopic.follow()
                     })])
@@ -7155,29 +6926,28 @@
             });
 
             this.getScriptTextAsync()
-                .done((scriptText:string) => {
-                if (!scriptText)
-                    return;
-                if (this.cloudHeader && this.cloudHeader.editor ||
-                    this.jsonScript && this.jsonScript.editor)
-                    return;
+                .done((scriptText: string) => {
+                    if (!scriptText)
+                        return;
+                    if (this.cloudHeader && this.cloudHeader.editor ||
+                        this.jsonScript && this.jsonScript.editor)
+                        return;
 
-                var oldPlatform = this.app && this.app.getPlatform();
+                    var oldPlatform = this.app && this.app.getPlatform();
 
-                this.app = AST.Parser.parseScript(scriptText);
-                this.app.localGuid = this.getGuid();
-                if (oldPlatform)
-                    this.app.setPlatform(oldPlatform);
+                    this.app = AST.Parser.parseScript(scriptText);
+                    this.app.localGuid = this.getGuid();
+                    if (oldPlatform)
+                        this.app.setPlatform(oldPlatform);
 
-                if (this.app.isLibrary)
-                    descDiv.appendChildren(ScriptProperties.libraryDocs(this.app, this.app.getName(), false));
-            });
+                    if (this.app.isLibrary)
+                        descDiv.appendChildren(ScriptProperties.libraryDocs(this.app, this.app.getName(), false));
+                });
         }
 
-        private docPath:string;
-        private docPathCurrent:boolean;
-        private setupDocPathAsync(isPublish = false)
-        {
+        private docPath: string;
+        private docPathCurrent: boolean;
+        private setupDocPathAsync(isPublish = false) {
             this.docPath = ""
             this.docPathCurrent = false
 
@@ -7187,53 +6957,52 @@
             if (!isDocs) return Promise.as()
 
             return this.getScriptTextAsync()
-                    .then((text:string) => {
-                        if (this.app.things.length == 0 && text)
-                            this.app = AST.Parser.parseScript(text)
+                .then((text: string) => {
+                    if (this.app.things.length == 0 && text)
+                        this.app = AST.Parser.parseScript(text)
 
-                        if (Cloud.hasPermission("root-ptr")) {
-                            var coll = new AST.IntelliCollector()
-                            coll.dispatch(this.app)
-                            this.docPath = coll.topicPath || this.getTitle().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
+                    if (Cloud.hasPermission("root-ptr")) {
+                        var coll = new AST.IntelliCollector()
+                        coll.dispatch(this.app)
+                        this.docPath = coll.topicPath || this.getTitle().replace(/\s+/g, "-").replace(/[^\w\-\/]/g, "").toLowerCase()
+                        return Promise.as()
+                    } else {
+                        // Not sure if we want it
+                        // if (Cloud.hasPermission("custom-ptr"))
+                        //    this.docPath = "users/" + Cloud.getUserId() + "/" + path
+
+                        if (!Cloud.hasPermission("post-pointer"))
                             return Promise.as()
-                        } else {
-                            // Not sure if we want it
-                            // if (Cloud.hasPermission("custom-ptr"))
-                            //    this.docPath = "users/" + Cloud.getUserId() + "/" + path
-                            
-                            if (!Cloud.hasPermission("post-pointer"))
-                                return Promise.as()
 
-                            return TheApiCacheMgr.getAsync(this.publicId, true)
-                                .then((js:JsonScript) => {
-                                    this.docPath = "usercontent/" + js.updateroot
+                        return TheApiCacheMgr.getAsync(this.publicId, true)
+                            .then((js: JsonScript) => {
+                                this.docPath = "usercontent/" + js.updateroot
+                            })
+                        /* This stuff (/usercontent/scriptid) needs more thought; disable for now
+                           It can still be accessed from the share dialog.
+                        .then(() => {
+                            if (isPublish && !Cloud.hasPermission("root-ptr")) {
+                                return Cloud.postPrivateApiAsync("pointers", {
+                                        path: this.docPath,
+                                        scriptid: this.publicId,
+                                        description: this.getTitle(),
                                 })
-                                /* This stuff (/usercontent/scriptid) needs more thought; disable for now
-                                   It can still be accessed from the share dialog.
-                                .then(() => {
-                                    if (isPublish && !Cloud.hasPermission("root-ptr")) {
-                                        return Cloud.postPrivateApiAsync("pointers", {
-                                                path: this.docPath,
-                                                scriptid: this.publicId,
-                                                description: this.getTitle(),
-                                        })
-                                    }
-                                    else return Promise.as()
-                                })
-                                */
-                        }
-                    })
-                    .then(() => this.docPath ? 
-                        Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")) : Promise.as())
-                    .then(v => v, e => null)
-                    .then(resp => {
-                        if (resp)
-                            this.docPathCurrent = resp.scriptid == this.publicId
-                    })
+                            }
+                            else return Promise.as()
+                        })
+                        */
+                    }
+                })
+                .then(() => this.docPath ?
+                    Cloud.getPrivateApiAsync("ptr-" + this.docPath.replace(/[^a-zA-Z0-9]/g, "-")) : Promise.as())
+                .then(v => v, e => null)
+                .then(resp => {
+                    if (resp)
+                        this.docPathCurrent = resp.scriptid == this.publicId
+                })
         }
 
-        private addShare(m:ModalDialog, options:RT.ShareManager.ShareOptions)
-        {
+        private addShare(m: ModalDialog, options: RT.ShareManager.ShareOptions) {
             var id = this.publicId;
             var title = this.getTitle();
             var ht = "";
@@ -7253,11 +7022,11 @@
                         tick(Ticks.publishShareGroup);
                         Meta.chooseGroupAsync({ header: lf("choose group"), includeSearch: false })
                             .done((g: GroupInfo) => {
-                            if (g) {
-                                CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
-                                this.browser().loadDetails(g);
-                            }
-                        });
+                                if (g) {
+                                    CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
+                                    this.browser().loadDetails(g);
+                                }
+                            });
                     }
                 }]
             }
@@ -7273,35 +7042,33 @@
 
                 var url = Cloud.getServiceUrl() + "/" + this.docPath.replace(/^\/+/, "")
 
-                m.add(div("wall-dialog-header",  lf("documentation page")))
+                m.add(div("wall-dialog-header", lf("documentation page")))
                 m.addBody([lf("current: "), HTML.mkA("", url, "_blank", url)])
                 if (this.docPathCurrent)
                     m.addBody([lf("This script is current.")])
                 else
                     m.addBody([
-                          HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
-                          " ",
-                          HTML.mkAsyncButton(lf("overwrite current"), () =>
-                                Cloud.postPrivateApiAsync("pointers", {
-                                    path: this.docPath,
-                                    scriptid: id,
-                                    description: this.getTitle(),
-                                })
+                        HTML.mkA("", Cloud.getServiceUrl() + "/preview/" + id, "_blank", lf("preview new")),
+                        " ",
+                        HTML.mkAsyncButton(lf("overwrite current"), () =>
+                            Cloud.postPrivateApiAsync("pointers", {
+                                path: this.docPath,
+                                scriptid: id,
+                                description: this.getTitle(),
+                            })
                                 .then(r => r, e => Cloud.handlePostingError(e, lf("update pointer"))))
                     ])
             })()
         }
 
-        public share()
-        {
+        public share() {
             var m = new ModalDialog()
             m.show()
             this.setupDocPathAsync()
-            .done(() => this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) }))
+                .done(() => this.addShare(m, { tickCallback: (s) => Ticker.rawTick("shareScript_" + s) }))
         }
 
-        public publishAsync(fromHub: boolean, noDialog = false, screenshotDataUri : string = null) : Promise
-        {
+        public publishAsync(fromHub: boolean, noDialog = false, screenshotDataUri: string = null): Promise {
             TipManager.setTip(null);
             if (Cloud.isOffline()) {
                 Cloud.showModalOnlineInfo(lf("publishing cancelled"));
@@ -7321,10 +7088,10 @@
             }
 
             var m: ModalDialog;
-            var sendPullRequest = false                
+            var sendPullRequest = false
             var sendPullRequestId = this.cloudHeader.scriptId;
             var baseId = this.cloudHeader.scriptId;
-            var pullMergeIds : string[] = undefined;
+            var pullMergeIds: string[] = undefined;
             var changeDescription = HTML.mkTextInput('text', lf("add a publication note"));
             changeDescription.classList.add('pub-notes');
 
@@ -7338,7 +7105,7 @@
                     Cloud.showModalOnlineInfo(lf("publishing cancelled"));
                     return Promise.as();
                 }
-                
+
                 tick(hidden ? Ticks.corePublishHidden : Ticks.corePublishPublic)
 
                 var trigger = (guid: string) => {
@@ -7412,68 +7179,68 @@
                         Promise.join(waitList)
                             .then(() => World.syncAsync())
                             .then(message => {
-                            if (!message) {
-                                if (prePub != numPublished)
-                                    fixpoint();
-                                else {
-                                    HTML.showProgressNotification(lf("{0} script{0:s} published", numPublished));
+                                if (!message) {
+                                    if (prePub != numPublished)
+                                        fixpoint();
+                                    else {
+                                        HTML.showProgressNotification(lf("{0} script{0:s} published", numPublished));
 
-                                    World.getInstalledHeaderAsync(this.getGuid()).then((hd) => {
-                                        if (!hd || hd.status !== "published") {
-                                            // let's hope there was some error notification already
-                                            m.dismiss()
-                                            return null;
-                                        }
+                                        World.getInstalledHeaderAsync(this.getGuid()).then((hd) => {
+                                            if (!hd || hd.status !== "published") {
+                                                // let's hope there was some error notification already
+                                                m.dismiss()
+                                                return null;
+                                            }
 
-                                        this.cloudHeader = hd;
-                                        this.publicId = hd.scriptId;
+                                            this.cloudHeader = hd;
+                                            this.publicId = hd.scriptId;
 
-                                        if (screenshotDataUri)
-                                            this.backgroundUploadScreenshot(screenshotDataUri);
+                                            if (screenshotDataUri)
+                                                this.backgroundUploadScreenshot(screenshotDataUri);
 
-                                        var descr = changeDescription.value || "";
-                                        if (descr && this.cloudHeader.status == 'published') {
-                                            tick(Ticks.browsePublicationNotes);
-                                            var req = { kind: "comment", text: descr + ' #publicationNotes', userplatform: Browser.platformCaps };
-                                            Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/comments", req)
-                                                .then((jscom: JsonComment) => {
-                                                    if (jscom && sendPullRequest) {
-                                                        tick(Ticks.browseSendPullRequest);
-                                                        Util.log('send pull request');
-                                                        HTML.showProgressNotification(lf("sending pull request..."), true);
-                                                        var req = { kind: "comment", text: '#pullRequest /' + jscom.id + ' /' + this.cloudHeader.scriptId, userplatform: Browser.platformCaps };
-                                                        return Cloud.postPrivateApiAsync(sendPullRequestId + "/comments", req);
-                                                    }
-                                                    return Promise.as();
-                                                }).done(() => { }, e => Cloud.handlePostingError(e, lf("send pull request")));
-                                        }
-                                        if (pullMergeIds && pullMergeIds.length > 0) {
-                                            Promise.join(pullMergeIds.map(mid => {
-                                                var req = { kind: "comment", text: lf("Your changes have been pulled into {0}!", ' /' + this.cloudHeader.scriptId), userplatform: Browser.platformCaps };
-                                                return Cloud.postPrivateApiAsync(mid + "/comments", req);
-                                            })).done(() => {}, (e) => {}); // swallow error
-                                        }
-                                        if (Cloud.lite && baseId && Cloud.hasPermission("post-script-meta")) {
-                                            var baseMeta = undefined;
-                                            Cloud.getPrivateApiAsync(baseId)
-                                                .then((baseJson: JsonScript) => {
-                                                    baseMeta = baseJson.meta;
-                                                    if (!baseMeta) return Promise.as();
-                                                    else Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/meta", baseJson.meta);
-                                                }).done(() => { 
-                                                    if (baseMeta) TheApiCacheMgr.invalidate(this.cloudHeader.scriptId)
-                                                }, e => Cloud.handlePostingError(e, lf("updating meta")));
-                                        }                                        
-                                        this.sendScriptIdToAppHost();                                        
-                                        return this.setupDocPathAsync(true)
-                                            .then(() => this.publishFinished(m, fromHub, sendPullRequest))
-                                    }).done()
+                                            var descr = changeDescription.value || "";
+                                            if (descr && this.cloudHeader.status == 'published') {
+                                                tick(Ticks.browsePublicationNotes);
+                                                var req = { kind: "comment", text: descr + ' #publicationNotes', userplatform: Browser.platformCaps };
+                                                Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/comments", req)
+                                                    .then((jscom: JsonComment) => {
+                                                        if (jscom && sendPullRequest) {
+                                                            tick(Ticks.browseSendPullRequest);
+                                                            Util.log('send pull request');
+                                                            HTML.showProgressNotification(lf("sending pull request..."), true);
+                                                            var req = { kind: "comment", text: '#pullRequest /' + jscom.id + ' /' + this.cloudHeader.scriptId, userplatform: Browser.platformCaps };
+                                                            return Cloud.postPrivateApiAsync(sendPullRequestId + "/comments", req);
+                                                        }
+                                                        return Promise.as();
+                                                    }).done(() => { }, e => Cloud.handlePostingError(e, lf("send pull request")));
+                                            }
+                                            if (pullMergeIds && pullMergeIds.length > 0) {
+                                                Promise.join(pullMergeIds.map(mid => {
+                                                    var req = { kind: "comment", text: lf("Your changes have been pulled into {0}!", ' /' + this.cloudHeader.scriptId), userplatform: Browser.platformCaps };
+                                                    return Cloud.postPrivateApiAsync(mid + "/comments", req);
+                                                })).done(() => { }, (e) => { }); // swallow error
+                                            }
+                                            if (Cloud.lite && baseId && Cloud.hasPermission("post-script-meta")) {
+                                                var baseMeta = undefined;
+                                                Cloud.getPrivateApiAsync(baseId)
+                                                    .then((baseJson: JsonScript) => {
+                                                        baseMeta = baseJson.meta;
+                                                        if (!baseMeta) return Promise.as();
+                                                        else Cloud.postPrivateApiAsync(this.cloudHeader.scriptId + "/meta", baseJson.meta);
+                                                    }).done(() => {
+                                                        if (baseMeta) TheApiCacheMgr.invalidate(this.cloudHeader.scriptId)
+                                                    }, e => Cloud.handlePostingError(e, lf("updating meta")));
+                                            }
+                                            this.sendScriptIdToAppHost();
+                                            return this.setupDocPathAsync(true)
+                                                .then(() => this.publishFinished(m, fromHub, sendPullRequest))
+                                        }).done()
+                                    }
+                                } else {
+                                    if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
+                                        ModalDialog.info(lf("publishing unsuccessful"), lf("Your script could not be published, please check your internet connection. If this does not resolve your issue, go to the help page for more information."));
                                 }
-                            } else {
-                                if (!ModalDialog.currentIsVisible() || ModalDialog.current == m)
-                                    ModalDialog.info(lf("publishing unsuccessful"), lf("Your script could not be published, please check your internet connection. If this does not resolve your issue, go to the help page for more information."));
-                            }
-                        }).done();
+                            }).done();
                     })
                 }
 
@@ -7505,7 +7272,7 @@
 
                     m.add(div("wall-dialog-body",
                         lf("Remember: everyone will be able to see your script if you publish it, so make sure it doesn’t contain your passwords or personal information.")
-                        ));
+                    ));
                     var screenshotDataUri = TheEditor.lastScreenshotUri();
                     var uploadScreenshot = true;
                     var uploadScreenshotCheck = HTML.mkCheckBox(lf("upload screenshot"), b => uploadScreenshot = b, uploadScreenshot);
@@ -7534,7 +7301,7 @@
                                 sendPullRequest = v;
                                 publishBtn.style.display = v ? 'none' : 'inline';
                             }, sendPullRequest)
-                            ));
+                        ));
                     }
                     m.add(Cloud.mkLegalDiv());
                     m.onDismiss = () => onSuccess(undefined);
@@ -7542,9 +7309,9 @@
                 });
             }
         }
-        
+
         private sendScriptIdToAppHost() {
-            if (TDev.RT.App.env().has_host() && this.publicId ) {
+            if (TDev.RT.App.env().has_host() && this.publicId) {
                 Util.log('app host: notify script published');
                 TDev.RT.App.hostExecAsync("touchdevelop.script(" +
                     this.publicId + "," +
@@ -7564,30 +7331,29 @@
             Util.betaCheck(!!contentType);
             if (contentType && base64content) {
                 HTML.showProgressNotification(lf("uploading screenshot..."));
-                Cloud.postPrivateApiAsync(this.publicId+ "/screenshots", {
+                Cloud.postPrivateApiAsync(this.publicId + "/screenshots", {
                     kind: "screenshot",
                     contentType: contentType,
                     content: base64content,
                     userplatform: Browser.platformCaps
-                    }).done(() => {
-                        HTML.showProgressNotification(lf("screenshot uploaded"), true);
-                    }, e => {
-                        Cloud.handlePostingError(e, lf("upload screenshot"));
-                   });
+                }).done(() => {
+                    HTML.showProgressNotification(lf("screenshot uploaded"), true);
+                }, e => {
+                    Cloud.handlePostingError(e, lf("upload screenshot"));
+                });
             }
         }
 
-        private publishFinished(m:ModalDialog, fromHub:boolean, isPull:boolean)
-        {
+        private publishFinished(m: ModalDialog, fromHub: boolean, isPull: boolean) {
             m.empty();
             var sml = div("floatingSmilie", ":)")
             m.add(sml)
             Util.setTimeout(1500, () => {
                 sml.setChildren(";)")
-                    Util.setTimeout(600, () => {
+                Util.setTimeout(600, () => {
                     sml.setChildren(":)")
-                    })
                 })
+            })
             m.add(div("wall-dialog-header", lf("hooray! your script is published")));
             if (isPull)
                 m.addHTML(lf("A comment about your pull request was added."));
@@ -7618,28 +7384,27 @@
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
         }
 
-        private moderate()
-        {
+        private moderate() {
             ModalDialog.ask(
-              lf("Did you make sure there is no personal data about the kid in the script? The script will be available on the internet."), 
-              lf("make public"), () => {
-                  var hash = HistoryMgr.windowHash()
-                  Cloud.postPrivateApiAsync(this.publicId, { unmoderated: false })
-                    .then(r => {
-                        TheApiCacheMgr.invalidate(this.publicId);
-                        TheEditor.historyMgr.reload(hash)
-                    }, e => Cloud.handlePostingError(e, lf("moderate script")))
-                    .done()
-            })
+                lf("Did you make sure there is no personal data about the kid in the script? The script will be available on the internet."),
+                lf("make public"), () => {
+                    var hash = HistoryMgr.windowHash()
+                    Cloud.postPrivateApiAsync(this.publicId, { unmoderated: false })
+                        .then(r => {
+                            TheApiCacheMgr.invalidate(this.publicId);
+                            TheEditor.historyMgr.reload(hash)
+                        }, e => Cloud.handlePostingError(e, lf("moderate script")))
+                        .done()
+                })
         }
-        
+
         private uninstall() {
             this.uninstallAsync().done();
         }
 
         private uninstallAsync(allowUndo = true): Promise {
             var id = this.getGuid();
-            var restoreAsync : Promise = null
+            var restoreAsync: Promise = null
             return Editor.updateEditorStateAsync(id, (st) => {
                 TipManager.setTip(null);
 
@@ -7678,10 +7443,9 @@
             });
         }
 
-        static setupLike(id:string, setBtn:(state:number, hearts : string, f:()=>void)=>void)
-        {
-            function load(n:number,h:number) : void {
-                var reviewId = TheApiCacheMgr.getHeart(id, () => load(2,h));
+        static setupLike(id: string, setBtn: (state: number, hearts: string, f: () => void) => void) {
+            function load(n: number, h: number): void {
+                var reviewId = TheApiCacheMgr.getHeart(id, () => load(2, h));
                 if (reviewId) {
                     setBtn(n, h < 0 ? lf("remove") : h.toString(), delHeart);
                 } else {
@@ -7692,43 +7456,42 @@
             function addHeart() {
                 if (Cloud.anonMode(lf("adding hearts"), addHeart)) return;
 
-                var jscript = TheApiCacheMgr.getCached(id);                
+                var jscript = TheApiCacheMgr.getCached(id);
                 var ha = getScriptHeartCount(jscript);
-                setBtn(-1, ha < 0 ? "0" : ha.toString(), () => {});
+                setBtn(-1, ha < 0 ? "0" : ha.toString(), () => { });
                 Util.httpPostJsonAsync(Cloud.getPrivateApiUrl(id + "/reviews"), { kind: "review", userplatform: Browser.platformCaps })
-                .done((resp: JsonReview) => {
-                    TheApiCacheMgr.storeHeart(id, resp.id);
-                    patchScriptHeartCount(jscript, Math.max(ha,0)+1);
-                    load(3, getScriptHeartCount(jscript));
-                    Browser.Hub.askToEnableNotifications();
-                }, (e: any) => {
-                    Cloud.handlePostingError(e, lf("add hearts"));
-                });
+                    .done((resp: JsonReview) => {
+                        TheApiCacheMgr.storeHeart(id, resp.id);
+                        patchScriptHeartCount(jscript, Math.max(ha, 0) + 1);
+                        load(3, getScriptHeartCount(jscript));
+                        Browser.Hub.askToEnableNotifications();
+                    }, (e: any) => {
+                        Cloud.handlePostingError(e, lf("add hearts"));
+                    });
             }
 
             function delHeart() {
                 if (Cloud.anonMode(lf("removing hearts"), delHeart)) return;
 
-                var jscript = TheApiCacheMgr.getCached(id);                
+                var jscript = TheApiCacheMgr.getCached(id);
                 var hd = getScriptHeartCount(jscript);
-                setBtn(1, hd < 0 ? "0" : hd.toString(), () => {});
+                setBtn(1, hd < 0 ? "0" : hd.toString(), () => { });
                 var reviewId = TheApiCacheMgr.getHeart(id, null);
                 Util.httpRequestAsync(Cloud.getPrivateApiUrl(reviewId), "DELETE", undefined)
-                .done(() => {
-                    TheApiCacheMgr.storeHeart(id, "");
-                    patchScriptHeartCount(jscript, Math.max(hd, 1)-1);
-                    load(3, getScriptHeartCount(jscript));
-                }, (e: any) => {
-                    Cloud.handlePostingError(e, lf("remove hearts"));
-                });
+                    .done(() => {
+                        TheApiCacheMgr.storeHeart(id, "");
+                        patchScriptHeartCount(jscript, Math.max(hd, 1) - 1);
+                        load(3, getScriptHeartCount(jscript));
+                    }, (e: any) => {
+                        Cloud.handlePostingError(e, lf("remove hearts"));
+                    });
             }
 
             var hs = getScriptHeartCount(TheApiCacheMgr.getCached(id));
-            load(2,hs);
+            load(2, hs);
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
             var lowerName = this.app.getName().toLowerCase();
             var r = IntelliItem.matchString(lowerName, terms, 10000, 1000, 100);
@@ -7743,38 +7506,35 @@
             return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
         }
 
-        public diffToId(id:string)
-        {
+        public diffToId(id: string) {
             ScriptProperties.showDiff(
                 Promise.join([id ? ScriptCache.getScriptAsync(id)
                     : this.getScriptTextAsync(),
                     this.getScriptTextAsync()]).then(scrs => {
-                    if (!scrs[0] || !scrs[1]) {
-                        if (Cloud.isOffline()) {
-                            Cloud.showModalOnlineInfo(lf("comparing cancelled"));
+                        if (!scrs[0] || !scrs[1]) {
+                            if (Cloud.isOffline()) {
+                                Cloud.showModalOnlineInfo(lf("comparing cancelled"));
+                            }
+                            return;
                         }
-                        return;
-                    }
-                    function prep(s:string)
-                    {
-                        var app = AST.Parser.parseScript(s, [])
-                        app.isTopLevel = true;
-                        AST.TypeChecker.tcScript(app, true);
-                        return app;
-                    }
-                    var a0 = prep(scrs[0])
-                    var a1 = prep(scrs[1])
-                    new AST.InitIdVisitor(false).dispatch(a0)
-                    AST.Diff.diffApps(a0, a1, {
-                        useStableNames: /diffNoStable/.test(document.URL) ? false : true,
-                        tutorialMode: /tutorialDiff/.test(document.URL)
-                    })
-                    return a1
-                }))
+                        function prep(s: string) {
+                            var app = AST.Parser.parseScript(s, [])
+                            app.isTopLevel = true;
+                            AST.TypeChecker.tcScript(app, true);
+                            return app;
+                        }
+                        var a0 = prep(scrs[0])
+                        var a1 = prep(scrs[1])
+                        new AST.InitIdVisitor(false).dispatch(a0)
+                        AST.Diff.diffApps(a0, a1, {
+                            useStableNames: /diffNoStable/.test(document.URL) ? false : true,
+                            tutorialMode: /tutorialDiff/.test(document.URL)
+                        })
+                        return a1
+                    }))
         }
 
-        public diffToBase()
-        {
+        public diffToBase() {
             if (this.basedOnPub)
                 this.diffToId(this.basedOnPub)
             else if (this.jsonScript && this.jsonScript.id == this.jsonScript.rootid)
@@ -7793,55 +7553,55 @@
             this.browser().updateInstalledHeaderCacheAsync()
                 .then(() => World.getAnyScriptAsync(this.getGuid()))
                 .then(scriptText => {
-                var clone = AST.Parser.parseScript(scriptText);
-                clone.comment += " #docs #tutorials #stepByStep";
-                clone.setName(this.browser().newScriptName(lf("{0} tutorial", clone.getName())));
+                    var clone = AST.Parser.parseScript(scriptText);
+                    clone.comment += " #docs #tutorials #stepByStep";
+                    clone.setName(this.browser().newScriptName(lf("{0} tutorial", clone.getName())));
 
-                // rename main to #0 main
-                var m = clone.actions().filter(a => a.getName() == "main")[0];
-                if (m) m.setName("#0 main");
+                    // rename main to #0 main
+                    var m = clone.actions().filter(a => a.getName() == "main")[0];
+                    if (m) m.setName("#0 main");
 
-                // insert steps
-                var converter = new TutorialConverter();
-                converter.avatarArtId = config.tutorialAvatarArtId;
-                converter.tutorial = true;
-                converter.visitChildren(clone);
+                    // insert steps
+                    var converter = new TutorialConverter();
+                    converter.avatarArtId = config.tutorialAvatarArtId;
+                    converter.tutorial = true;
+                    converter.visitChildren(clone);
 
-                // add main
-                var mainSrc = "action main {\n"
-                    + "// {template:" + (m.isPage() ? "emptyapp" : "empty") + "}\n"
-                    + "// {templatename:ADJ script}\n"
-                    + "// {widgets:}\n";
-                if (config.tutorialAvatarArtId) mainSrc += "// {box:avatar:avatar}\n";
-                mainSrc += "// " + lf("TODO: describe your tutorial here.") + "\n";
-                if (config.tutorialAvatarArtId) mainSrc += "// {/box}\n";
-                mainSrc += "}";
-                var main = AST.Parser.parseDecl(mainSrc);
-                clone.addDecl(main);
+                    // add main
+                    var mainSrc = "action main {\n"
+                        + "// {template:" + (m.isPage() ? "emptyapp" : "empty") + "}\n"
+                        + "// {templatename:ADJ script}\n"
+                        + "// {widgets:}\n";
+                    if (config.tutorialAvatarArtId) mainSrc += "// {box:avatar:avatar}\n";
+                    mainSrc += "// " + lf("TODO: describe your tutorial here.") + "\n";
+                    if (config.tutorialAvatarArtId) mainSrc += "// {/box}\n";
+                    mainSrc += "}";
+                    var main = AST.Parser.parseDecl(mainSrc);
+                    clone.addDecl(main);
 
-                // if avatar, insert resource
-                if (config.tutorialAvatarArtId) {
-                    var d = new AST.GlobalDef();
-                    d.setName("avatar");
-                    d.isTransient = true;
-                    d.isResource = true;
-                    d.setKind(api.core.Picture);
-                    d.url = Cloud.artUrl(config.tutorialAvatarArtId);
-                    d.comment = lf("The tutorial avatar head");
-                    clone.addDecl(d);
-                }
+                    // if avatar, insert resource
+                    if (config.tutorialAvatarArtId) {
+                        var d = new AST.GlobalDef();
+                        d.setName("avatar");
+                        d.isTransient = true;
+                        d.isResource = true;
+                        d.setKind(api.core.Picture);
+                        d.url = Cloud.artUrl(config.tutorialAvatarArtId);
+                        d.comment = lf("The tutorial avatar head");
+                        clone.addDecl(d);
+                    }
 
-                var text = clone.serialize();
-                Util.log(text);
-                var scriptStub = {
-                    editorName: "touchdevelop",
-                    scriptText: text,
-                    scriptName: clone.getName(),
-                }
-                return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
-            }).done((header: Cloud.Header) => {
-                this.browser().createInstalled(header).edit();
-            });
+                    var text = clone.serialize();
+                    Util.log(text);
+                    var scriptStub = {
+                        editorName: "touchdevelop",
+                        scriptText: text,
+                        scriptName: clone.getName(),
+                    }
+                    return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
+                }).done((header: Cloud.Header) => {
+                    this.browser().createInstalled(header).edit();
+                });
         }
 
         public convertToLesson() {
@@ -7850,43 +7610,41 @@
             this.browser().updateInstalledHeaderCacheAsync()
                 .then(() => World.getAnyScriptAsync(this.getGuid()))
                 .then(scriptText => {
-                var clone = AST.Parser.parseScript(scriptText);
-                clone.comment += " #docs";
-                clone.setName(this.browser().newScriptName(lf("{0} lesson", clone.getName())));
+                    var clone = AST.Parser.parseScript(scriptText);
+                    clone.comment += " #docs";
+                    clone.setName(this.browser().newScriptName(lf("{0} lesson", clone.getName())));
 
-                // insert steps
-                var converter = new TutorialConverter();
-                converter.visitChildren(clone);
+                    // insert steps
+                    var converter = new TutorialConverter();
+                    converter.visitChildren(clone);
 
-                // insert final full code step
-                var main = clone.mainAction();
-                if (main) {
-                    var c = new AST.Comment();
-                    c.text = lf("### full source code");
-                    c.text += "\n{decl*:}";
-                    main.body.stmts.push(c)
-                }
+                    // insert final full code step
+                    var main = clone.mainAction();
+                    if (main) {
+                        var c = new AST.Comment();
+                        c.text = lf("### full source code");
+                        c.text += "\n{decl*:}";
+                        main.body.stmts.push(c)
+                    }
 
-                var text = clone.serialize();
-                Util.log(text);
-                var scriptStub = {
-                    editorName: "touchdevelop",
-                    scriptText: text,
-                    scriptName: clone.getName(),
-                }
-                return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
-            }).done((header: Cloud.Header) => {
-                this.browser().createInstalled(header).edit();
-            });
+                    var text = clone.serialize();
+                    Util.log(text);
+                    var scriptStub = {
+                        editorName: "touchdevelop",
+                        scriptText: text,
+                        scriptName: clone.getName(),
+                    }
+                    return World.installUnpublishedAsync(this.jsonScript.id, this.jsonScript.userid, scriptStub);
+                }).done((header: Cloud.Header) => {
+                    this.browser().createInstalled(header).edit();
+                });
         }
 
-        public mergeScript()
-        {
+        public mergeScript() {
             ScriptProperties.mergeScript(this.jsonScript)
         }
 
-        public editPromo()
-        {
+        public editPromo() {
             var m = new ModalDialog()
             var id = this.publicId
             var json = this.jsonScript
@@ -7896,134 +7654,133 @@
             m.stretchWide()
             m.show()
 
-            Promise.join([TheApiCacheMgr.getAsync("config/promo"), 
-                          Cloud.getPrivateApiAsync(id + "/promo")])
-            .done(arr => {
-                var cfg = arr[0]
-                var promo = arr[1]
-                if (json.ishidden && (!promo.tags || promo.tags.length == 0)) {
-                    ModalDialog.info(lf("script is hidden"), lf("Cannot add promo on a hidden script."))
-                    return
-                }
-                var fields = cfg.fields || {}
-                var alltags = cfg.tags || ["all"]
-                fields["order"] = { desc: lf("Ordering slot (1-99); if empty 100 is assumed"), type: "number", optional: 100 }
-                fields["priority"] = { desc: lf("Publication time-shift (in hours; -9999 to +9999)"), type: "number" }
-                fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
-                var inputs = {}
-                var nowPrio = () => (((Date.now()/1000) - json.time) / 3600).toFixed(3)
-                if (!promo.priority && promo.tags && promo.tags.length == 0) {
-                    promo.priority = parseFloat(nowPrio())
-                }
-
-                if (typeof promo.priority == "string")
-                    promo.priority = parseFloat(promo.priority)
-
-                if (promo.priority >= 10000) {
-                    var ord = Math.floor(promo.priority / 10000)
-                    promo.order = 100 - ord
-                    promo.priority = promo.priority % 10000
-                } else {
-                    promo.order = ""
-                }
-                
-                Object.keys(fields).forEach(fn => {
-                    var meta = fields[fn]
-                    var inp = HTML.mkTextInput(meta.type || "text", "")
-                    inputs[fn] = inp
-                    if (promo.hasOwnProperty(fn))
-                        if (Array.isArray(promo[fn]))
-                            inp.value = promo[fn].join(", ")
-                        else
-                            inp.value = (promo[fn] + "")
-                    else if (meta.override)
-                        inp.value = json[fn]
-                    var dsc = meta.desc || fn
-                    if (meta.override)
-                        dsc += lf(" [override]")
-                    var btn = null
-                    if (fn == "priority")
-                        btn = HTML.mkLinkButton(lf("make current"), () => {
-                            inp.value = nowPrio()
-                        })
-                    m.add(div("wall-dialog-body", dsc, btn, inp))
-                })
-                inputs["tags"].value = (promo["tags"] || []).filter(t => alltags.indexOf(t) >= 0).join(", ")
-
-                var thisAutoTags = ["all"]
-                thisAutoTags.push(json.editor || "touchdevelop")
-                if (/#docs/.test(json.description))
-                    thisAutoTags.push("docs")
-                m.addBody(lf("Automatic tags: {0}", thisAutoTags.join(", ")))
-
-                m.addOk(lf("save promo"), () => {
-                    var wrong = [] 
-                    var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
-                    if (tags.some(t => alltags.indexOf(t) < 0)) {
-                        wrong.push(inputs["tags"])
+            Promise.join([TheApiCacheMgr.getAsync("config/promo"),
+                Cloud.getPrivateApiAsync(id + "/promo")])
+                .done(arr => {
+                    var cfg = arr[0]
+                    var promo = arr[1]
+                    if (json.ishidden && (!promo.tags || promo.tags.length == 0)) {
+                        ModalDialog.info(lf("script is hidden"), lf("Cannot add promo on a hidden script."))
+                        return
+                    }
+                    var fields = cfg.fields || {}
+                    var alltags = cfg.tags || ["all"]
+                    fields["order"] = { desc: lf("Ordering slot (1-99); if empty 100 is assumed"), type: "number", optional: 100 }
+                    fields["priority"] = { desc: lf("Publication time-shift (in hours; -9999 to +9999)"), type: "number" }
+                    fields["tags"] = { desc: lf("Tags (eg: {0})", alltags.join(", ")) }
+                    var inputs = {}
+                    var nowPrio = () => (((Date.now() / 1000) - json.time) / 3600).toFixed(3)
+                    if (!promo.priority && promo.tags && promo.tags.length == 0) {
+                        promo.priority = parseFloat(nowPrio())
                     }
 
-                    if (tags.length > 0) tags = tags.concat(thisAutoTags)
+                    if (typeof promo.priority == "string")
+                        promo.priority = parseFloat(promo.priority)
 
-                    var data = { tags: tags }
+                    if (promo.priority >= 10000) {
+                        var ord = Math.floor(promo.priority / 10000)
+                        promo.order = 100 - ord
+                        promo.priority = promo.priority % 10000
+                    } else {
+                        promo.order = ""
+                    }
 
                     Object.keys(fields).forEach(fn => {
-                        if (fn == "tags") return
                         var meta = fields[fn]
-                        var inpt = inputs[fn]
-                        var val = inpt.value
-
-                        if (meta.type == "number") {
-                            var v = parseFloat(val)
-                            if (isNaN(v)) {
-                                if (meta.optional != null)
-                                    data[fn] = meta.optional
-                                else
-                                    wrong.push(inpt)
-                            }
-                            else data[fn] = v
-                        } else {
-                            data[fn] = val
-                        }
+                        var inp = HTML.mkTextInput(meta.type || "text", "")
+                        inputs[fn] = inp
+                        if (promo.hasOwnProperty(fn))
+                            if (Array.isArray(promo[fn]))
+                                inp.value = promo[fn].join(", ")
+                            else
+                                inp.value = (promo[fn] + "")
+                        else if (meta.override)
+                            inp.value = json[fn]
+                        var dsc = meta.desc || fn
+                        if (meta.override)
+                            dsc += lf(" [override]")
+                        var btn = null
+                        if (fn == "priority")
+                            btn = HTML.mkLinkButton(lf("make current"), () => {
+                                inp.value = nowPrio()
+                            })
+                        m.add(div("wall-dialog-body", dsc, btn, inp))
                     })
+                    inputs["tags"].value = (promo["tags"] || []).filter(t => alltags.indexOf(t) >= 0).join(", ")
 
-                    var order:number = data["order"]
+                    var thisAutoTags = ["all"]
+                    thisAutoTags.push(json.editor || "touchdevelop")
+                    if (/#docs/.test(json.description))
+                        thisAutoTags.push("docs")
+                    m.addBody(lf("Automatic tags: {0}", thisAutoTags.join(", ")))
 
-                    if (wrong.length == 0 && (Math.floor(order) != order || Util.between(1, order, 100) != order))
-                        wrong.push(inputs["order"])
+                    m.addOk(lf("save promo"), () => {
+                        var wrong = []
+                        var tags = inputs["tags"].value.split(/[\s,;]/).filter(t => !!t)
+                        if (tags.some(t => alltags.indexOf(t) < 0)) {
+                            wrong.push(inputs["tags"])
+                        }
 
-                    var priority:number = data["priority"]
+                        if (tags.length > 0) tags = tags.concat(thisAutoTags)
 
-                    if (wrong.length == 0 && (Util.between(-9999, priority, 9999) != priority))
-                        wrong.push(inputs["priority"])
+                        var data = { tags: tags }
+
+                        Object.keys(fields).forEach(fn => {
+                            if (fn == "tags") return
+                            var meta = fields[fn]
+                            var inpt = inputs[fn]
+                            var val = inpt.value
+
+                            if (meta.type == "number") {
+                                var v = parseFloat(val)
+                                if (isNaN(v)) {
+                                    if (meta.optional != null)
+                                        data[fn] = meta.optional
+                                    else
+                                        wrong.push(inpt)
+                                }
+                                else data[fn] = v
+                            } else {
+                                data[fn] = val
+                            }
+                        })
+
+                        var order: number = data["order"]
+
+                        if (wrong.length == 0 && (Math.floor(order) != order || Util.between(1, order, 100) != order))
+                            wrong.push(inputs["order"])
+
+                        var priority: number = data["priority"]
+
+                        if (wrong.length == 0 && (Util.between(-9999, priority, 9999) != priority))
+                            wrong.push(inputs["priority"])
 
 
-                    if (wrong.length > 0) {
-                        wrong.forEach(HTML.wrong)
-                    } else {
-                        priority += (100 - order) * 10000
-                        data["priority"] = priority
-                        delete data["order"]
+                        if (wrong.length > 0) {
+                            wrong.forEach(HTML.wrong)
+                        } else {
+                            priority += (100 - order) * 10000
+                            data["priority"] = priority
+                            delete data["order"]
 
-                        Cloud.postPrivateApiAsync(id + "/promo", data)
-                        .done(r => {
-                            m.dismiss()
-                            TheApiCacheMgr.invalidate(id)
-                            TheApiCacheMgr.invalidate("promo-scripts/")
-                            TheEditor.historyMgr.reload(HistoryMgr.windowHash());
-                        }, e => Cloud.handlePostingError(e, "promo"))
-                    }
-                }, "", [
-                    //HTML.mkButton(lf("remove promo"), () => m.dismiss()),
-                    HTML.mkButton(lf("cancel"), () => m.dismiss())
-                    ])
-            })
+                            Cloud.postPrivateApiAsync(id + "/promo", data)
+                                .done(r => {
+                                    m.dismiss()
+                                    TheApiCacheMgr.invalidate(id)
+                                    TheApiCacheMgr.invalidate("promo-scripts/")
+                                    TheEditor.historyMgr.reload(HistoryMgr.windowHash());
+                                }, e => Cloud.handlePostingError(e, "promo"))
+                        }
+                    }, "", [
+                            //HTML.mkButton(lf("remove promo"), () => m.dismiss()),
+                            HTML.mkButton(lf("cancel"), () => m.dismiss())
+                        ])
+                })
         }
 
     }
 
-    class TutorialConverter extends AST.NodeVisitor
-    {
+    class TutorialConverter extends AST.NodeVisitor {
         public tutorial = false;
         public avatarArtId: string;
 
@@ -8057,9 +7814,8 @@
     }
 
     export class ScriptsTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage, private _noneText : string = lf("no scripts published by this user"), private _name : string = lf("scripts"), private path:string = "scripts") {
+        extends ListTab {
+        constructor(par: BrowserPage, private _noneText: string = lf("no scripts published by this user"), private _name: string = lf("scripts"), private path: string = "scripts") {
             super(par, "/" + path + (Cloud.lite ? "" : "?applyupdates=" + (/hiddenScripts/.test(document.URL) ? "false" : "true")))
         }
         public getId() { return this.path; }
@@ -8067,24 +7823,20 @@
         public bgIcon() { return "svg:Upload"; }
         public noneText() { return this._noneText; }
 
-        public inlineText(cc:JsonIdObject)
-        {
+        public inlineText(cc: JsonIdObject) {
             var c = <JsonScript>cc;
             var h = getScriptHeartCount(c)
             return <any[]>[c.name, h > 0 ? " " + h + " " + "♥" : null];
         }
 
-        public tabBox(c:JsonScript):HTMLElement
-        {
+        public tabBox(c: JsonScript): HTMLElement {
             return this.browser().getScriptInfo(c).mkSmallBox();
         }
     }
 
     export class ConsumersTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage)
-        {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/scripts?applyupdates=true");
             this.isEmpty = true;
         }
@@ -8096,13 +7848,11 @@
         public bgIcon() { return "svg:cutlery"; }
         public noneText() { return lf("no consumers of this library"); }
 
-        public tabBox(c:JsonScript):HTMLElement
-        {
+        public tabBox(c: JsonScript): HTMLElement {
             return this.browser().getScriptInfo(c).mkSmallBox();
         }
 
-        initInline()
-        {
+        initInline() {
             this.inlineContent.className = "";
 
             var hide = () => {
@@ -8117,14 +7867,14 @@
                 return;
             }
 
-            this.loadMoreElementsAnd(null, (cmts:JsonPublication[]) => {
+            this.loadMoreElementsAnd(null, (cmts: JsonPublication[]) => {
                 if (cmts.length == 0) {
                     hide();
                 } else {
                     this.setVisibility(true);
                     this.isEmpty = false;
                     var children = []
-                    cmts.forEach((scr:JsonScript, i:number) => {
+                    cmts.forEach((scr: JsonScript, i: number) => {
                         if (i >= 1) return;
                         children.push(ScriptInfo.labeledBox(lf("consumer"), this.browser().getScriptInfo(scr).mkSmallBox()));
                     });
@@ -8136,9 +7886,8 @@
     }
 
     export class UserTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/users")
         }
         public getId() { return "users"; }
@@ -8153,20 +7902,18 @@
             return b.getUserInfo(c).mkSmallBox();
         }
 
-        public tabBox(c:JsonUser)
-        {
+        public tabBox(c: JsonUser) {
             return UserTab.mkBox(this.browser(), c);
         }
     }
 
     export class UserInfo
-        extends BrowserPage
-    {
+        extends BrowserPage {
         private userName: string;
         public userScore: number;
-        public nopicture:boolean;
+        public nopicture: boolean;
 
-        constructor(par:Host) {
+        constructor(par: Host) {
             super(par)
         }
         public persistentId() { return "user:" + this.publicId; }
@@ -8175,16 +7922,15 @@
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
 
-        public loadFromWeb(id:string, name:string)
-        {
+        public loadFromWeb(id: string, name: string) {
             Util.assert(!!id)
             this.publicId = id;
             this.userName = name;
         }
 
-        public userBar(info : BrowserPage): HTMLElement {
+        public userBar(info: BrowserPage): HTMLElement {
             var authorDiv = div('sdScriptAuthor');
-            this.withUpdate(authorDiv,(u:JsonUser) => {
+            this.withUpdate(authorDiv, (u: JsonUser) => {
                 this.userName = u.name;
                 this.userScore = u.score;
                 var authorHead = this.thumbnail(false);
@@ -8196,23 +7942,21 @@
                     div("inlineBlock", authorHead, div("sdAuthorLabel sdShareIcon", this.userName))
                         .withClick(() => { this.browser().loadDetails(this); })
                     ,
-                    div("floatright", info.shareButtons() )
-                    ]);
+                    div("floatright", info.shareButtons())
+                ]);
             });
             return authorDiv;
         }
 
-        public userPicture(thumb = false)
-        {
+        public userPicture(thumb = false) {
             var dd = div("sdIcon");
-            var loadAnon = ():void => {
+            var loadAnon = (): void => {
                 var id = this.publicId;
                 this.browser().picturelessUsers[id] = true;
                 Browser.setInnerHTML(dd, TDev.Util.svgGravatar(id));
             }
 
-            var load = (id:string):void =>
-            {
+            var load = (id: string): void => {
                 var ui = TheApiCacheMgr.getCached(id);
                 if (ui && !ui.haspicture) this.nopicture = true;
 
@@ -8242,15 +7986,14 @@
         public getPublicIdAsync() {
             if (this.publicId == "me") {
                 var id = Cloud.getUserId();
-                if (!id) return new Promise(() =>{ }); // never return
+                if (!id) return new Promise(() => { }); // never return
                 this.publicId = id;
             }
             return Promise.as(this.publicId);
         }
 
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             var icon = this.userPicture();
             var nameBlock = dirAuto(sdName(big, this.userName));
             var hd = div("sdNameBlock", nameBlock);
@@ -8268,48 +8011,46 @@
             if (big)
                 res.className += " sdBigHeader";
 
-            return this.withUpdate(res, (u:JsonUser) => {
+            return this.withUpdate(res, (u: JsonUser) => {
                 this.userName = u.name;
                 this.userScore = u.score;
                 nameBlock.setChildren([u.name]);
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.score, "svg:Award,black,clip=110");
                 addNum(u.receivedpositivereviews, "♥");
                 numbers.setChildren(cont);
             });
         }
 
-        public mkTile(sz:number)
-        {
+        public mkTile(sz: number) {
             var d = div("hubTile hubTileSize" + sz);
-            d.style.background =  ScriptIcons.stableColorFromName(this.userName);
+            d.style.background = ScriptIcons.stableColorFromName(this.userName);
 
-            return this.withUpdate(d, (u:JsonUser) => {
+            return this.withUpdate(d, (u: JsonUser) => {
                 this.userName = u.name;
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.receivedpositivereviews, "♥");
                 //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
                 //addNum(u.features, "svg:Award,white,clip=110");
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
 
-                d.style.backgroundImage = HTML.cssImage( Cloud.getPublicApiUrl(u.id + "/picture?type=large") );
+                d.style.backgroundImage = HTML.cssImage(Cloud.getPublicApiUrl(u.id + "/picture?type=large"));
                 d.style.backgroundRepeat = 'no-repeat';
                 d.style.backgroundPosition = 'center';
                 d.style.backgroundSize = 'cover';
                 d.setChildren([div("hubTileTitleBar",
-                                     div("hubTileTitle", spanDirAuto(this.userName)),
-                                     div("hubTileSubtitle",
-                                        div("hubTileAuthor", u.score.toString(), nums)))])
+                    div("hubTileTitle", spanDirAuto(this.userName)),
+                    div("hubTileSubtitle",
+                        div("hubTileAuthor", u.score.toString(), nums)))])
             });
         }
 
-        public thumbnail(showName = true, onClick : () => void = undefined) : HTMLElement
-        {
+        public thumbnail(showName = true, onClick: () => void = undefined): HTMLElement {
             if (!this.publicId) return div(null);
             var icon = this.userPicture(true);
             var thumb = div("sdThumb", icon);
@@ -8332,10 +8073,9 @@
             return thumb;
         }
 
-        public mkTabsCore():BrowserTab[]
-        {
-            var tabs:BrowserTab[] = [this,
-             EditorSettings.widgets().userSocialTab ? new UserSocialTab(this) : null,
+        public mkTabsCore(): BrowserTab[] {
+            var tabs: BrowserTab[] = [this,
+                EditorSettings.widgets().userSocialTab ? new UserSocialTab(this) : null,
             ];
             if (!Cloud.isRestricted() && this.isMe())
                 tabs.push(new UserPrivateTab(this));
@@ -8345,14 +8085,13 @@
             return tabs;
         }
 
-        static invalidateSubscriptions(id:string)
-        {
+        static invalidateSubscriptions(id: string) {
             TheApiCacheMgr.invalidate((Cloud.getUserId() || "") + "/subscriptions")
             TheApiCacheMgr.invalidate(id + "/subscribers")
             TheApiCacheMgr.invalidate(id)
         }
 
-        private askedToLogin:boolean;
+        private askedToLogin: boolean;
         private scriptsTab: ScriptsTab;
         private artTab: ArtTab;
         private groupsTab: GroupsTab;
@@ -8367,7 +8106,7 @@
             var accountButtons = div('');
             if ((this.isMe() || Cloud.hasPermission("adult")) && Cloud.getUserId()) {
                 accountButtons.setChildren([
-                    Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"),() => { Hub.accountSettings() }),
+                    Cloud.isRestricted() ? null : HTML.mkButton(lf("more settings"), () => { Hub.accountSettings() }),
                     Cloud.isRestricted() ? null : HTML.mkButton(lf("wallpaper"), () => { Hub.chooseWallpaper() }),
                     this.isMe() ? HTML.mkButton(lf("sign out"), () => TheEditor.logoutDialog()) : null
                 ]);
@@ -8376,68 +8115,68 @@
                 ch.unshift(settingsDiv)
 
                 var refreshSettings = () =>
-                Cloud.getPrivateApiAsync(this.publicId + "/settings?format=sensitive")
-                .done((s:Cloud.UserSettings) => {
-                    if (!s) return
+                    Cloud.getPrivateApiAsync(this.publicId + "/settings?format=sensitive")
+                        .done((s: Cloud.UserSettings) => {
+                            if (!s) return
 
-                    var edit = (lbl:string, fld:string, maxLen = 100) => {
-                        var saved = false
-                        var saveIt = () => {
-                            saved = true
-                            HTML.showProgressNotification("saving...");
-                            var ss:any = {}
-                            ss[fld] = nameInput.value
-                            Cloud.postPrivateApiAsync(this.publicId + "/settings", ss)
-                                .done(resp => {
-                                if (resp.message) HTML.showProgressNotification(resp.message);
-                                else HTML.showProgressNotification(lf("setting saved"));
-                                TheApiCacheMgr.invalidate("me");
-                                refreshSettings()
-                            }, e => Cloud.handlePostingError(e, lf("saving setting")));
-                        }
-                        var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
-                            if (Cloud.isRestricted() && fld == "nickname" && / [A-Z][a-z]/i.test(nameInput.value.trim())) {
-                                var m = ModalDialog.ask(
-                                    lf("Your nickname is displayed on public pages. Make sure you do not enter your last name there."),
-                                    lf("it's ok, save it!"),
-                                    saveIt, false, lf("Possible last name detected"))
-                                m.onDismiss = () => {
-                                    if (!saved) nameInput.value = s[fld]
+                            var edit = (lbl: string, fld: string, maxLen = 100) => {
+                                var saved = false
+                                var saveIt = () => {
+                                    saved = true
+                                    HTML.showProgressNotification("saving...");
+                                    var ss: any = {}
+                                    ss[fld] = nameInput.value
+                                    Cloud.postPrivateApiAsync(this.publicId + "/settings", ss)
+                                        .done(resp => {
+                                            if (resp.message) HTML.showProgressNotification(resp.message);
+                                            else HTML.showProgressNotification(lf("setting saved"));
+                                            TheApiCacheMgr.invalidate("me");
+                                            refreshSettings()
+                                        }, e => Cloud.handlePostingError(e, lf("saving setting")));
                                 }
+                                var nameInput = HTML.mkTextInputWithOk(fld == "email" ? "email" : "text", "", () => {
+                                    if (Cloud.isRestricted() && fld == "nickname" && / [A-Z][a-z]/i.test(nameInput.value.trim())) {
+                                        var m = ModalDialog.ask(
+                                            lf("Your nickname is displayed on public pages. Make sure you do not enter your last name there."),
+                                            lf("it's ok, save it!"),
+                                            saveIt, false, lf("Possible last name detected"))
+                                        m.onDismiss = () => {
+                                            if (!saved) nameInput.value = s[fld]
+                                        }
+                                    }
+                                    else saveIt()
+
+                                });
+                                nameInput.maxLength = maxLen;
+                                nameInput.value = s[fld] || ""
+                                cc.push(div('inline-label', lbl));
+                                cc.push(nameInput);
                             }
-                            else saveIt()
 
-                        });
-                        nameInput.maxLength = maxLen;
-                        nameInput.value = s[fld] || ""
-                        cc.push(div('inline-label', lbl));
-                        cc.push(nameInput);
-                    }
+                            var cc = []
 
-                    var cc = []
+                            edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
 
-                    edit(lf("public nickname"), "nickname", Cloud.lite ? 25 : 100)
+                            if (/,adult,/.test(s.permissions)) {
+                                edit(lf("email (private)"), "email");
+                                cc.push(div('inline-description', s.emailverified
+                                    ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.")
+                                    : lf("email is not verified, {0}",
+                                        s.previousemail
+                                            ? lf("previous email: {0}", s.previousemail)
+                                            : lf("no previous email")))
+                                );
+                                edit(lf("real name (private)"), "realname");
+                            }
 
-                    if (/,adult,/.test(s.permissions)) {
-                        edit(lf("email (private)"), "email");
-                        cc.push(div('inline-description', s.emailverified 
-                              ? lf("We need your email address to validate your account and may contact you regarding your BBC micro:bit activity. We will not pass it on to third parties.") 
-                              : lf("email is not verified, {0}",
-                                     s.previousemail 
-                                       ? lf("previous email: {0}", s.previousemail) 
-                                        : lf("no previous email")))
-                        );
-                        edit(lf("real name (private)"), "realname");
-                    }
+                            if (s.credit && /,post-group,/.test(s.permissions))
+                                cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
 
-                    if (s.credit && /,post-group,/.test(s.permissions))
-                        cc.push(div("", lf("Credit available to sign-up up to {0} student{0:s}.", s.credit)));
-
-                    settingsDiv.setChildren(cc)
-                }, e => Cloud.handlePostingError(e, lf("get settings")))
+                            settingsDiv.setChildren(cc)
+                        }, e => Cloud.handlePostingError(e, lf("get settings")))
 
                 //if (this.isMe()) refreshSettings() else
-                    settingsDiv.setChildren(HTML.mkButton(lf("view/edit name, email, ..."), refreshSettings))
+                settingsDiv.setChildren(HTML.mkButton(lf("view/edit name, email, ..."), refreshSettings))
             }
 
             ch.unshift(accountButtons);
@@ -8449,43 +8188,43 @@
                         () => {
                             var path = this.publicId + "/permissions"
                             Cloud.getPrivateApiAsync(path)
-                            .done(resp => {
-                                ModalDialog.editText(lf("permissions"), resp.permissions,
-                                    t => {
-                                        return Cloud.postPrivateApiAsync(path, { permissions: t })
-                                            .then(r => {}, e => Cloud.handlePostingError(e, lf("set permissions")))
-                                    })
-                            })
+                                .done(resp => {
+                                    ModalDialog.editText(lf("permissions"), resp.permissions,
+                                        t => {
+                                            return Cloud.postPrivateApiAsync(path, { permissions: t })
+                                                .then(r => { }, e => Cloud.handlePostingError(e, lf("set permissions")))
+                                        })
+                                })
                         }))
                 accountButtons.appendChild(
                     HTML.mkButton(lf("credit"),
                         () => {
                             var path = this.publicId + "/permissions"
                             Cloud.getPrivateApiAsync(path)
-                            .done(resp => {
-                                ModalDialog.editText(lf("user activation credit"), resp.credit,
-                                    t => {
-                                        return Cloud.postPrivateApiAsync(path, { credit: parseInt(t) || resp.credit })
-                                            .then(r => {}, e => Cloud.handlePostingError(e, lf("set credit")))
-                                    })
-                            })
+                                .done(resp => {
+                                    ModalDialog.editText(lf("user activation credit"), resp.credit,
+                                        t => {
+                                            return Cloud.postPrivateApiAsync(path, { credit: parseInt(t) || resp.credit })
+                                                .then(r => { }, e => Cloud.handlePostingError(e, lf("set credit")))
+                                        })
+                                })
                         }))
                 accountButtons.appendChild(
                     HTML.mkButton(lf("can publish?"),
                         () => {
                             var path = this.publicId + "/permissions"
                             Cloud.getPrivateApiAsync(path)
-                            .done(resp => {
-                                ModalDialog.editText(lf("user allowed to publish ({0})", "yes/no"), resp.nopublish ? "no" : "yes",
-                                    t => {
-                                        if (t != "yes" && t != "no") {
-                                            ModalDialog.info(lf("invalid value"), lf("Expecting '{0}' or '{1}'", "yes", "no"))
-                                            return Promise.as()
-                                        } else
-                                            return Cloud.postPrivateApiAsync(path, { nopublish: t == "no" })
-                                                .then(r => {}, e => Cloud.handlePostingError(e, lf("set publish rights")))
-                                    })
-                            })
+                                .done(resp => {
+                                    ModalDialog.editText(lf("user allowed to publish ({0})", "yes/no"), resp.nopublish ? "no" : "yes",
+                                        t => {
+                                            if (t != "yes" && t != "no") {
+                                                ModalDialog.info(lf("invalid value"), lf("Expecting '{0}' or '{1}'", "yes", "no"))
+                                                return Promise.as()
+                                            } else
+                                                return Cloud.postPrivateApiAsync(path, { nopublish: t == "no" })
+                                                    .then(r => { }, e => Cloud.handlePostingError(e, lf("set publish rights")))
+                                        })
+                                })
                         }))
             }
 
@@ -8493,15 +8232,15 @@
                 accountButtons.appendChild(
                     HTML.mkButton(lf("disable login"),
                         () =>
-                            ModalDialog.ask(lf("The user will not be able to login, and instead will be asked to create a new account."), 
-                                            lf("disable login"),
-                                            () => {
-                                                Cloud.deletePrivateApiAsync(this.publicId + "/login?primary=true")
-                                                .then(() => Cloud.postPrivateApiAsync(this.publicId + "/logout", {}))
-                                                .then(() => ModalDialog.info(lf("Login deleted"), lf("Also, user logged out everywhere.")),
-                                                      e => Cloud.handlePostingError(e, lf("disable login")))
-                                                .done()
-                                            }, true)))
+                            ModalDialog.ask(lf("The user will not be able to login, and instead will be asked to create a new account."),
+                                lf("disable login"),
+                                () => {
+                                    Cloud.deletePrivateApiAsync(this.publicId + "/login?primary=true")
+                                        .then(() => Cloud.postPrivateApiAsync(this.publicId + "/logout", {}))
+                                        .then(() => ModalDialog.info(lf("Login deleted"), lf("Also, user logged out everywhere.")),
+                                        e => Cloud.handlePostingError(e, lf("disable login")))
+                                        .done()
+                                }, true)))
             }
 
             if (false && Cloud.isRestricted()) {
@@ -8534,17 +8273,16 @@
             this.tabContent.setChildren(ch);
 
             if (!Cloud.isRestricted()) {
-                this.withUpdate(hd,(u: JsonUser) => {
+                this.withUpdate(hd, (u: JsonUser) => {
                     hd.setChildren([Host.expandableTextBox(u.about)]);
                 });
             }
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
 
-            var json:JsonUser = TheApiCacheMgr.getCached(this.publicId);
+            var json: JsonUser = TheApiCacheMgr.getCached(this.publicId);
             if (!json) return 0; // not loaded yet
 
             var lowerName = json.name.toLowerCase();
@@ -8564,7 +8302,7 @@
             super(par,
                 lf("Private user information."),
                 CloudSessionsTab
-                );
+            );
         }
 
         public bgIcon() {
@@ -8626,10 +8364,8 @@
     }
 
     export class GroupUserProgressTab
-        extends ListTab
-    {
-        constructor(par:GroupInfo)
-        {
+        extends ListTab {
+        constructor(par: GroupInfo) {
             super(par, "/users");
         }
 
@@ -8638,12 +8374,11 @@
         public bgIcon() { return "svg:Star"; }
         public noneText() { return lf("no users in this group!"); }
 
-        private progressTable : HTMLTableElement;
-        private progressHeader : HTMLTableRowElement;
+        private progressTable: HTMLTableElement;
+        private progressHeader: HTMLTableRowElement;
         private tutorials: StringMap<string> = {};
         private userRows: StringMap<HTMLTableRowElement> = {};
-        topContainer() : HTMLElement
-        {
+        topContainer(): HTMLElement {
             this.progressTable = document.createElement("table");
             this.progressTable.className = "dashboard";
             this.progressHeader = document.createElement("tr");
@@ -8662,8 +8397,7 @@
             return div('tbProgress', this.progressTable);
         }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var tr = (u: JsonUser) => {
                 var row = this.userRows[c.id];
                 if (!row) {
@@ -8679,7 +8413,7 @@
                 this.progressTable.appendChild(row);
                 return row;
             }
-            var td = (r: HTMLTableRowElement, txt:string) => {
+            var td = (r: HTMLTableRowElement, txt: string) => {
                 var el = document.createElement("td");
                 el.innerText = txt;
                 r.appendChild(el)
@@ -8698,21 +8432,21 @@
                     .filter(p => p.index > 0)
                     .reverse();
                 if (pis.length == 0) return;
-                var items : StringMap<JsonProgress> = {};
+                var items: StringMap<JsonProgress> = {};
                 pis.forEach(it => {
-                        if (!this.tutorials[it.progressid]) {
-                            var hd = document.createElement("td");
-                            var info = this.browser().getScriptInfoById(it.progressid)
-                            hd.withClick(() => this.browser().loadDetails(info));
-                            var sp = span('', '/' + it.progressid);
-                            hd.appendChild(div('', sp))
-                            this.progressHeader.appendChild(hd);
-                            this.tutorials[it.progressid] = "1";
-                            info.getJsonScriptPromise().whenUpdated((x, opts) => { sp.innerText = x.name + ' /' + x.id });
+                    if (!this.tutorials[it.progressid]) {
+                        var hd = document.createElement("td");
+                        var info = this.browser().getScriptInfoById(it.progressid)
+                        hd.withClick(() => this.browser().loadDetails(info));
+                        var sp = span('', '/' + it.progressid);
+                        hd.appendChild(div('', sp))
+                        this.progressHeader.appendChild(hd);
+                        this.tutorials[it.progressid] = "1";
+                        info.getJsonScriptPromise().whenUpdated((x, opts) => { sp.innerText = x.name + ' /' + x.id });
 
-                        }
-                        items[it.progressid] = it;
-                    });
+                    }
+                    items[it.progressid] = it;
+                });
 
                 var row = tr(c);
                 var completed = 0; var steps = 0;
@@ -8721,13 +8455,13 @@
                 Object.keys(this.tutorials)
                     .map(progressid => items[progressid])
                     .forEach(progress => {
-                        if(!progress) {
+                        if (!progress) {
                             td(row, '');
                             return;
                         }
                         var cell = td(row, "");
                         cell.setAttribute("data-scriptid", progress.progressid);
-                        cell.setFlag("completed", progress.completed>0);
+                        cell.setFlag("completed", progress.completed > 0);
                         steps += progress.index;
                         stepsTd.innerText = steps.toString();
                         if (progress.completed) {
@@ -8745,8 +8479,7 @@
     }
 
     export class CollaborationsTab
-        extends BrowserTab
-    {
+        extends BrowserTab {
         constructor(par: GroupInfo) {
             super(par);
         }
@@ -8769,20 +8502,20 @@
 
             var buttons = div('');
             var ch = div('');
-            var sessionMapping:StringMap<Cloud.Header> = {}
+            var sessionMapping: StringMap<Cloud.Header> = {}
             this.tabContent.setChildren([infoDiv, buttons, ch]);
 
             var fillSessionMappingAsync = () => {
                 return Promise.join(
                     this.browser().getInstalledHeaders().map(h =>
                         World.getInstalledEditorStateAsync(h.guid)
-                        .then(s => {
-                            if (s) {
-                                var st = <AST.AppEditorState> JSON.parse(s)
-                                if (st.collabSessionId)
-                                    sessionMapping[st.collabSessionId] = h
-                            }
-                        })))
+                            .then(s => {
+                                if (s) {
+                                    var st = <AST.AppEditorState>JSON.parse(s)
+                                    if (st.collabSessionId)
+                                        sessionMapping[st.collabSessionId] = h
+                                }
+                            })))
             }
 
             var loadCollaborations = () => {
@@ -8791,82 +8524,82 @@
                     TDev.Collab.getCollaborationsAsync(this.parent.publicId),
                     fillSessionMappingAsync()
                 ]).done(arr => {
-                        var collabs: TDev.Collab.CollaborationInfo[] = arr[0]
-                        loadingDiv.removeSelf();
-                        if (!collabs || collabs.length == 0)
-                            ch.setChildren(lf("no scripts in this group yet!"));
-                        else
-                            ch.setChildren(collabs.map(collab => {
-                                var hd = sessionMapping[collab.session]
-                                if (collab.owner == me)
-                                    var info = this.browser().getInstalledByGuid(collab.ownerScriptguid);
-                                else if (hd)
-                                    info = this.browser().getInstalledByGuid(hd.guid)
-                                if (!info) {
-                                    var app = AST.Parser.parseScript(collab.meta)
-                                    var j = app.toJsonScript()
-                                    j.userid = collab.owner
-                                    j.username = collab.owner // TODO load real one
-                                    j.id = collab.ownerScriptguid.replace(/-/g, "")
-                                    info = this.browser().getScriptInfo(j)
-                                }
+                    var collabs: TDev.Collab.CollaborationInfo[] = arr[0]
+                    loadingDiv.removeSelf();
+                    if (!collabs || collabs.length == 0)
+                        ch.setChildren(lf("no scripts in this group yet!"));
+                    else
+                        ch.setChildren(collabs.map(collab => {
+                            var hd = sessionMapping[collab.session]
+                            if (collab.owner == me)
+                                var info = this.browser().getInstalledByGuid(collab.ownerScriptguid);
+                            else if (hd)
+                                info = this.browser().getInstalledByGuid(hd.guid)
+                            if (!info) {
+                                var app = AST.Parser.parseScript(collab.meta)
+                                var j = app.toJsonScript()
+                                j.userid = collab.owner
+                                j.username = collab.owner // TODO load real one
+                                j.id = collab.ownerScriptguid.replace(/-/g, "")
+                                info = this.browser().getScriptInfo(j)
+                            }
 
-                                var setAndEdit = () => {
-                                    Editor.updateEditorStateAsync(info.getGuid(), (st) => {
-                                        st.collabSessionId = collab.session;
-                                        st.groupId = this.parent.publicId;
-                                    }).done(() => info.edit())
-                                }
+                            var setAndEdit = () => {
+                                Editor.updateEditorStateAsync(info.getGuid(), (st) => {
+                                    st.collabSessionId = collab.session;
+                                    st.groupId = this.parent.publicId;
+                                }).done(() => info.edit())
+                            }
 
-                                if (info) {
-                                    var box = info.mkBoxCore(false).withClick(() => {
-                                        if (collab.owner == me)
-                                            setAndEdit()
-                                        else if (hd && hd.status !== "deleted")
-                                            info.edit()
-                                        else {
-                                            var stub: World.ScriptStub = {
-                                                editorName: "touchdevelop",
-                                                scriptText: collab.meta,
-                                                scriptName: info.getTitle(),
-                                            };
-                                            World.installUnpublishedAsync(null, collab.owner, stub)
-                                                .then(hd => {
-                                                    info = this.browser().createInstalled(hd)
-                                                    setAndEdit()
-                                                })
-                                                .done()
-                                        }
-                                    });
-                                    if (collab.owner == me || (<GroupInfo>this.parent).isMine())
-                                        box.appendChild(HTML.mkButton(lf("remove from group"), () => {
-                                            ModalDialog.ask(
-                                                lf("Are you sure you want to remove this script from the group? Other members of the group won't be able to edit it anymore."),
-                                                lf("remove script"),
-                                                () => {
-                                                    HTML.showProgressNotification(lf("removing script from group"), true);
-                                                    TDev.Collab.stopCollaborationAsync(collab.session)
-                                                        .then(() => {
-                                                            if (collab.owner == me)
-                                                                Editor.updateEditorStateAsync(collab.ownerScriptguid,(st) => {
-                                                                    if (st.collabSessionId === collab.session) {
-                                                                        delete st.collabSessionId;
-                                                                        delete st.groupId;
-                                                                    }
-                                                                });
-                                                        })
-                                                        .done(() => loadCollaborations())
-                                                });
-                                        }));
-                                    return box;
-                                }
-                                else
-                                    return null
-                            }));
-                    }, e => {
-                        Util.check(false, lf("failed to retrieve scripts"));
-                        loadingDiv.removeSelf();
-                        ch.appendChild(div('', lf("Oops, we could not get the scripts for this group. Please try again later.")));
+                            if (info) {
+                                var box = info.mkBoxCore(false).withClick(() => {
+                                    if (collab.owner == me)
+                                        setAndEdit()
+                                    else if (hd && hd.status !== "deleted")
+                                        info.edit()
+                                    else {
+                                        var stub: World.ScriptStub = {
+                                            editorName: "touchdevelop",
+                                            scriptText: collab.meta,
+                                            scriptName: info.getTitle(),
+                                        };
+                                        World.installUnpublishedAsync(null, collab.owner, stub)
+                                            .then(hd => {
+                                                info = this.browser().createInstalled(hd)
+                                                setAndEdit()
+                                            })
+                                            .done()
+                                    }
+                                });
+                                if (collab.owner == me || (<GroupInfo>this.parent).isMine())
+                                    box.appendChild(HTML.mkButton(lf("remove from group"), () => {
+                                        ModalDialog.ask(
+                                            lf("Are you sure you want to remove this script from the group? Other members of the group won't be able to edit it anymore."),
+                                            lf("remove script"),
+                                            () => {
+                                                HTML.showProgressNotification(lf("removing script from group"), true);
+                                                TDev.Collab.stopCollaborationAsync(collab.session)
+                                                    .then(() => {
+                                                        if (collab.owner == me)
+                                                            Editor.updateEditorStateAsync(collab.ownerScriptguid, (st) => {
+                                                                if (st.collabSessionId === collab.session) {
+                                                                    delete st.collabSessionId;
+                                                                    delete st.groupId;
+                                                                }
+                                                            });
+                                                    })
+                                                    .done(() => loadCollaborations())
+                                            });
+                                    }));
+                                return box;
+                            }
+                            else
+                                return null
+                        }));
+                }, e => {
+                    Util.check(false, lf("failed to retrieve scripts"));
+                    loadingDiv.removeSelf();
+                    ch.appendChild(div('', lf("Oops, we could not get the scripts for this group. Please try again later.")));
                 });
             }
 
@@ -8883,18 +8616,16 @@
                             return si.getCloudHeader() && (!si.getCloudHeader().userId || si.getCloudHeader().userId == Cloud.getUserId());
                         }
                     })
-                    .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
-                    .done(() => done());
+                        .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
+                        .done(() => done());
                 })
             ]);
         }
     }
 
     export class GroupUsersTab
-        extends ListTab
-    {
-        constructor(par:GroupInfo)
-        {
+        extends ListTab {
+        constructor(par: GroupInfo) {
             super(par, "/users");
         }
 
@@ -8903,9 +8634,8 @@
         public bgIcon() { return "svg:Person"; }
         public noneText() { return lf("no users in this group!"); }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
-            var grp:JsonGroup = TheApiCacheMgr.getCached(this.parent.publicId)
+        public tabBox(cc: JsonIdObject): HTMLElement {
+            var grp: JsonGroup = TheApiCacheMgr.getCached(this.parent.publicId)
 
             var c = <JsonUser>cc;
             TheApiCacheMgr.store(c.id, c);
@@ -8916,9 +8646,9 @@
                 user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
                     if (Cloud.isOffline()) {
                         Cloud.showModalOnlineInfo(lf("removing user cancelled"));
-                        return;            
+                        return;
                     }
-                    
+
                     ModalDialog.ask(lf("Are you sure you want to remove this user from this group?"), lf("remove this user"), () => {
                         removeBtn.removeSelf();
                         HTML.showProgressNotification(lf("Removing user..."));
@@ -8933,40 +8663,40 @@
                     if (c.isadult)
                         user.appendChild(HTML.mkButton(lf("make group owner"), () => {
                             Cloud.postPrivateApiAsync(grp.id, { userid: c.id })
-                            .done(r => ModalDialog.info(lf("The group has new owner"),
-                                         lf("Please reload the page to see it.")),
-                                  e => Cloud.handlePostingError(e, "make owner"))
+                                .done(r => ModalDialog.info(lf("The group has new owner"),
+                                    lf("Please reload the page to see it.")),
+                                e => Cloud.handlePostingError(e, "make owner"))
                         }))
                     else
                         user.appendChild(HTML.mkButton(lf("reset password"), () => {
                             if (Cloud.isOffline()) {
                                 Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
-                                return;            
+                                return;
                             }
                             Cloud.getPrivateApiAsync(c.id + "/resetpassword")
-                            .done(resp => {
-                                var boxes = resp.passwords.map(p => {
-                                    var d = new DeclEntry(p)
-                                    d.icon = "svg:lock,white"
-                                    return d.mkBox().withClick(() => {
-                                        m.dismiss()
-                                        Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
-                                            .done(() => {
-                                                var m = new ModalDialog();
-                                                m.add(div('wall-dialog-header', lf("password is reset")));
-                                                m.add(div('wall-dialog-body', lf("new password:")));
-                                                var inp = HTML.mkTextInput("text", "")
-                                                inp.value = p
-                                                inp.readOnly = true;
-                                                m.add(div(null, inp))
-                                                m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
-                                                m.show();
-                                            }, e => Cloud.handlePostingError(e, lf("reset password")));
+                                .done(resp => {
+                                    var boxes = resp.passwords.map(p => {
+                                        var d = new DeclEntry(p)
+                                        d.icon = "svg:lock,white"
+                                        return d.mkBox().withClick(() => {
+                                            m.dismiss()
+                                            Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
+                                                .done(() => {
+                                                    var m = new ModalDialog();
+                                                    m.add(div('wall-dialog-header', lf("password is reset")));
+                                                    m.add(div('wall-dialog-body', lf("new password:")));
+                                                    var inp = HTML.mkTextInput("text", "")
+                                                    inp.value = p
+                                                    inp.readOnly = true;
+                                                    m.add(div(null, inp))
+                                                    m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
+                                                    m.show();
+                                                }, e => Cloud.handlePostingError(e, lf("reset password")));
+                                        })
                                     })
+                                    var m = new ModalDialog()
+                                    m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
                                 })
-                                var m = new ModalDialog()
-                                m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
-                            })
                         }));
                 }
             }
@@ -8978,7 +8708,7 @@
         extends BrowserPage {
         private name: string;
         public description: string;
-        public userid:string;
+        public userid: string;
         private collaborations: CollaborationsTab;
 
         constructor(par: Host) {
@@ -9068,9 +8798,9 @@
                 d.setChildren([
                     div("hubTileSearch", HTML.mkImg("svg:group,white")),
                     div("hubTileTitleBar",
-                    div("hubTileTitle", spanDirAuto(this.name)),
-                    div("hubTileSubtitle",
-                        div("hubTileAuthor", spanDirAuto(u.username), nums)))])
+                        div("hubTileTitle", spanDirAuto(this.name)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(u.username), nums)))])
             });
         }
 
@@ -9116,26 +8846,26 @@
                 .then(() => script.getScriptTextAsync())
                 .then(text => TDev.Collab.startCollaborationAsync(script.getGuid(), text, this.publicId))
                 .then((successfullystarted) => {
-                if (successfullystarted)
-                    return World.syncAsync()
-                        .then(() => Cloud.postCommentAsync(this.publicId, lf("Script ``{0:q}`` was added to the group.", script.getTitle())))
+                    if (successfullystarted)
+                        return World.syncAsync()
+                            .then(() => Cloud.postCommentAsync(this.publicId, lf("Script ``{0:q}`` was added to the group.", script.getTitle())))
                 })
                 .then(() => ProgressOverlay.hide(), e => { ProgressOverlay.hide(); throw e; });
         }
 
 
-        private updateCommentsHeader(el : HTMLElement) {
-            this.withUpdate(el,(u: JsonGroup) => {
+        private updateCommentsHeader(el: HTMLElement) {
+            this.withUpdate(el, (u: JsonGroup) => {
                 Browser.setInnerHTML(el, new MdComments().formatText(u.description));
                 HTML.fixWp8Links(el);
                 if (!this.isMine()) {
                     Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-                        .done(() => {}, e => {
+                        .done(() => { }, e => {
                             if (!u.isrestricted)
                                 el.appendChild(div('', HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); })));
-                    });
+                        });
                 }
-             });
+            });
         }
 
         public initTab() {
@@ -9166,9 +8896,9 @@
                             tick(Ticks.groupChangePicture);
                             this.changePictureAsync().done(() => this.browser().loadDetails(this, "settings"));
                         }));
-                    if(u.isrestricted) {
+                    if (u.isrestricted) {
                         Cloud.getPrivateApiAsync(this.publicId + "/code")
-                            .done((r : Cloud.ApiGroupCodeResponse ) => {
+                            .done((r: Cloud.ApiGroupCodeResponse) => {
                                 if (r.code && r.expiration > Date.now() / 1000) {
                                     var input = HTML.mkTextInput("text", lf("invitation code"));
                                     // readonly does not pop keyboard on mobile
@@ -9176,7 +8906,7 @@
                                     input.onchange = () => { input.value = r.code };
                                     var codeDiv = div('',
                                         div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
-                                        div('sdExpandableText',lf("To join, users can enter the invitation code in the search")),
+                                        div('sdExpandableText', lf("To join, users can enter the invitation code in the search")),
                                         input
                                     );
                                     hd.appendChild(codeDiv);
@@ -9205,7 +8935,7 @@
 
                 Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
                     .done(() => {
-                        if(this.isMine()) {
+                        if (this.isMine()) {
                             //membership.appendChild(div('', 'You are the owner of this group. '));
                         } else {
                             membership.appendChild(div('', 'You are a member of this group.'));
@@ -9261,22 +8991,22 @@
 
                     this.invalidateCaches();
                     this.browser().loadDetails(this);
-            });
+                });
         }
 
-        private updateGroupPictureAsync(pictureid : string) : Promise {
+        private updateGroupPictureAsync(pictureid: string): Promise {
             HTML.showProgressNotification(lf("Updating group picture..."));
-            return Cloud.postPrivateApiAsync(this.publicId, { pictureid : pictureid })
+            return Cloud.postPrivateApiAsync(this.publicId, { pictureid: pictureid })
                 .then(() => { this.invalidateCaches(); });
         }
 
-        private restrictGroup(restricted : boolean) {
+        private restrictGroup(restricted: boolean) {
             HTML.showProgressNotification(lf("Updating group access..."));
-            Cloud.postPrivateApiAsync(this.publicId, { isrestricted : restricted })
+            Cloud.postPrivateApiAsync(this.publicId, { isrestricted: restricted })
                 .done(() => {
                     this.invalidateCaches();
                     this.browser().loadDetails(this);
-            });
+                });
         }
 
         public newInvitationCodeAsync() {
@@ -9341,8 +9071,7 @@
             return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
         }
 
-        public approvals()
-        {
+        public approvals() {
             var json: JsonGroup = TheApiCacheMgr.getCached(this.publicId);
             if (!json) return
 
@@ -9352,42 +9081,42 @@
             m.show()
 
             Cloud.getPrivateApiAsync(id + "/approvals")
-            .then(lst => Promise.join(lst.map(e => TheApiCacheMgr.getAsync(e))))
-            .then(users => {
-                m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
-                users.forEach(e => {
-                    var inp = HTML.mkTextInput("text", "")
-                    inp.value = e.name;
-                    inp.style.width = "10em";
-                    var chgNick = 
-                        HTML.mkAsyncButton(lf("save nickname"), () => 
-                                    Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
+                .then(lst => Promise.join(lst.map(e => TheApiCacheMgr.getAsync(e))))
+                .then(users => {
+                    m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
+                    users.forEach(e => {
+                        var inp = HTML.mkTextInput("text", "")
+                        inp.value = e.name;
+                        inp.style.width = "10em";
+                        var chgNick =
+                            HTML.mkAsyncButton(lf("save nickname"), () =>
+                                Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
                                     .then(r => r, Cloud.errorCallback()))
-                    chgNick.style.display = "none";
-                    var approved = false
+                        chgNick.style.display = "none";
+                        var approved = false
 
-                    var btn = HTML.mkAsyncButton(lf("approve"), () =>
-                        Cloud.postPrivateApiAsync(e.id + "/groups/" + id, {})
-                        .then(r => {
-                            approved = true
-                            if (inp.value != e.name)
-                                return Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
-                            else
-                                return Promise.as()
-                        }, Cloud.errorCallback())
-                        .then(() => {
-                            btn.removeSelf();
-                            d.appendChildren([lf("approved")])
-                        }))
-                    inp.onkeyup = function() {
-                        if (approved) chgNick.style.display = null;
-                    }
-                    var d = div("wall-dialog-body", inp, btn, chgNick)
-                    m.add(d)
-                })
-                m.addOk(lf("dismiss"))
-            }, Cloud.errorCallback())
-            .done()
+                        var btn = HTML.mkAsyncButton(lf("approve"), () =>
+                            Cloud.postPrivateApiAsync(e.id + "/groups/" + id, {})
+                                .then(r => {
+                                    approved = true
+                                    if (inp.value != e.name)
+                                        return Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
+                                    else
+                                        return Promise.as()
+                                }, Cloud.errorCallback())
+                                .then(() => {
+                                    btn.removeSelf();
+                                    d.appendChildren([lf("approved")])
+                                }))
+                        inp.onkeyup = function () {
+                            if (approved) chgNick.style.display = null;
+                        }
+                        var d = div("wall-dialog-body", inp, btn, chgNick)
+                        m.add(d)
+                    })
+                    m.addOk(lf("dismiss"))
+                }, Cloud.errorCallback())
+                .done()
         }
     }
 
@@ -9404,7 +9133,7 @@
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
 
-        public mkBoxCore(big:boolean):HTMLElement { return div("hubSectionHeader", spanDirAuto(lf("the forums"))) }
+        public mkBoxCore(big: boolean): HTMLElement { return div("hubSectionHeader", spanDirAuto(lf("the forums"))) }
 
         public mkTabsCore(): BrowserTab[] {
             var tabs: CommentsTab[] = [
@@ -9430,9 +9159,8 @@
     }
 
     export class AbuseReportInfo
-        extends BrowserPage
-    {
-        constructor(par:Host) {
+        extends BrowserPage {
+        constructor(par: Host) {
             super(par)
         }
         public persistentId() { return "abusereport:" + this.publicId; }
@@ -9441,13 +9169,11 @@
         public getId() { return "abusereport"; }
         public getName() { return lf("abuse report"); }
 
-        public loadFromWeb(id:string)
-        {
+        public loadFromWeb(id: string) {
             this.publicId = id;
         }
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             var icon = div("sdIcon");
             icon.style.background = "#aaa";
             var textBlock = div("sdCommentBlockInner");
@@ -9463,7 +9189,7 @@
 
             var firstResolved = true
 
-            Util.setTimeout(1, () => this.withUpdate(res, (u:JsonAbuseReport) => {
+            Util.setTimeout(1, () => this.withUpdate(res, (u: JsonAbuseReport) => {
                 var par = res
                 while (par && !/abusePair/.test(par.className))
                     par = <HTMLElement>par.parentNode;
@@ -9486,7 +9212,7 @@
                         par.setAttribute("data-resolved", resolved ? "yes" : "no");
                     firstResolved = false
                 }
-                textBlock.setChildren([ u.text ]);
+                textBlock.setChildren([u.text]);
                 var usersuff = ""
                 if (u.usernumreports)
                     usersuff = " (" + u.usernumreports + ")"
@@ -9506,23 +9232,22 @@
             return res;
         }
 
-        static box(c:JsonAbuseReport)
-        {
+        static box(c: JsonAbuseReport) {
             var b = TheHost;
             var uid = b.getCreatorInfo(c);
             var textDiv = div('sdSmallerTextBox', c.text);
             var r = div("sdCmt sdCmtTop " + (c.resolution == "ignored" ? "disabledItem" : ""), uid.thumbnail(),
-                        div("sdCmtTopic",
-                            span("sdBold", c.username),
-                            c.resolution ? div("sdCmtResolved", c.resolution) : null
-                            //" on ", div("sdCmtScriptName", c.publicationname).withClick(() => b.loadDetails(b.getReferencedPubInfo(c)))
-                            ),
-                        textDiv,
-                        div("sdCmtMeta", [
-                                Util.timeSince(c.time),
-                                span("sdCmtId", " /" + c.id),
-                                //div("sdCmtBtns", delBtn),
-                            ]));
+                div("sdCmtTopic",
+                    span("sdBold", c.username),
+                    c.resolution ? div("sdCmtResolved", c.resolution) : null
+                    //" on ", div("sdCmtScriptName", c.publicationname).withClick(() => b.loadDetails(b.getReferencedPubInfo(c)))
+                ),
+                textDiv,
+                div("sdCmtMeta", [
+                    Util.timeSince(c.time),
+                    span("sdCmtId", " /" + c.id),
+                    //div("sdCmtBtns", delBtn),
+                ]));
 
             r.withClick(() => {
 
@@ -9532,8 +9257,7 @@
             return r;
         }
 
-        public mkSmallBox():HTMLElement
-        {
+        public mkSmallBox(): HTMLElement {
             var box = this.mkBoxCore(false);
             box.withClick(() => {
                 if (!Cloud.isRestricted() && !/ visited/.test(box.className))
@@ -9544,144 +9268,138 @@
             return box;
         }
 
-        public initTab()
-        {
-            this.withUpdate(this.tabContent, (c:JsonAbuseReport) => {
+        public initTab() {
+            this.withUpdate(this.tabContent, (c: JsonAbuseReport) => {
                 this.tabContent.setChildren([
                     ScriptInfo.labeledBox(lf("report on"), this.browser().getReferencedPubInfo(c).mkSmallBox()),
-                    AbuseReportInfo.box(c) ]);
+                    AbuseReportInfo.box(c)]);
             });
         }
 
-        public mkBigBox():HTMLElement { return null; }
+        public mkBigBox(): HTMLElement { return null; }
 
-        public mkTabsCore():BrowserTab[] { return [this]; }
+        public mkTabsCore(): BrowserTab[] { return [this]; }
 
-        static setAbuseStatusAsync(abuseid:string, status:string) 
-        {
+        static setAbuseStatusAsync(abuseid: string, status: string) {
             return Cloud.postPrivateApiAsync(abuseid, { resolution: status })
-            .then(() => {
-                TheApiCacheMgr.refetch(abuseid)
-            })
+                .then(() => {
+                    TheApiCacheMgr.refetch(abuseid)
+                })
         }
 
-        static deletePubAsync(pubid:string)
-        {
+        static deletePubAsync(pubid: string) {
             return Cloud.deletePrivateApiAsync(pubid)
-            .then(() => {
-                TheApiCacheMgr.refetch(pubid)
-                HTML.showProgressNotification(lf("gone."))
-                return true;
-            }, e => {
-                Cloud.handlePostingError(e, lf("delete publication"))
-                return false;
-            });
+                .then(() => {
+                    TheApiCacheMgr.refetch(pubid)
+                    HTML.showProgressNotification(lf("gone."))
+                    return true;
+                }, e => {
+                    Cloud.handlePostingError(e, lf("delete publication"))
+                    return false;
+                });
         }
 
-        static abuseOrDelete(pubid:string, doubleConfirm = false, abuseid:string = "", onDeleted : () => void = undefined)
-        {
+        static abuseOrDelete(pubid: string, doubleConfirm = false, abuseid: string = "", onDeleted: () => void = undefined) {
             if (Cloud.isOffline()) {
                 Cloud.showModalOnlineInfo("Report/Delete");
                 return;
             }
-            
+
             if (!Cloud.lite) {
                 window.open(Cloud.getServiceUrl() + "/user/report/" + pubid)
                 return
             }
-            
+
 
             Cloud.getPrivateApiAsync(pubid + "/candelete")
-            .then((resp:CanDeleteResponse) => {
-                var b = TheHost
-                var del = () => {
-                    HTML.showProgressNotification(lf("deleting..."));
-                    AbuseReportInfo.deletePubAsync(pubid).done(v => {
-                        if (v && onDeleted) onDeleted();
-                    })
-                }
-                var godelete = () => {
-                    ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname),
-                                    lf("delete"),
-                                    () => {
-                                        if (doubleConfirm)
-                                            ModalDialog.ask(lf("Are you really sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
-                                        else del();
-                                    })
-                }
-                var viewreports = () => {
-                    m.dismiss()
-                    var inf = b.getAnyInfoByEtag({ id: pubid, kind: resp.publicationkind, ETag: "" });
-                    b.loadDetails(inf, "abusereports")
-                }
-                var setstatus = (status:string) => {
-                    m.dismiss()
-                    AbuseReportInfo.setAbuseStatusAsync(abuseid, status)
-                    .done(() => HTML.showProgressNotification(lf("resolution updated.")))
-                }
-
-                if (!abuseid && resp.publicationuserid == Cloud.getUserId()) {
-                    godelete()
-                } else {
-                    var m = new ModalDialog()
-                    var inp = HTML.mkTextInput("text", lf("Reason (eg., bad language, bullying, etc)"))
-                    var err = div(null)
-
-                    if (abuseid) {
-                        m.add([
-                            div("wall-dialog-header", lf("resolve report about '{0}' /{1}", resp.publicationname, pubid)),
-                        ])
-                    } else {
-                        m.add([
-                            div("wall-dialog-header", lf("report abuse about '{0}' /{1}", resp.publicationname, pubid)),
-                            div("", inp),
-                            err,
-                            div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
-                                    lf("No abuse reports so far.")),
-                        ])
+                .then((resp: CanDeleteResponse) => {
+                    var b = TheHost
+                    var del = () => {
+                        HTML.showProgressNotification(lf("deleting..."));
+                        AbuseReportInfo.deletePubAsync(pubid).done(v => {
+                            if (v && onDeleted) onDeleted();
+                        })
+                    }
+                    var godelete = () => {
+                        ModalDialog.ask(lf("Are you sure you want to delete '{0}'? No undo.", resp.publicationname),
+                            lf("delete"),
+                            () => {
+                                if (doubleConfirm)
+                                    ModalDialog.ask(lf("Are you really sure you want to delete '{0}'? No undo.", resp.publicationname), lf("delete"), del, true);
+                                else del();
+                            })
+                    }
+                    var viewreports = () => {
+                        m.dismiss()
+                        var inf = b.getAnyInfoByEtag({ id: pubid, kind: resp.publicationkind, ETag: "" });
+                        b.loadDetails(inf, "abusereports")
+                    }
+                    var setstatus = (status: string) => {
+                        m.dismiss()
+                        AbuseReportInfo.setAbuseStatusAsync(abuseid, status)
+                            .done(() => HTML.showProgressNotification(lf("resolution updated.")))
                     }
 
-                    m.add(
-                        div("wall-dialog-buttons", [
-                            HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                            Cloud.getUserId() && resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
-                            !abuseid && HTML.mkButton(lf("report"), () => {
-                                if (inp.value.trim().length < 5)
-                                    err.setChildren(lf("Need some reason."))
-                                else {
-                                    m.dismiss();
-                                    Cloud.postPrivateApiAsync(pubid + "/abusereports", { text: inp.value })
-                                    .done(
-                                        () => HTML.showProgressNotification(lf("reported.")),
-                                        e => Cloud.handlePostingError(e, lf("report abuse"))
-                                    );
-                                }
-                            }),
-                            abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), () => setstatus("ignored")),
-                            abuseid && resp.canmanage && HTML.mkButton(lf("unignore report"), () => setstatus("active")),
-                            resp.candelete && HTML.mkButton(lf("delete publication"), godelete),
-                        ]))
-                    m.show()
-                }
-            })
-            .done(() => { }, e => Cloud.handlePostingError(e, "report/delete"));
+                    if (!abuseid && resp.publicationuserid == Cloud.getUserId()) {
+                        godelete()
+                    } else {
+                        var m = new ModalDialog()
+                        var inp = HTML.mkTextInput("text", lf("Reason (eg., bad language, bullying, etc)"))
+                        var err = div(null)
+
+                        if (abuseid) {
+                            m.add([
+                                div("wall-dialog-header", lf("resolve report about '{0}' /{1}", resp.publicationname, pubid)),
+                            ])
+                        } else {
+                            m.add([
+                                div("wall-dialog-header", lf("report abuse about '{0}' /{1}", resp.publicationname, pubid)),
+                                div("", inp),
+                                err,
+                                div("wall-dialog-body", resp.hasabusereports ? lf("There are already abuse report(s).") :
+                                    lf("No abuse reports so far.")),
+                            ])
+                        }
+
+                        m.add(
+                            div("wall-dialog-buttons", [
+                                HTML.mkButton(lf("cancel"), () => m.dismiss()),
+                                Cloud.getUserId() && resp.hasabusereports && HTML.mkButton(lf("view reports"), viewreports),
+                                !abuseid && HTML.mkButton(lf("report"), () => {
+                                    if (inp.value.trim().length < 5)
+                                        err.setChildren(lf("Need some reason."))
+                                    else {
+                                        m.dismiss();
+                                        Cloud.postPrivateApiAsync(pubid + "/abusereports", { text: inp.value })
+                                            .done(
+                                            () => HTML.showProgressNotification(lf("reported.")),
+                                            e => Cloud.handlePostingError(e, lf("report abuse"))
+                                            );
+                                    }
+                                }),
+                                abuseid && resp.canmanage && HTML.mkButton(lf("ignore report"), () => setstatus("ignored")),
+                                abuseid && resp.canmanage && HTML.mkButton(lf("unignore report"), () => setstatus("active")),
+                                resp.candelete && HTML.mkButton(lf("delete publication"), godelete),
+                            ]))
+                        m.show()
+                    }
+                })
+                .done(() => { }, e => Cloud.handlePostingError(e, "report/delete"));
         }
 
-        static pubDeleted(notification:JsonNotification)
-        {
+        static pubDeleted(notification: JsonNotification) {
             var icon = div("sdIcon", HTML.mkImg("svg:fa-ban,#333,clip=80"));
             icon.style.background = "#ff6";
             var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", div("sdCommentBlock", div("sdCommentBlockInner",
-                lf("Something you published ({1}, /{0}) has been deleted by a moderator.", 
-                    notification.publicationid, notification.publicationname ))))));
+                lf("Something you published ({1}, /{0}) has been deleted by a moderator.",
+                    notification.publicationid, notification.publicationname))))));
             return res;
         }
     }
 
     export class CommentInfo
-        extends BrowserPage
-    {
-        constructor(par:Host) {
+        extends BrowserPage {
+        constructor(par: Host) {
             super(par)
             this._comments = new CommentsTab(this);
         }
@@ -9691,13 +9409,11 @@
         public getId() { return "comment"; }
         public getName() { return lf("comment"); }
 
-        public loadFromWeb(id:string)
-        {
+        public loadFromWeb(id: string) {
             this.publicId = id;
         }
 
-        public mkBoxCore(big:boolean)
-        {
+        public mkBoxCore(big: boolean) {
             var icon = div("sdIcon", HTML.mkImg("svg:email,white"));
             icon.style.background = "#1731B8";
             var textBlock = div("sdCommentBlockInner");
@@ -9712,10 +9428,10 @@
             if (big)
                 res.className += " sdBigHeader";
 
-            return this.withUpdate(res, (u:JsonComment) => {
+            return this.withUpdate(res, (u: JsonComment) => {
                 var del = (<any>u) === false
 
-                textBlock.setChildren([ del ? lf("deleted comment") : u.text ]);
+                textBlock.setChildren([del ? lf("deleted comment") : u.text]);
                 author.setChildren(["-- ", u.username || ""]);
                 addInfoInner.setChildren(del ? [] : [Util.timeSince(u.time) + " on " + u.publicationname]);
                 if (del) {
@@ -9732,20 +9448,19 @@
                 }
 
                 var cont = <any[]>[];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.positivereviews, "♥");
                 addNum(u.comments, "replies");
                 numbers.setChildren(cont);
             });
         }
 
-        public mkTile(sz:number)
-        {
+        public mkTile(sz: number) {
             var d = div("hubTile hubTileSize" + sz);
-            return this.withUpdate(d, (u:JsonComment) => {
+            return this.withUpdate(d, (u: JsonComment) => {
 
                 var cont = [];
-                var addNum = (n:number, sym:string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
                 addNum(u.positivereviews, "♥");
                 addNum(u.comments, lf("replies"));
 
@@ -9753,60 +9468,56 @@
                 //nums.style.background = d.style.background;
 
                 d.setChildren([div("hubTileIcon", HTML.mkImg("svg:callout,white")),
-                               div("hubTileTitleBar",
-                                     div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
-                                     div("hubTileSubtitle",
-                                        div("hubTileAuthor", spanDirAuto(u.username), nums)))])
+                    div("hubTileTitleBar",
+                        div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
+                        div("hubTileSubtitle",
+                            div("hubTileAuthor", spanDirAuto(u.username), nums)))])
             });
-            return d;
         }
 
-        public initTab()
-        {
+        public initTab() {
             this._comments.initElements();
             this._comments.tabLoaded = true;
             this._comments.initTab();
 
-            this.withUpdate(this.tabContent, (c:JsonComment) => {
+            this.withUpdate(this.tabContent, (c: JsonComment) => {
                 this.tabContent.setChildren([
                     ScriptInfo.labeledBox(lf("comment on"), this.browser().getReferencedPubInfo(c).mkSmallBox()),
                     this._comments.commentBox(c, true)]);
             });
         }
 
-        public mkBigBox():HTMLElement { return null; }
+        public mkBigBox(): HTMLElement { return null; }
 
-        private _comments:CommentsTab;
+        private _comments: CommentsTab;
 
-        public mkTabsCore():BrowserTab[] { return [this, new AbuseReportsTab(this)]; }
+        public mkTabsCore(): BrowserTab[] { return [this, new AbuseReportsTab(this)]; }
 
-        public bugCompareTo(other:CommentInfo, order:string) {
-            var j0:JsonComment = TheApiCacheMgr.getCached(this.publicId)
-            var j1:JsonComment = TheApiCacheMgr.getCached(other.publicId)
+        public bugCompareTo(other: CommentInfo, order: string) {
+            var j0: JsonComment = TheApiCacheMgr.getCached(this.publicId)
+            var j1: JsonComment = TheApiCacheMgr.getCached(other.publicId)
             if (j0)
                 if (j1) {
                     return (order == "recent" ? 0 :
-                                (j1.positivereviews - j0.positivereviews) ||
-                                (j1.comments - j0.comments)) ||
-                           (j1.time - j0.time)
+                        (j1.positivereviews - j0.positivereviews) ||
+                        (j1.comments - j0.comments)) ||
+                        (j1.time - j0.time)
                 } else return -1;
             else if (j1) return 1;
             else return 0;
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
 
-            var json:JsonComment = TheApiCacheMgr.getCached(this.publicId);
+            var json: JsonComment = TheApiCacheMgr.getCached(this.publicId);
             if (!json) return 0; // not loaded yet
 
             var s = this.publicId + " " + json.publicationid + " " + json.username + " " + json.text;
             return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
         }
 
-        public mkSmallBox():HTMLElement
-        {
+        public mkSmallBox(): HTMLElement {
             return this.mkBoxCore(false).withClick(() => {
                 var json = TheApiCacheMgr.getCached(this.publicId);
                 if (!json || json.nestinglevel == 0) this.parentBrowser.loadDetails(this)
@@ -9814,8 +9525,7 @@
             });
         }
 
-        private targetId():string
-        {
+        private targetId(): string {
             var json = TheApiCacheMgr.getCached(this.publicId);
             if (!json || json.nestinglevel == 0) return this.publicId;
             else return json.publicationid;
@@ -9824,11 +9534,10 @@
     }
 
     export class TopicInfo
-        extends BrowserPage
-    {
-        public topic:HelpTopic;
+        extends BrowserPage {
+        public topic: HelpTopic;
 
-        constructor(par:Host) {
+        constructor(par: Host) {
             super(par)
         }
         public persistentId() { return (this.topic.fromJson ? "script:" : "topic:") + this.publicId; }
@@ -9836,15 +9545,14 @@
         public getId() { return "overview"; }
         public getName() { return lf("overview"); }
 
-        public mkBigBox():HTMLElement { return null; }
+        public mkBigBox(): HTMLElement { return null; }
 
-        public loadFromTopic(topic:HelpTopic)
-        {
+        public loadFromTopic(topic: HelpTopic) {
             this.topic = topic;
             this.publicId = MdComments.shrink(topic.id);
         }
 
-        static mk(t:HelpTopic) {
+        static mk(t: HelpTopic) {
             var r = new TopicInfo(TheHost);
             r.loadFromTopic(t);
             return r;
@@ -9852,7 +9560,7 @@
 
         public mkTabsCore(): BrowserTab[] {
             return [
-             this
+                this
             ];
         }
 
@@ -9863,18 +9571,17 @@
             var btns = super.shareButtons();
             if (EditorSettings.widgets().scriptPrintTopic) btns.push(
                 div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:print,currentColor,clip=100")).withClick(() => { this.topic.print() })
-                );
+            );
             return btns;
         }
 
-        private likeBtn(showCount = false)
-        {
+        private likeBtn(showCount = false) {
             var likeBtn = div(null);
             var id = this.topic.json.id;
             if (!id) return likeBtn;
 
-            var setLikeBtn = (s:number, h:string, f:()=>void) => {
-                var btn:HTMLElement;
+            var setLikeBtn = (s: number, h: string, f: () => void) => {
+                var btn: HTMLElement;
                 if (s < 0)
                     btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
                 else
@@ -9883,7 +9590,7 @@
                 if (Math.abs(s) < 2) btn.setFlag("working", true);
                 likeBtn.setChildren([btn.withClick(f)]);
                 if (showCount)
-                    TheApiCacheMgr.getAnd(id, (s:JsonScript) => {
+                    TheApiCacheMgr.getAnd(id, (s: JsonScript) => {
                         if (!s) return; //deleted
                         var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
                         ctnSpan.innerText = n + "";
@@ -9893,8 +9600,7 @@
             return likeBtn;
         }
 
-        public mkBoxCore(big:boolean):HTMLElement
-        {
+        public mkBoxCore(big: boolean): HTMLElement {
             if (this.topic.fromJson) {
                 var r = this.browser().getScriptInfoById(this.topic.id).mkBoxExt(big, true);
                 if (big) {
@@ -9914,7 +9620,7 @@
             var hd = div("sdNameBlock", nameBlock);
             var desc = div("sdTopicExpansion", dirAuto(div("sdTopicExpansionInner", (big && this.topic.isApiHelp()) ? "" : j.description)))
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon, div("sdHeaderInner", hd, desc)));
+                div("sdHeader", icon, div("sdHeaderInner", hd, desc)));
             if (big) {
                 res.className += " sdBigHeader sdDocsHeader";
                 res.appendChild(this.likeBtn(true));
@@ -9924,12 +9630,11 @@
             return res;
         }
 
-        private commentsTab:CommentsTab;
+        private commentsTab: CommentsTab;
 
         public getPublicationId() { return this.topic.json.id; }
 
-        public initTab()
-        {
+        public initTab() {
             // TODO: locale support for docs
             var followDiv = div(null);
             var allBottomDiv = div(null)
@@ -9991,7 +9696,7 @@
                 var viewBottom = true
 
                 if (m) {
-                    var processFlag = (f:string) => {
+                    var processFlag = (f: string) => {
                         f = f.toLowerCase()
                         if (f == "noheader") viewTop = false
                         if (f == "nosocial") viewBottom = false
@@ -10054,8 +9759,7 @@
                 this.commentsTab.initTab();
         }
 
-        public match(terms:string[], fullName:string)
-        {
+        public match(terms: string[], fullName: string) {
             if (terms.length == 0) return 1;
 
             if (!this.topic) return 0;
@@ -10067,7 +9771,7 @@
             if (r > 0) {
                 if (lowerName.replace(/[^a-z0-9]/g, "") == fullName)
                     r += 100000;
-                r -= lowerName.length/10;
+                r -= lowerName.length / 10;
             } else {
                 r = IntelliItem.matchString(this.topic.forSearch(), terms, 10, 1, 0.1);
             }
@@ -10077,47 +9781,43 @@
             return r;
         }
 
-        public showInList()
-        {
+        public showInList() {
             return this.topic.json.priority < 10000;
         }
 
-        private renderExample(parent:TopicInfo)
-        {
+        private renderExample(parent: TopicInfo) {
             var c = this.topic.fromJson;
-            if (!c) return this.topic.render(() => {}); // shouldn't really happen
+            if (!c) return this.topic.render(() => { }); // shouldn't really happen
 
             var uid = this.browser().getCreatorInfo(c);
             var title = this.topic.json.name;
             var r = div("sdCmt sdRelated", uid.thumbnail(),
-                        div("sdCmtTopic",
-                            title.replace(/\s*\d*$/, "") == parent.topic.json.name.replace(/\s*\d*$/, "")
-                              ? null
-                              : span("sdBold", title + " "),
-                            "by ",
-                            span("sdBold", c.username)),
-                        div("sdRelatedBody", this.topic.render(() => {})),
-                        div("sdCmtMeta",
-                                Util.timeSince(c.time),
-                                //c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
-                                c.comments > 0 ? " " + c.comments + " comments " : null,
-                                span("sdCmtId", " /" + c.id),
-                            div("sdRelatedBtns", HTML.mkButton(lf("open"), () => {
-                                var b = this.browser();
-                                b.loadDetails(b.getScriptInfoById(c.id));
-                            }))),
-                        this.likeBtn(true)
-                        );
+                div("sdCmtTopic",
+                    title.replace(/\s*\d*$/, "") == parent.topic.json.name.replace(/\s*\d*$/, "")
+                        ? null
+                        : span("sdBold", title + " "),
+                    "by ",
+                    span("sdBold", c.username)),
+                div("sdRelatedBody", this.topic.render(() => { })),
+                div("sdCmtMeta",
+                    Util.timeSince(c.time),
+                    //c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
+                    c.comments > 0 ? " " + c.comments + " comments " : null,
+                    span("sdCmtId", " /" + c.id),
+                    div("sdRelatedBtns", HTML.mkButton(lf("open"), () => {
+                        var b = this.browser();
+                        b.loadDetails(b.getScriptInfoById(c.id));
+                    }))),
+                this.likeBtn(true)
+            );
             return r;
         }
 
-        static isWorthwhile(e:JsonScript)
-        {
+        static isWorthwhile(e: JsonScript) {
             return getScriptHeartCount(e) * 20 + e.userscore >= 60;
         }
 
-        static attachCopyHandlers(e:HTMLElement):void
-        {
+        static attachCopyHandlers(e: HTMLElement): void {
             var elts = e.getElementsByClassName("copy-button")
             for (var i = 0; i < elts.length; ++i) {
                 (() => {
@@ -10146,12 +9846,12 @@
 
             Util.toArray(e.getElementsByTagName("a")).forEach((ae: HTMLAnchorElement) => {
                 TopicInfo.loadTutorialTileAsync(ae.href)
-                .then(t => {
-                    if (t) {
-                        ae.parentNode.insertBefore(t, ae)
-                        ae.removeSelf()
-                    }
-                })
+                    .then(t => {
+                        if (t) {
+                            ae.parentNode.insertBefore(t, ae)
+                            ae.removeSelf()
+                        }
+                    })
             })
         }
 
@@ -10163,7 +9863,7 @@
                 return Promise.as(Browser.TheHub.topicTile(m[1], "More"));
             else if (m = /#pub:(\w+)$/.exec(decodeURIComponent(href)))
                 return TheApiCacheMgr.getAsync(m[1], true)
-                    .then((d : JsonPublication) => {
+                    .then((d: JsonPublication) => {
                         if (!d) return undefined;
                         if (d.kind == "script" && (<JsonScript>d).updateid != d.id)
                             return TheApiCacheMgr.getAsync((<JsonScript>d).updateid, true);
@@ -10177,60 +9877,58 @@
         }
 
         static defaultTutorialTemplate =
-           "meta version 'v2.2';\n" +
-           "meta name 'tutorial playground';\n" +
-           'meta allowExport "yes";\n' +
-           "action main {\n" +
-           "}";
+        "meta version 'v2.2';\n" +
+        "meta name 'tutorial playground';\n" +
+        'meta allowExport "yes";\n' +
+        "action main {\n" +
+        "}";
 
         static defaultTutorialAppTemplate =
-            "meta version 'v2.2,js,ctx,refs,localcloud,unicodemodel,allasync';\n" +
-            "meta name 'tutorial app playground';\n" +
-            'meta allowExport "yes";\n' +
-            "#main\n" +
-            "action main(\\u2756: * main_page_data) {\n" +
-            "  if box→is_init then { skip; }\n" +
-            "  if true then { skip; }\n" +
-            "  meta page;\n" +
-            "}\n" +
-            "#mainpagedata\n" +
-            "table main_page_data {\n" +
-            "  type = 'Object';\n" +
-            "  persistent = false;\n" +
-            "}\n";
+        "meta version 'v2.2,js,ctx,refs,localcloud,unicodemodel,allasync';\n" +
+        "meta name 'tutorial app playground';\n" +
+        'meta allowExport "yes";\n' +
+        "#main\n" +
+        "action main(\\u2756: * main_page_data) {\n" +
+        "  if box→is_init then { skip; }\n" +
+        "  if true then { skip; }\n" +
+        "  meta page;\n" +
+        "}\n" +
+        "#mainpagedata\n" +
+        "table main_page_data {\n" +
+        "  type = 'Object';\n" +
+        "  persistent = false;\n" +
+        "}\n";
 
         static defaultScriptPluginTemplate =
-            'meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";\n' +
-            'meta name "plugin playground";\n' +
-            'meta allowExport "yes";\n' +
-            'meta platform "current";\n' +
-            '// #scriptPlugin\n' +
-            '#plugin action plugin(ed: Editor) {\n' +
-            '}\n';
+        'meta version "v2.2,js,ctx,refs,localcloud,unicodemodel,allasync";\n' +
+        'meta name "plugin playground";\n' +
+        'meta allowExport "yes";\n' +
+        'meta platform "current";\n' +
+        '// #scriptPlugin\n' +
+        '#plugin action plugin(ed: Editor) {\n' +
+        '}\n';
 
-        static getAwesomeAdj():string
-        {
+        static getAwesomeAdj(): string {
             if (!TopicInfo.awesomeAdj)
                 TopicInfo.awesomeAdj = (
                     lf("amazing, astonishing, astounding, awe-inspiring, awesome, breathtaking, classic, cool, curious, distinct, exceptional, exclusive, extraordinary, fabulous, fantastic, glorious, great, ") +
                     lf("incredible, magical, marvellous, marvelous, mind-blowing, mind-boggling, miraculous, peculiar, phenomenal, rad, rockin', special, spectacular, startling, stunning, super-cool, ") +
                     lf("superior, supernatural, terrific, unbelievable, unearthly, unique, unprecedented, unusual, weird, wonderful, wondrous")
-                    ).split(/\s*[,،、]\s*/)
+                ).split(/\s*[,،、]\s*/)
             return Random.pick(TopicInfo.awesomeAdj)
         }
 
-        static awesomeAdj:string[] = null
+        static awesomeAdj: string[] = null
 
-        static followTopic(topic:HelpTopic, tutorialMode = "")
-        {
+        static followTopic(topic: HelpTopic, tutorialMode = "") {
             topic.initAsync()
-                .done((topicApp : AST.App) => {
+                .done((topicApp: AST.App) => {
                     if (!Cloud.getUserId() && topicApp.usesCloud()) {
                         Hub.loginToCreate(topicApp.getName(), "follow:" + topic.json.id)
                         return
                     }
 
-                    Ticker.tick(Ticks.tutorialStart);                    
+                    Ticker.tick(Ticks.tutorialStart);
                     if (topic.isBuiltIn)
                         Ticker.rawTick("startTutorial_" + topic.id);
 
@@ -10242,15 +9940,15 @@
                     var startNew = () => {
                         var text = !m || m[1] == "empty" ? Promise.as(TopicInfo.defaultTutorialTemplate) :
                             m[1].toLowerCase() == "emptyapp" ? Promise.as(TopicInfo.defaultTutorialAppTemplate) :
-                            m[1].toLowerCase() == "emptyscriptplugin" ? Promise.as(TopicInfo.defaultScriptPluginTemplate) :
-                            TheApiCacheMgr.getAsync(m[1]).then((jscript:JsonScript) => {
-                                return ScriptCache.getScriptAsync(jscript.updateid || m[1]);
-                            })
+                                m[1].toLowerCase() == "emptyscriptplugin" ? Promise.as(TopicInfo.defaultScriptPluginTemplate) :
+                                    TheApiCacheMgr.getAsync(m[1]).then((jscript: JsonScript) => {
+                                        return ScriptCache.getScriptAsync(jscript.updateid || m[1]);
+                                    })
                         if (!m)
                             HTML.showWarningNotification("missing {template:empty} in the tutorial")
                         text.done((t) => {
                             if (!t) {
-                                ModalDialog.info("template missing", lf("the script template /{0} couldn't be retrieved",m[1]));
+                                ModalDialog.info("template missing", lf("the script template /{0} couldn't be retrieved", m[1]));
                                 return;
                             }
 
@@ -10283,8 +9981,7 @@
                 });
         }
 
-        public follow()
-        {
+        public follow() {
             Util.log("follow() on Topic")
             TopicInfo.followTopic(this.topic)
         }
@@ -10296,7 +9993,7 @@
         extends BrowserPage {
         private name: string;
         public description: string;
-        public userid:string;
+        public userid: string;
 
         constructor(par: Host) {
             super(par)
@@ -10326,20 +10023,20 @@
             var pubId = div("sdAddInfoOuter", addInfoInner);
 
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon,
-                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
-                                    )));
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers
+                    )));
 
             if (big)
                 res.className += " sdBigHeader";
 
 
-            return this.withUpdate(res, (u:JsonRelease) => {
+            return this.withUpdate(res, (u: JsonRelease) => {
                 var nm = u.name
                 var labs = u.labels.map(l => l.name).join(", ")
                 if (labs) nm += " (" + labs + ")"
                 numbers.setChildren(labs ? [div("sdNumber", " ★")] : [])
-                nameBlock.setChildren([ nm ])
+                nameBlock.setChildren([nm])
                 author.setChildren([u.username]);
                 addInfoInner.setChildren(["/" + this.publicId + ", " + Util.timeSince(u.time)]);
             });
@@ -10354,11 +10051,11 @@
 
 
         public initTab() {
-            this.withUpdate(this.tabContent, (u:JsonRelease) => {
+            this.withUpdate(this.tabContent, (u: JsonRelease) => {
                 var ch = ["current", "beta", "latest", "cloud"].map(n => HTML.mkButton(lf("make {0}", n), () => {
                     var doit = () =>
                         Cloud.postPrivateApiAsync(this.publicId + "/label", { name: n })
-                        .done(r => this.reload())
+                            .done(r => this.reload())
                     if (n == "current") ModalDialog.ask(lf("are you sure?"), lf("move {0} label", n), doit, true)
                     else doit()
                 }))
@@ -10368,11 +10065,11 @@
                         div("sdBigButtonDesc", lf("launch")))
                         .withClick(() =>
                             Util.navigateInWindow(Cloud.getServiceUrl() + "/app/?r=" + this.publicId))
-                    ));
+                ));
 
                 if (u.commit)
-                  ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank",
-                    lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
+                    ch.push(div(null, HTML.mkA("", "https://github.com/Microsoft/TouchDevelop/commits/" + u.commit, "_blank",
+                        lf("github:{0} (on {1})", u.commit.slice(0, 10), u.branch))))
 
                 ch.push(div("sdHeading", u.labels.length ? "labels" : "no labels"))
                 u.labels.forEach(l => {
@@ -10386,8 +10083,7 @@
             });
         }
 
-        private reload()
-        {
+        private reload() {
             this.invalidateCaches();
             TheEditor.historyMgr.reload(HistoryMgr.windowHash());
         }
@@ -10418,7 +10114,7 @@
 
         public isMine() { return this.json && this.json.userid == Cloud.getUserId(); }
 
-        public mkBoxCore(big: boolean) : HTMLElement {
+        public mkBoxCore(big: boolean): HTMLElement {
             var icon = div("sdIcon", HTML.mkImg("svg:script,white"));
             icon.style.background = "#1731B8";
             var nameBlock = sdName(big);
@@ -10435,7 +10131,7 @@
             var res = div("sdHeaderOuter",
                 div("sdHeader", icon,
                     div("sdHeaderInner", hd, pubId, div("sdAuthor", author), abuse, numbers
-                        )));
+                    )));
 
             if (big) {
                 res.className += " sdBigHeader sdDocsHeader";
@@ -10443,7 +10139,7 @@
             }
 
 
-            return this.withUpdate(res,(u: JsonChannel) => {
+            return this.withUpdate(res, (u: JsonChannel) => {
                 this.json = u;
                 if (u.pictureid && !Browser.lowMemory) {
                     icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
@@ -10458,7 +10154,7 @@
             });
         }
 
-        private likeBtn(showCount = false) : HTMLElement {
+        private likeBtn(showCount = false): HTMLElement {
             var lbtn = div(null);
             var id = this.publicId;
             var setLikeBtn = (s: number, h: string, f: () => void) => {
@@ -10481,7 +10177,7 @@
             return lbtn;
         }
 
-        public mkTile(sz: number) : HTMLElement {
+        public mkTile(sz: number): HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
             return this.withUpdate(d, (u: JsonChannel) => {
@@ -10521,7 +10217,7 @@
             });
         }
 
-        public mkTabsCore(): BrowserTab[]{
+        public mkTabsCore(): BrowserTab[] {
             return [this];
         }
 
@@ -10547,32 +10243,32 @@
                 scripts
             ]);
 
-            this.withUpdate(this.tabContent,(u: JsonChannel) => {
+            this.withUpdate(this.tabContent, (u: JsonChannel) => {
                 this.json = u;
                 author.setChildren([this.browser().getUserInfoById(this.json.userid, this.json.username).userBar(this)]);
                 descr.setChildren([Host.expandableTextBox(this.json.description)]);
 
                 if (this.isMine()) {
                     btn.setChildren([]);
-                    btn.appendChild(HTML.mkButton(lf("delete channel"),() => {
-                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"),() => {
+                    btn.appendChild(HTML.mkButton(lf("delete channel"), () => {
+                        ModalDialog.ask(lf("There is no undo for this operation."), lf("delete channel"), () => {
                             HTML.showProgressNotification(lf("deleting channel..."));
                             Cloud.deletePrivateApiAsync(this.publicId)
                                 .done(() => {
-                                this.invalidateCaches();
-                                Util.setHash("list:lists");
-                            }, e => Cloud.handlePostingError(e, lf("delete channel")));
+                                    this.invalidateCaches();
+                                    Util.setHash("list:lists");
+                                }, e => Cloud.handlePostingError(e, lf("delete channel")));
                         });
                     }));
                     if (!Cloud.isRestricted())
-                        btn.appendChild(HTML.mkButton(lf("change picture"),() => {
+                        btn.appendChild(HTML.mkButton(lf("change picture"), () => {
                             Meta.chooseArtPictureAsync({ title: lf("change the channel picture"), initialQuery: "channel" })
                                 .then((a: JsonArt) => {
-                                if (a) {
-                                    HTML.showProgressNotification(lf("updating picture..."));
-                                    return Cloud.postPrivateApiAsync(this.publicId, { pictureid: a.id })
-                                }
-                                return Promise.as(undefined);
+                                    if (a) {
+                                        HTML.showProgressNotification(lf("updating picture..."));
+                                        return Cloud.postPrivateApiAsync(this.publicId, { pictureid: a.id })
+                                    }
+                                    return Promise.as(undefined);
                                 }).done(() => this.browser().loadDetails(this, "overview"));
                         }));
                 }
@@ -10611,13 +10307,13 @@
             var el = this.browser().getScriptInfo(c).mkSmallBox();
             var list = <ChannelInfo>this.parent;
             if (list.isMine()) {
-                el = div('', el, div('', HTML.mkButtonOnce(lf("remove"),() => {
+                el = div('', el, div('', HTML.mkButtonOnce(lf("remove"), () => {
                     HTML.showProgressNotification(lf("removing script..."));
                     Cloud.deletePrivateApiAsync(c.id + "/channels/" + this.parent.publicId)
-                    .done(() => {
-                        list.invalidateCaches();
-                        el.removeSelf();
-                    }, e => Cloud.handlePostingError(e, lf("remove script")));
+                        .done(() => {
+                            list.invalidateCaches();
+                            el.removeSelf();
+                        }, e => Cloud.handlePostingError(e, lf("remove script")));
                 })));
             }
             return el;
@@ -10644,24 +10340,22 @@
 
 
     export class PointerInfo
-        extends BrowserPage
-    {
-        private ptr:JsonPointer;
-        private redirect:string;
-        private art:JsonArt;
-        private script:JsonScript;
-        private text:string;
+        extends BrowserPage {
+        private ptr: JsonPointer;
+        private redirect: string;
+        private art: JsonArt;
+        private script: JsonScript;
+        private text: string;
 
         constructor(par: Host) {
             super(par)
         }
         public persistentId() { return "pointer:" + this.publicId; }
-        public getTitle()
-        { 
+        public getTitle() {
             return this.redirect ? "-> " + this.redirect :
-                   this.art ? "\u273f " + this.art.name :
-                   this.script ? this.script.name :
-                   super.getTitle()
+                this.art ? "\u273f " + this.art.name :
+                    this.script ? this.script.name :
+                        super.getTitle()
         }
 
         public getName() { return lf("page"); }
@@ -10672,15 +10366,14 @@
             this.publicId = id;
         }
 
-        public mkTabsCore(): BrowserTab[]{
+        public mkTabsCore(): BrowserTab[] {
             return [
-                this, 
+                this,
                 Cloud.hasPermission("root-ptr") ? new PointerHistoryTab(this) : null
             ];
         }
 
-        public withUpdate(elt:HTMLElement, update:(data:any)=>void)
-        {
+        public withUpdate(elt: HTMLElement, update: (data: any) => void) {
             return super.withUpdate(elt, d => {
                 this.ptr = d
                 this.redirect = null
@@ -10693,18 +10386,18 @@
                 }
                 else if (this.ptr.artid)
                     TheApiCacheMgr.getAsync(this.ptr.artid, true)
-                    .done(r => {
-                        this.art = r
-                        update(d)
-                    })
+                        .done(r => {
+                            this.art = r
+                            update(d)
+                        })
                 else if (this.ptr.scriptid) {
                     Promise.join([ScriptCache.getScriptAsync(this.ptr.scriptid),
-                                  TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
-                    .done(rr => {
-                        this.text = rr[0]
-                        this.script = rr[1]
-                        update(d)
-                    })
+                        TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
+                        .done(rr => {
+                            this.text = rr[0]
+                            this.script = rr[1]
+                            update(d)
+                        })
                 } else {
                     update(d)
                 }
@@ -10722,22 +10415,22 @@
 
             var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
             var pubId = div("sdAddInfoOuter", addInfoInner);
-            
+
             var res = div("sdHeaderOuter",
-                            div("sdHeader", icon,
-                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big)
-                                    )));
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big)
+                    )));
 
             if (big)
                 res.className += " sdBigHeader";
 
 
-            return this.withUpdate(res, (u:JsonPointer) => {
+            return this.withUpdate(res, (u: JsonPointer) => {
                 if (this.ptr) {
                     var nm = this.ptr.path;
-                    nameBlock.setChildren([ nm ])
-                    author.setChildren([this.script ? this.script.username : 
-                                        this.art ? this.art.username : this.ptr.username]);
+                    nameBlock.setChildren([nm])
+                    author.setChildren([this.script ? this.script.username :
+                        this.art ? this.art.username : this.ptr.username]);
                     if (this.script) {
                         addInfoInner.setChildren(["/" + this.script.id + ", " + Util.timeSince(this.script.time)]);
                     }
@@ -10756,7 +10449,7 @@
         }
 
         public initTab() {
-            this.withUpdate(this.tabContent, (u:JsonPointer) => {
+            this.withUpdate(this.tabContent, (u: JsonPointer) => {
                 if (this.script) {
                     var preview = div("");
                     this.tabContent.setChildren([
@@ -10772,16 +10465,15 @@
                     this.tabContent.setChildren([
                         ScriptInfo.labeledBox(lf("points to"), ai.mkSmallBox()),
                         div(null, ai.getContent(this.art))
-                        ])
+                    ])
                 }
             });
         }
     }
 
     export class PointerHistoryTab
-        extends ListTab
-    {
-        constructor(par:BrowserPage) {
+        extends ListTab {
+        constructor(par: BrowserPage) {
             super(par, "/history")
         }
         public getId() { return "ptrhistory"; }
@@ -10791,8 +10483,7 @@
         public noneText() { return lf("nothing"); }
         public hideOnEmpty() { return false }
 
-        public tabBox(cc:JsonIdObject):HTMLElement
-        {
+        public tabBox(cc: JsonIdObject): HTMLElement {
             var ptr = <JsonPointer>cc;
 
             var icon = div("sdIcon", HTML.mkImg("svg:undo,white"));
@@ -10808,7 +10499,7 @@
 
             var ptr0 = TheApiCacheMgr.getCached(this.parent.publicId) || {}
 
-            var getScriptInfo = (id:string) =>
+            var getScriptInfo = (id: string) =>
                 <ScriptInfo>this.browser().getAnyInfoByEtag({ id: id, kind: "script", ETag: "" });
 
             var showDiff = () => {
@@ -10820,16 +10511,16 @@
             }
 
             var btns = div("sdBaseCorner",
-                    ptr.scriptid && ptr0.scriptid ? div(null, HTML.mkButton(lf("diff to curr"), showDiff)) : null,
-                    ptr.scriptid && ptr.oldscriptid ? div(null, HTML.mkButton(lf("changes"), showChanges)) : null
+                ptr.scriptid && ptr0.scriptid ? div(null, HTML.mkButton(lf("diff to curr"), showDiff)) : null,
+                ptr.scriptid && ptr.oldscriptid ? div(null, HTML.mkButton(lf("changes"), showChanges)) : null
             )
-            
-            var res = div("sdHeaderOuter",
-                            div("sdHeader", icon,
-                                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers)),
-                            btns)
 
-            nameBlock.setChildren([ ptr.id.replace(/.*@/, "") ])
+            var res = div("sdHeaderOuter",
+                div("sdHeader", icon,
+                    div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers)),
+                btns)
+
+            nameBlock.setChildren([ptr.id.replace(/.*@/, "")])
             author.setChildren([ptr.username])
 
             if (ptr.scriptid) {
@@ -10847,6 +10538,6 @@
             })
         }
     }
- 
+
 
 }
