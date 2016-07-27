@@ -213,6 +213,7 @@ module TDev.Browser {
 
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
             this.searchBox.placeholder = lf("Search here...");
+            this.searchBox.title = lf("Search for online scripts");
             this.searchBox.setAttribute("aria-owns", "leftList");
 
             this.rightPane.withClick(() => this.hideSidePane(), true);
