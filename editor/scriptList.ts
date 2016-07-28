@@ -4509,13 +4509,13 @@ module TDev.Browser {
                     var info = this.browser().getScriptInfoById(scr.id)
                     var box = div(null, info.mkSmallBox())
                     box.appendChild(HTML.mkButton(lf("diff"), () => info.diffToId(diffTo)))
-                    var addNum = (n: number, sym: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym)]) }
+                    var addNum = (n: number, sym: string, title: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym, title)]) }
 
-                    addNum(st.numOtherChanges, "svg:Wrench")
-                    addNum(st.numCommentChanges, "svg:callout")
-                    addNum(st.numArtChanges, "svg:Clover")
-                    addNum(st.numStringChanges, "svg:ABC")
-                    addNum(st.numNumberChanges, "svg:123");
+                    addNum(st.numOtherChanges, "svg:Wrench", lf("other"))
+                    addNum(st.numCommentChanges, "svg:callout", lf("comments"))
+                    addNum(st.numArtChanges, "svg:Clover", lf("art changes"))
+                    addNum(st.numStringChanges, "svg:ABC", lf("string changes"))
+                    addNum(st.numNumberChanges, "svg:123", lf("number changes"));
 
                     (<any>box).score = [st.numOtherChanges, st.numCommentChanges + st.numStringChanges + st.numNumberChanges,
                         st.numArtChanges, -scr.time]
@@ -5467,7 +5467,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var audio = null;
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 // addNum(a.positivereviews, "♥");
                 // if (sz > 1) {
                 //     addNum(a.comments, "✉");
@@ -5573,7 +5573,7 @@ module TDev.Browser {
                 author.setChildren([a.username]);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 //addNum(a.receivedpositivereviews, "♥");
                 //addNum(a.subscribers, "svg:Person,black,clip=80");
                 //addNum(a.features, "svg:Award,black,clip=110");
@@ -6255,7 +6255,7 @@ module TDev.Browser {
             });
         }
 
-        static mkNum(n: number, sym: string) {
+        static mkNum(n: number, sym: string, title: string) {
             if (n > 0) {
                 var ch: any[] = [" " + n + " "];
                 if (/^svg:/.test(sym))
@@ -6264,7 +6264,9 @@ module TDev.Browser {
                     ch.push(span("smallText", sym));
                 else
                     ch.push(sym);
-                return div("sdNumber", ch);
+                var d = div("sdNumber", ch);
+                d.title = title;
+                return d;
             } else {
                 return null;
             }
@@ -6466,15 +6468,15 @@ module TDev.Browser {
                 }
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 if (big && !isTopic) {
                     if (!SizeMgr.phoneMode)
-                        addNum(this.jsonScript.installations, "users");
-                    addNum(this.jsonScript.runs, "runs");
+                        addNum(this.jsonScript.installations, "users", lf("users"));
+                    addNum(this.jsonScript.runs, "runs", lf("runs"));
                 } else {
-                    addNum(getScriptHeartCount(this.jsonScript), "♥");
+                    addNum(getScriptHeartCount(this.jsonScript), "♥", lf("hearts"));
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉");
+                        addNum(this.jsonScript.comments, "✉", lf("comments"));
                 }
                 if (this.app.isLibrary) {
                     var sp = document.createElement('span'); sp.className = 'sdNumber symbol';
@@ -6530,11 +6532,11 @@ module TDev.Browser {
                     : this.app.htmlColor();
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(getScriptHeartCount(this.jsonScript), "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(getScriptHeartCount(this.jsonScript), "♥", lf("hearts"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉");
+                        addNum(this.jsonScript.comments, "✉", lf("comments"));
                     //addNum(jsonScript.installations, "users");
                     //addNum(jsonScript.runs, "runs");
                 }
@@ -8023,9 +8025,9 @@ module TDev.Browser {
                 nameBlock.setChildren([u.name]);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.score, "svg:Award,black,clip=110");
-                addNum(u.receivedpositivereviews, "♥");
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.score, "svg:Award,black,clip=110", lf("score"));
+                addNum(u.receivedpositivereviews, "♥", lf("hearts"));
                 numbers.setChildren(cont);
             });
         }
@@ -8038,8 +8040,8 @@ module TDev.Browser {
                 this.userName = u.name;
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.receivedpositivereviews, "♥");
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.receivedpositivereviews, "♥", lf("hearts"));
                 //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
                 //addNum(u.features, "svg:Award,white,clip=110");
 
@@ -8770,10 +8772,10 @@ module TDev.Browser {
                 dirAuto(nameBlock);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("hearts"));
                 if (EditorSettings.widgets().publicationComments)
-                    addNum(u.comments, "✉");
+                    addNum(u.comments, "✉", lf("comments"));
                 /* if (big) {
                     addNum(u.subscribers, "svg:Person,black,clip=80");
                 } */
@@ -9454,9 +9456,9 @@ module TDev.Browser {
                 }
 
                 var cont = <any[]>[];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
-                addNum(u.comments, "replies");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("hearts"));
+                addNum(u.comments, "replies", lf("replies"));
                 numbers.setChildren(cont);
             });
         }
@@ -9466,9 +9468,9 @@ module TDev.Browser {
             return this.withUpdate(d, (u: JsonComment) => {
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
-                addNum(u.comments, lf("replies"));
+                var addNum = (n: number, sym: string,title) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("hearts"));
+                addNum(u.comments, lf("replies"), lf("replies"));
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = d.style.background;
@@ -10190,11 +10192,11 @@ module TDev.Browser {
                 this.json = u;
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(this.json.positivereviews, "♥");
+                var addNum = (n: number, sym: string, title:string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(this.json.positivereviews, "♥", lf("hearts"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.json.comments, "✉");
+                        addNum(this.json.comments, "✉", lf("comments"));
                 }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
