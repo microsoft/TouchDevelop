@@ -329,7 +329,7 @@ function processLf(filename:string)
     if (!/\.(ts|html)$/.test(filename)) return
     if (/\.d\.ts$/.test(filename)) return
 
-    console.log('extracting strings from %s', filename);    
+ //   console.log('extracting strings from %s', filename);    
     loadText(filename).split('\n').forEach((line:string, idx:number) => {
         function err(msg:string) {
             console.log("%s(%d): %s", filename, idx, msg);
@@ -362,7 +362,7 @@ function processLib(filename:string)
 {
     if (!/\.txt$/.test(filename)) return
 
-    console.log('extracting strings from %s', filename);    
+  //  console.log('extracting strings from %s', filename);    
     var prevAct = ""
     loadText(filename).split('\n').forEach((line:string, idx:number) => {
         function err(msg:string) {

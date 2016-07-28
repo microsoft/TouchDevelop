@@ -17,7 +17,7 @@ module TDev.Browser {
         constructor() {
             super()
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
-            this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
+            this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.searchBtn, this.slideButton);
             this.listHeader.setAttribute("aria-controls", "leftList");
             this.listHeader.setAttribute("role", "header");
             this.theList.setAttribute("aria-label", lf("Search results"));
@@ -144,6 +144,10 @@ module TDev.Browser {
         private theList = divId("leftList", "slList");
         private header = divLike("h2", "sdListLabel");
         private botDiv = div(null);
+        private searchBtn = HTML.mkImgButton(lf("svg:search"), () => {
+            this.searchKey(true);
+            this.theList.focus();
+        });
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
         private autoUpdate: KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
@@ -210,6 +214,9 @@ module TDev.Browser {
 
             var up = KeyboardAutoUpdate.mkInput(this.searchBox, () => this.searchKey())
             up.attach()
+
+            this.searchBtn.title = lf("Search for online scripts");
+            this.searchBtn.setAttribute("aria-label", lf("Search for online scripts"))
 
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
             this.searchBox.placeholder = lf("Search here...");
@@ -599,7 +606,7 @@ module TDev.Browser {
             return view.showAsync().done()
         }
 
-        private syncView(showCurrent = true) {
+        private syncView(showCurrent = true, selectOnLoad = false) {
             var lst: BrowserPage[] = this.topLocations;
             this.listDivs = [];
 
@@ -2306,12 +2313,12 @@ module TDev.Browser {
         // Search
         //
 
-        private searchKey() {
+        private searchKey(selectOnLoad = false) {
             //Util.normalizeKeyEvent(e);
             this.showSidePane();
             if (this.lastSearchValue != this.searchBox.value) {
                 this.lastSearchValue = this.searchBox.value;
-                this.syncView();
+                this.syncView(false, selectOnLoad);
             }
             //if (e.keyName == "Enter" && !!this.searchOnline) {
             //    this.searchOnline();
