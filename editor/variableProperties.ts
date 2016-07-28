@@ -718,21 +718,25 @@ module TDev
             }
             m.add(div('wall-dialog-body', input));
             var err = div('wall-dialog-body');
+            var importBtn = HTML.mkButton(lf("import"), () => {
+                if (!input.files.length) {
+                    var errd = div('', [lf("Please select a file before importing.")]);
+                    errd.setAttribute("role", "alert");
+                    errd.setAttribute("aria-live", "assertive");
+                    err.setChildren(errd);
+                }
+                else {
+                    m.dismiss();
+                    handleImportFilesAsync(Util.toArray(input.files))
+                        .done();
+                }
+            });
+            importBtn.style.display = 'none'
+            input.onchange = ev => {
+                importBtn.style.display = input.files && input.files.length > 0 ? 'inline' : 'none'; 
+            }
             m.add(err);
-            m.add(div('wall-dialog-buttons',
-                HTML.mkButton(lf("import"), () => {
-                    if (!input.files.length) {
-                        var errd = div('', [lf("Please select a file before importing.")]);
-                        errd.setAttribute("role", "alert");
-                        errd.setAttribute("aria-live", "assertive");
-                        err.setChildren(errd);
-                    }
-                    else {
-                        m.dismiss();
-                        handleImportFilesAsync(Util.toArray(input.files))
-                            .done();
-                    }
-                }),
+            m.add(div('wall-dialog-buttons', importBtn,
                 HTML.mkButton(lf("cancel"), () => m.dismiss())
             ));
             m.show();            
