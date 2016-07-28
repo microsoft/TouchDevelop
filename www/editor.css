@@ -3532,7 +3532,8 @@ div.sdTabTileLabel {
   display: inline-block;
 }
 
-.sdBigButton:hover {
+.sdBigButton:hover, .sdBigButton:focus {
+  outline-width: 4px;
   transform: translate(0.15em, 0.15em);                      /*CSSpref*/  -webkit-transform: translate(0.15em, 0.15em);  -moz-transform: translate(0.15em, 0.15em);  -ms-transform: translate(0.15em, 0.15em);
 }
 
