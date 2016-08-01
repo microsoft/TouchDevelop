@@ -6268,14 +6268,16 @@ module TDev.Browser {
         static mkNum(n: number, sym: string, title: string) {
             if (n > 0) {
                 var ch: any[] = [" " + n + " "];
+                var sh: HTMLElement;
                 if (/^svg:/.test(sym))
-                    ch.push(div("inlineIcon", HTML.mkImg(sym)))
+                    ch.push(sh = div("inlineIcon", HTML.mkImg(sym)))
                 else if (sym.length > 1)
-                    ch.push(span("smallText", sym));
+                    ch.push(sh = span("smallText", sym));
                 else
-                    ch.push(sym);
+                    ch.push(sh = span('', sym));
+                sh.title = title;
+                sh.setAttribute("aria-label", title);
                 var d = div("sdNumber", ch);
-                d.title = title;
                 return d;
             } else {
                 return null;
@@ -6484,7 +6486,7 @@ module TDev.Browser {
                         addNum(this.jsonScript.installations, "users", lf("users"));
                     addNum(this.jsonScript.runs, "runs", lf("runs"));
                 } else {
-                    addNum(getScriptHeartCount(this.jsonScript), "♥", lf("hearts"));
+                    addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
                     if (EditorSettings.widgets().publicationComments)
                         addNum(this.jsonScript.comments, "✉", lf("comments"));
                 }
@@ -6543,7 +6545,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(getScriptHeartCount(this.jsonScript), "♥", lf("hearts"));
+                addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
                         addNum(this.jsonScript.comments, "✉", lf("comments"));
@@ -8037,7 +8039,7 @@ module TDev.Browser {
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 addNum(u.score, "svg:Award,black,clip=110", lf("score"));
-                addNum(u.receivedpositivereviews, "♥", lf("hearts"));
+                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
                 numbers.setChildren(cont);
             });
         }
@@ -8051,7 +8053,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.receivedpositivereviews, "♥", lf("hearts"));
+                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
                 //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
                 //addNum(u.features, "svg:Award,white,clip=110");
 
@@ -8783,7 +8785,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("hearts"));
+                addNum(u.positivereviews, "♥", lf("favourites"));
                 if (EditorSettings.widgets().publicationComments)
                     addNum(u.comments, "✉", lf("comments"));
                 /* if (big) {
@@ -9467,7 +9469,7 @@ module TDev.Browser {
 
                 var cont = <any[]>[];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("hearts"));
+                addNum(u.positivereviews, "♥", lf("favourites"));
                 addNum(u.comments, "replies", lf("replies"));
                 numbers.setChildren(cont);
             });
@@ -9479,7 +9481,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("hearts"));
+                addNum(u.positivereviews, "♥", lf("favourites"));
                 addNum(u.comments, lf("replies"), lf("replies"));
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
@@ -10203,7 +10205,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(this.json.positivereviews, "♥", lf("hearts"));
+                addNum(this.json.positivereviews, "♥", lf("favourites"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
                         addNum(this.json.comments, "✉", lf("comments"));
