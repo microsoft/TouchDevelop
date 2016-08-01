@@ -219,7 +219,7 @@ module TDev.Browser {
             this.searchBtn.setAttribute("aria-label", lf("Search for online scripts"))
 
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
-            this.searchBox.placeholder = lf("Search here...");
+            this.searchBox.placeholder = lf("Search...");
             this.searchBox.title = lf("Search for online scripts");
             this.searchBox.setAttribute("aria-owns", "leftList");
 
