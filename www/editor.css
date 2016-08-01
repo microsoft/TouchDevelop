@@ -31,6 +31,12 @@ div.calcButtonHelp {
     font-weight: 200;
 }
 
+div.skipMenu {
+    position:absolute;
+    top:1em;
+    left: 20em;
+}
+
 div.notificationBox {
     position:absolute;
     top:1em;
@@ -6309,8 +6315,6 @@ li.skip
 position:absolute;
 left:-10000px;
 top:auto;
-width:1px;
-height:1px;
 overflow:hidden;
 }
 
@@ -6318,7 +6322,6 @@ li.skip:focus {
   position:inherit;
   left:inherit;
   top:inherit;
-  width:auto;
-  height:auto;
+  width:10em;
   overflow:inherit;
 }

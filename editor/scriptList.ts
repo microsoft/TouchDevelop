@@ -52,8 +52,6 @@ module TDev.Browser {
                     cls?: string;
                     handler: () => void
                 }[] = [
-                        { id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
-                        { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" },
                         { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                         {
                             id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
@@ -73,6 +71,26 @@ module TDev.Browser {
                     menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
+                var mkMenu = mi => {
+                    var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
+                        tick(mi.tick);
+                        mi.handler();
+                    });
+                    li.id = "siteMenuBtn" + mi.id;
+                    if (mi.id == "signin" || mi.id == "settings")
+                        li.style.fontWeight = "bold";
+                    li.setAttribute("role", "menuitem");
+                    return li;
+                };
+
+                var skipMenu = elt("siteSkipMenu");
+                if (skipMenu) {
+                    skipMenu.setChildren(
+                        [{ id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
+                            { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" }]
+                            .map(mkMenu));
+                }
+
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
@@ -90,17 +108,7 @@ module TDev.Browser {
                 }
                 var siteMenu = elt("siteMenu");
                 if (siteMenu) {
-                    siteMenu.setChildren(menuItems.map(mi => {
-                        var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
-                            tick(mi.tick);
-                            mi.handler();
-                        });
-                        li.id = "siteMenuBtn" + mi.id;
-                        if (mi.id == "signin" || mi.id == "settings")
-                            li.style.fontWeight = "bold";
-                        li.setAttribute("role", "menuitem");
-                        return li;
-                    }));
+                    siteMenu.setChildren(menuItems.map(mkMenu));
                     HTML.setRole(siteMenu, "menu")
                 }
                 var siteMore = elt("siteMore");
