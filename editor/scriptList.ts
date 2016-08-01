@@ -606,8 +606,11 @@ module TDev.Browser {
             return view.showAsync().done()
         }
 
+        private syncSelectOnLoad = false;
         private syncView(showCurrent = true, selectOnLoad = false) {
             var lst: BrowserPage[] = this.topLocations;
+
+            this.syncSelectOnLoad = selectOnLoad;
             this.listDivs = [];
 
             var terms: string[] = this.lastSearchValue.split(/\s+/)
@@ -997,7 +1000,14 @@ module TDev.Browser {
                 .filter(d => d.getAttribute("role") == "button")
                 .forEach(d => d.setAttribute("role", "option"));
             // only first element is tab stop
-            this.listDivs.filter(d => d.tabIndex == 0).slice(1).forEach(d => d.tabIndex = -1);
+            this.listDivs.filter(d => d.tabIndex == 0).forEach((d,i) => {
+                if (i == 0) {
+                    if (this.syncSelectOnLoad) {
+                        this.syncSelectOnLoad = false;
+                        d.focus();
+                    }
+                } else d.tabIndex = -1;
+            });
             // handle key up and down
             this.listDivs.forEach(d => {
                 d.onkeyup = (ev) => {
@@ -2319,7 +2329,7 @@ module TDev.Browser {
         private searchKey(selectOnLoad = false) {
             //Util.normalizeKeyEvent(e);
             this.showSidePane();
-            if (this.lastSearchValue != this.searchBox.value) {
+            if (this.lastSearchValue != this.searchBox.value || selectOnLoad) {
                 this.lastSearchValue = this.searchBox.value;
                 this.syncView(false, selectOnLoad);
             }
