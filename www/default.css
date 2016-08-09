@@ -2035,7 +2035,7 @@ a.button, a.button:hover, a.button:visited {
 }
 
 :focus {
-  outline: 2px;
+  outline-width: 2px;
   outline-color: gray;
   outline-style: solid;
 }

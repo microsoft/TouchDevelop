@@ -225,7 +225,7 @@ export module SVG {
     export function svgBoilerPlate(viewPort:string, svg:string, iconName = "", altText = "")
     {
         return "<svg class='svg svg-icon-" + iconName + "' viewBox='" + viewPort + "'" +
-                " preserveAspectRatio='xMinYMin' xmlns='http://www.w3.org/2000/svg'>" + 
+                " preserveAspectRatio='xMinYMin' role='presentation' xmlns='http://www.w3.org/2000/svg'>" + 
                 // Util.htmlEscape not defined when this is used
                 (altText ? "<title>" + altText.replace(/[<>]/g, "") + "</title>" : "") +
                 svg + "</svg>";

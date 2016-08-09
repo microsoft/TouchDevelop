@@ -17,9 +17,11 @@ module TDev.Browser {
         constructor() {
             super()
             this.autoUpdate = KeyboardAutoUpdate.mkInput(this.searchBox, null);
-            this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.slideButton);
+            this.listHeader = div("slListHeader", this.listHeaderHider, this.backContainer, this.searchBox, this.searchBtn, this.slideButton);
             this.listHeader.setAttribute("aria-controls", "leftList");
             this.listHeader.setAttribute("role", "header");
+            this.theList.setAttribute("aria-label", lf("Search results"));
+            this.theList.setAttribute("aria-described", "");
             this.theList.setAttribute("aria-live", "polite");
             this.theList.setAttribute("aria-relevant", "additions");
             this.theList.setAttribute("role", "listbox");
@@ -50,8 +52,6 @@ module TDev.Browser {
                     cls?: string;
                     handler: () => void
                 }[] = [
-                        { id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
-                        { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" },
                         { id: "home", name: lf("Home"), tick: Ticks.siteMenuHome, handler: () => Util.navigateInWindow("/") },
                         {
                             id: "createcode", name: lf("Create Code"), tick: Ticks.siteMenuCreateCode, handler: () => {
@@ -71,6 +71,26 @@ module TDev.Browser {
                     menuItems.push({ id: "signin", name: lf("● Sign in"), tick: Ticks.siteMenuSignIn, handler: () => Login.show() });
                 else menuItems.push({ id: "settings", name: username ? username : lf("My Profile"), tick: Ticks.siteMenuProfile, handler: () => this.loadDetails(this.getUserInfoById("me", "me")) });
 
+                var mkMenu = mi => {
+                    var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
+                        tick(mi.tick);
+                        mi.handler();
+                    });
+                    li.id = "siteMenuBtn" + mi.id;
+                    if (mi.id == "signin" || mi.id == "settings")
+                        li.style.fontWeight = "bold";
+                    li.setAttribute("role", "menuitem");
+                    return li;
+                };
+
+                var skipMenu = elt("siteSkipMenu");
+                if (skipMenu) {
+                    skipMenu.setChildren(
+                        [{ id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
+                            { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" }]
+                            .map(mkMenu));
+                }
+
                 if (Cloud.getUserId()) {
                     var siteNotifications = elt("siteNotifications");
                     if (siteNotifications) this.addNotificationCounter(siteNotifications);
@@ -88,17 +108,7 @@ module TDev.Browser {
                 }
                 var siteMenu = elt("siteMenu");
                 if (siteMenu) {
-                    siteMenu.setChildren(menuItems.map(mi => {
-                        var li = HTML.li('nav-list__item ' + (mi.cls || ''), mi.name).withClick(() => {
-                            tick(mi.tick);
-                            mi.handler();
-                        });
-                        li.id = "siteMenuBtn" + mi.id;
-                        if (mi.id == "signin" || mi.id == "settings")
-                            li.style.fontWeight = "bold";
-                        li.setAttribute("role", "menuitem");
-                        return li;
-                    }));
+                    siteMenu.setChildren(menuItems.map(mkMenu));
                     HTML.setRole(siteMenu, "menu")
                 }
                 var siteMore = elt("siteMore");
@@ -140,8 +150,12 @@ module TDev.Browser {
             }
         }
         private theList = divId("leftList", "slList");
-        private header = div("sdListLabel");
+        private header = divLike("h2", "sdListLabel");
         private botDiv = div(null);
+        private searchBtn = HTML.mkImgButton(lf("svg:search"), () => {
+            this.searchKey(true);
+            this.theList.focus();
+        });
         private searchBox = HTML.mkTextInput("text", lf("Search..."), "search", lf("Search"));
         private autoUpdate: KeyboardAutoUpdate;
         private slideButton = div("slSlideContainer");
@@ -209,8 +223,12 @@ module TDev.Browser {
             var up = KeyboardAutoUpdate.mkInput(this.searchBox, () => this.searchKey())
             up.attach()
 
+            this.searchBtn.title = lf("Search for online scripts");
+            this.searchBtn.setAttribute("aria-label", lf("Search for online scripts"))
+
             this.searchBox.onclick = Util.catchErrors("slSearch-click", () => this.showSidePane());
-            this.searchBox.placeholder = lf("Search here...");
+            this.searchBox.placeholder = lf("Search...");
+            this.searchBox.title = lf("Search for online scripts");
             this.searchBox.setAttribute("aria-owns", "leftList");
 
             this.rightPane.withClick(() => this.hideSidePane(), true);
@@ -596,8 +614,11 @@ module TDev.Browser {
             return view.showAsync().done()
         }
 
-        private syncView(showCurrent = true) {
+        private syncSelectOnLoad = false;
+        private syncView(showCurrent = true, selectOnLoad = false) {
             var lst: BrowserPage[] = this.topLocations;
+
+            this.syncSelectOnLoad = selectOnLoad;
             this.listDivs = [];
 
             var terms: string[] = this.lastSearchValue.split(/\s+/)
@@ -948,6 +969,7 @@ module TDev.Browser {
                     this.initMoreDiv(path);
                     elts.push(this.moreDiv)
                     sd.setChildren(elts);
+                    this.updateListDiv();
                 }, true);
             }
 
@@ -962,7 +984,7 @@ module TDev.Browser {
 
             if (searchMode) {
                 if (!scriptMod) {
-                    this.listDivs.push(div("sdListLabel", spanDirAuto(lf("online"))));
+                    this.listDivs.push(divLike("h2", "sdListLabel", spanDirAuto(lf("online"))));
                     this.searchOnline = () => { searchFrom("") };
                     this.autoUpdate.update = this.searchOnline;
                     this.autoUpdate.lastValue = null;
@@ -975,12 +997,25 @@ module TDev.Browser {
 
             if (allHelpBtn) this.listDivs.push(allHelpBtn)
 
+            this.updateListDiv();
+            this.theList.setChildren(this.listDivs);
+            this.setCurrent(showCurrent);
+        }
+
+        private updateListDiv() {
             // patch role="button" to role="option"
             this.listDivs
                 .filter(d => d.getAttribute("role") == "button")
                 .forEach(d => d.setAttribute("role", "option"));
             // only first element is tab stop
-            this.listDivs.filter(d => d.tabIndex == 0).slice(1).forEach(d => d.tabIndex = -1);
+            this.listDivs.filter(d => d.tabIndex == 0).forEach((d,i) => {
+                if (i == 0) {
+                    if (this.syncSelectOnLoad) {
+                        this.syncSelectOnLoad = false;
+                        d.focus();
+                    }
+                } else d.tabIndex = -1;
+            });
             // handle key up and down
             this.listDivs.forEach(d => {
                 d.onkeyup = (ev) => {
@@ -988,6 +1023,8 @@ module TDev.Browser {
                     switch (ev.keyName) {
                         case "Down":
                             var next = <HTMLElement>d.nextElementSibling;
+                            while (next && next.getAttribute("role") != "option")
+                                next = <HTMLElement>next.nextElementSibling;
                             if (next) {
                                 next.focus();
                                 ev.preventDefault();
@@ -996,6 +1033,8 @@ module TDev.Browser {
                             break;
                         case "Up":
                             var up = <HTMLElement>d.previousElementSibling;
+                            while (up && up.getAttribute("role") != "option")
+                                up = <HTMLElement>up.previousElementSibling;
                             if (up) {
                                 up.focus();
                                 ev.preventDefault();
@@ -1010,10 +1049,6 @@ module TDev.Browser {
                     }
                 }
             })
-
-            this.theList.setChildren(this.listDivs);
-
-            this.setCurrent(showCurrent);
         }
 
         public poweredByElements(): HTMLElement[] {
@@ -2299,12 +2334,12 @@ module TDev.Browser {
         // Search
         //
 
-        private searchKey() {
+        private searchKey(selectOnLoad = false) {
             //Util.normalizeKeyEvent(e);
             this.showSidePane();
-            if (this.lastSearchValue != this.searchBox.value) {
+            if (this.lastSearchValue != this.searchBox.value || selectOnLoad) {
                 this.lastSearchValue = this.searchBox.value;
-                this.syncView();
+                this.syncView(false, selectOnLoad);
             }
             //if (e.keyName == "Enter" && !!this.searchOnline) {
             //    this.searchOnline();
@@ -4502,13 +4537,13 @@ module TDev.Browser {
                     var info = this.browser().getScriptInfoById(scr.id)
                     var box = div(null, info.mkSmallBox())
                     box.appendChild(HTML.mkButton(lf("diff"), () => info.diffToId(diffTo)))
-                    var addNum = (n: number, sym: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym)]) }
+                    var addNum = (n: number, sym: string, title: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym, title)]) }
 
-                    addNum(st.numOtherChanges, "svg:Wrench")
-                    addNum(st.numCommentChanges, "svg:callout")
-                    addNum(st.numArtChanges, "svg:Clover")
-                    addNum(st.numStringChanges, "svg:ABC")
-                    addNum(st.numNumberChanges, "svg:123");
+                    addNum(st.numOtherChanges, "svg:Wrench", lf("other"))
+                    addNum(st.numCommentChanges, "svg:callout", lf("comments"))
+                    addNum(st.numArtChanges, "svg:Clover", lf("art changes"))
+                    addNum(st.numStringChanges, "svg:ABC", lf("string changes"))
+                    addNum(st.numNumberChanges, "svg:123", lf("number changes"));
 
                     (<any>box).score = [st.numOtherChanges, st.numCommentChanges + st.numStringChanges + st.numNumberChanges,
                         st.numArtChanges, -scr.time]
@@ -4909,9 +4944,9 @@ module TDev.Browser {
 
         public topContainer(): HTMLElement {
             if (this.parent instanceof NotificationsPage)
-                return div("sdListLabel", spanDirAuto(lf("notifications")))
+                return divLike("h2", "sdListLabel", spanDirAuto(lf("notifications")))
             if (this.parent instanceof GroupInfo)
-                return div("sdListLabel", spanDirAuto(lf("members activity")))
+                return divLike("h2", "sdListLabel", spanDirAuto(lf("members activity")))
             return div(null)
         }
 
@@ -5460,7 +5495,7 @@ module TDev.Browser {
 
                 var cont = [];
                 var audio = null;
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 // addNum(a.positivereviews, "♥");
                 // if (sz > 1) {
                 //     addNum(a.comments, "✉");
@@ -5509,7 +5544,6 @@ module TDev.Browser {
                         div("hubTileSubtitle",
                             div("hubTileAuthor", spanDirAuto(a.username), nums)))])
             });
-            return d;
         }
 
         public mkBoxCore(big: boolean) {
@@ -5567,7 +5601,7 @@ module TDev.Browser {
                 author.setChildren([a.username]);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 //addNum(a.receivedpositivereviews, "♥");
                 //addNum(a.subscribers, "svg:Person,black,clip=80");
                 //addNum(a.features, "svg:Award,black,clip=110");
@@ -6249,16 +6283,20 @@ module TDev.Browser {
             });
         }
 
-        static mkNum(n: number, sym: string) {
+        static mkNum(n: number, sym: string, title: string) {
             if (n > 0) {
                 var ch: any[] = [" " + n + " "];
+                var sh: HTMLElement;
                 if (/^svg:/.test(sym))
-                    ch.push(div("inlineIcon", HTML.mkImg(sym)))
+                    ch.push(sh = div("inlineIcon", HTML.mkImg(sym)))
                 else if (sym.length > 1)
-                    ch.push(span("smallText", sym));
+                    ch.push(sh = span("smallText", sym));
                 else
-                    ch.push(sym);
-                return div("sdNumber", ch);
+                    ch.push(sh = span('', sym));
+                sh.title = title;
+                sh.setAttribute("aria-label", title);
+                var d = div("sdNumber", ch);
+                return d;
             } else {
                 return null;
             }
@@ -6460,15 +6498,15 @@ module TDev.Browser {
                 }
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
                 if (big && !isTopic) {
                     if (!SizeMgr.phoneMode)
-                        addNum(this.jsonScript.installations, "users");
-                    addNum(this.jsonScript.runs, "runs");
+                        addNum(this.jsonScript.installations, "users", lf("users"));
+                    addNum(this.jsonScript.runs, "runs", lf("runs"));
                 } else {
-                    addNum(getScriptHeartCount(this.jsonScript), "♥");
+                    addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉");
+                        addNum(this.jsonScript.comments, "✉", lf("comments"));
                 }
                 if (this.app.isLibrary) {
                     var sp = document.createElement('span'); sp.className = 'sdNumber symbol';
@@ -6524,11 +6562,11 @@ module TDev.Browser {
                     : this.app.htmlColor();
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(getScriptHeartCount(this.jsonScript), "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉");
+                        addNum(this.jsonScript.comments, "✉", lf("comments"));
                     //addNum(jsonScript.installations, "users");
                     //addNum(jsonScript.runs, "runs");
                 }
@@ -8017,9 +8055,9 @@ module TDev.Browser {
                 nameBlock.setChildren([u.name]);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.score, "svg:Award,black,clip=110");
-                addNum(u.receivedpositivereviews, "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.score, "svg:Award,black,clip=110", lf("score"));
+                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
                 numbers.setChildren(cont);
             });
         }
@@ -8032,8 +8070,8 @@ module TDev.Browser {
                 this.userName = u.name;
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.receivedpositivereviews, "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
                 //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
                 //addNum(u.features, "svg:Award,white,clip=110");
 
@@ -8764,10 +8802,10 @@ module TDev.Browser {
                 dirAuto(nameBlock);
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("favourites"));
                 if (EditorSettings.widgets().publicationComments)
-                    addNum(u.comments, "✉");
+                    addNum(u.comments, "✉", lf("comments"));
                 /* if (big) {
                     addNum(u.subscribers, "svg:Person,black,clip=80");
                 } */
@@ -9448,9 +9486,9 @@ module TDev.Browser {
                 }
 
                 var cont = <any[]>[];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
-                addNum(u.comments, "replies");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("favourites"));
+                addNum(u.comments, "replies", lf("replies"));
                 numbers.setChildren(cont);
             });
         }
@@ -9460,9 +9498,9 @@ module TDev.Browser {
             return this.withUpdate(d, (u: JsonComment) => {
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(u.positivereviews, "♥");
-                addNum(u.comments, lf("replies"));
+                var addNum = (n: number, sym: string, title) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(u.positivereviews, "♥", lf("favourites"));
+                addNum(u.comments, lf("replies"), lf("replies"));
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = d.style.background;
@@ -10184,11 +10222,11 @@ module TDev.Browser {
                 this.json = u;
 
                 var cont = [];
-                var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                addNum(this.json.positivereviews, "♥");
+                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
+                addNum(this.json.positivereviews, "♥", lf("favourites"));
                 if (sz > 1) {
                     if (EditorSettings.widgets().publicationComments)
-                        addNum(this.json.comments, "✉");
+                        addNum(this.json.comments, "✉", lf("comments"));
                 }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));

@@ -259,7 +259,7 @@ module TDev
         export function clickHandler(e:HTMLElement, cb:(e:any) => void, allowSelect?:boolean)
         {
             if (e) {
-                if (!e.getAttribute("role"))
+                if (!e.getAttribute("role") && !e.getAttribute("data-norole"))
                     e.setAttribute("role", "button")
                 e.tabIndex = 0;
             }
