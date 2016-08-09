@@ -2725,6 +2725,27 @@ a.md-bigbutton:hover {
   margin: 0;
   width: 90%;
 }
+.landscape .slListHeader input {
+  width:calc(100% - 4em);
+}
+.slListHeader button {
+  width: 2em;
+  height: 2em;
+  min-width: 2em;
+  padding: 0em;
+  margin: 0em 0em 0em 0.5em;
+  vertical-align: sub;
+}
+.portrait .slListHeader button {
+  position: absolute;
+  right: 0.5em;
+  top: 1.1em;
+}
+.portrait .slListHeader input {
+  left:0.5em !important;
+  width: calc(100% - 4em) !important;
+}
+
 
 .slTabContainer,
 .slList {
@@ -4727,6 +4748,7 @@ span.videoCaption
   pointer-events: none;
 }
 
+.slBackContainer  .topMenu-button .topMenu-button-desc,
 .editormediacontrol  .topMenu-button .topMenu-button-desc {
   display: none;
 }

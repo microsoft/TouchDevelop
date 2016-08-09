@@ -1346,6 +1346,7 @@ module TDev.Browser {
             var m = new ModalDialog();
             m.add([
                 progressBar,
+                div("wall-dialog-header", lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016.")),
                 div("wall-dialog-header", lf("join a group")),
                 div("wall-dialog-body", lf("Enter the invitation code"), Editor.mkHelpLink("invitation code")),
                 div("wall-dialog-line-textbox", name),
@@ -1422,6 +1423,7 @@ module TDev.Browser {
             var groupInfo: GroupInfo;
             m.add([
                 progressBar,
+                div("wall-dialog-header", lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016.")),
                 div("wall-dialog-header", lf("create new group")),
                 div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
                 div1 = div('wall-dialog-body',

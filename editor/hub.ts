@@ -2301,7 +2301,11 @@ module TDev.Browser {
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
             else if (s == "social") {
-                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups,() => { this.hide(); this.browser().showList("mygroups") });
+                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => {
+                    this.hide();
+                    ModalDialog.showAsync(lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016."))
+                        .done(() => this.browser().showList("mygroups"));
+                });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
 
                 if (EditorSettings.widgets().hubUsers)
