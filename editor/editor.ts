@@ -4473,6 +4473,7 @@ module TDev
             r.style.display = "none";
             elt("root").appendChild(divId("testHostFrame", null));
             elt("root").appendChild(r);
+            elt("scriptEditor").setAttribute("data-norole", "true");
             Util.setupDragToScroll(elt("leftPaneContent"));
         }
 

@@ -31,6 +31,12 @@ div.calcButtonHelp {
     font-weight: 200;
 }
 
+div.skipMenu {
+    position:absolute;
+    top:1em;
+    left: 20em;
+}
+
 div.notificationBox {
     position:absolute;
     top:1em;
@@ -3532,7 +3538,8 @@ div.sdTabTileLabel {
   display: inline-block;
 }
 
-.sdBigButton:hover {
+.sdBigButton:hover, .sdBigButton:focus {
+  outline-width: 4px;
   transform: translate(0.15em, 0.15em);                      /*CSSpref*/  -webkit-transform: translate(0.15em, 0.15em);  -moz-transform: translate(0.15em, 0.15em);  -ms-transform: translate(0.15em, 0.15em);
 }
 
@@ -6312,8 +6319,6 @@ li.skip
 position:absolute;
 left:-10000px;
 top:auto;
-width:1px;
-height:1px;
 overflow:hidden;
 }
 
@@ -6321,7 +6326,6 @@ li.skip:focus {
   position:inherit;
   left:inherit;
   top:inherit;
-  width:auto;
-  height:auto;
+  width:10em;
   overflow:inherit;
 }
