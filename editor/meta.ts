@@ -163,44 +163,6 @@ module TDev.Meta {
         return r;
     }
 
-    export interface ChooseGroupOptions extends ModalChooseOptions
-    {
-    }
-
-    export function chooseGroupAsync(options:ChooseGroupOptions):Promise
-    {
-        var r = new PromiseInv();
-
-        Browser.TheHost.getLocationList("me/groups?count=100", (itms:Browser.BrowserPage[], cont:string) => {
-            var m = new ModalDialog();
-            var selected = false;
-            var converter = (s : Browser.GroupInfo) => {
-                return s.mkSmallBoxNoClick().withClick(() => {
-                        selected = true;
-                        m.dismiss();
-                        r.success(s);
-                    });
-            };
-
-            var boxes = []
-            for(var i = 0; i < itms.length; ++i) {
-                var p = itms[i];
-                if (p instanceof Browser.GroupInfo) {
-                    var s = <Browser.GroupInfo>p;
-                    var b = converter(s);
-                    if (!!b) boxes.push(b);
-                }
-            }
-
-            m.onDismiss = () => {
-                if (!selected) r.success(null)
-            };
-            m.choose(boxes, options)
-        }, true);
-
-        return r;
-    }
-
     export interface ChooseScriptOptions extends ModalChooseOptions
     {
         searchPath?:string;
@@ -208,7 +170,7 @@ module TDev.Meta {
         maxItems?:number;
     }
 
-    export function chooseScriptAsync(options:ChooseScriptOptions):Promise
+    export function chooseScriptAsync(options: ChooseScriptOptions): Promise
     {
         var r = new PromiseInv();
 

@@ -31,7 +31,6 @@ module TDev.Browser {
                     fixItButton: true,
                     splitScreen: false,
                     splitScreenOnLoad: true,
-                    shareScriptToGroup: true,
                     searchArtRefactoring: true,
                     calcSearchArt: true,
                     scriptPropertiesIcons: true,
@@ -52,7 +51,6 @@ module TDev.Browser {
                     hubTutorials: true,
                     hubLearn: true,
                     hubShowcase: true,
-                    hubSocial: true,
                     publicationComments: true,
                     translateComments: true,
 
@@ -79,7 +77,6 @@ module TDev.Browser {
                     promoteRefactoring: true,
                     fixItButton: true,
                     splitScreen: true,
-                    shareScriptToGroup: true,
                     searchArtRefactoring: true,
                     calcSearchArt: true,
                     tokenRefactoring: true,
@@ -134,7 +131,6 @@ module TDev.Browser {
                     hubTutorials: true,
                     hubLearn: true,
                     hubShowcase: true,
-                    hubSocial: true,
                     hubTopAndNew: true,
                     hubScriptUpdates: true,
                     hubUsers: true,
@@ -166,7 +162,6 @@ module TDev.Browser {
                     promoteRefactoring: true,
                     fixItButton: true,
                     splitScreen: true,
-                    shareScriptToGroup: true,
                     searchArtRefactoring: true,
                     calcSearchArt: true,
                     makeAsyncRefactoring: true,
@@ -269,7 +264,6 @@ module TDev.Browser {
                     githubLinks: true,
                     hubLearn: true,
                     hubShowcase: true,
-                    hubSocial: true,
                     hubTopAndNew: true,
                     hubScriptUpdates: true,
                     hubUsers: true,
@@ -320,7 +314,6 @@ module TDev.Browser {
                         fixItButton: true,
                         splitScreen: false,
                         splitScreenOnLoad: true,
-                        shareScriptToGroup: true,
                         // searchArtRefactoring: true,
                         // calcSearchArt: true,
                         scriptProperties: true,
@@ -344,7 +337,6 @@ module TDev.Browser {
                         // hub
                         hubTutorials: true,
                         // hubShowcase : true,
-                        // hubSocial: true,
                         publicationComments: true,
                         translateComments: true,
 
@@ -687,7 +679,6 @@ module TDev.Browser {
                 m.add(div("wall-dialog-body", versionInfo))
                 m.add(div("wall-dialog-body", [
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my scripts"), () => { Util.setHash("#list:installed-scripts") }) : null),
-                    (Cloud.hasPermission("internal") ? HTML.mkButton(lf("my groups"), () => { Util.setHash("#list:mygroups") }) : null),
                     (Cloud.hasPermission("internal") ? HTML.mkButton(lf("create script"), () => { TemplateManager.createScript() }) : null),
                     // (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse reports"), () => { Util.setHash("#list:installed-scripts:abusereports") }) : null),
                     (Cloud.hasPermission("user-mgmt") ? HTML.mkButton(lf("abuse review"), () => { AbuseReview.show() }) : null),
@@ -702,7 +693,6 @@ module TDev.Browser {
                         var perm = HTML.mkTextInput("text", "")
                         var count = HTML.mkTextInput("text", "")
                         var credit = HTML.mkTextInput("text", "")
-                        var groups = HTML.mkTextInput("text", "")
                         var desc = HTML.mkTextInput("text", "")
                         var numuses = HTML.mkTextInput("text", "")
                         perm.value = "preview"
@@ -715,14 +705,12 @@ module TDev.Browser {
                             lf("Credit for each code: "), credit,
                             lf("Number of uses for each code: "), numuses,
                             lf("Code description (purpose): "), desc,
-                            lf("Groups to join: "), groups,
                             HTML.mkAsyncButton(lf("generate"), () => {
                                 var data = {
                                     count: parseInt(count.value),
                                     credit: parseInt(credit.value) * parseInt(numuses.value),
                                     singlecredit: parseInt(credit.value),
                                     permissions: perm.value.replace(/[,\s]+/g, ","),
-                                    groups: groups.value.replace(/[,\s]+/g, ","),
                                     description: desc.value,
                                 }
                                 var items = []
@@ -1804,22 +1792,6 @@ module TDev.Browser {
             this.showSections();
 
             switch (h[1]) {
-                case "joingroup":
-                    var code = h[2];
-                    HistoryMgr.instance.setHash(this.screenId() + ":joingroup:" + code, null)
-                    Cloud.authenticateAsync(lf("joining groups"), false, true)
-                        .done((auth) => {
-                        if (auth) Browser.TheHost.joinGroup(code);
-                    });
-                    break;
-                case "creategroup":
-                    Util.log('creategroup received');
-                    HistoryMgr.instance.setHash(this.screenId() + ":creategroup", null);
-                    Cloud.authenticateAsync(lf("creating groups"), false, true)
-                        .done((auth) => {
-                        if (auth) this.createGroup();
-                    });
-                    break;
                 case "pub": // redirect to list
                     Util.setHash("#list:installed-scripts:pub:" + h[2], true);    
                     return;
@@ -1902,14 +1874,6 @@ module TDev.Browser {
             else
                 this.tileClick(elt, f0);
             return elt;
-        }
-
-        private joinGroup(code: string = null) {
-            this.browser().joinGroup(code);
-        }
-
-        private createGroup() {
-            this.browser().createNewGroup();
         }
 
         static loginToCreate(name:string, hash:string)
@@ -2197,7 +2161,6 @@ module TDev.Browser {
                     if (s == "recent") this.browser().showList("installed-scripts", { item: item });
                     else if (s == "myart") this.browser().showList(Cloud.getUserId() ? "myart" : "art", { item: item });
                     else if (s == "art") this.browser().showList("art", { item: item });
-                    else if (s == "social") this.browser().showList("groups", { item: item } );
                     else if (s == "users") this.browser().showList("users", { item: item });
                     else if (s == "channels") this.browser().showList("channels", { item: item });
                     else if (s == "showcase") this.browser().showList(Cloud.config.showcaseid + "/scripts", { item: item, header: lf("showcase") });    
@@ -2222,47 +2185,6 @@ module TDev.Browser {
             var beforeFirstFnBtn = null;
             var noFnBreak = false;
 
-            if (s == "social") {
-                var slots = 4;
-                elements = elements.slice(0, slots);
-                if (elements.length == 1) {
-                    var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
-                    fill.style.opacity = '0';
-                    elements.push(fill);
-                }
-
-                if (!Cloud.isRestricted()) {
-                    var forumEl = this.mkFnBtn(lf("Forums"),() => { this.hide(); Hub.showForum() }, Ticks.hubForum, false, tileSize(elements.length));
-                    forumEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:im,white")));
-                    elements.push(forumEl);
-                }
-
-                var toExternalBtn = (btn: HTMLElement) => {
-                    btn.className += " externalBtn";
-                    return btn;
-                }
-                if (EditorSettings.widgets().hubSocialTiles) {
-                    if (elements.length < slots + 1) {
-                        var el = toExternalBtn(this.mkFnBtn(lf("Facebook"),() => { window.open('http://www.facebook.com/TouchDevelop'); }, Ticks.hubFacebook, true, tileSize(elements.length)));
-                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:facebook,white")));
-                        elements.push(el);
-                    }
-                    if (elements.length < slots + 1) {
-                        var el = toExternalBtn(this.mkFnBtn(lf("Twitter"),() => { window.open('http://www.twitter.com/TouchDevelop'); }, Ticks.hubTwitter, true, tileSize(elements.length)));
-                        el.appendChild(div("hubTileSearch", HTML.mkImg("svg:twitter,white")));
-                        elements.push(el);
-                    }
-                    if (elements.length < slots + 1) {
-                        var el = toExternalBtn(this.mkFnBtn(lf("YouTube"),() => { window.open('http://www.youtube.com/TouchDevelop'); }, Ticks.hubYouTube, true, tileSize(elements.length)));
-                        elements.push(el);
-                    }
-                }
-                while (elements.length < slots + 1) {
-                    var fill = div("hubTile hubTileBtn hubTileSize" + tileSize(elements.length));
-                    fill.style.opacity = '0';
-                    elements.push(fill);
-                }
-            }
 
             var addFnBtn = (lbl: string, t, f: () =>void , modal = false, size = 1) => {
                 elements.push(this.mkFnBtn(lbl, f, t, modal, size));
@@ -2274,8 +2196,6 @@ module TDev.Browser {
                     () => { this.hide(); this.browser().showList("installed-scripts") });
                 elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
                 addFnBtn(lf("Create Script"), Ticks.hubCreateScript, () => { TemplateManager.createScript(); }, true);
-                if (Cloud.isRestricted())
-                    addFnBtn(lf("My Groups"), Ticks.hubSeeMoreGroups, () => { this.hide(); this.browser().showList("mygroups"); }, true);
 
                 if (EditorSettings.widgets().hubScriptUpdates) {
                     var upd = this.browser().headersWithUpdates();
@@ -2300,19 +2220,7 @@ module TDev.Browser {
                 addFnBtn(lf("Upload Picture"), Ticks.hubUploadPicture, () => { ArtUtil.uploadPictureDialogAsync({ finalDialog: true }).done() }, true);
                 addFnBtn(lf("Upload Sound"), Ticks.hubUploadSound, () => { ArtUtil.uploadSoundDialogAsync().done() }, true);
             }
-            else if (s == "social") {
-                addFnBtn(lf("All my groups"), Ticks.hubSeeMoreGroups, () => {
-                    this.hide();
-                    ModalDialog.showAsync(lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016."))
-                        .done(() => this.browser().showList("mygroups"));
-                });
-                elements.peek().appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-
-                if (EditorSettings.widgets().hubUsers)
-                    elements.push(this.smallBtn(lf("Users"),() => { this.hide(); this.browser().showList("users") }, Ticks.hubSeeMoreUsers));
-                elements.push(this.smallBtn(lf("Join Group"),() => { this.joinGroup() }, Ticks.hubJoinGroup));
-                elements.push(this.smallBtn(lf("Create Group"),() => { this.createGroup() }, Ticks.hubCreateGroup));
-            } else if (s == "channels") {
+            else if (s == "channels") {
                 noFnBreak = true;
                 while (elements.length < 5) {
                     var oneSlot = this.mkFnBtn(lf("Your channel will appear here"),() => {
@@ -2901,8 +2809,6 @@ module TDev.Browser {
                 sects["channels"] = { title: lf("channels") };
             if (widgets.hubShowcase)
                 sects["showcase"] = { title: lf("showcase") };
-            if (widgets.hubSocial)
-                sects["social"] = { title: lf("social") };
             if (widgets.hubTopAndNew)
                 sects["top"] = { title: lf("top & new") };
             if (widgets.hubMyArt)
@@ -3025,12 +2931,6 @@ module TDev.Browser {
                     else {
                         this.addPageTiles(s, c, []);
                     }
-                }
-                else if (s == "social") {
-                    if (Cloud.getUserId())
-                        this.browser().getLocationList(Cloud.getUserId() + "/groups?count=6", (items, cont) => this.addPageTiles(s, c, items));
-                    else
-                        this.addPageTiles(s, c, []);
                 }
                 else if (s == "channels") {
                     if (Cloud.getUserId())

@@ -63,8 +63,6 @@ module TDev.Browser {
                         { id: "help", name: lf("Help"), tick: Ticks.siteMenuHelp, handler: () => Util.navigateInWindow("/help") },
                         { id: "myscripts", name: lf("My Scripts"), tick: Ticks.siteMenuMyScripts, handler: skipToMyScripts }
                     ];
-                if (settings && Cloud.hasPermission("post-group"))
-                    menuItems.push({ id: "groups", name: lf("My Groups"), tick: Ticks.siteMenuGroups, handler: () => this.showList("mygroups") });
                 if (settings && EditorSettings.widgets().hubChannels)
                     menuItems.push({ id: "channels", name: lf("Channels"), tick: Ticks.siteMenuChannels, handler: () => this.showList("channels") });
                 if (!Cloud.getUserId())
@@ -750,9 +748,6 @@ module TDev.Browser {
                 case "top-scripts":
                     searchPath = this.apiPath;
                     break;
-                case "mygroups":
-                    searchPath = "groups";
-                    break;
                 case "art":
                 case "users":
                 case "comments":
@@ -768,9 +763,6 @@ module TDev.Browser {
                     searchPath = "scripts";
                     searchAdd = ['#docs'];
                     break;
-            }
-            if (/\/groups$/.test(this.apiPath)) {
-                searchPath = this.apiPath;
             }
 
             var meid = Cloud.getUserId();
@@ -876,11 +868,6 @@ module TDev.Browser {
                                 direct.setChildren([addEntry(inf)])
                             }
                         });
-                    } else if (/^\d{9,64}$/i.test(terms[0])) {
-                        Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + terms[0] : terms[0])
-                            .done((rc: JsonCode) => {
-                                if (rc.verb == "JoinGroup") this.joinGroup(terms[0]);
-                            }, e => { });
                     } else if (/^BuG\d{14}\w{8,}$/.test(terms[0])) {
                         Cloud.getPrivateApiAsync("bug/" + terms[0])
                             .done(Host.showBugReport, e => { })
@@ -1298,179 +1285,6 @@ module TDev.Browser {
             return name;
         }
 
-        public joinGroup(code: string) {
-            if (Cloud.anonMode(lf("joining groups"))) return;
-
-            var name = HTML.mkTextInput("text", lf("enter invitation code"));
-            name.maxLength = 64;
-            name.pattern = '\d{9,64}';
-            name.value = code || "";
-
-            var codeid = name.value;
-            var groupid = "";
-            var progressBar = HTML.mkProgressBar();
-            var errorDiv = div('');
-            function setError(error: string) {
-                errorDiv.setChildren([error]);
-            }
-            var btn = HTML.mkButton(lf("join group"), () => {
-                hideBtn();
-                progressBar.start();
-                Cloud.postPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid, {})
-                    .done(resp => {
-                        progressBar.stop();
-                        m.dismiss();
-                        if (resp.status == "waiting") {
-                            ModalDialog.info(lf("Awaiting Approval"),
-                                lf("The owner of the group has been notified. You will be notified when approved to join."))
-                            return
-                        }
-                        TheApiCacheMgr.invalidate("groups");
-                        TheApiCacheMgr.invalidate("me/groups");
-                        TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
-                        var groupInfo = this.getGroupInfoById(groupid);
-                        TheHost.loadDetails(groupInfo);
-                    }, e => {
-                        setError(lf("this invitation code is invalid or expired, please check for typing errors..."));
-                    });
-            });
-            function hideBtn() {
-                progressBar.stop();
-                btn.style.display = 'none';
-            }
-            function showBtn() {
-                progressBar.stop();
-                btn.style.display = 'inline';
-            }
-            hideBtn();
-            var m = new ModalDialog();
-            m.add([
-                progressBar,
-                div("wall-dialog-header", lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016.")),
-                div("wall-dialog-header", lf("join a group")),
-                div("wall-dialog-body", lf("Enter the invitation code"), Editor.mkHelpLink("invitation code")),
-                div("wall-dialog-line-textbox", name),
-                errorDiv,
-                div("wall-dialog-buttons", btn)
-            ]);
-
-            var autoKeyboard = KeyboardAutoUpdate.mkInput(name, Util.catchErrors("getCode", () => {
-                codeid = name.value.trim();
-                var lastCode: JsonCode = null;
-                if (/\d{9,64}/.test(codeid)) {
-                    progressBar.start();
-                    Cloud.getPrivateApiAsync(Cloud.lite ? "me/code/" + codeid : codeid)
-                        .then((code: JsonCode) => {
-                            lastCode = code;
-                            if (code.verb == 'JoinGroup')
-                                return Cloud.getPrivateApiAsync(Cloud.lite ? code.data + "?code=" + codeid : code.data)
-                            else
-                                return Promise.as(undefined);
-                        })
-                        .done((group: JsonGroup) => {
-                            if (group) {
-                                showBtn();
-                                groupid = group.id;
-                                TheApiCacheMgr.store(group.id, group);
-                                var groupInfo = this.getGroupInfoById(groupid);
-                                errorDiv.setChildren([
-                                    div('wall-dialog-header', lf("for group")),
-                                    groupInfo.mkSmallBox()
-                                ]);
-                                if (!!Cloud.getUserId())
-                                    Cloud.getPublicApiAsync("me/groups?count=100")
-                                        .done((groups: JsonList) => {
-                                            if (groups.items.some(gr => gr.id == groupid)) {
-                                                Util.log('user already member of group, opening');
-                                                TheHost.loadDetails(groupInfo);
-                                            }
-                                        }, () => { });
-                            } else {
-                                hideBtn();
-                                if (lastCode.expiration > Date.now() / 1000)
-                                    setError(lf("this invitation code is expired."));
-                                else
-                                    setError(lf("this invitation code is invalid, please check for typing errors..."));
-                            }
-                        }, e => {
-                            hideBtn();
-                            setError(lf("this invitation code is invalid or expired, please check for typing errors..."));
-                        });
-                } else {
-                    hideBtn();
-                    setError(lf("the invitation code must be a number between 9 and 64 characters long"));
-                }
-            }));
-            autoKeyboard.attach()
-
-            m.show();
-            autoKeyboard.keypress();
-        }
-
-        public createNewGroup() {
-            if (Cloud.anonMode(lf("creating groups"))) return;
-
-            var progressBar = HTML.mkProgressBar();
-            var name = HTML.mkTextInput("text", lf("enter a group name (required)"));
-            name.value = lf("my group");
-
-            var descr = HTML.mkTextArea("wall-textbox")
-            descr.placeholder = lf("enter a description");
-            descr.value = "";
-
-            var div1, cancelBtn;
-            var m = new ModalDialog();
-            var groupInfo: GroupInfo;
-            m.add([
-                progressBar,
-                div("wall-dialog-header", lf("GROUPS WILL BE DISCONTINUED ON SEPTEMBER 1, 2016.")),
-                div("wall-dialog-header", lf("create new group")),
-                div("wall-dialog-body", lf("A group can be used to run a class or an event. Please do NOT include your school name within the group name."), Editor.mkHelpLink("groups")),
-                div1 = div('wall-dialog-body',
-                    div('', div('', lf("name (minimum 4 characters)")), name),
-                    div('', div('', lf("description")), descr)
-                ),
-                div("wall-dialog-body", lf("The group name cannot be changed afterwards.")),
-                div("wall-dialog-buttons",
-                    cancelBtn = HTML.mkButton(lf("cancel"), () => m.dismiss()),
-                    HTML.mkButtonOnce(lf("create"), () => {
-                        var request = <Cloud.PostApiGroupsBody>{
-                            name: name.value,
-                            description: descr.value,
-                            userplatform: Browser.platformCaps,
-                            isclass: Cloud.isRestricted(),
-                        };
-                        progressBar.start();
-                        cancelBtn.removeSelf();
-                        div1.removeSelf();
-                        Cloud.postPrivateApiAsync("groups", request)
-                            .then((r: Cloud.PostApiGroupsResponse) => {
-                                TheApiCacheMgr.invalidate("groups");
-                                TheApiCacheMgr.invalidate("me/groups");
-                                TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
-                                groupInfo = this.getGroupInfoById(r.id);
-                                return groupInfo.newInvitationCodeAsync();
-                            }).then(() => {
-                                progressBar.stop();
-                                m.dismiss();
-                                if (Cloud.isRestricted())
-                                    return Promise.as()
-                                return groupInfo.changePictureAsync();
-                            })
-                            .done(() => TheHost.loadDetails(groupInfo, "settings"),
-                            e => {
-                                if (e && e.status == 405) {
-                                    ModalDialog.info(lf("we need your email"),
-                                        lf("You need to have your email address set and verified to create groups."));
-                                } else {
-                                    Cloud.handlePostingError(e, lf("create group"));
-                                }
-                            })
-                    }))
-            ]);
-            m.show();
-        }
-
         public openNewScriptAsync(stub: World.ScriptStub, t: ScriptTemplate = null): Promise {
             Ticker.rawTick("NewScript_" + stub.editorName)
             if (currentScreen)
@@ -1593,7 +1407,6 @@ module TDev.Browser {
             else if (e.kind == "user") return this.getUserInfoById(e.id, "");
             else if (e.kind == "comment") return this.getCommentInfoById(e.id);
             else if (e.kind == "art") return this.getArtInfoById(e.id);
-            else if (e.kind == "group") return this.getGroupInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
             else if (e.kind == "channel") return this.getSpecificInfoById(e.id, ChannelInfo);
@@ -1786,10 +1599,6 @@ module TDev.Browser {
                     tick(Ticks.browseListHelp);
                     header = lf("help");
                     break;
-                case "groups":
-                    tick(Ticks.browseListGroups);
-                    header = lf("groups");
-                    break;
                 case "art":
                     tick(Ticks.browseListArt);
                     header = lf("art");
@@ -1799,16 +1608,6 @@ module TDev.Browser {
                     header = lf("my art");
                     if (Cloud.getUserId()) path = Cloud.getUserId() + "/art";
                     else path = null;
-                    break;
-                case "mygroups":
-                    tick(Ticks.browseListGroups);
-                    header = lf("my groups");
-                    if (Cloud.getUserId()) path = Cloud.getUserId() + "/groups";
-                    else path = null;
-                    this.botDiv = div(null,
-                        HTML.mkButtonTick(lf("create group"), Ticks.hubCreateGroup,
-                            () => { this.createNewGroup() })
-                    )
                     break;
                 case "releases":
                     tick(Ticks.browseListReleases)
@@ -2183,17 +1982,6 @@ module TDev.Browser {
             return si;
         }
 
-        public getGroupInfo(c: JsonGroup) {
-            var si = <GroupInfo>this.getLocation(c.id);
-            if (!si) {
-                si = new GroupInfo(this);
-                TheApiCacheMgr.store(c.id, c);
-                si.loadFromWeb(c.id);
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
         public getChannelInfoById(id: string) {
             var si = <ChannelInfo>this.getLocation(id);
             if (!si) {
@@ -2249,16 +2037,6 @@ module TDev.Browser {
             var si = <CommentInfo>this.getLocation(id);
             if (!si) {
                 si = new CommentInfo(this);
-                si.loadFromWeb(id);
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
-        public getGroupInfoById(id: string) {
-            var si = <GroupInfo>this.getLocation(id);
-            if (!si) {
-                si = new GroupInfo(this);
                 si.loadFromWeb(id);
                 this.saveLocation(si);
             }
@@ -4044,7 +3822,7 @@ module TDev.Browser {
                         postDiv.className = "commentPost";
                         postDiv.setChildren([div(null, text), postBtn]);
                         if (e && e.status == 400)
-                            ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment. If you are posting to a group, please join the group first."));
+                            ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment."));
                         else
                             Cloud.handlePostingError(e, lf("post comment"));
                     });
@@ -4939,7 +4717,7 @@ module TDev.Browser {
         }
 
         public getId() { return "notifications"; }
-        public getName() { return this.parent instanceof GroupInfo ? lf("activity") : lf("notifications"); }
+        public getName() { return lf("notifications"); }
 
         public bgIcon() { return "svg:fa-bell"; }
         public noneText() { return lf("nothin' goin' on"); }
@@ -4947,8 +4725,6 @@ module TDev.Browser {
         public topContainer(): HTMLElement {
             if (this.parent instanceof NotificationsPage)
                 return divLike("h2", "sdListLabel", spanDirAuto(lf("notifications")))
-            if (this.parent instanceof GroupInfo)
-                return divLike("h2", "sdListLabel", spanDirAuto(lf("members activity")))
             return div(null)
         }
 
@@ -4981,28 +4757,6 @@ module TDev.Browser {
                         lab(lf("of"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
                 case "art":
                     return div(null, lab(lf("art")));
-                case "group":
-                    if (notkind == "groupapproval") {
-                        var grpuser = this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()
-                        var joinid = jn.supplementalid + "/groups/" + jn.publicationid
-                        var existing = <HTMLElement>grpuser.getElementsByClassName("sdNumbers")[0]
-                        if (existing)
-                            existing.removeSelf()
-                        var nums = div("sdNumbers")
-                        grpuser.appendChild(nums)
-                        TheApiCacheMgr.getAsync(joinid)
-                            .done(d => {
-                                nums.setChildren([
-                                    d ? lf("approved") :
-                                        HTML.mkButton(lf("approvals"), () => (<GroupInfo>pub).approvals())
-                                ])
-                            })
-                        return div(null, lab(lf("wants to join"), grpuser),
-                            lab(lf("your group")))
-                    }
-                    if (notkind == "groupapproved")
-                        return div(null, lab(lf("approved")));
-                    return div(null, lab(lf("group")));
                 case "leaderboardscore": // this one should not happen anymore
                     return div(null, lab(lf("scored {0}", (<any>c).score), this.browser().getCreatorInfo(c).mkSmallBox()),
                         lab(lf("in"), this.browser().getReferencedPubInfo(<JsonPubOnPub>c).mkSmallBox()));
@@ -5959,25 +5713,6 @@ module TDev.Browser {
                         else if (ch && ch.status != "published" && ch.scriptId)
                             divs.push(ScriptInfo.labeledBox(lf("base"), this.browser().getScriptInfoById(ch.scriptId).mkSmallBox()));
 
-                        if (sc.getCloudHeader() && !Cloud.isRestricted()) {
-                            var groupDiv = div("inlineBlock");
-                            divs.push(groupDiv);
-                            World.getInstalledEditorStateAsync(sc.getGuid()).done(text => {
-                                if (!text) return;
-                                // tutorial state
-                                var st = <AST.AppEditorState>JSON.parse(text)
-
-                                // group mode?
-                                if (st.collabSessionId && st.groupId) {
-                                    groupDiv.appendChild(
-                                        ScriptInfo.labeledBox(
-                                            lf("with group"),
-                                            Browser.TheHost.getGroupInfoById(st.groupId).mkSmallBox()
-                                        ));
-                                }
-                            })
-                        }
-
                         var seen: any = {}
                         app.libraries().forEach((lr: AST.LibraryRef) => {
                             var b = this.browser();
@@ -6710,7 +6445,6 @@ module TDev.Browser {
 
             var uninstall: HTMLElement;
             var moderate: HTMLElement;
-            var editWithGroup: HTMLElement;
             var btns: HTMLElement = div("sdRunBtns");
 
             if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
@@ -7055,21 +6789,6 @@ module TDev.Browser {
 
             options.header = lf("share this script")
             options.noDismiss = true
-            if (EditorSettings.widgets().shareScriptToGroup) {
-                options.moreButtons = [{
-                    text: lf("group"),
-                    handler: () => {
-                        tick(Ticks.publishShareGroup);
-                        Meta.chooseGroupAsync({ header: lf("choose group"), includeSearch: false })
-                            .done((g: GroupInfo) => {
-                                if (g) {
-                                    CommentsTab.topCommentInitialText = "'" + title + "' /" + id;
-                                    this.browser().loadDetails(g);
-                                }
-                            });
-                    }
-                }]
-            }
 
             var buttons = RT.ShareManager.addShareButtons(m, lnk, options)
             buttons.classList.add("text-left");
@@ -7447,14 +7166,6 @@ module TDev.Browser {
             var restoreAsync: Promise = null
             return Editor.updateEditorStateAsync(id, (st) => {
                 TipManager.setTip(null);
-
-                var isownedgroupscript = st
-                    && st.collabSessionId
-                    && Collab.getSessionOwner(st.collabSessionId) == Cloud.getUserId();
-                if (isownedgroupscript) {
-                    ModalDialog.info(lf("owned group script"), lf("you are the owner of this group script. To uninstall, you must first remove it from the group scripts."));
-                    return Promise.as();
-                }
 
                 if (allowUndo) restoreAsync = World.getScriptRestoreAsync(id);
                 return World.uninstallAsync(id)
@@ -8134,7 +7845,6 @@ module TDev.Browser {
         private askedToLogin: boolean;
         private scriptsTab: ScriptsTab;
         private artTab: ArtTab;
-        private groupsTab: GroupsTab;
         public initTab() {
             if (this.publicId == "me" && !Cloud.getUserId() && !this.askedToLogin) {
                 this.askedToLogin = true;
@@ -8283,16 +7993,6 @@ module TDev.Browser {
                                 }, true)))
             }
 
-            if (false && Cloud.isRestricted()) {
-                ch.push(div("", text(lf("Groups of this user:"))));
-                if (!this.groupsTab) {
-                    this.groupsTab = new GroupsTab(this);
-                    this.groupsTab.initElements();
-                    this.groupsTab.initTab();
-                }
-                ch.push(this.groupsTab.tabContent);
-            }
-
             ch.push(div("", text(lf("Scripts by this user:"))));
             if (!this.scriptsTab) {
                 this.scriptsTab = new ScriptsTab(this);
@@ -8358,9 +8058,9 @@ module TDev.Browser {
     export class UserSocialTab extends BrowserMultiTab {
         constructor(par: UserInfo) {
             super(par,
-                "More information about art, score, groups, subscribers, subscriptions and given hearts.",
+                "More information about art, score, subscribers, subscriptions and given hearts.",
                 Cloud.lite ? ChannelListTab : null,
-                ArtTab, GroupsTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
+                ArtTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
         }
 
         public bgIcon() {
@@ -8383,781 +8083,6 @@ module TDev.Browser {
 
         public getName() { return lf("insights"); }
         public getId() { return "insights"; }
-    }
-
-    export class GroupsTab
-        extends ListTab {
-        constructor(par: BrowserPage) {
-            super(par, "/groups")
-        }
-        public getName() { return lf("groups"); }
-        public getId() { return "groups"; }
-        public bgIcon() { return "svg:group"; }
-
-        static mkBox(b: Host, c: JsonGroup) {
-            return b.getGroupInfo(c).mkSmallBox();
-        }
-
-        public tabBox(c: JsonGroup) {
-            return GroupsTab.mkBox(this.browser(), c);
-        }
-    }
-
-    export class GroupUserProgressTab
-        extends ListTab {
-        constructor(par: GroupInfo) {
-            super(par, "/users");
-        }
-
-        public getName() { return lf("progress"); }
-        public getId() { return "progress"; }
-        public bgIcon() { return "svg:Star"; }
-        public noneText() { return lf("no users in this group!"); }
-
-        private progressTable: HTMLTableElement;
-        private progressHeader: HTMLTableRowElement;
-        private tutorials: StringMap<string> = {};
-        private userRows: StringMap<HTMLTableRowElement> = {};
-        topContainer(): HTMLElement {
-            this.progressTable = document.createElement("table");
-            this.progressTable.className = "dashboard";
-            this.progressHeader = document.createElement("tr");
-            this.progressHeader.className = "header";
-            this.progressTable.appendChild(this.progressHeader);
-            var cph = document.createElement("td");
-            cph.appendChild(HTML.mkButton(lf("pop out"), () => this.showDialog()));
-            this.progressHeader.appendChild(cph);
-            var cp = document.createElement("td"); cp.appendChild(div('', span('', lf("tutorial completed"))));
-            this.progressHeader.appendChild(cp); // completed
-            var st = document.createElement("td"); st.appendChild(div('', span('', lf("tutorial steps"))));
-            this.progressHeader.appendChild(st);
-            this.tutorials = {};
-            this.userRows = {};
-
-            return div('tbProgress', this.progressTable);
-        }
-
-        public tabBox(cc: JsonIdObject): HTMLElement {
-            var tr = (u: JsonUser) => {
-                var row = this.userRows[c.id];
-                if (!row) {
-                    row = this.userRows[c.id] = document.createElement("tr");
-                    row.setAttribute("data-userid", c.id);
-                }
-                var cell = document.createElement("td");
-                cell.style.width = '14em';
-                row.appendChild(cell);
-                var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
-                user.setFlag('slim', true);
-                cell.appendChild(user);
-                this.progressTable.appendChild(row);
-                return row;
-            }
-            var td = (r: HTMLTableRowElement, txt: string) => {
-                var el = document.createElement("td");
-                el.innerText = txt;
-                r.appendChild(el)
-                return el;
-            }
-
-            var c = <JsonUser>cc;
-            // skip owner
-            if (c.id == (<GroupInfo>this.parent).userid) return undefined;
-
-            TheApiCacheMgr.store(c.id, c);
-            TheApiCacheMgr.getAnd(c.id + "/progress", (progresses) => {
-                if (!progresses) return;
-                // gather list of tutorials
-                var pis = (<JsonProgress[]>progresses.items)
-                    .filter(p => p.index > 0)
-                    .reverse();
-                if (pis.length == 0) return;
-                var items: StringMap<JsonProgress> = {};
-                pis.forEach(it => {
-                    if (!this.tutorials[it.progressid]) {
-                        var hd = document.createElement("td");
-                        var info = this.browser().getScriptInfoById(it.progressid)
-                        hd.withClick(() => this.browser().loadDetails(info));
-                        var sp = span('', '/' + it.progressid);
-                        hd.appendChild(div('', sp))
-                        this.progressHeader.appendChild(hd);
-                        this.tutorials[it.progressid] = "1";
-                        info.getJsonScriptPromise().whenUpdated((x, opts) => { sp.innerText = x.name + ' /' + x.id });
-
-                    }
-                    items[it.progressid] = it;
-                });
-
-                var row = tr(c);
-                var completed = 0; var steps = 0;
-                var completedTd = td(row, "0"); completedTd.className = "stats";
-                var stepsTd = td(row, "0"); stepsTd.className = "stats";
-                Object.keys(this.tutorials)
-                    .map(progressid => items[progressid])
-                    .forEach(progress => {
-                        if (!progress) {
-                            td(row, '');
-                            return;
-                        }
-                        var cell = td(row, "");
-                        cell.setAttribute("data-scriptid", progress.progressid);
-                        cell.setFlag("completed", progress.completed > 0);
-                        steps += progress.index;
-                        stepsTd.innerText = steps.toString();
-                        if (progress.completed) {
-                            Browser.setInnerHTML(cell, '<span class="symbol">✓</span>')
-                            completed++;
-                            completedTd.innerText = completed.toString();
-                        } else {
-                            cell.innerText = progress.index.toString();
-                        }
-                    })
-            });
-
-            return undefined;
-        }
-    }
-
-    export class CollaborationsTab
-        extends BrowserTab {
-        constructor(par: GroupInfo) {
-            super(par);
-        }
-        public getName() { return lf("scripts"); }
-        public getId() { return "scripts"; }
-        public bgIcon() { return "svg:globe"; }
-
-        public initTab() {
-            var infoDiv = div('sdExpandableText',
-                lf("Group scripts can be edited by multiple group members at the same time. Only group owners can add and remove group scripts."),
-                Editor.mkHelpLink("group scripts"));
-            var me = Cloud.getUserId()
-            if (!me) {
-                this.tabContent.setChildren([infoDiv,
-                    lf("You must sign in to use group scripts.")]);
-                return;
-            }
-
-            var loadingDiv = div('bigLoadingMore', lf("loading..."));
-
-            var buttons = div('');
-            var ch = div('');
-            var sessionMapping: StringMap<Cloud.Header> = {}
-            this.tabContent.setChildren([infoDiv, buttons, ch]);
-
-            var fillSessionMappingAsync = () => {
-                return Promise.join(
-                    this.browser().getInstalledHeaders().map(h =>
-                        World.getInstalledEditorStateAsync(h.guid)
-                            .then(s => {
-                                if (s) {
-                                    var st = <AST.AppEditorState>JSON.parse(s)
-                                    if (st.collabSessionId)
-                                        sessionMapping[st.collabSessionId] = h
-                                }
-                            })))
-            }
-
-            var loadCollaborations = () => {
-                this.tabContent.appendChild(loadingDiv);
-                Promise.join([
-                    TDev.Collab.getCollaborationsAsync(this.parent.publicId),
-                    fillSessionMappingAsync()
-                ]).done(arr => {
-                    var collabs: TDev.Collab.CollaborationInfo[] = arr[0]
-                    loadingDiv.removeSelf();
-                    if (!collabs || collabs.length == 0)
-                        ch.setChildren(lf("no scripts in this group yet!"));
-                    else
-                        ch.setChildren(collabs.map(collab => {
-                            var hd = sessionMapping[collab.session]
-                            if (collab.owner == me)
-                                var info = this.browser().getInstalledByGuid(collab.ownerScriptguid);
-                            else if (hd)
-                                info = this.browser().getInstalledByGuid(hd.guid)
-                            if (!info) {
-                                var app = AST.Parser.parseScript(collab.meta)
-                                var j = app.toJsonScript()
-                                j.userid = collab.owner
-                                j.username = collab.owner // TODO load real one
-                                j.id = collab.ownerScriptguid.replace(/-/g, "")
-                                info = this.browser().getScriptInfo(j)
-                            }
-
-                            var setAndEdit = () => {
-                                Editor.updateEditorStateAsync(info.getGuid(), (st) => {
-                                    st.collabSessionId = collab.session;
-                                    st.groupId = this.parent.publicId;
-                                }).done(() => info.edit())
-                            }
-
-                            if (info) {
-                                var box = info.mkBoxCore(false).withClick(() => {
-                                    if (collab.owner == me)
-                                        setAndEdit()
-                                    else if (hd && hd.status !== "deleted")
-                                        info.edit()
-                                    else {
-                                        var stub: World.ScriptStub = {
-                                            editorName: "touchdevelop",
-                                            scriptText: collab.meta,
-                                            scriptName: info.getTitle(),
-                                        };
-                                        World.installUnpublishedAsync(null, collab.owner, stub)
-                                            .then(hd => {
-                                                info = this.browser().createInstalled(hd)
-                                                setAndEdit()
-                                            })
-                                            .done()
-                                    }
-                                });
-                                if (collab.owner == me || (<GroupInfo>this.parent).isMine())
-                                    box.appendChild(HTML.mkButton(lf("remove from group"), () => {
-                                        ModalDialog.ask(
-                                            lf("Are you sure you want to remove this script from the group? Other members of the group won't be able to edit it anymore."),
-                                            lf("remove script"),
-                                            () => {
-                                                HTML.showProgressNotification(lf("removing script from group"), true);
-                                                TDev.Collab.stopCollaborationAsync(collab.session)
-                                                    .then(() => {
-                                                        if (collab.owner == me)
-                                                            Editor.updateEditorStateAsync(collab.ownerScriptguid, (st) => {
-                                                                if (st.collabSessionId === collab.session) {
-                                                                    delete st.collabSessionId;
-                                                                    delete st.groupId;
-                                                                }
-                                                            });
-                                                    })
-                                                    .done(() => loadCollaborations())
-                                            });
-                                    }));
-                                return box;
-                            }
-                            else
-                                return null
-                        }));
-                }, e => {
-                    Util.check(false, lf("failed to retrieve scripts"));
-                    loadingDiv.removeSelf();
-                    ch.appendChild(div('', lf("Oops, we could not get the scripts for this group. Please try again later.")));
-                });
-            }
-
-            this.setCollaborationButtons(buttons, () => ch.setChildren([loadingDiv]), loadCollaborations);
-            loadCollaborations();
-        }
-
-        public setCollaborationButtons(buttons: HTMLElement, start: () => void, done: () => void) {
-            buttons.setChildren([
-                HTML.mkButton(lf("add existing script"), () => {
-                    start();
-                    Meta.chooseScriptAsync(<TDev.Meta.ChooseScriptOptions>{
-                        filter: function (si: ScriptInfo) {
-                            return si.getCloudHeader() && (!si.getCloudHeader().userId || si.getCloudHeader().userId == Cloud.getUserId());
-                        }
-                    })
-                        .then((script: ScriptInfo) => (<GroupInfo>this.parent).addScriptAsync(script))
-                        .done(() => done());
-                })
-            ]);
-        }
-    }
-
-    export class GroupUsersTab
-        extends ListTab {
-        constructor(par: GroupInfo) {
-            super(par, "/users");
-        }
-
-        public getName() { return lf("users"); }
-        public getId() { return "users"; }
-        public bgIcon() { return "svg:Person"; }
-        public noneText() { return lf("no users in this group!"); }
-
-        public tabBox(cc: JsonIdObject): HTMLElement {
-            var grp: JsonGroup = TheApiCacheMgr.getCached(this.parent.publicId)
-
-            var c = <JsonUser>cc;
-            TheApiCacheMgr.store(c.id, c);
-            var user = this.browser().getUserInfoById(c.id, c.name).mkSmallBox();
-            if (Cloud.hasPermission("any-facilitator") ||
-                ((<GroupInfo>this.parent).isMine() && (<GroupInfo>this.parent).userid != c.id)) {
-                var removeBtn = null;
-                user.appendChild(removeBtn = HTML.mkButton(lf("remove"), () => {
-                    if (Cloud.isOffline()) {
-                        Cloud.showModalOnlineInfo(lf("removing user cancelled"));
-                        return;
-                    }
-
-                    ModalDialog.ask(lf("Are you sure you want to remove this user from this group?"), lf("remove this user"), () => {
-                        removeBtn.removeSelf();
-                        HTML.showProgressNotification(lf("Removing user..."));
-                        Cloud.deletePrivateApiAsync(c.id + "/groups/" + this.parent.publicId)
-                            .done(() => {
-                                user.removeSelf();
-                            }, e => Cloud.handlePostingError(e, lf("remove user")));
-                    });
-                }));
-
-                if (grp && grp.isclass) {
-                    if (c.isadult)
-                        user.appendChild(HTML.mkButton(lf("make group owner"), () => {
-                            Cloud.postPrivateApiAsync(grp.id, { userid: c.id })
-                                .done(r => ModalDialog.info(lf("The group has new owner"),
-                                    lf("Please reload the page to see it.")),
-                                e => Cloud.handlePostingError(e, "make owner"))
-                        }))
-                    else
-                        user.appendChild(HTML.mkButton(lf("reset password"), () => {
-                            if (Cloud.isOffline()) {
-                                Cloud.showModalOnlineInfo(lf("reseting password cancelled"));
-                                return;
-                            }
-                            Cloud.getPrivateApiAsync(c.id + "/resetpassword")
-                                .done(resp => {
-                                    var boxes = resp.passwords.map(p => {
-                                        var d = new DeclEntry(p)
-                                        d.icon = "svg:lock,white"
-                                        return d.mkBox().withClick(() => {
-                                            m.dismiss()
-                                            Cloud.postPrivateApiAsync(c.id + "/resetpassword", { password: p })
-                                                .done(() => {
-                                                    var m = new ModalDialog();
-                                                    m.add(div('wall-dialog-header', lf("password is reset")));
-                                                    m.add(div('wall-dialog-body', lf("new password:")));
-                                                    var inp = HTML.mkTextInput("text", "")
-                                                    inp.value = p
-                                                    inp.readOnly = true;
-                                                    m.add(div(null, inp))
-                                                    m.add(div('wall-dialog-buttons', HTML.mkButton(lf("ok"), () => m.dismiss())));
-                                                    m.show();
-                                                }, e => Cloud.handlePostingError(e, lf("reset password")));
-                                        })
-                                    })
-                                    var m = new ModalDialog()
-                                    m.choose(boxes, { header: lf("choose new password"), includeSearch: false })
-                                })
-                        }));
-                }
-            }
-            return user;
-        }
-    }
-
-    export class GroupInfo
-        extends BrowserPage {
-        private name: string;
-        public description: string;
-        public userid: string;
-        private collaborations: CollaborationsTab;
-
-        constructor(par: Host) {
-            super(par)
-        }
-        public persistentId() { return "group:" + this.publicId; }
-        public getTitle() { return this.name || super.getTitle(); }
-
-        public getName() { return lf("settings"); }
-        public getId() { return "settings"; }
-        public isMine() { return this.userid == Cloud.getUserId(); }
-
-        public loadFromWeb(id: string) {
-            Util.assert(!!id)
-            this.publicId = id;
-        }
-
-        public groupPicture() {
-            var icon = div('sdIcon');
-            Browser.setInnerHTML(icon, TDev.Util.svgGravatar(this.publicId));
-            return icon;
-        }
-
-        public mkBoxCore(big: boolean) {
-            var icon = this.groupPicture();
-
-            var nameBlock = dirAuto(sdName(big, this.name));
-            var hd = div("sdNameBlock", nameBlock);
-
-            var numbers = div("sdNumbers");
-            var author = div("sdAuthorInner");
-            var pubId = div("sdAddInfoOuter", div("sdAddInfoInner", "/" + this.publicId));
-            var res = div("sdHeaderOuter", div("sdHeader", icon,
-                div("sdHeaderInner", hd, pubId, div("sdAuthor", author), numbers, this.reportAbuse(big))));
-
-            if (big)
-                res.className += " sdBigHeader";
-
-            return this.withUpdate(res, (u: JsonGroup) => {
-                this.name = u.name;
-                this.description = u.description;
-                this.userid = u.userid;
-
-                if (u.pictureid && !Browser.lowMemory) {
-                    icon.style.backgroundImage = Cloud.artCssImg(u.pictureid);
-                    icon.style.backgroundRepeat = 'no-repeat';
-                    icon.style.backgroundPosition = 'center';
-                    icon.style.backgroundSize = 'contain';
-                    icon.setChildren([]);
-                }
-
-                nameBlock.setChildren([u.name]);
-                dirAuto(nameBlock);
-
-                var cont = [];
-                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("favourites"));
-                if (EditorSettings.widgets().publicationComments)
-                    addNum(u.comments, "✉", lf("comments"));
-                /* if (big) {
-                    addNum(u.subscribers, "svg:Person,black,clip=80");
-                } */
-                numbers.setChildren(cont);
-                author.setChildren([u.username]);
-            });
-        }
-
-        public mkTile(sz: number) {
-            var d = div("hubTile hubTileSize" + sz);
-            d.style.background = ScriptIcons.stableColorFromName(this.publicId);
-            d.appendChild(div("hubTileSearch", HTML.mkImg("svg:group,white")));
-
-            return this.withUpdate(d, (u: JsonGroup) => {
-                this.name = u.name;
-                if (u.pictureid && !Browser.lowMemory) {
-                    d.style.backgroundImage = Cloud.artCssImg(u.pictureid);
-                    d.style.backgroundRepeat = 'no-repeat';
-                    d.style.backgroundPosition = 'center';
-                    d.style.backgroundSize = 'cover';
-                }
-                var cont = [];
-                //var addNum = (n: number, sym: string) => { cont.push(ScriptInfo.mkNum(n, sym)) }
-                //addNum(u.receivedpositivereviews, "♥");
-
-                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
-
-                d.setChildren([
-                    div("hubTileSearch", HTML.mkImg("svg:group,white")),
-                    div("hubTileTitleBar",
-                        div("hubTileTitle", spanDirAuto(this.name)),
-                        div("hubTileSubtitle",
-                            div("hubTileAuthor", spanDirAuto(u.username), nums)))])
-            });
-        }
-
-        public thumbnail() {
-            if (!this.publicId) return div(null);
-            var icon = this.groupPicture();
-            var nameBlock = div("sdThumbName", this.name);
-            var thumb = div("sdThumb", icon, nameBlock);
-
-            thumb.withClick(() => {
-                this.browser().loadDetails(this);
-            });
-
-            if (!this.name) {
-                this.withUpdate(nameBlock, (u: JsonGroup) => {
-                    this.name = u.name;
-                    nameBlock.setChildren([u.name]);
-                });
-            }
-
-            thumb.style.cursor = "pointer";
-
-            return thumb;
-        }
-
-        public mkTabsCore(): BrowserTab[] {
-            var tabs: BrowserTab[] = [
-                Cloud.isRestricted() ? null : new CommentsTab(this, () => this.isMine(), (el) => this.updateCommentsHeader(el)),
-                new GroupUsersTab(this),
-                this.collaborations = Cloud.isRestricted() ? null : new CollaborationsTab(this),
-                Cloud.isRestricted() ? null : new GroupUserProgressTab(this),
-                this
-            ];
-            if (Cloud.lite)
-                tabs.unshift(new NotificationsTab(this))
-            return tabs;
-        }
-
-        public addScriptAsync(script: ScriptInfo): Promise {
-            if (!script) return Promise.as();
-
-            return ProgressOverlay.lockAndShowAsync(lf("adding script to group..."))
-                .then(() => script.getScriptTextAsync())
-                .then(text => TDev.Collab.startCollaborationAsync(script.getGuid(), text, this.publicId))
-                .then((successfullystarted) => {
-                    if (successfullystarted)
-                        return World.syncAsync()
-                            .then(() => Cloud.postCommentAsync(this.publicId, lf("Script ``{0:q}`` was added to the group.", script.getTitle())))
-                })
-                .then(() => ProgressOverlay.hide(), e => { ProgressOverlay.hide(); throw e; });
-        }
-
-
-        private updateCommentsHeader(el: HTMLElement) {
-            this.withUpdate(el, (u: JsonGroup) => {
-                Browser.setInnerHTML(el, new MdComments().formatText(u.description));
-                HTML.fixWp8Links(el);
-                if (!this.isMine()) {
-                    Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-                        .done(() => { }, e => {
-                            if (!u.isrestricted)
-                                el.appendChild(div('', HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); })));
-                        });
-                }
-            });
-        }
-
-        public initTab() {
-            var ch = this.getTabs().map((t: BrowserTab) => t == this ? null : <HTMLElement>t.inlineContentContainer);
-            var authorDiv = div('inlineBlock');
-            var ad = div("wall-div-buttons");
-            var hd = div("sdDesc");
-            var remainingContainer = div(null);
-            ch.unshift(remainingContainer);
-            ch.unshift(ad);
-            ch.unshift(hd);
-
-            remainingContainer.setChildren([authorDiv]);
-
-            this.tabContent.setChildren(ch);
-
-            this.withUpdate(hd, (u: JsonGroup) => {
-                var membership = div('');
-                hd.setChildren([membership]);
-
-                var uid = this.browser().getCreatorInfo(u);
-                authorDiv.setChildren([ScriptInfo.labeledBox(lf("owner"), uid.mkSmallBox())]);
-
-                ad.setChildren([]);
-                if (this.isMine()) {
-                    if (!Cloud.isRestricted())
-                        ad.appendChild(HTML.mkButton(lf("change picture"), () => {
-                            tick(Ticks.groupChangePicture);
-                            this.changePictureAsync().done(() => this.browser().loadDetails(this, "settings"));
-                        }));
-                    if (u.isrestricted) {
-                        Cloud.getPrivateApiAsync(this.publicId + "/code")
-                            .done((r: Cloud.ApiGroupCodeResponse) => {
-                                if (r.code && r.expiration > Date.now() / 1000) {
-                                    var input = HTML.mkTextInput("text", lf("invitation code"));
-                                    // readonly does not pop keyboard on mobile
-                                    input.value = r.code;
-                                    input.onchange = () => { input.value = r.code };
-                                    var codeDiv = div('',
-                                        div('', lf("join by invitation only"), Editor.mkHelpLink("groups")),
-                                        div('sdExpandableText', lf("To join, users can enter the invitation code in the search")),
-                                        input
-                                    );
-                                    hd.appendChild(codeDiv);
-                                } else {
-                                    hd.appendChild(div('', lf("This group is locked.")));
-                                    hd.appendChild(div('sdExpandableText', lf("There is no active invitation code. Tap 'new invitation code' to generate a code that will allow users to join immediately (the new code will be valid 14 days). Tap 'allow anyone to join' to allow any user to join without registration code.")));
-                                }
-                                ad.appendChild(HTML.mkButton(lf("new invitation code"), () => {
-                                    tick(Ticks.groupCodeNew);
-                                    HTML.showProgressNotification(lf("requesting new invitation code..."));
-                                    this.newInvitationCodeAsync().done(() => this.browser().loadDetails(this, "settings"));
-                                }));
-                                if (!Cloud.isRestricted())
-                                    ad.appendChild(HTML.mkButton(lf("allow anyone to join"), () => { tick(Ticks.groupAllowAnyoneToJoin); this.allowAnyoneToJoin(); }));
-                                ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
-                                if (u.isclass)
-                                    ad.appendChild(HTML.mkButton(lf("approvals"), () => { this.approvals(); }));
-                            });
-                    } else {
-                        hd.appendChild(div('', lf("This group is open.")));
-                        hd.appendChild(div('sdExpandableText', lf("Anyone can join this group without permissions.")));
-                        ad.appendChild(HTML.mkButton(lf("require invitation code"), () => { tick(Ticks.groupRequireInvitationCodeToJoin); this.requireInvitationCodeToJoin(); }));
-                        ad.appendChild(HTML.mkButton(lf("delete group"), () => { tick(Ticks.groupDelete); this.deleteGroup(); }));
-                    }
-                }
-
-                Cloud.getPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-                    .done(() => {
-                        if (this.isMine()) {
-                            //membership.appendChild(div('', 'You are the owner of this group. '));
-                        } else {
-                            membership.appendChild(div('', 'You are a member of this group.'));
-                            ad.appendChild(HTML.mkButton(lf("leave group"), () => { tick(Ticks.groupLeave); this.leaveGroup(); }));
-                        }
-                    }, e => {
-                        membership.appendChild(div('', 'You are not a member of this group.'));
-                        if (!u.isrestricted)
-                            ad.appendChild(HTML.mkButton(lf("join group"), () => { tick(Ticks.groupJoin); this.joinGroupDirect(); }));
-                    });
-            });
-        }
-
-        public addProjectAsync(): Promise {
-            this.collaborations = new CollaborationsTab(this);
-            return new Promise((onSuccess, onError, onProgress) => {
-                var m = new ModalDialog();
-                m.onDismiss = () => onSuccess(undefined);
-                var buttons = div('wall-dialog-buttons');
-                this.collaborations.setCollaborationButtons(buttons,
-                    () => {
-                        m.onDismiss = undefined;
-                        m.dismiss();
-                    },
-                    () => onSuccess(undefined));
-                m.add(div('wall-dialog-header', lf("add scripts to your group")));
-                m.add(div('wall-dialog-body', lf("Group scripts can be edited by multiple group users at the same time. You can add or remove projects any time you want.")));
-                m.add(buttons);
-                m.show();
-            });
-        }
-
-        public changePictureAsync(): Promise {
-            return Meta.chooseArtPictureAsync({ title: lf("change your group picture"), initialQuery: "group" })
-                .then((a: JsonArt) => {
-                    if (a) return this.updateGroupPictureAsync(a.id);
-                    return Promise.as(undefined);
-                });
-        }
-
-        public allowAnyoneToJoin() {
-            this.restrictGroup(false);
-        }
-
-        public requireInvitationCodeToJoin() {
-            this.restrictGroup(true);
-        }
-
-        private joinGroupDirect() {
-            HTML.showProgressNotification(lf("Joining group..."));
-            Cloud.postPrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId, {})
-                .done(resp => {
-
-                    this.invalidateCaches();
-                    this.browser().loadDetails(this);
-                });
-        }
-
-        private updateGroupPictureAsync(pictureid: string): Promise {
-            HTML.showProgressNotification(lf("Updating group picture..."));
-            return Cloud.postPrivateApiAsync(this.publicId, { pictureid: pictureid })
-                .then(() => { this.invalidateCaches(); });
-        }
-
-        private restrictGroup(restricted: boolean) {
-            HTML.showProgressNotification(lf("Updating group access..."));
-            Cloud.postPrivateApiAsync(this.publicId, { isrestricted: restricted })
-                .done(() => {
-                    this.invalidateCaches();
-                    this.browser().loadDetails(this);
-                });
-        }
-
-        public newInvitationCodeAsync() {
-            return Cloud.postPrivateApiAsync(this.publicId + "/code", <Cloud.ApiGroupCodeRequest>{})
-                .then((r: Cloud.ApiGroupCodeResponse) => {
-                    this.invalidateCaches();
-                    return r.code;
-                });
-        }
-
-        public resetInvitationCode() {
-            HTML.showProgressNotification(lf("clearing invitation code..."));
-            Cloud.deletePrivateApiAsync(this.publicId + "/code")
-                .done(() => {
-                    this.invalidateCaches();
-                    this.browser().loadDetails(this);
-                });
-        }
-
-        public deleteGroup() {
-            ModalDialog.ask(lf("Are you sure you want to delete this group? There is no undo for this operation."), lf("delete group"), () => {
-                HTML.showProgressNotification(lf("deleting group..."));
-                Cloud.deletePrivateApiAsync(this.publicId)
-                    .done(() => {
-                        this.invalidateCaches();
-                        Util.setHash("list:groups");
-                    });
-            });
-        }
-
-        public leaveGroup() {
-            ModalDialog.ask(lf("Are you sure you want to leave this group?"), lf("leave group"), () => {
-                HTML.showProgressNotification(lf("leaving group..."));
-                Cloud.deletePrivateApiAsync(Cloud.getUserId() + "/groups/" + this.publicId)
-                    .done(() => {
-                        this.invalidateCaches();
-                        TheEditor.historyMgr.reload(HistoryMgr.windowHash());
-                    });
-            });
-        }
-
-        private invalidateCaches() {
-            TheApiCacheMgr.invalidate("groups");
-            TheApiCacheMgr.invalidate(Cloud.getUserId() + "/groups");
-            TheApiCacheMgr.invalidate(this.publicId);
-        }
-
-        public match(terms: string[], fullName: string) {
-            if (terms.length == 0) return 1;
-
-            var json: JsonGroup = TheApiCacheMgr.getCached(this.publicId);
-            if (!json) return 0; // not loaded yet
-
-            var lowerName = json.name.toLowerCase();
-            var r = IntelliItem.matchString(lowerName, terms, 10000, 1000, 100);
-            if (r > 0) {
-                if (lowerName.replace(/[^a-z0-9]/g, "") == fullName)
-                    r += 100000;
-                return r;
-            }
-            var s = lowerName + " " + this.publicId + " " + json.description;
-            return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
-        }
-
-        public approvals() {
-            var json: JsonGroup = TheApiCacheMgr.getCached(this.publicId);
-            if (!json) return
-
-            var m = new ModalDialog()
-            var id = this.publicId
-            m.add(div("wall-dialog-header", lf("User approvals for {0}", json.name)))
-            m.show()
-
-            Cloud.getPrivateApiAsync(id + "/approvals")
-                .then(lst => Promise.join(lst.map(e => TheApiCacheMgr.getAsync(e))))
-                .then(users => {
-                    m.addHTML(lf("By approving an underage user you agree to <a href='/terms'>Terms and conditions</a>. Make sure there is no last name in their nickname!"))
-                    users.forEach(e => {
-                        var inp = HTML.mkTextInput("text", "")
-                        inp.value = e.name;
-                        inp.style.width = "10em";
-                        var chgNick =
-                            HTML.mkAsyncButton(lf("save nickname"), () =>
-                                Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
-                                    .then(r => r, Cloud.errorCallback()))
-                        chgNick.style.display = "none";
-                        var approved = false
-
-                        var btn = HTML.mkAsyncButton(lf("approve"), () =>
-                            Cloud.postPrivateApiAsync(e.id + "/groups/" + id, {})
-                                .then(r => {
-                                    approved = true
-                                    if (inp.value != e.name)
-                                        return Cloud.postPrivateApiAsync(e.id + "/settings", { nickname: inp.value })
-                                    else
-                                        return Promise.as()
-                                }, Cloud.errorCallback())
-                                .then(() => {
-                                    btn.removeSelf();
-                                    d.appendChildren([lf("approved")])
-                                }))
-                        inp.onkeyup = function () {
-                            if (approved) chgNick.style.display = null;
-                        }
-                        var d = div("wall-dialog-body", inp, btn, chgNick)
-                        m.add(d)
-                    })
-                    m.addOk(lf("dismiss"))
-                }, Cloud.errorCallback())
-                .done()
-        }
     }
 
     export class ForumInfo

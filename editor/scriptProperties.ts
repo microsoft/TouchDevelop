@@ -170,7 +170,6 @@ module TDev
             this.isCloud.appendChild(Editor.mkHelpLink("cloud libraries"));
             this.formRoot.setChildren([div("varLabel", lf("script")),
                 div("formLine", lf("description"), this.description),
-                div("groupLine"), // filled in later on
                 this.iconsSection = div('',
                     this.colorContainer,
                     this.iconArtIdContainer,
@@ -800,32 +799,6 @@ module TDev
 
         private load(a:AST.App) :void
         {
-            if (Collab.AstSession && a.editorState.groupId && !TDev.noHub) {
-                var sessionId = Collab.AstSession.servername;
-                var groupId = a.editorState.groupId;
-                var groupInfo = Browser.TheHost.getGroupInfoById(groupId);
-                var button = HTML.mkButton(
-                    groupInfo.getTitle(),
-                    () => {
-                        this.editor.onExitAsync().then(() => {
-                            this.editor.hide(true);
-                            Browser.TheHost.showList("groups", { item: groupInfo });
-                        }).done();
-                    }
-                );
-                groupInfo.withUpdate(button, (g: JsonGroup) => {
-                    button.textContent = g.name;
-                });
-
-                var line = <HTMLElement> this.formRoot.querySelector(".groupLine");
-                line.classList.add("calcButtonsClear");
-                line.setChildren([
-                    lf("part of group: "),
-                    button
-                ]);
-            }
-
-
             Util.assert(a instanceof AST.App);
             this.theScript = a;
             this.setChildren([this.formRoot]);

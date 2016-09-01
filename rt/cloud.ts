@@ -23,7 +23,6 @@ module TDev.Cloud {
         searchArtRefactoring?: boolean;
         makeAsyncRefactoring?: boolean;
         fixItButton?: boolean;
-        shareScriptToGroup?: boolean;
         splitScreen?: boolean; // split screen button
         splitScreenOnLoad?: boolean;
         simplify?: boolean;
@@ -116,7 +115,6 @@ module TDev.Cloud {
         hubLearn?: boolean;
         hubTutorials?: boolean;
         hubShowcase?: boolean;
-        hubSocial?: boolean;
         startTutorialButton?: boolean;
         publicationComments?: boolean;
         translateComments?: boolean;

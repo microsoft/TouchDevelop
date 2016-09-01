@@ -4173,15 +4173,6 @@ module TDev
 
         public uninstallCurrentScriptAsync()
         {
-            var isownedgroupscript = Script.editorState
-                && Script.editorState.collabSessionId
-                && Collab.getSessionOwner(Script.editorState.collabSessionId) == Cloud.getUserId();
-
-            if (isownedgroupscript) {
-                ModalDialog.info(lf("owned group script"), lf("you are the owner of this group script. To uninstall, you must first remove it from the group scripts."));
-                return Promise.as();
-            }
-
             tick(Ticks.codeUninstallScript);
             var guid = Script.localGuid;
             currentScreen = null;
@@ -6045,12 +6036,6 @@ module TDev
                         break;
                     case "androidgcm":
                         hs = ["hub", "androidgcm", hs[1], hs[2], hs[3] ];
-                        break;
-                    case "joingroup":
-                        hs = ["hub", "joingroup", hs[1] ];
-                        break;
-                    case "creategroup":
-                        hs = ["hub", "creategroup"];
                         break;
                     case "pub":
                         Browser.TheApiCacheMgr.getAsync(hs[1], true).done((d: JsonEtag) => {
