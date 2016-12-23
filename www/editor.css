@@ -1919,10 +1919,6 @@ span.errorSq .kw
     flex: 1;                      /*CSSpref*/  -webkit-flex: 1;  -moz-flex: 1;  -ms-flex: 1;
 }
 
-.wallFullScreenLogo {
-  max-width: 7rem;
-}
-
 #externalEditorSide .wallFullScreenLogo {
     text-align: right;
 }
