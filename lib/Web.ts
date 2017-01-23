@@ -966,6 +966,164 @@ module TDev.RT {
             return res;
         }
 
+        //? Authenticate with OAuth 2.0 and receives the code or error. See [](/oauthv2) for more information on which Redirect URI to choose.
+        //@ cap(network) flow(SinkWeb) returns(OAuthResponse) uiAsync
+        export function oauth_v2_code(oauth_url: string, r : ResumeCtx)
+        {
+            // validating url
+            if (!oauth_url) {
+                r.resumeVal(OAuthResponse.mkCodeError("access_denied", "Empty oauth url."));
+                return;
+            }
+            // dissallow state and redirect uris.
+            if (/state=|redirect_uri=/i.test(oauth_url)) {
+                r.resumeVal(OAuthResponse.mkCodeError("access_denied", "The `redirect_uri` and `state` query arguments are not allowed."));
+                return;
+            }
+
+            // check connection
+            if (!Web.is_connected()) {
+                r.resumeVal(OAuthResponse.mkCodeError("access_denied", "No internet connection."));
+                return;
+            }
+            var userid = r.rt.currentAuthorId;
+
+            Web.oauth_v2_code_async(oauth_url, userid).done((v) => {
+                r.resumeVal(v);
+            })
+        }
+
+        export function oauth_v2_code_async(oauth_url: string, userid: string): Promise
+            // : OAuthResponse
+        {
+            var redirectURI = "https://www.touchdevelop.com/" + userid + "/oauth";
+            var state = Util.guidGen();
+            var stateArg = "state=" + state.replace('-', '');
+
+            var hostM = /^([^\/]+:\/\/[^\/]+)/.exec(document.URL)
+            var host = hostM ? hostM[1] : ""
+            if (host && !/\.touchdevelop\.com$/i.test(host)) {
+                redirectURI = host + "/api/oauth"
+                userid = "web-app"
+            }
+
+            var actualRedirectURI = redirectURI;
+            // special subdomain scheme?
+            var subdomainRx = /&tdredirectdomainid=([a-z0-9]{1,64})/i;
+            var msubdomain = oauth_url.match(subdomainRx);
+            if (msubdomain) {
+                var appid = msubdomain[1];
+                actualRedirectURI = 'https://' + appid + '-' + userid + '.users.touchdevelop.com/oauth';
+                redirectURI = "https://www.touchdevelop.com/" + appid + '-' + userid + "/oauth";
+                App.log('oauth appid redirect: ' + appid);
+                oauth_url = oauth_url.replace(subdomainRx, '');
+            }
+            // state variable needed in redirect uri?
+            var stateRx = /&tdstateinredirecturi=true/i;
+            if (stateRx.test(oauth_url)) {
+                actualRedirectURI += "?" + stateArg;
+                Time.log('oauth adding state to url');
+                oauth_url = oauth_url.replace(stateRx, '');
+            }
+
+            App.log('oauth login uri: ' + oauth_url);
+            App.log('oauth redirect uri: ' + actualRedirectURI);
+            // craft url login;
+            var url = oauth_url
+                + (/\?/.test(oauth_url) ? '&' : '?')
+                + 'redirect_uri=' + encodeURIComponent(actualRedirectURI)
+                + "&" + stateArg;
+            if (!/response_type=(code)/i.test(url))
+                url += "&response_type=code";
+
+            App.log('oauth auth url: ' + url);
+            return Web.oauth_v2_code_dance_async(url, actualRedirectURI, userid, stateArg);
+        }
+
+        export function oauth_v2_code_dance_async(url: string, redirect_uri: string, userid: string, stateArg: string): Promise {
+            var res = new PromiseInv();
+
+            var response: OAuthResponse;
+            var oauthWindow: Window;
+            var m = new ModalDialog();
+
+            function handleMessage(event) {
+                var origin = document.URL.replace(/(.*:\/\/[^\/]+).*/, (a, b) => b)
+                if (event.origin == origin && Array.isArray(event.data)) {
+                    processRedirects(event.data)
+                }
+            }
+
+            function handleStorage(event) {
+                // console.log("Storage: " + event.key)
+                if (event.key == "oauth_redirect")
+                    processRedirects(JSON.parse(event.newValue || "[]"))
+            }
+
+            function dismiss() {
+                window.removeEventListener("message", handleMessage, false)
+                window.removeEventListener("storage", handleStorage, false)
+
+                if (!response)
+                    response = OAuthResponse.mkCodeError("access_denied", "The user cancelled the authentication.");
+                if (oauthWindow)
+                    oauthWindow.close();
+                res.success(response);
+            }
+
+            function processRedirects(redirects:OAuthRedirect[])
+            {
+                redirects.reverse(); // pick the latest oauth message
+
+                var matches = redirects.filter(redirect => userid == redirect.user_id && redirect.redirect_url.indexOf(stateArg) > -1);
+                if (matches.length > 0) {
+                    Time.log('oauth redirect_uri: ' + matches[0].redirect_url);
+                    response = OAuthResponse.parse_code(matches[0].redirect_url);
+                    m.dismiss();
+                    return;
+                }
+
+                // is the window still opened?
+                if (!response && oauthWindow && oauthWindow.closed) {
+                    response = OAuthResponse.mkCodeError("access_denied", "The authentication window was closed");
+                    m.dismiss();
+                    return;
+                }
+            }
+
+            // monitors local storage for the url
+            function tracker() {
+                if (response) return; // we've gotten a response or the user dismissed
+
+                window.localStorage.setItem("last_oauth_check", Date.now() + "")
+
+                // array of access tokens
+                processRedirects(JSON.parse(window.localStorage.getItem("oauth_redirect") || "[]"))
+
+                if (!response)
+                    Util.setTimeout(100, tracker);
+            }
+
+            // start the oauth dance...
+            var woptions = 'menubar=no,toolbar=no';
+            oauthWindow = window.open(url, '_blank', woptions);
+
+            m.add(div('wall-dialog-header', 'authenticating...'));
+            m.add(div('wall-dialog-body', 'A separate window with the sign in dialog has opened, please sign in in that window.'));
+            m.add(div('wall-dialog-body', "Can't see any window? Try tapping the button below to log in manually."));
+            m.add(div('wall-dialog-buttons', HTML.mkA("button wall-button", url, "_blank", "log in")));
+            m.onDismiss = () => { dismiss(); };
+
+            m.show();
+
+            // and start listening...
+            Util.setTimeout(100, tracker);
+            // window.addEventListener("message", handleMessage, false)
+            // window.addEventListener("storage", handleStorage, false)
+
+            return res;
+        }
+
         //? Create a form builder
         //@ [result].writesMutable
         export function create_form_builder(): FormBuilder { return new FormBuilder(); }

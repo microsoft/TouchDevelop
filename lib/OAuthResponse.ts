@@ -13,7 +13,7 @@ module TDev.RT {
         private _errorDescription: string;
         private _errorUri: string;
         private _others: StringMap;
-
+        private _code: string;
 
         // ctx is ignored
         public exportJson(ctx: JsonExportCtx): any {
@@ -73,6 +73,35 @@ module TDev.RT {
                 return OAuthResponse.mkAccessToken(accessToken, expiresIn, scope, others);
             else
                 return OAuthResponse.mkError(error, errorDescription, errorUri, others);
+        }
+
+        static parse_code(redirect_url: string): OAuthResponse {
+            var queryIndex = redirect_url.indexOf('?');
+            var markerIndex = redirect_url.indexOf('=', queryIndex + 1);
+            if (queryIndex < 0 && markerIndex < 0)
+                return undefined;
+
+            var code = markerIndex < 0 ? "" : redirect_url.substring(markerIndex + 1, redirect_url.length);
+            var error = 'access_denied';
+            var errorDescription = 'invalid OAuth url';
+            var errorUri = redirect_url;    
+            if (code == error)
+                return OAuthResponse.mkCodeError(error, errorDescription);
+            else
+                return OAuthResponse.mkCodeAccessToken(code);
+        }
+
+        static mkCodeAccessToken(code: string) : OAuthResponse {
+            var r = new OAuthResponse();
+            r._code = code;
+            return r;
+        }
+
+        static mkCodeError(error: string, errorDescription: string): OAuthResponse {
+            var r = new OAuthResponse();
+            r._error = error;
+            r._errorDescription = errorDescription;
+            return r;
         }
 
         static parse(redirect_url: string): OAuthResponse {
