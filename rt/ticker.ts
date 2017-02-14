@@ -453,6 +453,7 @@ module TDev {
         browseHeart,
         browseUnHeart,
         browseModerate,
+        browseMigrate,
         browsePublish,
         browseUninstall,
         browsePush,
