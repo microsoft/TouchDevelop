@@ -1251,7 +1251,6 @@ module TDev
                     m.add(div('wall-dialog-header', lf("Have a question?")));
                     m.add(div('wall-dialog-body', lf("We're here to help. Pick one of the options below for more information.")));
                     m.add(div('wall-dialog-buttons',
-                        Cloud.config.userVoice ? HTML.mkAButton(lf("send feedback"), "https://" + Cloud.config.userVoice + ".uservoice.com") : undefined,
                         HTML.mkAButton(lf("read the docs"), Cloud.config.helpPath),
                         this.widgetEnabled("computingAtSchool") ? HTML.mkAButton(lf("CAS resources"), "http://community.computingatschool.org.uk/resources?category=139") : undefined,
                         HTML.mkButton(lf("cancel"), () => m.dismiss())

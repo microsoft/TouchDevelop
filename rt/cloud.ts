@@ -224,7 +224,6 @@ module TDev.Cloud {
         showcaseid?: string; // channel containing showcase scripts
         
         cachedScripts?: string[];
-        userVoice?: string;
         tickFilter?: StringMap<number>;
         primaryLocale: string;
         uploader?: string;
@@ -255,13 +254,13 @@ module TDev.Cloud {
         specHelpPaths: { },
         topicPath: "/docs/",
         legalButtons: [
-            { name: "terms of use", url: "/terms-of-use" },
-            { name: "privacy and cookies", url: "/privacy"},
-            { name: "support", url:"https://touchdevelop.uservoice.com" }
+            { name: "Contact Us", url: "https://go.microsoft.com/?linkid=2028325" },     
+            { name: "Privacy & Cookies", url: "https://go.microsoft.com/fwlink/?LinkId=521839"},
+            { name: "Terms Of Use", url: "https://go.microsoft.com/fwlink/?LinkID=246338" },
+            { name: "Trademarks", url: "https://go.microsoft.com/fwlink/?LinkId=506942"}
         ],
         doNothingText: "do nothing",
         hintLevel: "full",
-        userVoice: "touchdevelop",
         tutorialsid: "vjsseqks",
         showcaseid: "njigpnyj",
         primaryLocale: "en-US",
