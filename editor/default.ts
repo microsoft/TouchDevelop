@@ -78,6 +78,8 @@ module TDev
 
             handleChromeSerial();            
             Hex.preCacheEmptyExtensionAsync().done();
+
+            Cookies.initAsync().done();
         });
     }
     
