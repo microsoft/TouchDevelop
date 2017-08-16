@@ -12,11 +12,17 @@ module TDev.Cookies {
 
     export function shouldShowBannerAsync(): Promise { // CookieInfo
         return Util.httpGetJsonAsync(`https://uhf.microsoft.com/${navigator.language}/shell/api/mscc?sitename=touchdevelop&domain=touchdevelop.com&mscc_eudomain=true`)
+            .then((info: CookieInfo) => {
+                if (!info.IsConsentRequired) return undefined;
+                return info;
+            })
     }
 
     export function initAsync(): Promise {
         return shouldShowBannerAsync()
             .then(info => {
+                if (!info) return;
+
                 info.Css.forEach(css => {
                     var link = document.createElement('link');
                     link.rel = 'stylesheet';
