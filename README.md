@@ -81,14 +81,6 @@ tsd reinstall
 npm install
 ````
 
-### Quick Windows setup
-These steps install the tools for Windows (+ extras to handle the Arduino compilation scenarios)
-* install [Chocolatey](https://chocolatey.org/)
-* install nodejs, Visual Studio Code
-````
-choco install -y nodejs git visualstudiocode arduino python2 pip
-````
-
 ## Building
 
 There's different ways to build and run Touch Develop:
@@ -127,6 +119,14 @@ jake test
 
 ````
 jake clean
+````
+
+### Arduino compilation on Windows
+These steps install the tools for Windows (+ extras to handle the Arduino compilation scenarios)
+* install [Chocolatey](https://chocolatey.org/)
+* install nodejs, Visual Studio Code
+````
+choco install -y nodejs git visualstudiocode arduino python2 pip
 ````
 
 ## Editing
