@@ -15,7 +15,7 @@ intending to write Touch Develop scripts, you want to go to the web app at
 * **beta:** https://www.touchdevelop.com/app/beta
 * **latest:** https://www.touchdevelop.com/app/latest
 
-You can save a Touch Develop script from the wep app by clicking the `Save` button on
+You can save a Touch Develop script from the web app by clicking the `Save` button on
 the script's home page. This will create a JSON file that you can save. You can later
 drag-and-drop that file into the web app (running locally or via the web site) to load
 the script again.
