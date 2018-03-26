@@ -20,13 +20,6 @@ the script's home page. This will create a JSON file that you can save. You can 
 drag-and-drop that file into the web app (running locally or via the web site) to load
 the script again.
 
-The make sure which version you're running, tap the small
-copyright/legal/version bar in the bottom right, and then the **latest changes**
-button. This will give you the changes that went into your current version, and
-in particular if the fix for your submitted issue is in.  If the expected
-change is not there, try reloading the page. Keep in mind that the build
-process takes a few minutes.
-
 Other pages of interest:
 * landing page: [https://www.touchdevelop.com](https://www.touchdevelop.com)
 * blog: [https://www.touchdevelop.com/blog](https://www.touchdevelop.com/blog)
