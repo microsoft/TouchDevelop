@@ -1,20 +1,24 @@
 ![](https://az31353.vo.msecnd.net/c04/gttu.png)
 
-Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed with <3 at Microsoft Research. 
+Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed by Microsoft Research. 
 [![Build Status](https://travis-ci.org/Microsoft/TouchDevelop.svg)](https://travis-ci.org/Microsoft/TouchDevelop)
 
 [![Dependency Status](https://david-dm.org/Microsoft/TouchDevelop.svg)](https://david-dm.org/Microsoft/TouchDevelop)
 [![devDependency Status](https://david-dm.org/Microsoft/TouchDevelop/dev-status.svg)](https://david-dm.org/Microsoft/TouchDevelop#info=devDependencies)
 
+## Writing and saving Touch Develop scripts
 
 **This repo contains the source code of the Touch Develop editor.** If you are
-intending to write Touch Develop scripts, you want to go to
+intending to write Touch Develop scripts, you want to go to the web app at
 `touchdevelop.com`:
 * **stable:** https://www.touchdevelop.com/app/
 * **beta:** https://www.touchdevelop.com/app/beta
-
-If you want to always run the latest build,
 * **latest:** https://www.touchdevelop.com/app/latest
+
+You can save a Touch Develop script from the wep app by clicking the `Save` button on
+the script's home page. This will create a JSON file that you can save. You can later
+drag-and-drop that file into the web app (running locally or via the web site) to load
+the script again.
 
 The make sure which version you're running, tap the small
 copyright/legal/version bar in the bottom right, and then the **latest changes**
@@ -40,13 +44,12 @@ This repo contains the source code for:
  * the runtime
 * the node.js client
 
-The next-generation cloud backend for Touch Develop is available in
+The cloud backend for Touch Develop is available in
 [TouchDevelop-backend repo](https://github.com/microsoft/touchdevelop-backend).
 It was originally written in Touch Develop itself (see [script tdlite](https://www.touchdevelop.com/aycxg)
 if you're interested) and was later converted to TypeScript.
 It is currently used for the [BBC micro:bit](https://www.microbit.co.uk)
-and will be deployed at https://www.touchdevelop.com shortly.
-
+as well as https://www.touchdevelop.com.
 
 ## Contributing
 
