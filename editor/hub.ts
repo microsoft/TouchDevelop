@@ -1568,7 +1568,7 @@ module TDev.Browser {
             this.topBox = div(null, this.topContainer);
             this.eol = document.createElement("a");
             this.eol.className = "eol";
-            this.eol.innerText = "Touch Develop is going away May 23rd. Click to learn more.";
+            this.eol.innerText = "Touch Develop is retiring on May 23, 2018. Click to learn more.";
             this.eol.href = "https://makecode.com/touchdevelop";
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
         }
