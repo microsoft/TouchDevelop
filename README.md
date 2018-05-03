@@ -103,12 +103,6 @@ export TD_SOURCE_MAPS=1 # optional, will slow down your build
 jake local
 ````
 
-* run packaged as a [nwjs] app:
-
-````
-jake nw
-````
-
 * run the test suite
 
 ````
