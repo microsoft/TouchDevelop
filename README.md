@@ -1,3 +1,5 @@
+**We heard your feedback and are extending the retirement date of Touch Develop to June 22, 2019.**
+
 ![](https://az31353.vo.msecnd.net/c04/gttu.png)
 
 Touch Develop is a touch-friendly, cross-platform, mobile-first app creation environment developed by Microsoft Research. 
