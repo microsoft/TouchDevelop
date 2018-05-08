@@ -1,16 +1,11 @@
 {
   "devDependencies": {
-    "jake": "latest",
-    "typescript": "1.4",
-    "nw": "^0.12.2",
-    "nw-builder": "latest"
+    "jake": "8.0.15",
+    "typescript": "1.4.1"
   },
   "dependencies": {
-    "source-map": "^0.2.0",
-    "tsd": "^0.5.7",
-    "node-sass": "^4.5.3",
-    "request": "<=2.81.0",
-    "shrinkwrap": "^0.4.0"
+    "source-map": "0.2.0",
+    "tsd": "0.5.7"
   },
   "scripts": {
     "test": "jake test --trace"
