@@ -1566,12 +1566,17 @@ module TDev.Browser {
             super()
             this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
             this.topBox = div(null, this.topContainer);
+            this.eol = document.createElement("a");
+            this.eol.className = "eol";
+            this.eol.innerText = "Touch Develop is retiring on May 23, 2018. Click to learn more.";
+            this.eol.href = "https://makecode.com/touchdevelop";
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
         private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor", '', '', true));
         private meBox = div("hubMe");
+        private eol: HTMLAnchorElement;
         private notificationBox = div("notificationBox");
         private topBox: HTMLElement;
         private topContainer: HTMLElement;
@@ -1588,7 +1593,9 @@ module TDev.Browser {
         public init() {
             this.theRoot.style.display = "none";
             this.theRoot.id = "hubRoot";
-            elt("root").appendChild(this.theRoot);
+            elt("root").appendChild(this.eol); 
+            elt("root")
+                .appendChild(this.theRoot);
             this.logo.withClick(() => {
                 tick(Ticks.hubAbout);
                 Hub.showAbout();

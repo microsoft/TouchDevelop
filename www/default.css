@@ -1682,6 +1682,22 @@ height: 100%;
   cursor: pointer;
 }
 
+
+.eol {
+  position:absolute;
+  left: 0;
+  right: 0;
+  height: 2rem;
+  font-size: 0.7em;
+  background: #fa9090;
+  color: #ffffff;
+  z-index:1000;
+  text-decoration: none;
+
+  padding: 0.6em 0.5em 0.3em;
+  cursor: pointer;
+}
+
 .copyright-note {
   background: rgba(255,255,255,0.0001);
   color: black;
