@@ -1564,7 +1564,7 @@ module TDev.Browser {
         extends Screen {
         constructor() {
             super()
-            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
+            this.topContainer = div(null, this.logo, this.notificationBox);
             this.topBox = div(null, this.topContainer);
             this.eol = document.createElement("a");
             this.eol.className = "eol";
@@ -1575,7 +1575,6 @@ module TDev.Browser {
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
         private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor", '', '', true));
-        private meBox = div("hubMe");
         private eol: HTMLAnchorElement;
         private notificationBox = div("notificationBox");
         private topBox: HTMLElement;
@@ -2812,14 +2811,6 @@ module TDev.Browser {
                 sects["tutorials"] = { title: lf("tutorials") };
             if (widgets.hubLearn)
                 sects["learn"] = { title: lf("learn") };
-            if (widgets.hubChannels)
-                sects["channels"] = { title: lf("channels") };
-            if (widgets.hubShowcase)
-                sects["showcase"] = { title: lf("showcase") };
-            if (widgets.hubTopAndNew)
-                sects["top"] = { title: lf("top & new") };
-            if (widgets.hubMyArt)
-                sects["myart"] = { title: lf("my art") };
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
@@ -2849,7 +2840,6 @@ module TDev.Browser {
             var sectWidth = (name:string):number => sectWidths['default']
 
             this.logo.style.display = "";
-            this.meBox.style.display = "";
 
             // h=26em
 
@@ -2959,18 +2949,6 @@ module TDev.Browser {
             }
 
             this.mainContent.setChildren(divs);
-
-            if (Cloud.getUserId()) {
-                var uid = this.browser().getUserInfoById("me", "me");
-                this.meBox.setChildren([uid.mkSmallBox()]);
-                this.browser().addNotificationCounter(this.notificationBox);
-            } else {
-                var loginBtn = HTML.mkButtonElt("wall-button login-button", SVG.getLoginButton())
-                this.meBox.setChildren(loginBtn.withClick(() => {
-                    Login.show();
-                }))
-                this.notificationBox.setChildren([]);
-            }
         }
 
         private docTopics:any[];
