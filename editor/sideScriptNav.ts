@@ -328,6 +328,7 @@ module TDev
             }
 
             var prog = Script;
+            /*
             var progDiv = declIt(prog);
 
             if (ScriptEditorWorldInfo.status === "published") {
@@ -339,7 +340,7 @@ module TDev
                 var pubbtn = HTML.mkRoundButton("svg:Upload,currentColor", lf("publish"), Ticks.sidePublish, () => { ScriptNav.publishScript() });
                 progDiv = ScriptNav.addSideButton(progDiv, pubbtn);
                 items[items.length - 1] = progDiv;
-            }
+            } */
 
             if (!debugMode)
                 items.push(this.scriptButtons(Script, false, !!TheEditor.parentScript));
