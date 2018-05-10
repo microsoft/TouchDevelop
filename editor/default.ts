@@ -495,6 +495,8 @@ module TDev
             }
             var cfg = (<any>window).tdConfig
             if (cfg) Object.keys(cfg).forEach(k => Cloud.config[k] = cfg[k])
+            if (!Cloud.config.newCdnUrl)
+                Cloud.config.newCdnUrl = Cloud.config.primaryCdnUrl    
         }
 
         mx = /microbit=(\w+)/.exec(document.URL)

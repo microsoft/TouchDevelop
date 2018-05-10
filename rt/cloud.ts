@@ -302,7 +302,7 @@ module TDev.Cloud {
         if (!thumbContainer) thumbContainer = "pub"
 
         var tmp = stripCdnUrl(url)
-        if (tmp) return config.primaryCdnUrl + "/" + thumbContainer + "/" + tmp
+        if (tmp) return config.newCdnUrl + "/" + thumbContainer + "/" + tmp
         else return url
     }
 
@@ -318,7 +318,7 @@ module TDev.Cloud {
     }
 
     export function artUrl(id: string, thumb = false): string {
-        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.primaryCdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
+        return id ? HTML.proxyResource(Util.fmt("{0}/{1}/{2:uri}", Cloud.config.newCdnUrl, thumb ? "thumb" : "pub", id)) : undefined;
     }
     
     export function setPermissions(perms:string = null)
@@ -345,7 +345,7 @@ module TDev.Cloud {
     }
 
     export function getServiceUrl() {
-        return config.newCdnUrl || config.rootUrl;
+        return config.rootUrl;
     }
 
     export function mkLegalDiv() {

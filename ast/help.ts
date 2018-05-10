@@ -392,7 +392,7 @@ module TDev {
         {
             id: "art",
             name: "TouchDevelop Art",
-            description: lf("Cover art ({0}/...)", Cloud.config.primaryCdnUrl),
+            description: lf("Cover art ({0}/...)", Cloud.config.newCdnUrl),
             parseIds: text => {
                 var links = [];
                 if (text)
@@ -402,8 +402,8 @@ module TDev {
                     });
                 return links;
             },
-            idToUrl: id => Cloud.config.primaryCdnUrl + "/pub/" + id,
-            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.primaryCdnUrl + "/pub/" + id, '', lf("open")))
+            idToUrl: id => Cloud.config.newCdnUrl + "/pub/" + id,
+            idToHTMLAsync: id => Promise.as(HTML.mkImg(Cloud.config.newCdnUrl + "/pub/" + id, '', lf("open")))
         }, {
             id: "youtube",
             name: "YouTube",
