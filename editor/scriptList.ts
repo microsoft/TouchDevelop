@@ -1403,7 +1403,6 @@ module TDev.Browser {
         public getAnyInfoByEtag(e: JsonEtag): BrowserPage {
             if (!e) return null;
             else if (e.kind == "script") return this.getScriptInfoById(e.id);
-            else if (e.kind == "forum") return this.getForumInfo();
             else if (e.kind == "user") return this.getUserInfoById(e.id, "");
             else if (e.kind == "comment") return this.getCommentInfoById(e.id);
             else if (e.kind == "art") return this.getArtInfoById(e.id);
@@ -1419,15 +1418,6 @@ module TDev.Browser {
         public getAnyInfoByPub(e: JsonPublication, etag: string): BrowserPage {
             TheApiCacheMgr.store(e.id, e, etag);
             return this.getAnyInfoByEtag(<JsonEtag>(<any>e));
-        }
-
-        public getForumInfo() {
-            var si = <ForumInfo>this.getLocation("theForum");
-            if (!si) {
-                si = new ForumInfo(this);
-                this.saveLocation(si);
-            }
-            return si;
         }
 
         private showInstalledAsync() {
@@ -3144,34 +3134,6 @@ module TDev.Browser {
 
         public shareButtons(): HTMLElement[] {
             var btns: HTMLElement[] = [];
-
-            var id = this.getPublicationId();
-            if (!id) return btns;
-
-            var url = Cloud.config.shareUrl + "/" + id;
-            var text = this.twitterMessage();
-
-            if (EditorSettings.widgets().scriptEmail)
-                btns.push(div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:email,currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
-
-            if (!Cloud.isRestricted()) {
-                btns.pushRange(["twitter", "facebook"].map(network =>
-                    div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:" + network + ",currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-                ));
-            }
-            if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
-                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100", '', lf("add to channel"))).withClick(() => {
-                    Meta.chooseListAsync({
-                        header: lf("add to channel"),
-                        custombuttons: [
-                            HTML.mkButton(lf("create channel"), () => this.browser().createChannel())
-                        ]
-                    }).done((info: ChannelInfo) => {
-                        var si = (<ScriptInfo>this.parent);
-                        if (info) info.addScriptAsync(si).done();
-                    });
-                }));
-            }
             return btns;
         }
     }
@@ -3578,14 +3540,7 @@ module TDev.Browser {
         constructor(par: ScriptInfo) {
             super(par,
                 lf("This tab contains additional information about this script"),
-                ScreenShotTab,
-                ScriptHeartsTab,
-                ChannelListTab,
-                TagsTab,
-                ArtTab,
-                ConsumersTab,
-                SuccessorsTab,
-                DerivativesTab);
+                ArtTab);
         }
 
         public bgIcon() {
@@ -4191,6 +4146,7 @@ module TDev.Browser {
             }
 
             var likeBtn = div("sdCmtBtnOuter");
+            likeBtn.style.backgroundColor = "#ccc";
             function setLikeBtn(s: number, h: string, f: () => void) {
                 var btn: HTMLElement;
                 if (s < 0)
@@ -6364,7 +6320,6 @@ module TDev.Browser {
             return !this.app || this.app.supportsAllPlatforms(api.core.currentPlatform);
         }
 
-        private commentsTab: CommentsTab;
         public mkTabsCore(): BrowserTab[] {
             var r: BrowserTab[];
             if (!this.publicId)
@@ -6374,8 +6329,7 @@ module TDev.Browser {
                 r =
                     [
                         this,
-                        new ScriptDetailsTab(this),
-                        EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null
+                        new ScriptDetailsTab(this)
                     ];
             return r;
         }
@@ -6439,8 +6393,8 @@ module TDev.Browser {
             } else {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
                 likePub.classList.add("sdUninstall");
-                likePub.style.backgroundColor = "#ccc";
             }
+            likePub.style.backgroundColor = "#ccc";
 
             var uninstall: HTMLElement;
             var moderate: HTMLElement;
@@ -6612,7 +6566,6 @@ module TDev.Browser {
             var wontWork = div(null);
             var runBtns = div(null);
             var authorDiv = div(null);
-            var commentsDiv = div(null);
             var docsButtonDiv = div(null);
 
             this.tabContent.setChildren([
@@ -6622,7 +6575,6 @@ module TDev.Browser {
                 descDiv,
                 metaDiv,
                 docsButtonDiv,
-                commentsDiv,
                 wontWork,
             ]);
 
@@ -6683,18 +6635,6 @@ module TDev.Browser {
                 if (this.jsonScript.meta) {
                     socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
                         .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
-                }
-
-                if (EditorSettings.widgets().publicationComments && this.getPublicationIdOrBaseId()) {
-                    if (!this.commentsTab) {
-                        this.commentsTab = new CommentsTab(this);
-                        this.commentsTab.initElements();
-                        this.commentsTab.tabLoaded = true;
-                        this.commentsTab.initTab();
-                    }
-                    commentsDiv.setChildren([
-                        this.commentsTab.topContainer(),
-                        this.commentsTab.tabContent])
                 }
             });
 
@@ -8058,8 +7998,7 @@ module TDev.Browser {
         constructor(par: UserInfo) {
             super(par,
                 "More information about art, score, subscribers, subscriptions and given hearts.",
-                Cloud.lite ? ChannelListTab : null,
-                ArtTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
+                ArtTab);
         }
 
         public bgIcon() {
@@ -8082,44 +8021,6 @@ module TDev.Browser {
 
         public getName() { return lf("insights"); }
         public getId() { return "insights"; }
-    }
-
-    export class ForumInfo
-        extends BrowserPage {
-
-        constructor(par: Host) {
-            super(par)
-            this.publicId = "theForum";
-        }
-        public persistentId() { return "forum:forum"; }
-        public getTitle() { return "Forum"; }
-
-        public getId() { return "overview"; }
-        public getName() { return lf("overview"); }
-
-        public mkBoxCore(big: boolean): HTMLElement { return div("hubSectionHeader", spanDirAuto(lf("the forums"))) }
-
-        public mkTabsCore(): BrowserTab[] {
-            var tabs: CommentsTab[] = [
-                new CommentsTab(this),
-                new CommentsTab(this),
-                new CommentsTab(this)
-            ];
-
-            tabs[0].forumName = lf("general");
-            tabs[0].forumId = "bttt";
-
-            tabs[1].forumName = lf("issues");
-            tabs[1].forumId = "atljilhp";
-
-            tabs[2].forumName = lf("everything");
-            tabs[2].forumId = "";
-
-            return tabs;
-        }
-
-        public initTab() {
-        }
     }
 
     export class AbuseReportInfo
@@ -8541,6 +8442,7 @@ module TDev.Browser {
 
         private likeBtn(showCount = false) {
             var likeBtn = div(null);
+            likeBtn.style.backgroundColor = "#ccc";
             var id = this.topic.json.id;
             if (!id) return likeBtn;
 
@@ -8593,8 +8495,6 @@ module TDev.Browser {
             }
             return res;
         }
-
-        private commentsTab: CommentsTab;
 
         public getPublicationId() { return this.topic.json.id; }
 
@@ -8689,21 +8589,8 @@ module TDev.Browser {
             })
 
             var requestDocs = null
-            var comments = div(null)
-            if (id) {
-                if (!this.commentsTab) {
-                    this.commentsTab = new CommentsTab(this);
-                    this.commentsTab.initElements();
-                }
-                comments.setChildren([
-                    div("sdHeading", lf("comments")),
-                    this.commentsTab.topContainer(),
-                    this.commentsTab.tabContent])
-            }
-
             allBottomDiv.setChildren([
                 div("sdBottomButtons", btn2),
-                comments,
                 requestDocs
             ])
 
@@ -8719,8 +8606,6 @@ module TDev.Browser {
                 noChromeDiv,
                 allBottomDiv
             ])
-            if (this.commentsTab)
-                this.commentsTab.initTab();
         }
 
         public match(terms: string[], fullName: string) {
@@ -9120,6 +9005,7 @@ module TDev.Browser {
 
         private likeBtn(showCount = false): HTMLElement {
             var lbtn = div(null);
+            lbtn.style.backgroundColor = "#ccc";
             var id = this.publicId;
             var setLikeBtn = (s: number, h: string, f: () => void) => {
                 var btn: HTMLElement;
