@@ -176,8 +176,6 @@ module TDev
 
         public additionalFullScreenButtons(): HTMLElement[] {
             var btns = [];
-            if (ScriptEditorWorldInfo.status == "published" && TheEditor.widgetEnabled("wallScreenshot"))
-                btns.push(HTML.mkRoundButton("svg:camera,currentColor", lf("screenshot"), Ticks.wallScreenshot, () => this.takeScreenshot()));
             if (Browser.serialLog)
                 btns.push(HTML.mkRoundButton("svg:CommandLine,currentColor", lf("serial"), Ticks.wallSerial, () => this.showSerialView()))    
             return btns;
@@ -195,73 +193,6 @@ module TDev
         }
 
         public takeScreenshot() {
-            if (!Script) return;
-            if (ScriptEditorWorldInfo.status !== "published") {
-                ModalDialog.info(lf("Oops, your script is not published"),
-                                 lf("You need to publish your script in order to upload screenshots."));
-                return;
-            }
-            if (Cloud.anonMode(lf("publishing screenshots"))) return;
-
-            var baseId = ScriptEditorWorldInfo.baseId;
-            RT.ScreenshotManager.toScreenshotURLAsync(this, false)
-                .done((data: string) => {
-                    if (!data) {
-                        ModalDialog.info(lf("Oops, we could not take the screenshot"),
-                            lf("You are probably using a picture downloaded from the web on the board. Your web browser and the web site prevent cross-origin resource sharing (CORS)."));
-                        return;
-                    }
-
-                    var contentType = data.match(/^data:(image\/(png|jpeg));base64,/i)[1];
-                    Util.log('content type: ' + contentType);
-                    var base64content = Util.base64EncodeToBase64(data, contentType);
-                    if (base64content && base64content.length > 2000000) {
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("Oops, we can't take a screenshot now")),
-                            div("wall-dialog-body", lf("The encoded screenshot is too big.")),
-                        ]);
-                        m.show();
-                    } else if (base64content && baseId) {
-                        var previewImage = HTML.mkImg(data);
-                        previewImage.setAttribute('class', 'wall-media');
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("wall screenshot")),
-                            div("wall-dialog-body", lf("Publish your screenshot to the cloud so that everybody can enjoy it.")),
-                            div("wall-dialog-buttons",
-                                HTML.mkButton(lf("publish"), () => {
-                                    m.dismiss();
-                                    HTML.showProgressNotification(lf("uploading screenshot..."));
-                                    Cloud.postPrivateApiAsync(baseId + "/screenshots",
-                                        {
-                                            kind: "screenshot",
-                                            contentType: contentType,
-                                            content: base64content,
-                                            userplatform: Browser.platformCaps
-                                        }).done((resp : JsonScreenShot) => {
-                                            HTML.showProgressNotification(lf("screenshot uploaded"), true);
-                                            Cloud.postCommentAsync(baseId, lf("{0} added a screenshot {1}", ((<any>window).userName || ""), "/" + resp.id))
-                                                .done(() => { },() => { });
-                                            Browser.Hub.askToEnableNotifications();
-                                        }, e => {
-                                            HTML.showProgressNotification(lf("screenshot upload failed"), true);
-                                            Cloud.handlePostingError(e, lf("post screenshot"));
-                                        });
-                                })),
-                            previewImage
-                        ]);
-                        m.setScroll();
-                        m.show();
-                    } else {
-                        var m = new ModalDialog();
-                        m.add([
-                            div("wall-dialog-header", lf("Oops, we can't take a screenshot now.")),
-                            div("wall-dialog-body", lf("Unfortunately, we can only take screenshots of full screen boards.")),
-                        ]);
-                        m.show();
-                    }
-                });
         }
 
         public notifyStopAsync() : Promise
@@ -312,32 +243,6 @@ module TDev
             // Update edit mode. (When live mode, updateEditMode is called in SideEditorHost.notifyStopAsync())
             if (!this.currentRt.liveMode())
                 LayoutMgr.instance.updateEditMode(this.currentRt);
-
-            // take screenshots periodically
-            var takePoll = () => {
-                if (this.takeScreenshotMaybe())
-                    Util.setTimeout(TheEditor.hasLastScreenshot() ? 5000 : 3000, takePoll);
-            }
-            if (ScriptEditorWorldInfo &&
-                ScriptEditorWorldInfo.status !== "published")
-                Util.setTimeout(2000, takePoll);
-        }
-
-        private takeScreenshotMaybe(): boolean {
-            if (Cloud.isRestricted()) return false;
-            if (this.currentRt && !this.currentRt.isStopped()) {
-                if (!TheEditor.hasLastScreenshot() || Math.random() < 0.4) {
-                    if (Browser.screenshots && Browser.isHosted)
-                        TDev.RT.ScreenshotManager.toScreenshotURLAsync(this.currentRt.host, true)
-                            .done(url => TheEditor.setLastScreenshotDataUri(url));
-                    else {
-                        var canvas = this.toScreenshotCanvas();
-                        TheEditor.setLastScreenshotCanvas(canvas);
-                    }
-                    return true;
-                }
-            }
-            return false;
         }
 
         public notifyBreakpointHit(bp: string) {
