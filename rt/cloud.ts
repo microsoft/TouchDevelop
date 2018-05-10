@@ -356,79 +356,22 @@ module TDev.Cloud {
 
     export var authenticateAsync = (activity:string, redirect = false, dontRedirect = false, sensitive = false): Promise =>
     { // boolean
+        var r = new PromiseInv();
+        var m = new ModalDialog();
+        m.addHTML(
+            lf("<h3>{0:q} is not supported anymore&nbsp;</h3>", activity) +
+            "<p class='agree'>" +
+            lf("You can run and save your scripts locally, but cloud synchronization and publishing is not supported anymore.") +
+            "</p>"
+        );
+        m.fullWhite();
+        m.add(div("wall-dialog-buttons",
+            HTML.mkButton(lf("ok"), () => { m.dismiss() })
+        ));
+        m.onDismiss = () => r.success(false);
+        m.show();
 
-        if (!sensitive && !Cloud.isAccessTokenExpired()) return Promise.as(true);
-
-        function loginAsync() {
-            var loginUrl = Cloud.getServiceUrl() + "/oauth/dialog?response_type=token&"
-                + "client_id=webapp"
-                + "&identity_provider=" + encodeURIComponent(Cloud.getIdentityProvider() || "");
-            return TDev.RT.Web.oauth_v2_async(loginUrl, "touchdevelop")
-                .then((or: TDev.RT.OAuthResponse) => {
-                    if (or.is_error()) return false;
-                    else {
-                        var id = or.others().at('id');
-                        var oldid = Cloud.getUserId();
-                        if (oldid && id != oldid) {
-                            // TODO: error message.
-                            return false;
-                        }
-                        Cloud.setUserId(or.others().at('id'));
-                        Cloud.setAccessToken(encodeURIComponent(or.access_token()));
-                        Cloud.setIdentityProvider(or.others().at('identity_provider'));
-                        return true;
-                    }
-                });
-        }
-
-        return Cloud.isOnlineWithPingAsync()
-            .then((isOnline : boolean) => {
-                if (!isOnline) return Promise.as(false);
-
-                var prevHash = (window.location.hash || "#").replace(/#/, "");
-                var login = (<any>TDev).Login;
-                if (login) {
-                    if (!login.show || dontRedirect)
-                        login = null;
-                    if (!redirect && (!prevHash || /^(hub|list:.*:user:me:)/.test(prevHash)))
-                        login = null;
-                }
-
-                var r = new PromiseInv();
-
-                var m = new ModalDialog();
-                if (sensitive)
-                    m.addHTML(
-                        lf("<h3>we need you to sign in again</h3>") +
-                          "<p class='agree'>" +
-                          lf("Accessing private data requires verification of your sign in credentials.") +
-                          "</p>"
-                    )
-                else
-                    m.addHTML(
-                        lf("<h3>{0:q} requires sign&nbsp;in</h3>", activity) +
-                        (!(<any>TDev).TheEditor ? "" :
-                          "<p class='agree'>" +
-                          lf("You can run and save your scripts locally, but to access your scripts from all devices, you need to be signed in. After you sign in, we will save and sync your scripts between your devices.") +
-                          "</p>")
-                        )
-                m.fullWhite();
-                var ignoreDismiss = false;
-                m.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("maybe later"), () => { m.dismiss() }),
-                    HTML.mkButton(lf("sign in"), () => {
-                        ignoreDismiss = true;
-                        m.dismiss()
-                        if (login) login.show();
-                        else loginAsync().done(v => r.success(v))
-                    })));
-                m.onDismiss = () => {
-                    if (!ignoreDismiss) r.success(false);
-                };
-                m.show();
-
-                return r;
-            })
+        return r;
     }
 
     export function anonMode(activity:string, restart:()=>void = null, redirect = false)
