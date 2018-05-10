@@ -117,7 +117,7 @@ module TDev {
         if (TDev.Browser.webAppImplicit) {
             // do not ask the authenticate
             var auth = TDev.Cloud.authenticateAsync;
-            TDev.Cloud.authenticateAsync = (reason: string) => Promise.resolve(false);
+            TDev.Cloud.authenticateAsync = (reason: string) => Promise.as(false);
         }
     }
 

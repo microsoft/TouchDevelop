@@ -204,17 +204,6 @@ module TDev
                     this.editor.typeCheckNow();
                     this.editor.searchFor(":m");
                 }));
-
-            if (onlyParent && this.editor.widgetEnabled("deployButton")) {
-                addBtn(HTML.mkRoundButton("svg:cloudupload,currentColor", lf("export"), Ticks.sideDeployWebSite, () => {
-                    AppExport.exportBtn(app)
-                }));
-            }
-
-            if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
-                addBtn(HTML.mkRoundButton("svg:plug,currentColor", lf("plugins"), Ticks.sidePlugins, () => {
-                    Plugins.runPlugin();
-                }));
             if (!isParent && app.hasTests() && TheEditor.widgetEnabled("runTestsButton"))
                 addBtn(HTML.mkRoundButton("svg:experiment,currentColor", lf("run tests"), Ticks.sideAllTests, () => {
                     TestMgr.testCurrentScript()
