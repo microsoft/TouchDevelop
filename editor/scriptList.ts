@@ -6439,6 +6439,7 @@ module TDev.Browser {
             } else {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
                 likePub.classList.add("sdUninstall");
+                likePub.style.backgroundColor = "#ccc";
             }
 
             var uninstall: HTMLElement;

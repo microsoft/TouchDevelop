@@ -337,7 +337,6 @@ module TDev
                 items[items.length - 1] = progDiv;
             } else if(!debugMode) {
                 var pubbtn = HTML.mkRoundButton("svg:Upload,currentColor", lf("publish"), Ticks.sidePublish, () => { ScriptNav.publishScript() });
-                TheEditor.keyMgr.btnShortcut(pubbtn, "Ctrl-S")
                 progDiv = ScriptNav.addSideButton(progDiv, pubbtn);
                 items[items.length - 1] = progDiv;
             }

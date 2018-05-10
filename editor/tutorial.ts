@@ -977,54 +977,6 @@ module TDev
         private nowPublish()
         {
             TheEditor.leaveTutorial(); // always leave tutorial
-
-            // not generally signed in
-            if (!Cloud.getUserId() || !Cloud.isOnline() || !Cloud.canPublish() || !Script) return;
-
-            // author explicitely wanted to skip step
-            if (!this.topic || /none/i.test(this.topic.nextTutorials()[0]))
-                return;
-
-            World.getInstalledHeaderAsync(Script.localGuid).done((h: Cloud.Header) => {
-                if (h.status == "published") return Promise.as();
-
-                var screenshotDataUri = TheEditor.lastScreenshotUri();
-                var start = Util.now()
-                var m = new ModalDialog();
-                this.disableUpdate = true;
-
-                m.add(div('wall-dialog-header', lf("you did it!")));
-                m.addHTML(lf("Publish your script, so that everyone can run it."))
-                m.add(div('wall-dialog-buttons',
-                    HTML.mkButton(lf("publish"), () => {
-                        this.disableUpdate = false;
-                        ScriptNav.publishScript(dbg ? false : true, uploadScreenshot ? screenshotDataUri : undefined)
-                    this.update()
-                }),
-                    HTML.mkButton(lf("maybe later"), () => {
-                        this.disableUpdate = false;
-                        m.dismiss();
-                    })
-                    ));
-
-                var uploadScreenshot = true;
-                var uploadScreenshotCheck = HTML.mkCheckBox(lf("upload screenshot"), b => uploadScreenshot = b, uploadScreenshot);
-                if (screenshotDataUri) {
-                    var previewImage = HTML.mkImg(screenshotDataUri);
-                    previewImage.setAttribute('class', 'publishScreenshot');
-                    m.add(previewImage);
-                    m.add(div('wall-dialog-body', uploadScreenshotCheck));
-                    m.setScroll();
-                }
-
-                m.fullWhite();
-
-                var d = Cloud.mkLegalDiv()
-                d.style.marginTop = "1em";
-                d.style.opacity = "0.6";
-                m.add(d);
-                m.show();
-            });
         }
 
         private addHocFinishPixel(m : ModalDialog) {
