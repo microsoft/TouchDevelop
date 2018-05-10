@@ -195,6 +195,7 @@ module TDev.Cloud {
         liteVersion: string;
         shareUrl: string;
         cdnUrl: string;
+        newCdnUrl?: string;
         translateCdnUrl: string;
         translateApiUrl: string;
         hashtag: string;
@@ -343,7 +344,9 @@ module TDev.Cloud {
         return !fullTD;
     }
 
-    export function getServiceUrl() { return config.rootUrl; }
+    export function getServiceUrl() {
+        return config.newCdnUrl || config.rootUrl;
+    }
 
     export function mkLegalDiv() {
         var link = (text: string, lnk: string) =>
