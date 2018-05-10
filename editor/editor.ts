@@ -199,9 +199,6 @@ module TDev
         {
             TheEditor.stopPlayTime();
             this.currentRt.editorObj = undefined;
-            if (ScriptEditorWorldInfo &&
-                ScriptEditorWorldInfo.status !== "published")
-                this.takeScreenshotMaybe();
             return super.notifyStopAsync().then(v => {
                 if (TheEditor.stepTutorial) TheEditor.stepTutorial.notify("runStop");
                 if (this.currentRt.headlessPluginMode &&

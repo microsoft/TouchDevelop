@@ -6369,16 +6369,13 @@ module TDev.Browser {
             var r: BrowserTab[];
             if (!this.publicId)
                 r = [this,
-                    new ScriptDetailsTab(this),
-                    EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null];
+                    new ScriptDetailsTab(this)];
             else
                 r =
                     [
                         this,
                         new ScriptDetailsTab(this),
-                        this.cloudHeader && EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
-                        EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
-                        Cloud.lite ? new AbuseReportsTab(this) : null,
+                        EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null
                     ];
             return r;
         }
@@ -6441,6 +6438,7 @@ module TDev.Browser {
                 ScriptInfo.setupLike(this.publicId, setBtn);
             } else {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
+                likePub.classList.add("sdUninstall");
             }
 
             var uninstall: HTMLElement;
