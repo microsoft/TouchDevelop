@@ -2588,10 +2588,6 @@ module TDev.Browser {
             }
 
             var docsEl: HTMLElement;
-            var ccgaEl: HTMLElement;
-            var whatsNew: HTMLElement;
-            var begginersEl : HTMLElement;
-            //var advancedEl:HTMLElement;
             var rate, settings: HTMLElement;
             var searchEl: HTMLElement;
             var elements = [
@@ -2599,15 +2595,6 @@ module TDev.Browser {
                 docsEl = toTutBtn(this.mkFnBtn(lf("Docs"), () => {
                     Util.navigateNewWindow(Cloud.config.helpPath);
                 }, Ticks.hubDocs, true, 2)),
-                whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
-                    Util.navigateNewWindow(Cloud.config.topicPath + "whatsnew");
-                }, Ticks.hubDocsWhatsNew, true)),
-                begginersEl = toTutBtn(this.mkFnBtn(lf("Getting started"), () => {
-                    Util.navigateNewWindow(Cloud.config.topicPath + "gettingstarted");
-                }, Ticks.hubBeginnersGettingStarted, true)),
-                ccgaEl = toTutBtn(this.mkFnBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateNewWindow("/ccga");
-                }, Ticks.hubCCGA, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search"); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
@@ -2619,7 +2606,6 @@ module TDev.Browser {
             searchEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             (<any>searchEl).breakBefore = 1;
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-            whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
 
             if (rate) rate.className += " exportBtn";
