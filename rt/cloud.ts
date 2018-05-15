@@ -869,17 +869,6 @@ module TDev.Cloud {
         return e => handlePostingError(e, action)
     }
     
-    export function showSigninNotification(isOnline: boolean) {
-        if (isOnline) HTML.showWarningNotification(lf("You are not signed in."), {
-            els: [HTML.mkLinkButton(lf("sign in"), () => {
-                    var login = (<any>TDev).Login;
-                    if (login && login.show)
-                        login.show()
-                })]
-            });
-        else HTML.showProgressNotification(lf("You appear to be offline."));
-    }
-            
     export function handlePostingError(e: any, action: string, modal = true) {
         if (e) {
             if (e.status == 502) {

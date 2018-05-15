@@ -1089,8 +1089,7 @@ module TDev.Browser {
                 if (Cloud.hasAccessToken() && Cloud.getUserId()) {
                     World.syncAsync(true, undefined, false,
                         () => {
-                            Cloud.isOnlineWithPingAsync()
-                                .done((isOnline: boolean) => Cloud.showSigninNotification(isOnline));
+                            // ignore
                         },
                         (seconds) => {
                             var delta = "";
