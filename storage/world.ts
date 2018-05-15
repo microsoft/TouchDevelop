@@ -744,6 +744,7 @@ module TDev {
                 else if (status == 403)
                     //(Cloud.isOnline() && /localhost/.test(document.URL)) // because of CORS on localhost when not logged in yet
                 {
+                    /*
                     var message = status == 403
                         ? Cloud.hasAccessToken()
                             ? onNotLoggedIn
@@ -752,6 +753,7 @@ module TDev {
                             : lf("cannot sync - you are not signed in") + info
                         : lf("cannot sync") + info;
                     HTML.showProgressNotification(message)
+                    */
 
                     if (status == 403) {
                         Cloud.accessTokenExpired();
