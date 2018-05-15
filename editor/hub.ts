@@ -2200,46 +2200,6 @@ module TDev.Browser {
             });
         }
 
-        private temporaryRequestedSignin = false;
-        private showingTemporarySignin = false;
-        private showTemporaryNotice() {
-            if ((!Storage.temporary || this.showingTemporarySignin) ||
-                !EditorSettings.widgets().showTemporaryNotice ||
-                ModalDialog.currentIsVisible()) return;
-
-            // if only and not signed in, request to sign in
-            if (!this.temporaryRequestedSignin
-                && Cloud.isOnline()
-                && Cloud.isAccessTokenExpired()) {
-                this.temporaryRequestedSignin = true;
-                this.showingTemporarySignin = true;
-                var d = new ModalDialog();
-                d.add(div('wall-dialog-header', lf("Sign in to avoid losing your scripts!")));
-                d.add(div('wall-dialog-body', lf("Your browser does not allow Touch Develop to store web site data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage.")));
-                d.add(div('wall-dialog-body', lf("When you sign in, Touch Develop will save your scripts in the cloud.")));
-                d.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("skip this"), () => {
-                        this.showingTemporarySignin = false;
-                        d.canDismiss = true;
-                        d.dismiss();
-                    }),
-                    HTML.mkButton(lf("sign in"), () => {
-                        this.showingTemporarySignin = false;
-                        if (Login.show()) {
-                            d.canDismiss = true;
-                            d.dismiss();
-                        }
-                    })
-                ));
-                d.fullWhite()
-                    d.canDismiss = false;
-                d.show();
-            } else {
-                if (EditorSettings.widgets().showTemporaryNotice)
-                    Storage.showTemporaryWarning();
-            }
-        }
-
         static userPictureChooser(fbButton:boolean, onUpd:()=>void)
         {
             var preview = <HTMLImageElement> document.createElement("img");
@@ -2329,7 +2289,7 @@ module TDev.Browser {
             var updated = false;
             if (finish === undefined && !notificationsOnly)
                 finish = () => {
-                    if (updated && !Storage.showTemporaryWarning())
+                    if (updated)
                             Util.setTimeout(500, () => window.location.reload());
                 };
             var dialogBody = div(null)
@@ -2566,7 +2526,6 @@ module TDev.Browser {
         public showSections(skipSync = false)
         {
             this.show();
-            this.showTemporaryNotice();
             this.showSectionsCoreAsync(skipSync).done();
         }
 

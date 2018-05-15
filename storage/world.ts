@@ -754,10 +754,7 @@ module TDev {
                     HTML.showProgressNotification(message)
 
                     if (status == 403) {
-                        if (!onNotLoggedIn)
-                            Cloud.handlePostingError(e, lf("sync"))
-                        else
-                            Cloud.accessTokenExpired();
+                        Cloud.accessTokenExpired();
                     }
                     if (onNotLoggedIn) onNotLoggedIn();
                     World.cancelContinuouslySync(); // stop continuously script
@@ -812,7 +809,6 @@ module TDev {
                 else if (status == 403 ||
                     (!Cloud.lite && Cloud.isOnline() && /localhost/.test(document.URL))) // because of CORS on localhost when not logged in yet
                     {
-                    HTML.showSaveNotification(lf("could not save - you are not signed in ({0:500})",status));
                     if (status == 403)
                         Cloud.accessTokenExpired();
                     if (onNotLoggedIn) onNotLoggedIn();

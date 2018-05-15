@@ -896,11 +896,7 @@ module TDev.Cloud {
             else if (e.status == 403) {
                 Cloud.accessTokenExpired();
                 // in lite, 403 always means missing or expired access token
-                if (localStorage['everLoggedIn'])
-                    Cloud.isOnlineWithPingAsync()
-                        .done(isOnline => Cloud.showSigninNotification(isOnline));
-                else
-                    authenticateAsync(action).done()
+                // in readonly, 403 means user has no access
                 return;
             }
             else if (e.status == 419 || e.status == 402) {
