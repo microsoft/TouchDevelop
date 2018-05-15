@@ -6703,9 +6703,6 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
-                //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
-                //addNum(u.features, "svg:Award,white,clip=110");
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
 
