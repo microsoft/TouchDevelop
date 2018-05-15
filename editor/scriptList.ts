@@ -4412,24 +4412,7 @@ module TDev.Browser {
         }
 
         private mkButtons(): HTMLElement {
-            var mkBtn = (icon: string, desc: string, key: string, f: () => void) => {
-                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)), div("sdBigButtonDesc sdHeartCounter", desc));
-                TheEditor.keyMgr.btnShortcut(b, key);
-                return b.withClick(f);
-            }
-            var heartButton: HTMLElement = span("sdHeart", "");
-            var setBtn = (state: number, hearts: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (state < 0)
-                    btn = mkBtn("svg:wholeheart,white,opacity=0.3", hearts, null, f);
-                else
-                    btn = mkBtn("svg:wholeheart,white", hearts, null, f);
-                heartButton.setChildren([btn]);
-                btn.setFlag("working", Math.abs(state) < 2);
-            }
-
-            ScriptInfo.setupLike(this.publicId, setBtn);
-            return div("sdRunBtns", heartButton);
+            return div("sdRunBtns");
         }
 
         public match(terms: string[], fullName: string) {
@@ -5387,26 +5370,11 @@ module TDev.Browser {
             }
 
             var likePub: HTMLElement;
-
-            var setBtn = (state: number, hearts: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (state < 0)
-                    btn = mkBtn(Ticks.browseHeart, "svg:wholeheart,white,opacity=0.3", hearts, null, f);
-                else
-                    btn = mkBtn(Ticks.browseUnHeart, "svg:wholeheart,white", hearts, null, f);
-                heartButton.setChildren([btn]);
-                btn.setFlag("working", Math.abs(state) < 2);
-            }
-
-            if (this.publicId) {
-                var heartButton = span("sdHeart", "");
-                likePub = heartButton;
-                ScriptInfo.setupLike(this.publicId, setBtn);
-            } else {
+            if (!this.publicId) {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
                 likePub.classList.add("sdUninstall");
+                likePub.style.backgroundColor = "#ccc";
             }
-            likePub.style.backgroundColor = "#ccc";
 
             var uninstall: HTMLElement;
             var moderate: HTMLElement;
