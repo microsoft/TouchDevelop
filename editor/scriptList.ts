@@ -2541,10 +2541,6 @@ module TDev.Browser {
             if (!window.localStorage["everLoggedIn"])
                 return;
             this.offlineErrorReported = true;
-            if (Cloud.isTouchDevelopOnline()) {
-                HTML.showProgressNotification(Util.fmt("cannot reach {0}{1}; are you offline or not signed in?",
-                    Cloud.getServiceUrl(), dbg ? ("/" + entry.path) : ""))
-            }
         }
 
         private decompressLists() {
