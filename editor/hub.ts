@@ -1435,7 +1435,7 @@ module TDev.Browser {
             this.topBox = div(null, this.topContainer);
             this.eol = document.createElement("a");
             this.eol.className = "eol";
-            this.eol.innerText = "Touch Develop retirement postponed until June 22, 2019.  Sign-in and access to cloud assets to be removed on May 23, 2018. Learn more.";
+            this.eol.innerText = "Touch Develop will retire on June 22, 2019.  Sign-in and access to cloud assets was removed on May 23, 2018. Learn more.";
             this.eol.href = "https://makecode.com/touchdevelop";
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
         }
