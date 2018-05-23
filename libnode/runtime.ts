@@ -727,7 +727,7 @@ module TDev.RT.Node {
         }
 
         Cloud.authenticateAsync = (activity:string, redirect = false, dontRedirect = false): Promise => {
-            return Promise.as(!!Cloud.getUserId())
+            return Promise.as(false)
         }
         try { // TODO: find a better way to detect if this module is available
             var xmldom = require('xmldom');

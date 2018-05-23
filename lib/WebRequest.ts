@@ -157,8 +157,6 @@ module TDev.RT {
                         return this.mkProxyCrash(proxyResponse);
                     case 403:
                         Cloud.accessTokenExpired();
-                        if (this._showNotifications)
-                            HTML.showProxyNotification("Proxy Error: Could not perform web request; access denied; your access token might have expired.", this._url);
                         return this.mkProxyCrash(proxyResponse);
                     case 504:
                         if (this._showNotifications)

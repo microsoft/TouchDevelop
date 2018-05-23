@@ -918,31 +918,6 @@ module TDev.Browser {
                     this.searchOnline = null;
                     var sd = searchDiv;
 
-                    if (bugStatus) {
-                        var bugCompare = (a: BrowserPage, b: BrowserPage) => {
-                            if (a instanceof CommentInfo) {
-                                if (b instanceof CommentInfo) {
-                                    return (<CommentInfo>a).bugCompareTo(<CommentInfo>b, bugOrder)
-                                } else return -1;
-                            } else {
-                                return b instanceof CommentInfo ? 1 : 0
-                            }
-                        };
-
-                        if (bugUser) {
-                            var bu = bugUser == "me" ? Cloud.getUserId()
-                                : bugUser == "none" ? ""
-                                    : bugUser;
-                            items = items.filter(i => {
-                                var j: JsonComment = TheApiCacheMgr.getCached(i.publicId)
-                                if (j && (j.assignedtoid || "") != bu)
-                                    return false
-                                return true
-                            })
-                        }
-                        items.sort(bugCompare)
-                    }
-
                     var elts: HTMLElement[] = items.map(addEntry);
                     if (xcont) {
                         searchDiv = div(null, HTML.mkButton(lf("load more"), () => { searchFrom("continuation=" + xcont + "&") }));
@@ -1114,8 +1089,7 @@ module TDev.Browser {
                 if (Cloud.hasAccessToken() && Cloud.getUserId()) {
                     World.syncAsync(true, undefined, false,
                         () => {
-                            Cloud.isOnlineWithPingAsync()
-                                .done((isOnline: boolean) => Cloud.showSigninNotification(isOnline));
+                            // ignore
                         },
                         (seconds) => {
                             var delta = "";
@@ -1403,9 +1377,7 @@ module TDev.Browser {
         public getAnyInfoByEtag(e: JsonEtag): BrowserPage {
             if (!e) return null;
             else if (e.kind == "script") return this.getScriptInfoById(e.id);
-            else if (e.kind == "forum") return this.getForumInfo();
             else if (e.kind == "user") return this.getUserInfoById(e.id, "");
-            else if (e.kind == "comment") return this.getCommentInfoById(e.id);
             else if (e.kind == "art") return this.getArtInfoById(e.id);
             else if (e.kind == "screenshot") return this.getScreenshotInfoById(e.id);
             else if (e.kind == "document") return this.getDocumentInfo(e);
@@ -1419,15 +1391,6 @@ module TDev.Browser {
         public getAnyInfoByPub(e: JsonPublication, etag: string): BrowserPage {
             TheApiCacheMgr.store(e.id, e, etag);
             return this.getAnyInfoByEtag(<JsonEtag>(<any>e));
-        }
-
-        public getForumInfo() {
-            var si = <ForumInfo>this.getLocation("theForum");
-            if (!si) {
-                si = new ForumInfo(this);
-                this.saveLocation(si);
-            }
-            return si;
         }
 
         private showInstalledAsync() {
@@ -2033,16 +1996,6 @@ module TDev.Browser {
             return si;
         }
 
-        public getCommentInfoById(id: string) {
-            var si = <CommentInfo>this.getLocation(id);
-            if (!si) {
-                si = new CommentInfo(this);
-                si.loadFromWeb(id);
-                this.saveLocation(si);
-            }
-            return si;
-        }
-
         public getSpecificInfoById(id: string, cl: any) {
             var si = this.getLocation(id);
             if (!si) {
@@ -2588,10 +2541,6 @@ module TDev.Browser {
             if (!window.localStorage["everLoggedIn"])
                 return;
             this.offlineErrorReported = true;
-            if (Cloud.isTouchDevelopOnline()) {
-                HTML.showProgressNotification(Util.fmt("cannot reach {0}{1}; are you offline or not signed in?",
-                    Cloud.getServiceUrl(), dbg ? ("/" + entry.path) : ""))
-            }
         }
 
         private decompressLists() {
@@ -3042,9 +2991,6 @@ module TDev.Browser {
             var c = b.lastScore - a.lastScore;
             if (c != 0) return c;
 
-            if (a instanceof CommentInfo && b instanceof CommentInfo) {
-            }
-
             if (a instanceof ScriptInfo && b instanceof ScriptInfo)
                 return ScriptInfo.compareScripts(<ScriptInfo>a, <ScriptInfo>b);
             else
@@ -3144,34 +3090,6 @@ module TDev.Browser {
 
         public shareButtons(): HTMLElement[] {
             var btns: HTMLElement[] = [];
-
-            var id = this.getPublicationId();
-            if (!id) return btns;
-
-            var url = Cloud.config.shareUrl + "/" + id;
-            var text = this.twitterMessage();
-
-            if (EditorSettings.widgets().scriptEmail)
-                btns.push(div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:email,currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), "email") }));
-
-            if (!Cloud.isRestricted()) {
-                btns.pushRange(["twitter", "facebook"].map(network =>
-                    div("sdAuthorLabel sdShareIcon phone-hidden", HTML.mkImg("svg:" + network + ",currentColor,clip=100")).withClick(() => { TDev.RT.ShareManager.shareLinkAsync(TDev.RT.Web.link_url(text, url), network) })
-                ));
-            }
-            if (this.parent instanceof ScriptInfo && EditorSettings.widgets().scriptAddToChannel) {
-                btns.unshift(div("sdAuthorLabel sdShareIcon", HTML.mkImg("svg:list,currentColor,clip=100", '', lf("add to channel"))).withClick(() => {
-                    Meta.chooseListAsync({
-                        header: lf("add to channel"),
-                        custombuttons: [
-                            HTML.mkButton(lf("create channel"), () => this.browser().createChannel())
-                        ]
-                    }).done((info: ChannelInfo) => {
-                        var si = (<ScriptInfo>this.parent);
-                        if (info) info.addScriptAsync(si).done();
-                    });
-                }));
-            }
             return btns;
         }
     }
@@ -3578,14 +3496,7 @@ module TDev.Browser {
         constructor(par: ScriptInfo) {
             super(par,
                 lf("This tab contains additional information about this script"),
-                ScreenShotTab,
-                ScriptHeartsTab,
-                ChannelListTab,
-                TagsTab,
-                ArtTab,
-                ConsumersTab,
-                SuccessorsTab,
-                DerivativesTab);
+                ArtTab);
         }
 
         public bgIcon() {
@@ -3610,932 +3521,8 @@ module TDev.Browser {
         public getId() { return "insights"; }
     }
 
-    export class CommentsTab
-        extends ListTab {
-        private seenComments: any = {}
-
-        static topCommentInitialText: string = undefined;
-
-        constructor(par: BrowserPage, private canDeleteAny: () => boolean = undefined, private headerRenderer: (el: HTMLElement) => void = undefined) {
-            super(par, "/comments")
-        }
-        public getId() { return this.forumId || "comments"; }
-        public getName() { return this.forumName || lf("comments"); }
-        public needsJsonScript() { return true; }
-        public getPreciseCount(): number { return !this.script() || !this.script().jsonScript ? -1 : this.script().jsonScript.comments; }
-        private _topContainer: HTMLElement;
-
-        public isForum() { return !!this.forumName; }
-
-        public forumName: string;
-        public forumId: string;
-
-        public getParentId() {
-            if (this.isForum()) return this.forumId;
-            if (this.parent.publicId) return this.parent.publicId;
-            if (this.parent instanceof ScriptInfo) {
-                var sc = this.script();
-                return sc.getPublicationIdOrBaseId();
-            }
-            Util.check(false, "unknown id");
-            return undefined;
-        }
-
-        public getUrl() {
-            if (this.forumName) return this.forumId ? this.forumId + "/comments?bylatestnestedcomments=true" : "comments";
-            return this.getParentId() + "/comments?bylatestnestedcomments=true";
-        }
-
-        public bgIcon() { return "svg:Email"; }
-        public noneText() { return this.parent instanceof UserInfo ? lf("no comments written by this user") : lf("no comments, tap to write some!"); }
-
-        public resetEltsSoFar() {
-            this.seenComments = {}
-        }
-
-        static bugStatuses = {
-            "bug": { icon: "bug", name: "bug" },
-            "feature": { icon: "chip", name: "feature" },
-            "fixed": { icon: "bandage", name: "fixed" },
-            "postponed": { icon: "Alram" /* sic! */, name: "postponed" },
-            "notabug": { icon: "Butterfly", name: "not a bug" },
-            "duplicate": { icon: "twobugs", name: "duplicate" },
-        }
-        static bugUsers = ["gxfb", "wonm", "ajlk", "bqsl", "ikyp", "pboj", "jeiv", "expza"]
-
-        public finalListElt(): HTMLElement {
-            if (!this.isForum() && this.parent instanceof ScriptInfo) {
-
-                var versionDepth = 0;
-                var js = this.script().jsonScript
-                if (js.id && js.rootid == js.id)
-                    return div(null)
-                var cont = div(null)
-                var getFor = (id: string, skipComments = false) => {
-                    Util.assert(!!id, "missing comment id");
-                    TheApiCacheMgr.getAsync(Cloud.lite ? id : id + "/base", true).done(resp => {
-                        versionDepth++;
-                        if (!resp) return
-                        var d = div("sdLoadingMore", lf("loading comments for /{0}...", resp.id))
-                        var loadMore = (cont: string) => {
-                            var dd = div(null, HTML.mkButton(lf("load more"), () => {
-                                dd.setChildren(lf("loading..."))
-                                TheApiCacheMgr.getAnd(resp.id + "/comments?continuation=" + cont, (lst: JsonList) => {
-                                    if (!lst) lst = { items: [], etags: undefined, continuation: undefined };
-                                    dd.setChildren(lst.items.map(j => this.tabBox(j)))
-                                    if (lst.continuation)
-                                        dd.appendChild(loadMore(lst.continuation))
-                                })
-                            }))
-                            return dd
-                        }
-
-                        TheApiCacheMgr.getAnd(resp.id + "/comments", (lst: JsonList) => {
-                            d.className = ""
-                            if (lst && lst.items.length > 0) {
-                                var ch = lst.items.map(j => this.tabBox(j))
-                                //ch.unshift(div("sdHeading", lf("comments on base /{0}", resp.id)))
-                                if (lst.continuation)
-                                    ch.push(loadMore(lst.continuation))
-                                d.setChildren(ch)
-                            } else {
-                                d.setChildren([])
-                            }
-                        })
-
-                        var si = this.browser().getScriptInfo(resp)
-                        var hd = si.mkSmallBox();
-                        hd.className += " sdBaseHeader"
-                        if (EditorSettings.widgets().commentHistory) {
-                            var btn = div("sdBaseCorner",
-                                div(null, HTML.mkButton(lf("diff curr"), () => this.script().diffToId(resp.id))),
-                                div(null, HTML.mkButton(lf("diff prev"), () => si.diffToBase())))
-                            hd.appendChild(btn)
-                        } else hd.setFlag("slim", true);
-                        cont.appendChild(div(null, hd, d))
-
-                        if (resp.rootid != resp.id) {
-                            if (versionDepth < 5) getFor(Cloud.lite ? resp.baseid : resp.id)
-                            else {
-                                var loadMoreVersion = HTML.mkButton(lf("load more"), () => {
-                                    loadMoreVersion.removeSelf();
-                                    versionDepth = 0;
-                                    getFor(Cloud.lite ? resp.baseid : resp.id);
-                                });
-                                cont.appendChild(loadMoreVersion);
-                            }
-                        }
-                    })
-                }
-
-
-                if (Cloud.lite)
-                    // the call to /family is there to prefetch typical parents
-                    TheApiCacheMgr.getAsync(this.getParentId() + "/family?count=10&etagsmode=includeetags", true)
-                        .done((prefetch) => {
-                            if (prefetch)
-                                prefetch.items.forEach((e, i) => {
-                                    TheApiCacheMgr.store(e.id, e, prefetch.etags && prefetch.etags[i] ? prefetch.etags[i].ETag : null, true);
-                                })
-
-                            if (this.parent.publicId) {
-                                if (!js.id)
-                                    return cont; // script deleted?
-                                if (js.baseid) getFor(js.baseid)
-                            }
-                            else
-                                getFor(this.getParentId(), true)
-                        })
-                else
-                    getFor(this.getParentId())
-
-                return cont
-            } else {
-                return div(null)
-            }
-        }
-
-        private mkCommentPostWidget(reply: boolean, id: string, initialText: string = null): HTMLElement {
-            Util.assert(!!id, "missing comment id");
-
-            if (Cloud.isRestricted() && !Cloud.hasPermission("post-comment")) return div('');
-
-            var text = HTML.mkTextArea();
-            var postBtn = div(null);
-            text.rows = 1;
-            text.placeholder = reply ? lf("Reply...") : lf("Post a comment...");
-            var postDiv: HTMLElement = div("commentPost", div(null, text), postBtn);
-
-            var post = () => {
-                if (text.value.length < 2) return;
-                if (Cloud.anonMode(lf("posting comments"))) return;
-                var cmt =
-                    {
-                        time: Util.now() * 1000,
-                        userid: "me",
-                        username: "",
-                        publicationid: id,
-                        publicationname: this.parent.getName(),
-                        text: text.value,
-                        nestinglevel: this.parent.getPublicationId() == id ? 0 : 1,
-                        positivereviews: 0,
-                        comments: 0
-                    };
-                var req = { kind: "comment", text: text.value, userplatform: Browser.platformCaps };
-                Cloud.postPrivateApiAsync(id + "/comments", req)
-                    .done((resp: JsonComment) => {
-                        cmtBox.setFlag("working", false);
-                        if (reply)
-                            postDiv.setChildren([cmtBox, inner]);
-                        else
-                            postDiv.setChildren([inner, cmtBox]);
-                        if (resp.id) {
-                            TheApiCacheMgr.invalidate(id);
-                            TheApiCacheMgr.store(resp.id, resp);
-                            cmtBox.setChildren([this.commentBox(resp)]);
-                            Browser.Hub.askToEnableNotifications();
-
-
-                            if (bugsEnabled) {
-                                var bugId = id
-                                if (!reply) bugId = resp.id
-
-                                var bugReq = { assignedtoid: undefined, resolved: undefined }
-                                Util.getHashTags(req.text).forEach((h) => {
-                                    h = h.toLowerCase()
-                                    var m = /^assignedto(\w+)$/.exec(h)
-                                    if (m) bugReq.assignedtoid = m[1]
-                                    if (CommentsTab.bugStatuses.hasOwnProperty(h))
-                                        bugReq.resolved = h
-                                })
-
-                                if (bugReq.assignedtoid || bugReq.resolved) {
-                                    return Cloud.postPrivateApiAsync(bugId, bugReq).then((resp) => {
-                                        TheApiCacheMgr.invalidate(bugId);
-                                        // debugger;
-                                    })
-                                }
-                            }
-                        }
-                    }, (e: any) => {
-                        cmtBox.setFlag("working", false);
-                        postDiv.className = "commentPost";
-                        postDiv.setChildren([div(null, text), postBtn]);
-                        if (e && e.status == 400)
-                            ModalDialog.info(lf("couldn't post comment"), lf("Sorry, we could not post this comment."));
-                        else
-                            Cloud.handlePostingError(e, lf("post comment"));
-                    });
-
-                var cmtBox = div("sdCmtPosting", lf("posting..."));
-                cmtBox.setFlag("working", true);
-                postDiv.className = "";
-                var inner = this.mkCommentPostWidget(reply, id);
-                postDiv.setChildren([cmtBox]);
-            }
-
-            var addText = (s: string) => {
-                if (s) {
-                    if (text.value) s = " " + s;
-                    text.value += s + " ";
-                    Util.setKeyboardFocusTextArea(text);
-                }
-            };
-
-            var attaching = false;
-            var attach = () => {
-                if (!attaching) {
-                    attaching = true;
-                    tick(Ticks.commentAttach);
-                    Meta.chooseScriptAsync({ header: lf("pick a script to attach"), filter: s => !!s.publicId })
-                        .done(s => {
-                            attaching = false;
-                            if (s) {
-                                var x = "/" + s.publicId
-                                if (s.app)
-                                    x = "'" + s.app.getName() + "' " + x;
-                                addText(x)
-                            }
-                        });
-                }
-            };
-
-            var bug = () => {
-                tick(Ticks.commentBugTracking);
-                var m = new ModalDialog()
-                var boxes = []
-
-                var mkStatus = (info) => {
-                    var e = new DeclEntry(info.name);
-                    e.icon = "svg:" + info.icon + ",white"
-                    e.description = "set status to " + info.name
-                    boxes.push(e.mkBox().withClick(() => {
-                        addText(Util.toHashTag(info.name))
-                        m.dismiss()
-                    }))
-                }
-
-                var mkUser = (name: string) => {
-                    var ui = this.browser().getUserInfoById(name, name)
-                    boxes.push(ui.mkSmallBox().withClick(() => {
-                        addText(Util.toHashTag("assigned to " + name))
-                        m.dismiss()
-                    }))
-                }
-
-                var st = CommentsTab.bugStatuses
-                Object.keys(st).forEach(k => mkStatus(st[k]))
-                CommentsTab.bugUsers.forEach(mkUser)
-
-                m.choose(boxes);
-            }
-
-            var expand = () => {
-                if (text.rows <= 1) {
-                    if (Cloud.anonMode(lf("posting comments"), expand)) return;
-                    text.rows = 4;
-                    postBtn.setChildren(<any[]>[
-                        bugsEnabled ? HTML.mkButton(lf("bug-tracking"), bug) : null,
-                        HTML.mkButton(lf("attach"), attach),
-                        HTML.mkButton(lf("post"), post)]);
-                }
-            }
-
-            Util.onInputChange(text, expand);
-            text.addEventListener("click", expand, false);
-
-            if (initialText) {
-                text.value = initialText;
-                Util.setTimeout(1, post);
-            }
-
-            return postDiv;
-        }
-
-        private addBugControls() {
-            var assignedto = ""
-            var assignedtoBtn = HTML.mkLinkButton(lf("any assignment"), () => {
-                var m = new ModalDialog()
-                var boxes = []
-
-                var add = (b: HTMLElement, f: () => void) =>
-                    boxes.push(b.withClick(() => { f(); m.dismiss(); }));
-
-                var mkUser = (name: string) => {
-                    var ui = this.browser().getUserInfoById(name, name)
-                    add(ui.mkSmallBox(), () => {
-                        assignedto = name;
-                        assignedtoBtn.setChildren(ui.getTitle())
-                    })
-                }
-
-                var mkEntry = (name: string, at: string) => {
-                    var e = new DeclEntry(name)
-                    add(e.mkBox(), () => {
-                        assignedto = at
-                        assignedtoBtn.setChildren(name)
-                    })
-                }
-
-                mkEntry("any assignment", "")
-                mkEntry("not yet assigned", "none")
-
-                CommentsTab.bugUsers.forEach(mkUser)
-
-                m.choose(boxes)
-            })
-
-            var order = ""
-            var orderBtn = HTML.mkLinkButton(lf("by votes"), () => {
-                if (order) {
-                    order = ""
-                    orderBtn.setChildren(lf("by votes"))
-                } else {
-                    order = "recent";
-                    orderBtn.setChildren(lf("by time"))
-                }
-            })
-
-            var mk = (n: string) =>
-                HTML.mkLinkButton(n + "s", () => {
-                    var srch = "issue:" + n
-                    if (assignedto)
-                        srch += " assignedto:" + assignedto
-                    if (order)
-                        srch += " order:" + order
-                    this.browser().searchFor(srch)
-                });
-            this._topContainer = div(null,
-                div("smallText",
-                    "show: ",
-                    mk("bug"),
-                    mk("feature"),
-                    " filters: ",
-                    assignedtoBtn,
-                    orderBtn),
-                this._topContainer)
-        }
-
-        public topContainer() {
-            if (!this._topContainer) {
-                if (this.forumName && !this.forumId)
-                    this._topContainer = div(null);
-                else {
-                    var t = CommentsTab.topCommentInitialText;
-                    CommentsTab.topCommentInitialText = undefined;
-                    this._topContainer = this.mkCommentPostWidget(false, this.getParentId(), t);
-                }
-                if (this.forumName == lf("issues"))
-                    this.addBugControls();
-                //if (this.isForum())
-                //    this._topContainer = div(null, ScriptInfo.labeledBox("forum", this.parent.mkSmallBox()), this._topContainer);
-                if (this.headerRenderer) {
-                    var h = div(null);
-                    this._topContainer = div(null, h, this._topContainer);
-                    this.headerRenderer(h);
-                }
-            }
-            TheApiCacheMgr.invalidate(this.getUrl());
-            return this._topContainer;
-        }
-
-        public hideOnEmpty() { return false; }
-
-        inlineText(cc: JsonIdObject) {
-            var c = <JsonComment>cc;
-            return <any[]>[span("sdBold", c.username), ": " + ListTab.limitLength(c.text, 60)];
-        }
-
-        private nestedCommentsCount(cont: string): number {
-            if (!cont) // first time querying
-                return Browser.isCellphone ? 2 : Browser.isMobile ? 3 : 5;
-            else // user asked for more
-                return Browser.isCellphone ? 5 : Browser.isMobile ? 10 : 15;
-        }
-
-        private getNestedComments(elt: HTMLElement, id: string, cont: string) {
-            Util.assert(!!id, "missing nested replies");
-            elt.setChildren([lf("loading replies...")]);
-            var count = this.nestedCommentsCount(cont);
-            TheApiCacheMgr.getAnd(id + "/comments?count=" + count + (cont ? "&continuation=" + cont : ""), (lst: JsonList) => {
-                if (!lst || !lst.items) lst = { items: [], etags: undefined, continuation: undefined };
-                var items = <JsonComment[]>lst.items;
-                if (!cont && items.length > count) // first load
-                {
-                    var boxes = items.slice(0, count).map((cmt) => this.commentBox(cmt));
-                    boxes.reverse();
-                    var loadRemaining = () => {
-                        var d: HTMLElement = div(null, HTML.mkButton(lf("load more replies"), () => {
-                            var remainingBoxes = items.slice(count).map((cmt) => this.commentBox(cmt));
-                            remainingBoxes.reverse();
-                            if (!!lst.continuation) {
-                                var d2: HTMLElement = div(null, HTML.mkButton(lf("load more replies"), () => {
-                                    this.getNestedComments(d2, id, lst.continuation);
-                                }));
-                                remainingBoxes.unshift(d2);
-                            }
-                            d.setChildren(remainingBoxes);
-                        }));
-                        boxes.unshift(d);
-                    }
-                    loadRemaining();
-                    elt.setChildren(boxes);
-                } else {
-                    var boxes = items.map((cmt) => this.commentBox(cmt));
-                    boxes.reverse();
-                    var loadMore = () => {
-                        if (!!lst.continuation) {
-                            var d: HTMLElement = div(null, HTML.mkButton(lf("load more replies"), () => {
-                                this.getNestedComments(d, id, lst.continuation);
-                            }));
-                            boxes.unshift(d);
-                        }
-                    }
-                    loadMore()
-                    elt.setChildren(boxes);
-                }
-            });
-        }
-
-        public tabBox(cc: JsonIdObject): HTMLElement {
-            var c = <JsonComment>cc;
-
-            if (!this.isForum())
-                return this.commentBox(c, c.nestinglevel == 0);
-
-            if (c.nestinglevel > 0) {
-                var r = div(null);
-
-                if (!this.seenComments.hasOwnProperty(c.publicationid)) {
-                    this.seenComments[c.publicationid] = 1;
-                    TheApiCacheMgr.getAnd(c.publicationid, (pc: JsonComment) => {
-                        r.setChildren([this.commentBox(pc, true)]);
-                    });
-                }
-
-                return r;
-            } else {
-                if (this.seenComments.hasOwnProperty(c.id)) return div(null);
-                return this.commentBox(c, true);
-            }
-        }
-
-        static translateCommentAsync(cid: string): Promise { // text
-            if (!Cloud.config.translateCdnUrl || !Cloud.config.translateApiUrl) return Promise.as(undefined);
-            var to = Util.getTranslationLanguage();
-            var blobUrl = Cloud.config.translateCdnUrl + "/comments/" + to + "/" + cid;
-            return Util.httpGetTextAsync(blobUrl)
-                .then((blob) => blob, e => {
-                    // requestion translation
-                    var url = Cloud.config.translateApiUrl + '/translate_comment?commentId=' + cid + '&to=' + to;
-                    return Util.httpGetJsonAsync(url).then((js) => js.translated, e => undefined);
-                });
-        }
-
-        public commentBox(c: JsonComment, includePosting = false): HTMLElement {
-            if (!c) return undefined; // deleted comment
-
-            var uid = this.browser().getCreatorInfo(c);
-            var nestedComments = div(null);
-            var nestedPubs = div(null);
-            if (c.nestinglevel > 0 || c.comments == 0) nestedComments = null;
-            else {
-                TheApiCacheMgr.invalidate(c.id + "/comments");
-                this.getNestedComments(nestedComments, c.id, null);
-            }
-            var textDiv = div('sdSmallerTextBox');
-            var cmts = new MdComments();
-            cmts.allowLinks = true;
-            cmts.allowImages = false;
-            cmts.allowVideos = false;
-            var formattedText = cmts.formatText(c.text)
-            Browser.setInnerHTML(textDiv, formattedText);
-            HTML.fixWp8Links(textDiv);
-            dirAuto(textDiv);
-
-            // parsing any pub id
-            var pubRx = /(^|[^\w\/]|https?:\/\/tdev.ly|https?:\/\/(www\.)?touchdevelop.com)\/([a-z]{4,})/g;
-            var pubM = null;
-            var isPull = /#pullRequest/i.test(c.text)
-            while ((pubM = pubRx.exec(c.text)) != null) {
-                TheApiCacheMgr.getAsync(pubM[3], true)
-                    .done(
-                    j => {
-                        var jd = this.browser().getAnyInfoByEtag(j);
-                        if (jd) {
-                            var box = jd.mkSmallBox()
-                            nestedPubs.appendChild(box);
-                            if (isPull && jd instanceof ScriptInfo) {
-                                box.appendChild(
-                                    div("sdBaseCorner", HTML.mkButton(lf("pull"), () => (<ScriptInfo>jd).mergeScript())))
-                            }
-                        }
-                    },
-                    e => { });
-            }
-            // parsing user id
-            var userRx = /(^|[^\w@])@([a-z]{4,})/g;
-            var userM = null;
-            while ((userM = userRx.exec(c.text)) != null) {
-                TheApiCacheMgr.getAsync(userM[2], true)
-                    .done(
-                    j => {
-                        var jd = this.browser().getAnyInfoByEtag(j);
-                        if (jd) nestedPubs.appendChild(jd.mkSmallBox());
-                    },
-                    e => { });
-            }
-
-            // parsing social network links
-            socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync)
-                .forEach(sn => sn.parseIds(c.text)
-                    .forEach(ytid => sn.idToHTMLAsync(ytid)
-                        .done(d => { if (d) nestedPubs.appendChild(d); })));
-
-            var translateBtn: HTMLElement = null;
-            var translateCmt = () => {
-                translateBtn.setFlag("working", true);
-                CommentsTab.translateCommentAsync(c.id)
-                    .done(translated => {
-                        var trDiv = div('translated', translated || ':( ' + lf("Sorry, we could not translate this message."));
-                        dirAuto(trDiv);
-                        translateBtn.setFlag("working", false);
-                        translateBtn.removeSelf();
-                        textDiv.appendChild(trDiv);
-                    });
-            }
-            translateBtn = EditorSettings.widgets().translateComments ? div("sdCmtBtn", HTML.mkImg("svg:Recycle,#000", '', '', true), lf("translate")).withClick(translateCmt) : null;
-
-            var delBtn: HTMLElement = null;
-            var deleteCmt = () => {
-                if (Cloud.anonMode(lf("deleting comments"))) return;
-                ModalDialog.ask(lf("are you sure you want to delete this comment?"), lf("delete it"), () => {
-                    delBtn.setFlag("working", true);
-                    Cloud.deletePrivateApiAsync(c.id).done(() => {
-                        r.removeSelf();
-                    }, (e: any) => {
-                        delBtn.setFlag("working", false);
-                        Cloud.handlePostingError(e, "delete comment");
-                    });
-                });
-            }
-
-            var reportAbuse = () => {
-                AbuseReportInfo.abuseOrDelete(c.id)
-            }
-
-            if (c.userid == Cloud.getUserId() || (this.canDeleteAny && this.canDeleteAny())) {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:Trash,#000", '', '', true), lf("delete")).withClick(deleteCmt);
-            } else {
-                delBtn = div("sdCmtBtn", HTML.mkImg("svg:SmilieSad,#000", '', '', true), lf("abuse")).withClick(reportAbuse);
-            }
-
-            var likeBtn = div("sdCmtBtnOuter");
-            function setLikeBtn(s: number, h: string, f: () => void) {
-                var btn: HTMLElement;
-                if (s < 0)
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#000"), h)
-                else
-                    btn = div("sdCmtBtn", HTML.mkImg("svg:wholeheart,#a00"), h)
-                if (Math.abs(s) < 2) btn.setFlag("working", true);
-                likeBtn.setChildren([btn.withClick(f)]);
-            }
-            ScriptInfo.setupLike(c.id, setLikeBtn);
-
-            var r = div("sdCmt", uid.thumbnail(),
-                div("sdCmtTopic",
-                    span("sdBold", c.username),
-                    c.resolved ? div("sdCmtResolved", c.resolved + (c.assignedtoid ? " (" + c.assignedtoid + ")" : "")) : null,
-                    this.parent.getPublicationId() == c.publicationid || this.forumId == c.publicationid || c.nestinglevel > 0 ? null
-                        : <any[]>[" on ", div("sdCmtScriptName", c.publicationname).withClick(() => {
-                            var b = this.browser();
-                            b.loadDetails(b.getReferencedPubInfo(c))
-                        })
-                        ]),
-                textDiv,
-                div("sdCmtMeta",
-                    Util.timeSince(c.time),
-                    c.positivereviews > 0 ? " " + c.positivereviews + "♥ " : null,
-                    c.comments > 0 ? " " + c.comments + " replies " : null,
-                    span("sdCmtId", " /" + c.id),
-                    div("sdCmtBtns", translateBtn, likeBtn, delBtn)),
-                nestedPubs,
-                nestedComments,
-                includePosting ? this.mkCommentPostWidget(true, c.id) : null
-            );
-            if (c.nestinglevel == 0) {
-                r.className += " sdCmtTop";
-                if (!includePosting) {
-                    r.style.cursor = "pointer";
-                    r.withClick(() => {
-                        var b = this.browser();
-                        b.loadDetails(b.getCommentInfoById(c.id));
-                    });
-                }
-            } else {
-                r.className += " sdCmtNested";
-            }
-            return r;
-        }
-    }
-
-    export class SuccessorsTab
-        extends ListTab {
-        constructor(par: BrowserPage) {
-            super(par, "/successors")
-        }
-        public getId() { return "forks"; }
-        public getName() { return lf("forks"); }
-
-        public bgIcon() { return "svg:code-fork"; }
-        public noneText() { return lf("no forks, install, edit and re-publish script to create one!"); }
-        // public bgIcon() => "svg:WritePage";
-        inlineText(cc: JsonIdObject) {
-            var c = <JsonScript>cc;
-            return <any[]>[c.name == this.script().app.getName() ? null : c.name, " by\u00A0", span("sdBold", c.username)];
-        }
-
-        public tabBox(cc: JsonIdObject): HTMLElement {
-            var c = <JsonScript>cc;
-            return this.browser().getScriptInfo(c).mkSmallBox();
-        }
-    }
-
     interface JsonScriptWithBase extends JsonScript {
         baseid: string;
-    }
-
-    export class DerivativesTab
-        extends BrowserTab {
-        constructor(par: BrowserPage) {
-            super(par)
-        }
-        public getId() { return "derivatives"; }
-        public getName() { return lf("derivatives"); }
-
-        public bgIcon() { return "svg:Binoculars"; }
-
-        public initTab() {
-            var infos: StringMap<JsonScriptWithBase> = {}
-            var boxes: HTMLElement[] = []
-            var numQueries = 0
-            var numDiffs = 0
-
-            var statDiv = div("sdInlineHelp")
-            boxes.push(statDiv)
-
-            var updateStats = (done = false) => {
-                statDiv.setChildren(Util.fmt("{2}. {0} server request(s), {1} diff(s) computed", numQueries, numDiffs, done ? "Done" : "Working"))
-            }
-
-            var addDiffAsync = (scr: JsonScriptWithBase) => {
-                // find first script up with a different update id
-                var diffTo = scr.baseid
-                while (infos.hasOwnProperty(diffTo)) {
-                    var par = infos[diffTo]
-                    if (par.updateid != scr.updateid)
-                        break
-                    diffTo = par.baseid
-                }
-
-                return Promise.join([ScriptCache.getScriptAsync(diffTo), ScriptCache.getScriptAsync(scr.id)]).then(scrs => {
-                    if (!scrs[0] || !scrs[1]) return;
-
-                    function prep(s: string) {
-                        var app = AST.Parser.parseScript(s, [])
-                        //app.isTopLevel = true;
-                        //AST.TypeChecker.tcScript(app, true);
-                        return app;
-                    }
-                    var a0 = prep(scrs[0])
-                    var a1 = prep(scrs[1])
-                    AST.Diff.diffApps(a0, a1, {
-                        useStableNames: true
-                    })
-                    var st = AST.Diff.DiffStat.run(a1)
-
-                    var info = this.browser().getScriptInfoById(scr.id)
-                    var box = div(null, info.mkSmallBox())
-                    box.appendChild(HTML.mkButton(lf("diff"), () => info.diffToId(diffTo)))
-                    var addNum = (n: number, sym: string, title: string) => { box.appendChildren([ScriptInfo.mkNum(n, sym, title)]) }
-
-                    addNum(st.numOtherChanges, "svg:Wrench", lf("other"))
-                    addNum(st.numCommentChanges, "svg:callout", lf("comments"))
-                    addNum(st.numArtChanges, "svg:Clover", lf("art changes"))
-                    addNum(st.numStringChanges, "svg:ABC", lf("string changes"))
-                    addNum(st.numNumberChanges, "svg:123", lf("number changes"));
-
-                    (<any>box).score = [st.numOtherChanges, st.numCommentChanges + st.numStringChanges + st.numNumberChanges,
-                        st.numArtChanges, -scr.time]
-                    var cmpBox = (a, b) => {
-                        if (!a.score) return -1
-                        if (!b.score) return 1
-                        for (var i = 0; i < a.score.length; ++i) {
-                            var d = b.score[i] - a.score[i]
-                            if (d) return d
-                        }
-                        return 0
-                    }
-
-                    boxes.push(box)
-                    boxes.sort(cmpBox)
-                    this.tabContent.setChildren(boxes)
-
-                    numDiffs++
-                    updateStats()
-                })
-            }
-
-            var processAsync: (p: string) => Promise = (parid: string) => {
-                var withContAsync = (cont: string) =>
-                    TheApiCacheMgr.getAsync(parid + "/successors?count=100" + cont)
-                        .then((resp: JsonList) => {
-                            numQueries++
-                            updateStats()
-                            var promises: Promise[] = []
-                            resp.items.forEach((scr: JsonScriptWithBase) => {
-                                scr.baseid = parid
-                                infos[scr.id] = scr
-                                if (scr.updateid == scr.id)
-                                    promises.push(addDiffAsync(scr))
-                                promises.push(processAsync(scr.id))
-                            })
-                            if (resp.continuation)
-                                promises.push(withContAsync("&continuation=" + resp.continuation))
-                            return Promise.join(promises)
-                        })
-                return withContAsync("")
-            }
-            processAsync(this.parent.publicId).done(() => updateStats(true))
-
-            this.tabContent.setChildren(boxes)
-        }
-    }
-
-    export class TagsTab extends ListTab {
-        tagBtns: any = {};
-        ownTags: any = {};
-        askedForTagList = false;
-        _topContainer: HTMLElement = null;
-
-        constructor(par: BrowserPage) {
-            super(par, "/tags");
-        }
-
-        hideOnEmpty() { return false; }
-
-        getId() { return "tags"; }
-        getName() { return lf("tags"); }
-
-        private fullName(c: JsonTag) { return c.category ? c.category + " " + c.name : c.name; }
-
-        inlineText(cc: JsonIdObject) {
-            var c = <JsonTag>cc;
-            return <any[]>[c.instances + "x ", span("sdBold", this.fullName(c))];
-        }
-
-        noneText() { return lf("no tags, tap to add some!"); }
-
-        initInline() {
-            this.loadMoreElementsAnd(null, (tags: JsonTag[]) => {
-                this.setVisibility(true);
-                if (tags.length == 0) {
-                    this.inlineContent.setChildren([div("sdTabTileNothing", span(null, this.noneText())), this.getTileLabel("")])
-                } else {
-                    tags.sort((a, b) => b.instances - a.instances);
-                    var ptfn = this.fullName(tags[0]);
-                    var prim = div("sdTabTilePrimaryTag " + (ptfn.length < 10 ? " sdTabTilePrimaryTagBig" : ""), span(null, ptfn));
-                    var ch = [prim];
-                    for (var i = 1; i < 2; i++) {
-                        var t = tags[i];
-                        if (t)
-                            ch.push(div("sdTabTileSecondaryTag", span(null, this.fullName(t))))
-                    }
-                    ch.push(this.getTileLabel(""));
-                    this.inlineContent.setChildren(ch);
-                }
-            });
-        }
-
-
-        resetEltsSoFar() {
-            this.tagBtns = {}
-        }
-
-
-        topContainer(): HTMLElement {
-            if (this._topContainer) return this._topContainer;
-
-            var tagContainer = div(null);
-
-            var addTag = (e: JsonTag) => {
-                if (Cloud.anonMode(lf("adding tags"))) return;
-
-                var id = e.id;
-                e = JSON.parse(JSON.stringify(e));
-                e.instances = 1;
-                tagContainer.appendChild(this.tabBox(e));
-                this.tagBtns[id].firstChild.setFlag("working", true);
-
-                var req = { kind: "tag", id: id }
-                Cloud.postPrivateApiAsync(this.parent.getPublicationId() + "/tags", req)
-                    .done((resp) => {
-                        this.updateTagTo(id, true);
-                        Browser.Hub.askToEnableNotifications();
-                    }, (e: any) => {
-                        this.tagBtns[id].firstChild.setFlag("working", false);
-                        Cloud.handlePostingError(e, "add tag");
-                    });
-            }
-
-            var btn = HTML.mkButton(lf("add new tag"), () => {
-                var done = false;
-                TheApiCacheMgr.getAnd("tags?count=1000", (lst: JsonList) => {
-                    if (done) return;
-                    done = true;
-                    var seenTags: any = {}
-                    var items = lst.items.filter((e: JsonTag) => {
-                        if (this.tagBtns[e.id] || seenTags[e.id]) return false;
-                        seenTags[e.id] = true;
-                        return true;
-                    });
-                    items.sort((a: JsonTag, b: JsonTag) => b.instances - a.instances);
-                    var m = new ModalDialog();
-                    m.choose(items.map((e: JsonTag) => this.bareBox(e, null).withClick(() => { m.dismiss(); addTag(e) })));
-                });
-            });
-
-            return this._topContainer = div(null, div(null, btn),
-                Host.expandableTextBox(lf("tap a checkmark to add (or remove) your 'vote' to an existing tag")), tagContainer);
-        }
-
-        private bareBox(c: JsonTag, btn: HTMLElement) {
-            return div("sdCmt",
-                btn,
-                div("sdCmtTopic",
-                    span("sdBold", this.fullName(c)),
-                    " x" + c.instances + ""
-                ),
-                Host.expandableTextBox(c.description));
-        }
-
-        updateTagTo(id: string, hasIt: boolean) {
-            var sid = this.parent.getPublicationId();
-            TheApiCacheMgr.invalidate("me/tagged/" + sid);
-            TheApiCacheMgr.invalidate(sid + "/tags");
-            this.ownTags[id] = hasIt;
-            this.updateTag(id);
-        }
-
-        updateTag(id: string) {
-            var sid = this.parent.getPublicationId();
-            var btn = this.tagBtns[id];
-            if (!btn) return;
-            var hasIt = !!this.ownTags[id];
-            var elt = div("sdIcon", HTML.mkImg("svg:Check," + (hasIt ? "black" : "#ddd") + ",clip=60"));
-            elt.withClick(() => {
-                elt.setFlag("working", true);
-                if (hasIt) {
-                    if (Cloud.anonMode(lf("removing tags"))) return;
-                    Util.httpRequestAsync(Cloud.getPrivateApiUrl(sid + "/" + id), "DELETE", undefined).then(() => {
-                        this.updateTagTo(id, false);
-                    }, (e: any) => {
-                        elt.setFlag("working", false);
-                        Cloud.handlePostingError(e, "remove tag");
-                    }).done();
-                } else {
-                    if (Cloud.anonMode(lf("adding tags"))) return;
-                    var req = { kind: "tag", id: id }
-                    Cloud.postPrivateApiAsync(sid + "/tags", req)
-                        .done((resp) => {
-                            this.updateTagTo(id, true);
-                            Browser.Hub.askToEnableNotifications();
-                        }, (e: any) => {
-                            elt.setFlag("working", false);
-                            Cloud.handlePostingError(e, "add tag");
-                        });
-                }
-            });
-            btn.setChildren([elt]);
-        }
-
-        tabBox(cc: JsonIdObject) {
-            var c = <JsonTag>cc;
-            if (!this.askedForTagList) {
-                TheApiCacheMgr.getAnd("me/tagged/" + this.parent.getPublicationId(), (resp: JsonList) => {
-                    this.ownTags = {}
-                    resp.items.forEach((t: JsonTag) => { this.ownTags[t.id] = true })
-                    Object.keys(this.tagBtns).forEach((t) => this.updateTag(t))
-                })
-            }
-
-            var btn = div("sdThumb");
-            var d = this.bareBox(c, btn);
-            this.tagBtns[c.id] = btn;
-            this.updateTag(c.id);
-
-            return d;
-        }
     }
 
     export class AbuseReportsTab
@@ -5235,10 +4222,7 @@ module TDev.Browser {
         public mkTabsCore(): BrowserTab[] {
             return [
                 this
-                // these need more work
-                //  new CommentsTab(this),
                 , new ScriptsTab(this, lf("no scripts using this art"))
-                //  new SubscribersTab(this)
                 , new AbuseReportsTab(this)
             ];
         }
@@ -5252,10 +4236,6 @@ module TDev.Browser {
                 var cont = [];
                 var audio = null;
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                // addNum(a.positivereviews, "♥");
-                // if (sz > 1) {
-                //     addNum(a.comments, "✉");
-                // }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = d.style.background;
@@ -5428,24 +4408,7 @@ module TDev.Browser {
         }
 
         private mkButtons(): HTMLElement {
-            var mkBtn = (icon: string, desc: string, key: string, f: () => void) => {
-                var b = HTML.mkButtonElt("sdBigButton sdBigButtonHalf", div("sdBigButtonIcon", HTML.mkImg(icon, '', '', true)), div("sdBigButtonDesc sdHeartCounter", desc));
-                TheEditor.keyMgr.btnShortcut(b, key);
-                return b.withClick(f);
-            }
-            var heartButton: HTMLElement = span("sdHeart", "");
-            var setBtn = (state: number, hearts: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (state < 0)
-                    btn = mkBtn("svg:wholeheart,white,opacity=0.3", hearts, null, f);
-                else
-                    btn = mkBtn("svg:wholeheart,white", hearts, null, f);
-                heartButton.setChildren([btn]);
-                btn.setFlag("working", Math.abs(state) < 2);
-            }
-
-            ScriptInfo.setupLike(this.publicId, setBtn);
-            return div("sdRunBtns", heartButton);
+            return div("sdRunBtns");
         }
 
         public match(terms: string[], fullName: string) {
@@ -6236,15 +5199,6 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                if (big && !isTopic) {
-                    if (!SizeMgr.phoneMode)
-                        addNum(this.jsonScript.installations, "users", lf("users"));
-                    addNum(this.jsonScript.runs, "runs", lf("runs"));
-                } else {
-                    addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
-                    if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉", lf("comments"));
-                }
                 if (this.app.isLibrary) {
                     var sp = document.createElement('span'); sp.className = 'sdNumber symbol';
                     sp.innerHTML = ' ' + AST.libSymbol;
@@ -6300,13 +5254,6 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(getScriptHeartCount(this.jsonScript), "♥", lf("favourites"));
-                if (sz > 1) {
-                    if (EditorSettings.widgets().publicationComments)
-                        addNum(this.jsonScript.comments, "✉", lf("comments"));
-                    //addNum(jsonScript.installations, "users");
-                    //addNum(jsonScript.runs, "runs");
-                }
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = this.app.htmlColor();
@@ -6364,21 +5311,16 @@ module TDev.Browser {
             return !this.app || this.app.supportsAllPlatforms(api.core.currentPlatform);
         }
 
-        private commentsTab: CommentsTab;
         public mkTabsCore(): BrowserTab[] {
             var r: BrowserTab[];
             if (!this.publicId)
                 r = [this,
-                    new ScriptDetailsTab(this),
-                    EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null];
+                    new ScriptDetailsTab(this)];
             else
                 r =
                     [
                         this,
-                        new ScriptDetailsTab(this),
-                        this.cloudHeader && EditorSettings.widgets().scriptHistoryTab ? new HistoryTab(this) : null,
-                        EditorSettings.widgets().scriptInsightsTab ? new InsightsTab(this) : null,
-                        Cloud.lite ? new AbuseReportsTab(this) : null,
+                        new ScriptDetailsTab(this)
                     ];
             return r;
         }
@@ -6424,23 +5366,10 @@ module TDev.Browser {
             }
 
             var likePub: HTMLElement;
-
-            var setBtn = (state: number, hearts: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (state < 0)
-                    btn = mkBtn(Ticks.browseHeart, "svg:wholeheart,white,opacity=0.3", hearts, null, f);
-                else
-                    btn = mkBtn(Ticks.browseUnHeart, "svg:wholeheart,white", hearts, null, f);
-                heartButton.setChildren([btn]);
-                btn.setFlag("working", Math.abs(state) < 2);
-            }
-
-            if (this.publicId) {
-                var heartButton = span("sdHeart", "");
-                likePub = heartButton;
-                ScriptInfo.setupLike(this.publicId, setBtn);
-            } else {
+            if (!this.publicId) {
                 likePub = mkBtn(Ticks.browsePublish, "svg:Upload,white", lf("publish"), null, () => this.publishAsync(true).done());
+                likePub.classList.add("sdUninstall");
+                likePub.style.backgroundColor = "#ccc";
             }
 
             var uninstall: HTMLElement;
@@ -6613,7 +5542,6 @@ module TDev.Browser {
             var wontWork = div(null);
             var runBtns = div(null);
             var authorDiv = div(null);
-            var commentsDiv = div(null);
             var docsButtonDiv = div(null);
 
             this.tabContent.setChildren([
@@ -6623,7 +5551,6 @@ module TDev.Browser {
                 descDiv,
                 metaDiv,
                 docsButtonDiv,
-                commentsDiv,
                 wontWork,
             ]);
 
@@ -6684,18 +5611,6 @@ module TDev.Browser {
                 if (this.jsonScript.meta) {
                     socialNetworks(EditorSettings.widgets()).filter(sn => !!sn.idToHTMLAsync && !!this.jsonScript.meta[sn.id])
                         .forEach(sn => sn.idToHTMLAsync(this.jsonScript.meta[sn.id]).done(d => { if (d) metaDiv.appendChild(d); }));
-                }
-
-                if (EditorSettings.widgets().publicationComments && this.getPublicationIdOrBaseId()) {
-                    if (!this.commentsTab) {
-                        this.commentsTab = new CommentsTab(this);
-                        this.commentsTab.initElements();
-                        this.commentsTab.tabLoaded = true;
-                        this.commentsTab.initTab();
-                    }
-                    commentsDiv.setChildren([
-                        this.commentsTab.topContainer(),
-                        this.commentsTab.tabContent])
                 }
             });
 
@@ -7784,9 +6699,6 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.receivedpositivereviews, "♥", lf("favourites"));
-                //addNum(u.subscribers, "svg:Person,white,clip=80"); does not scale properly
-                //addNum(u.features, "svg:Award,white,clip=110");
 
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
 
@@ -8059,8 +6971,7 @@ module TDev.Browser {
         constructor(par: UserInfo) {
             super(par,
                 "More information about art, score, subscribers, subscriptions and given hearts.",
-                Cloud.lite ? ChannelListTab : null,
-                ArtTab, SubscribersTab, UserHeartsTab, SubscriptionsTab, ScreenShotTab);
+                ArtTab);
         }
 
         public bgIcon() {
@@ -8083,44 +6994,6 @@ module TDev.Browser {
 
         public getName() { return lf("insights"); }
         public getId() { return "insights"; }
-    }
-
-    export class ForumInfo
-        extends BrowserPage {
-
-        constructor(par: Host) {
-            super(par)
-            this.publicId = "theForum";
-        }
-        public persistentId() { return "forum:forum"; }
-        public getTitle() { return "Forum"; }
-
-        public getId() { return "overview"; }
-        public getName() { return lf("overview"); }
-
-        public mkBoxCore(big: boolean): HTMLElement { return div("hubSectionHeader", spanDirAuto(lf("the forums"))) }
-
-        public mkTabsCore(): BrowserTab[] {
-            var tabs: CommentsTab[] = [
-                new CommentsTab(this),
-                new CommentsTab(this),
-                new CommentsTab(this)
-            ];
-
-            tabs[0].forumName = lf("general");
-            tabs[0].forumId = "bttt";
-
-            tabs[1].forumName = lf("issues");
-            tabs[1].forumId = "atljilhp";
-
-            tabs[2].forumName = lf("everything");
-            tabs[2].forumId = "";
-
-            return tabs;
-        }
-
-        public initTab() {
-        }
     }
 
     export class AbuseReportInfo
@@ -8362,142 +7235,6 @@ module TDev.Browser {
         }
     }
 
-    export class CommentInfo
-        extends BrowserPage {
-        constructor(par: Host) {
-            super(par)
-            this._comments = new CommentsTab(this);
-        }
-        public persistentId() { return "comment:" + this.targetId(); }
-        public getTitle() { return "comment " + this.publicId; }
-
-        public getId() { return "comment"; }
-        public getName() { return lf("comment"); }
-
-        public loadFromWeb(id: string) {
-            this.publicId = id;
-        }
-
-        public mkBoxCore(big: boolean) {
-            var icon = div("sdIcon", HTML.mkImg("svg:email,white"));
-            icon.style.background = "#1731B8";
-            var textBlock = div("sdCommentBlockInner");
-            var author = div("sdCommentAuthor");
-            var hd = div("sdCommentBlock", textBlock, author);
-
-            var numbers = div("sdNumbers");
-            var addInfoInner = div("sdAddInfoInner", "/" + this.publicId);
-            var pubId = div("sdAddInfoOuter", addInfoInner);
-            var res = div("sdHeaderOuter", div("sdHeader", icon, div("sdHeaderInner", hd, pubId, numbers, this.reportAbuse(big))));
-
-            if (big)
-                res.className += " sdBigHeader";
-
-            return this.withUpdate(res, (u: JsonComment) => {
-                var del = (<any>u) === false
-
-                textBlock.setChildren([del ? lf("deleted comment") : u.text]);
-                author.setChildren(["-- ", u.username || ""]);
-                addInfoInner.setChildren(del ? [] : [Util.timeSince(u.time) + " on " + u.publicationname]);
-                if (del) {
-                    icon.style.background = "#999";
-                }
-                if (u.publicationname == "general discussion" || u.publicationname == "bug reports and feature requests") {
-                    icon.setChildren([HTML.mkImg("svg:callout,white")])
-                    icon.style.background = "#080";
-                }
-                if (u.resolved) {
-                    var ic = CommentsTab.bugStatuses[u.resolved]
-                    if (ic && ic.icon)
-                        icon.setChildren([HTML.mkImg("svg:" + ic.icon + ",white")])
-                }
-
-                var cont = <any[]>[];
-                var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("favourites"));
-                addNum(u.comments, "replies", lf("replies"));
-                numbers.setChildren(cont);
-            });
-        }
-
-        public mkTile(sz: number) {
-            var d = div("hubTile hubTileSize" + sz);
-            return this.withUpdate(d, (u: JsonComment) => {
-
-                var cont = [];
-                var addNum = (n: number, sym: string, title) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(u.positivereviews, "♥", lf("favourites"));
-                addNum(u.comments, lf("replies"), lf("replies"));
-
-                var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
-                //nums.style.background = d.style.background;
-
-                d.setChildren([div("hubTileIcon", HTML.mkImg("svg:callout,white")),
-                    div("hubTileTitleBar",
-                        div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
-                        div("hubTileSubtitle",
-                            div("hubTileAuthor", spanDirAuto(u.username), nums)))])
-            });
-        }
-
-        public initTab() {
-            this._comments.initElements();
-            this._comments.tabLoaded = true;
-            this._comments.initTab();
-
-            this.withUpdate(this.tabContent, (c: JsonComment) => {
-                this.tabContent.setChildren([
-                    ScriptInfo.labeledBox(lf("comment on"), this.browser().getReferencedPubInfo(c).mkSmallBox()),
-                    this._comments.commentBox(c, true)]);
-            });
-        }
-
-        public mkBigBox(): HTMLElement { return null; }
-
-        private _comments: CommentsTab;
-
-        public mkTabsCore(): BrowserTab[] { return [this, new AbuseReportsTab(this)]; }
-
-        public bugCompareTo(other: CommentInfo, order: string) {
-            var j0: JsonComment = TheApiCacheMgr.getCached(this.publicId)
-            var j1: JsonComment = TheApiCacheMgr.getCached(other.publicId)
-            if (j0)
-                if (j1) {
-                    return (order == "recent" ? 0 :
-                        (j1.positivereviews - j0.positivereviews) ||
-                        (j1.comments - j0.comments)) ||
-                        (j1.time - j0.time)
-                } else return -1;
-            else if (j1) return 1;
-            else return 0;
-        }
-
-        public match(terms: string[], fullName: string) {
-            if (terms.length == 0) return 1;
-
-            var json: JsonComment = TheApiCacheMgr.getCached(this.publicId);
-            if (!json) return 0; // not loaded yet
-
-            var s = this.publicId + " " + json.publicationid + " " + json.username + " " + json.text;
-            return IntelliItem.matchString(s.toLowerCase(), terms, 100, 10, 1);
-        }
-
-        public mkSmallBox(): HTMLElement {
-            return this.mkBoxCore(false).withClick(() => {
-                var json = TheApiCacheMgr.getCached(this.publicId);
-                if (!json || json.nestinglevel == 0) this.parentBrowser.loadDetails(this)
-                else this.parentBrowser.loadDetails(this.parentBrowser.getCommentInfoById(json.publicationid));
-            });
-        }
-
-        private targetId(): string {
-            var json = TheApiCacheMgr.getCached(this.publicId);
-            if (!json || json.nestinglevel == 0) return this.publicId;
-            else return json.publicationid;
-        }
-
-    }
-
     export class TopicInfo
         extends BrowserPage {
         public topic: HelpTopic;
@@ -8540,37 +7277,11 @@ module TDev.Browser {
             return btns;
         }
 
-        private likeBtn(showCount = false) {
-            var likeBtn = div(null);
-            var id = this.topic.json.id;
-            if (!id) return likeBtn;
-
-            var setLikeBtn = (s: number, h: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (s < 0)
-                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
-                else
-                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#EAC117"))
-                var ctnSpan = span('', ''); btn.appendChild(ctnSpan);
-                if (Math.abs(s) < 2) btn.setFlag("working", true);
-                likeBtn.setChildren([btn.withClick(f)]);
-                if (showCount)
-                    TheApiCacheMgr.getAnd(id, (s: JsonScript) => {
-                        if (!s) return; //deleted
-                        var n = this.topic.fromJson ? getScriptHeartCount(s) : s.cumulativepositivereviews
-                        ctnSpan.innerText = n + "";
-                    })
-            }
-            ScriptInfo.setupLike(id, setLikeBtn);
-            return likeBtn;
-        }
-
         public mkBoxCore(big: boolean): HTMLElement {
             if (this.topic.fromJson) {
                 var r = this.browser().getScriptInfoById(this.topic.id).mkBoxExt(big, true);
                 if (big) {
                     r.className += " sdDocsHeader";
-                    r.appendChild(this.likeBtn(false));
                 }
                 return r;
             }
@@ -8588,14 +7299,11 @@ module TDev.Browser {
                 div("sdHeader", icon, div("sdHeaderInner", hd, desc)));
             if (big) {
                 res.className += " sdBigHeader sdDocsHeader";
-                res.appendChild(this.likeBtn(true));
             } else {
                 res.style.paddingLeft = (1 + 1.5 * this.topic.nestingLevel) + "em"
             }
             return res;
         }
-
-        private commentsTab: CommentsTab;
 
         public getPublicationId() { return this.topic.json.id; }
 
@@ -8690,21 +7398,8 @@ module TDev.Browser {
             })
 
             var requestDocs = null
-            var comments = div(null)
-            if (id) {
-                if (!this.commentsTab) {
-                    this.commentsTab = new CommentsTab(this);
-                    this.commentsTab.initElements();
-                }
-                comments.setChildren([
-                    div("sdHeading", lf("comments")),
-                    this.commentsTab.topContainer(),
-                    this.commentsTab.tabContent])
-            }
-
             allBottomDiv.setChildren([
                 div("sdBottomButtons", btn2),
-                comments,
                 requestDocs
             ])
 
@@ -8720,8 +7415,6 @@ module TDev.Browser {
                 noChromeDiv,
                 allBottomDiv
             ])
-            if (this.commentsTab)
-                this.commentsTab.initTab();
         }
 
         public match(terms: string[], fullName: string) {
@@ -8772,8 +7465,7 @@ module TDev.Browser {
                     div("sdRelatedBtns", HTML.mkButton(lf("open"), () => {
                         var b = this.browser();
                         b.loadDetails(b.getScriptInfoById(c.id));
-                    }))),
-                this.likeBtn(true)
+                    })))
             );
             return r;
         }
@@ -9100,7 +7792,6 @@ module TDev.Browser {
 
             if (big) {
                 res.className += " sdBigHeader sdDocsHeader";
-                res.appendChild(this.likeBtn(false));
             }
 
 
@@ -9119,29 +7810,6 @@ module TDev.Browser {
             });
         }
 
-        private likeBtn(showCount = false): HTMLElement {
-            var lbtn = div(null);
-            var id = this.publicId;
-            var setLikeBtn = (s: number, h: string, f: () => void) => {
-                var btn: HTMLElement;
-                if (s < 0)
-                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#000"))
-                else
-                    btn = div("sdDocsBtn", HTML.mkImg("svg:wholeheart,#EAC117"))
-                var ctnSpan = span('', ''); btn.appendChild(ctnSpan);
-                if (Math.abs(s) < 2) btn.setFlag("working", true);
-                lbtn.setChildren([btn.withClick(f)]);
-                if (showCount)
-                    TheApiCacheMgr.getAnd(id, (s: JsonChannel) => {
-                        if (!s) return; // deleted
-                        var n = s.positivereviews;
-                        ctnSpan.innerText = n + "";
-                    })
-            }
-            ScriptInfo.setupLike(id, setLikeBtn);
-            return lbtn;
-        }
-
         public mkTile(sz: number): HTMLElement {
             var d = div("hubTile hubTileSize" + sz);
             d.style.background = "#1731B8";
@@ -9150,12 +7818,6 @@ module TDev.Browser {
 
                 var cont = [];
                 var addNum = (n: number, sym: string, title: string) => { cont.push(ScriptInfo.mkNum(n, sym, title)) }
-                addNum(this.json.positivereviews, "♥", lf("favourites"));
-                if (sz > 1) {
-                    if (EditorSettings.widgets().publicationComments)
-                        addNum(this.json.comments, "✉", lf("comments"));
-                }
-
                 var nums = div("hubTileNumbers", cont, div("hubTileNumbersOverlay"));
                 //nums.style.background = this.app.htmlColor();
 

@@ -288,139 +288,6 @@ module TDev.Browser {
                 description: lf("All options turned on"),
                 editorMode: editorModes['pro']
             },
-            'minecraft': {
-                name: "Minecraft",
-                description: lf("Learn to code with Minecraft"),
-                logoArtId: 'eopyzwpm',
-                tutorialsTopic: 'minecrafttutorials',
-                scriptSearch: '#minecraft',
-                scriptTemplates: ['blankminecraft', 'blankcreeper'],
-                noAnimations: true,
-                editorMode: {
-                    id: 'minecraft',
-                    name: lf("minecraft"),
-                    descr: lf("Drag and drop blocks, simplified interface, great for beginners!"),
-                    astMode: 2,
-                    artId: 'brfljsds',
-                    widgets: {
-                        // edit
-                        addNewButton: true,
-                        undoButton: true,
-                        changeSkillLevel: true,
-                        async: true,
-                        // refactoring                    
-                        updateButton: true,
-                        promoteRefactoring: true,
-                        fixItButton: true,
-                        splitScreen: false,
-                        splitScreenOnLoad: true,
-                        // searchArtRefactoring: true,
-                        // calcSearchArt: true,
-                        scriptProperties: true,
-                        scriptPropertiesIcons: true,
-                        // statements
-                        copyPaste: true,
-                        selectStatements: true,
-                        stringConcatProperty: true,
-                        show: true,
-                        "return": true,
-                        gotoNavigation: true,
-                        // sections
-                        dataSection: true,
-                        // artSection: true,
-                        librariesSection: true,
-                        // ui
-                        wallScreenshot: true,
-                        wallHeart: true,
-                        startTutorialButton: true,
-                        nextTutorialsList: true,
-                        // hub
-                        hubTutorials: true,
-                        // hubShowcase : true,
-                        publicationComments: true,
-                        translateComments: true,
-
-                        whileConditionDefault: "true",
-                        whileBodyDefault: "skip; minecraft->pause(20);",
-                        forConditionDefault: "5",
-                        ifConditionDefault: "true",
-
-                        scriptSocialLinks: true,
-                        scriptAddToChannel: true,
-                    }
-                }
-            },
-            'rpi': {
-                name: "Raspberry Pi",
-                description: lf("Learn to code with Raspberry Pi"),
-                logoArtId: 'eopyzwpm',
-                tutorialsTopic: 'minecraftpitutorials',
-                scriptTemplates: ['blankminecraftpi'],
-                noAnimations: true,
-                lowMemory: true,
-                editorMode: editorModes['block'],
-            },
-            'arduino': {
-                name: "Arduino",
-                description: lf("Program Arduino boards"),
-                logoArtId: 'kzajxznr',
-                wallpaperArtId: 'kzajxznr',
-                tutorialsTopic: 'arduinotutorials',
-                scriptSearch: '#arduino',
-                scriptTemplates: ['blankarduino', 'blankesplore'],
-                intelliProfileId: 'kbmkc',
-                editorMode: editorModes['classic'],
-            },
-            'engduino': {
-                name: "Engduino",
-                description: lf("Programming the Engduino"),
-                logoArtId: 'qmjzqlkc',
-                wallpaperArtId: 'qmjzqlkc',
-                scriptSearch: '#engduino',
-                scriptTemplates: ['blankengduino'],
-                intelliProfileId: 'kbmkc',
-                editorMode: editorModes['classic'],
-            },
-            'microbit': {
-                name: 'BBC micro:bit',
-                description: ' ',
-                scriptSearch: '#microbit',
-                scriptTemplates: ['blankmicrobit'],
-                intelliProfileId: 'upfje',
-                editorMode: {
-                    id: 'microbit',
-                    name: 'Micro Bit',
-                    descr: lf("Micro Bit mode!"),
-                    astMode: 2,
-                    widgets: {
-                        hubTutorials: true,
-                        addNewButton: true,
-                        undoButton: true,
-                        promoteRefactoring: true,
-                        copyPaste: true,
-                        comment: true,
-                        dataSection: true,
-                        gotoNavigation: true,
-                        splitScreenOnLoad: true,
-                        updateButton: true,
-                        forceMainAsAction: true,
-                        singleReturnValue: true,
-                        integerNumbers: true,
-                        codeSearch: true,
-                        librariesSection: true,
-                        scriptPropertiesSettings: true,
-                        editorRunOnLoad: true,
-                        whileConditionDefault: "true",
-                        whileBodyDefault: "skip; basic->pause(20);",
-                        forConditionDefault: "5",
-                        "return": true,
-                        "break": true,
-                        scriptPrintScript: true,
-                        scriptPrintTopic: true,
-                        tutorialGoToPreviousStep: true,
-                    }
-                },
-            },
             'restricted': {
                 name: "Restricted",
                 description: lf("Opinionated restricted mode"),
@@ -1564,18 +1431,17 @@ module TDev.Browser {
         extends Screen {
         constructor() {
             super()
-            this.topContainer = div(null, this.logo, this.meBox, this.notificationBox);
+            this.topContainer = div(null, this.logo, this.notificationBox);
             this.topBox = div(null, this.topContainer);
             this.eol = document.createElement("a");
             this.eol.className = "eol";
-            this.eol.innerText = "Touch Develop retirement postponed until June 22, 2019.  Sign-in and access to cloud assets to be removed on May 23, 2018. Learn more.";
+            this.eol.innerText = "Touch Develop will retire on June 22, 2019.  Sign-in and access to cloud assets was removed on May 23, 2018. Learn more.";
             this.eol.href = "https://makecode.com/touchdevelop";
             this.theRoot = div("hubRoot", this.bglogo, this.mainContent, this.topBox);
         }
         private mainContent = div("hubContent");
         private logo = div("hubLogo", SVG.getTopLogo());
         private bglogo = div("hubBgLogo", HTML.mkImg("svg:touchDevelop,currentColor", '', '', true));
-        private meBox = div("hubMe");
         private eol: HTMLAnchorElement;
         private notificationBox = div("notificationBox");
         private topBox: HTMLElement;
@@ -2334,46 +2200,6 @@ module TDev.Browser {
             });
         }
 
-        private temporaryRequestedSignin = false;
-        private showingTemporarySignin = false;
-        private showTemporaryNotice() {
-            if ((!Storage.temporary || this.showingTemporarySignin) ||
-                !EditorSettings.widgets().showTemporaryNotice ||
-                ModalDialog.currentIsVisible()) return;
-
-            // if only and not signed in, request to sign in
-            if (!this.temporaryRequestedSignin
-                && Cloud.isOnline()
-                && Cloud.isAccessTokenExpired()) {
-                this.temporaryRequestedSignin = true;
-                this.showingTemporarySignin = true;
-                var d = new ModalDialog();
-                d.add(div('wall-dialog-header', lf("Sign in to avoid losing your scripts!")));
-                d.add(div('wall-dialog-body', lf("Your browser does not allow Touch Develop to store web site data. This usually happens if run in Private Mode (Safari), in InPrivate mode (Internet Explorer) or your security settings prevent data storage.")));
-                d.add(div('wall-dialog-body', lf("When you sign in, Touch Develop will save your scripts in the cloud.")));
-                d.add(div("wall-dialog-buttons",
-                    HTML.mkButton(lf("skip this"), () => {
-                        this.showingTemporarySignin = false;
-                        d.canDismiss = true;
-                        d.dismiss();
-                    }),
-                    HTML.mkButton(lf("sign in"), () => {
-                        this.showingTemporarySignin = false;
-                        if (Login.show()) {
-                            d.canDismiss = true;
-                            d.dismiss();
-                        }
-                    })
-                ));
-                d.fullWhite()
-                    d.canDismiss = false;
-                d.show();
-            } else {
-                if (EditorSettings.widgets().showTemporaryNotice)
-                    Storage.showTemporaryWarning();
-            }
-        }
-
         static userPictureChooser(fbButton:boolean, onUpd:()=>void)
         {
             var preview = <HTMLImageElement> document.createElement("img");
@@ -2463,7 +2289,7 @@ module TDev.Browser {
             var updated = false;
             if (finish === undefined && !notificationsOnly)
                 finish = () => {
-                    if (updated && !Storage.showTemporaryWarning())
+                    if (updated)
                             Util.setTimeout(500, () => window.location.reload());
                 };
             var dialogBody = div(null)
@@ -2700,7 +2526,6 @@ module TDev.Browser {
         public showSections(skipSync = false)
         {
             this.show();
-            this.showTemporaryNotice();
             this.showSectionsCoreAsync(skipSync).done();
         }
 
@@ -2763,10 +2588,6 @@ module TDev.Browser {
             }
 
             var docsEl: HTMLElement;
-            var ccgaEl: HTMLElement;
-            var whatsNew: HTMLElement;
-            var begginersEl : HTMLElement;
-            //var advancedEl:HTMLElement;
             var rate, settings: HTMLElement;
             var searchEl: HTMLElement;
             var elements = [
@@ -2774,15 +2595,6 @@ module TDev.Browser {
                 docsEl = toTutBtn(this.mkFnBtn(lf("Docs"), () => {
                     Util.navigateNewWindow(Cloud.config.helpPath);
                 }, Ticks.hubDocs, true, 2)),
-                whatsNew = toTutBtn(this.mkFnBtn(lf("What's new"), () => {
-                    Util.navigateNewWindow(Cloud.config.topicPath + "whatsnew");
-                }, Ticks.hubDocsWhatsNew, true)),
-                begginersEl = toTutBtn(this.mkFnBtn(lf("Getting started"), () => {
-                    Util.navigateNewWindow(Cloud.config.topicPath + "gettingstarted");
-                }, Ticks.hubBeginnersGettingStarted, true)),
-                ccgaEl = toTutBtn(this.mkFnBtn(lf("Teach Creative Coding!"), () => {
-                    Util.navigateNewWindow("/ccga");
-                }, Ticks.hubCCGA, true)),
                 // this button says "Search", which means "search" not "search docs" - "Help" is for that
                 searchEl = this.mkFnBtn(lf("Search everything"), () => { this.hide(); this.browser().showList("search"); }, Ticks.hubChatSearch, false),
                 this.createSkillButton(),
@@ -2794,7 +2606,6 @@ module TDev.Browser {
             searchEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
             (<any>searchEl).breakBefore = 1;
             docsEl.appendChild(div("hubTileSearch", HTML.mkImg("svg:search,white")));
-            whatsNew.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:star,white")));
             settings.appendChild(div("hubTileSearch hubTileSearchSmall", HTML.mkImg("svg:settings,white")));
 
             if (rate) rate.className += " exportBtn";
@@ -2812,14 +2623,6 @@ module TDev.Browser {
                 sects["tutorials"] = { title: lf("tutorials") };
             if (widgets.hubLearn)
                 sects["learn"] = { title: lf("learn") };
-            if (widgets.hubChannels)
-                sects["channels"] = { title: lf("channels") };
-            if (widgets.hubShowcase)
-                sects["showcase"] = { title: lf("showcase") };
-            if (widgets.hubTopAndNew)
-                sects["top"] = { title: lf("top & new") };
-            if (widgets.hubMyArt)
-                sects["myart"] = { title: lf("my art") };
 
             if (SizeMgr.portraitMode) {
                 this.vertical = true;
@@ -2849,7 +2652,6 @@ module TDev.Browser {
             var sectWidth = (name:string):number => sectWidths['default']
 
             this.logo.style.display = "";
-            this.meBox.style.display = "";
 
             // h=26em
 
@@ -2959,18 +2761,6 @@ module TDev.Browser {
             }
 
             this.mainContent.setChildren(divs);
-
-            if (Cloud.getUserId()) {
-                var uid = this.browser().getUserInfoById("me", "me");
-                this.meBox.setChildren([uid.mkSmallBox()]);
-                this.browser().addNotificationCounter(this.notificationBox);
-            } else {
-                var loginBtn = HTML.mkButtonElt("wall-button login-button", SVG.getLoginButton())
-                this.meBox.setChildren(loginBtn.withClick(() => {
-                    Login.show();
-                }))
-                this.notificationBox.setChildren([]);
-            }
         }
 
         private docTopics:any[];

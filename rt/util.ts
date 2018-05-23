@@ -2809,7 +2809,7 @@ module TDev{
             }
         }
 
-        if (willReload && !Storage.showTemporaryWarning()) {
+        if (willReload) {
             try {
                 ProgressOverlay.show(lf("Whoops! Something went wrong."))
                 ProgressOverlay.setProgress("")

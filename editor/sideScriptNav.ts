@@ -204,17 +204,6 @@ module TDev
                     this.editor.typeCheckNow();
                     this.editor.searchFor(":m");
                 }));
-
-            if (onlyParent && this.editor.widgetEnabled("deployButton")) {
-                addBtn(HTML.mkRoundButton("svg:cloudupload,currentColor", lf("export"), Ticks.sideDeployWebSite, () => {
-                    AppExport.exportBtn(app)
-                }));
-            }
-
-            if (!isParent && TheEditor.widgetEnabled("pluginsButton"))
-                addBtn(HTML.mkRoundButton("svg:plug,currentColor", lf("plugins"), Ticks.sidePlugins, () => {
-                    Plugins.runPlugin();
-                }));
             if (!isParent && app.hasTests() && TheEditor.widgetEnabled("runTestsButton"))
                 addBtn(HTML.mkRoundButton("svg:experiment,currentColor", lf("run tests"), Ticks.sideAllTests, () => {
                     TestMgr.testCurrentScript()
@@ -339,6 +328,7 @@ module TDev
             }
 
             var prog = Script;
+            /*
             var progDiv = declIt(prog);
 
             if (ScriptEditorWorldInfo.status === "published") {
@@ -348,10 +338,9 @@ module TDev
                 items[items.length - 1] = progDiv;
             } else if(!debugMode) {
                 var pubbtn = HTML.mkRoundButton("svg:Upload,currentColor", lf("publish"), Ticks.sidePublish, () => { ScriptNav.publishScript() });
-                TheEditor.keyMgr.btnShortcut(pubbtn, "Ctrl-S")
                 progDiv = ScriptNav.addSideButton(progDiv, pubbtn);
                 items[items.length - 1] = progDiv;
-            }
+            } */
 
             if (!debugMode)
                 items.push(this.scriptButtons(Script, false, !!TheEditor.parentScript));

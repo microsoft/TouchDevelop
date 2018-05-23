@@ -250,9 +250,6 @@ module TDev
             }, {
                 name: "local",
                 tick: Ticks.recordPersLocal
-            }, {
-                name: "replicated",
-                tick: Ticks.recordPersCloud
             }];
 
         static servicePersistenceLabels = [{
@@ -269,22 +266,13 @@ module TDev
             }, {
                 name: "server-local",
                 tick: Ticks.recordPersLocal
-            }, {
-                name: "fully replicated",
-                tick: Ticks.recordPersCloud
-            } /*, {
-                name: "partially replicated",
-                tick: Ticks.recordPersPartial
-            } */];
+            }];
         static cloudlibraryVarPersistenceLabels = [{
             name: "temporary",
             tick: Ticks.recordPersTemporary
         }, {
             name: "server-local",
                 tick: Ticks.recordPersLocal
-            }, {
-                name: "replicated",
-                tick: Ticks.recordPersCloud
             }];
 
 

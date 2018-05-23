@@ -117,17 +117,13 @@ module TDev {
         if (TDev.Browser.webAppImplicit) {
             // do not ask the authenticate
             var auth = TDev.Cloud.authenticateAsync;
-            TDev.Cloud.authenticateAsync = (reason: string) => {
-                if (reason == "leaderboard")
-                    return Promise.as(!Cloud.isAccessTokenExpired());
-                return auth(reason);
-            }
+            TDev.Cloud.authenticateAsync = (reason: string) => Promise.as(false);
         }
     }
 
     function initCompiledApp() {
         TDev.RuntimeSettings.askSourceAccess = false;
-        TDev.Cloud.authenticateAsync = (reason:string) => Promise.as(true);
+        TDev.Cloud.authenticateAsync = (reason:string) => Promise.as(false);
         TDev.RT.ArtCache.enabled = false; // disable art caching
         TDev.RT.ApiManager.getKeyAsync = (url: string): Promise => Promise.as(TDev.RT.ApiManager.keys[url] || undefined);
         TDev.RT.BingServices.searchAsync = function (

@@ -4113,10 +4113,8 @@ var sectTemplates = 'templates';
 var sectBeginners = lf("beginners");
 var sectCordova = lf("apps");
 var sectAzure = lf("web apps");
-var sectMakers = lf("makers");
 var sectTouchDevelop = lf("touch develop");
 var sectOthers = lf("others");
-var sectMinecraft = "Minecraft";
 
 /*
     editorMode: 1 = block, 2 = coder, 3 = expert
@@ -4158,87 +4156,6 @@ var templates: ScriptTemplate[] = [{
     section: sectBeginners,
     scriptid: 'oobxb',
     editorMode: 1,
-}, {
-    title: lf("blank scratch"),
-    id: 'blankscratch',
-    icon: 'Controller',
-    name: 'ADJ app',
-    description: lf("An empty app using the scratch library."),
-    section: sectBeginners,
-    scriptid: 'rbhea',
-    editorMode: 1,
-}, {
-    title: lf("blank pixel art"),
-    id: 'blankpixelart',
-    icon: 'NineColumn',
-    name: 'ADJ art',
-    description: lf("A pixel art app."),
-    section: sectBeginners,
-    scriptid: 'mdrw',
-    editorMode: 1,
-}, {
-    title: lf("blank minecraft"),
-    id: 'blankminecraft',
-    icon: 'NineColumn',
-    name: 'ADJ craft',
-    description: lf("A Minecraft app."),
-    section: sectMinecraft,
-    scriptid: 'mbepa',
-    editorMode: 2,
-}, {
-    title: lf("blank creeper"),
-    id: 'blankcreeper',
-    icon: 'NineColumn',
-    name: 'ADJ creeper',
-    description: lf("A Minecraft creeper app."),
-    section: sectMinecraft,
-    scriptid: 'ehtt',
-    editorMode: 2,
-},{
-    title: lf("blank minecraft pi"),
-    id: 'blankminecraftpi',
-    icon: 'NineColumn',
-    name: 'ADJ craft',
-    description: lf("A Minecraft Pi app."),
-    section: sectMinecraft,
-    scriptid: 'uggce',
-    editorMode: 2,
-}, {
-    title: lf("blank docs"),
-    id: 'blankdocs',
-    icon: 'Controller',
-    name: 'ADJ docs',
-    description: lf("An empty documentation page."),
-    section: sectTouchDevelop,
-    scriptid: 'krvn',
-    editorMode: 3,
-}, {
-    title: lf("blank tutorial"),
-    id: 'blanktutorial',
-    icon: 'Controller',
-    name: 'ADJ tutorial',
-    description: lf("An empty interactive tutorial."),
-    section: sectTouchDevelop,
-    scriptid: 'yujva',
-    editorMode: 3,
-}, {
-    title: lf("blank script plugin"),
-    id: 'blankscriptplugin',
-    icon: 'Brush',
-    name: 'ADJ plugin',
-    description: lf("An empty script editor plugin."),
-    section: sectTouchDevelop,
-    scriptid: 'tiwt',
-    editorMode: 3,
-}, {
-    title: lf("physics game starter"),
-    id: 'physicsgamestarter',
-    icon: 'Controller',
-    name: 'ADJ game',
-    description: lf("Boiler plate code to create a game."),
-    section: sectOthers,
-    scriptid: 'kkwd',
-    editorMode: 2,
 }];
 
 export function main()
