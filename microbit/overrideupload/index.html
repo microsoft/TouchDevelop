@@ -43,6 +43,15 @@
   
 		<!--/ Site Header -->    
 <style>
+
+#deprecationBannerMB a {
+	color: #fff;
+}
+
+#deprecationBannerMB {
+       font-size: 0.6em; background-size: cover; color: #333; padding: 12px 0; background-image: url(https://microbit0.blob.core.windows.net/pub/vkkqeibd); background-repeat: repeat; color: #fff; padding: 2rem;
+}
+
 #leftBtnRow, .apiTopDiv {
   background: #44ddfe url(https://az742082.vo.msecnd.net/files/images/bg-site-header-mobile.png) center top no-repeat !important;
   background-size: cover !important;  
@@ -463,7 +472,7 @@ li.siteMenuBtn {
         </nav>
   </header>
 
-    <div style="font-size: 0.6em; background-size: cover; color: #333; padding: 12px 0; background-image: url(https://microbit0.blob.core.windows.net/pub/vkkqeibd); background-repeat: repeat; color: #fff; padding: 2rem;"> <p>Hello!</p> <p>This site is no longer being updated. For all the latest on BBC micro:bit go to microbit.org.</p> <p>If you click on a page that has already moved to microbit.org your browser will be automatically redirected to <a href="https://microbit.org">microbit.org</a>. microbit.org is subject to the following <a href="https://www.microbit.org/privacy/">privacy policy</a></p> <p>If you have an account, you can still login to microbit.co.uk. Please note that the data you have given is subject to the following <a href="https://www.microbit.co.uk/privacy">Privacy Policy</a>. The <a href="https://microbit.org/about">Micro:bit Educational Foundation</a> does not process this data or combine it with data it has collected in other systems. Instructions for deleting your account are available on our <a href="https://support.microbit.org/solution/articles/19000081400-how-do-i-remove-my-account-from-microbit-co-uk-/">support website.</a></p> </div>
+  <div id="deprecationBannerMB"> <p>Hello!</p> <p>This site is no longer being updated. For all the latest on BBC micro:bit go to microbit.org.</p> <p>If you click on a page that has already moved to microbit.org your browser will be automatically redirected to <a href="https://microbit.org">microbit.org</a>. microbit.org is subject to the following <a href="https://www.microbit.org/privacy/">privacy policy</a></p> <p>If you have an account, you can still login to microbit.co.uk. Please note that the data you have given is subject to the following <a href="https://www.microbit.co.uk/privacy">Privacy Policy</a>. The <a href="https://microbit.org/about">Micro:bit Educational Foundation</a> does not process this data or combine it with data it has collected in other systems. Instructions for deleting your account are available on our <a href="https://support.microbit.org/solution/articles/19000081400-how-do-i-remove-my-account-from-microbit-co-uk-/">support website.</a></p><p><a href="javascript:hideDeprecation();">Close Message</a></p> </div>
 
 <div id="loading" style="width: 40%; margin-left: 30%; margin-top: 10%;text-align: center; color: #81e774; font-family: sans-serif; ">
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -653,6 +662,11 @@ statusMsg("js initialized");
 <script src="./external/lzma_worker-min.js" type="text/javascript"></script>
 <script>
   window.bbcMicrobit = true;
+</script>
+<script>
+function hideDeprecation() {
+        document.getElementById('deprecationMessageMB').style.display = 'none';
+}
 </script>
 <script src="./browser.js" type="text/javascript"></script>
 <script type="text/javascript">
