@@ -3575,6 +3575,10 @@ div.sdTabTileLabel {
   background-color:#333333;
 }
 
+.sdMigrate {
+  background-color: #6633cc;
+}
+
 .phone .sdBigButtonFull .sdBigButtonDesc
 {
     left:3em;

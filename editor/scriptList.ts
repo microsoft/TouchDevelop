@@ -87,7 +87,7 @@ module TDev.Browser {
                 if (skipMenu) {
                     skipMenu.setChildren(
                         [{ id: "skiplist", name: lf("Skip to my scripts"), tick: Ticks.siteMenuSkip, handler: skipToMyScripts, cls: "skip" },
-                            { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" }]
+                        { id: "skipdetails", name: lf("Skip to current script"), tick: Ticks.siteMenuSkip, handler: () => this.rightPane.focus(), cls: "skip" }]
                             .map(mkMenu));
                 }
 
@@ -1008,7 +1008,7 @@ module TDev.Browser {
                 .filter(d => d.getAttribute("role") == "button")
                 .forEach(d => d.setAttribute("role", "option"));
             // only first element is tab stop
-            this.listDivs.filter(d => d.tabIndex == 0).forEach((d,i) => {
+            this.listDivs.filter(d => d.tabIndex == 0).forEach((d, i) => {
                 if (i == 0) {
                     if (this.syncSelectOnLoad) {
                         this.syncSelectOnLoad = false;
@@ -3696,21 +3696,21 @@ module TDev.Browser {
                 }, false, currentHeader)
 
                 Promise.join([HistoryTab.historicalTextAsync(Cloud.getUserId(), this.script().getGuid(), it),
-                    s.getScriptTextAsync()]).done(texts => {
-                        if (!texts[0] || !texts[1])
-                            return;
-                        htext = texts[0]
-                        if (!currentHeader.editor) {
-                            var app0 = AST.Parser.parseScript(texts[0]);
-                            var app1 = AST.Parser.parseScript(texts[1]);
-                            AST.Diff.diffApps(app0, app1)
-                            scrProm.success(app1)
-                        } else {
-                            // no-op if there's an external editor (because the call
-                            // [showDiff] above returns immediately and doesn't wait on
-                            // [scrProm] to complete)
-                        }
-                    })
+                s.getScriptTextAsync()]).done(texts => {
+                    if (!texts[0] || !texts[1])
+                        return;
+                    htext = texts[0]
+                    if (!currentHeader.editor) {
+                        var app0 = AST.Parser.parseScript(texts[0]);
+                        var app1 = AST.Parser.parseScript(texts[1]);
+                        AST.Diff.diffApps(app0, app1)
+                        scrProm.success(app1)
+                    } else {
+                        // no-op if there's an external editor (because the call
+                        // [showDiff] above returns immediately and doesn't wait on
+                        // [scrProm] to complete)
+                    }
+                })
             })
             return box
         }
@@ -4546,7 +4546,7 @@ module TDev.Browser {
                     addNum(st.numNumberChanges, "svg:123", lf("number changes"));
 
                     (<any>box).score = [st.numOtherChanges, st.numCommentChanges + st.numStringChanges + st.numNumberChanges,
-                        st.numArtChanges, -scr.time]
+                    st.numArtChanges, -scr.time]
                     var cmpBox = (a, b) => {
                         if (!a.score) return -1
                         if (!b.score) return 1
@@ -6592,10 +6592,10 @@ module TDev.Browser {
                 d.setChildren([div("hubTileIcon", this.iconImg(true)),
                     bigIcon,
                     smallIcon,
-                    div("hubTileTitleBar",
-                        div("hubTileTitle", spanDirAuto(this.app.getName())),
-                        div("hubTileSubtitle",
-                            div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
+                div("hubTileTitleBar",
+                    div("hubTileTitle", spanDirAuto(this.app.getName())),
+                    div("hubTileSubtitle",
+                        div("hubTileAuthor", spanDirAuto(this.jsonScript.username), nums)))])
                 ScriptInfo.addTutorialProgress(d, this.cloudHeader);
             });
             return d;
@@ -6710,6 +6710,12 @@ module TDev.Browser {
             var moderate: HTMLElement;
             var editWithGroup: HTMLElement;
             var btns: HTMLElement = div("sdRunBtns");
+            var migrate: HTMLElement;
+            var ed = this.editor();
+            if (ed == "blockly" || ed == "td" || !ed /* TD script */) {
+                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate"), null, () => this.migrateToPXT());
+                migrate.classList.add("sdMigrate");
+            }
 
             if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
                 moderate = mkBtn(Ticks.browseModerate, "svg:fa-globe,white", lf("make public"), null, () => this.moderate())
@@ -6744,7 +6750,7 @@ module TDev.Browser {
                     editB.style.opacity = "0.2"
             }
 
-            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, save, clone, uninstall]);
+            btns.setChildren([updateB, editB, runB, likePub, pinB, moderate, save, clone, uninstall, migrate]);
             return btns;
         }
 
@@ -6817,6 +6823,17 @@ module TDev.Browser {
         }
 
         private internalSaveAsync(): Promise {
+            return this.internalSaveToJSONAsync(false)
+                .then((json: string) => {
+                    return lzmaCompressAsync(json)
+                        .then((jsonz: Uint8Array) => {
+                            var fileName = Util.toFileName(this.cloudHeader.name, 'script');
+                            if (jsonz) HTML.browserDownloadUInt8Array(jsonz, fileName + ".jsz");
+                            else HTML.browserDownloadText(json, fileName + ".json");
+                        })
+                });
+        }
+        private internalSaveToJSONAsync(migration: boolean): Promise {
             var guid = this.getGuid();
             var json: string;
             var p = Promise.as();
@@ -6826,18 +6843,22 @@ module TDev.Browser {
                     var header = <Cloud.Header>r[1];
                     if (!text || !header) return;
 
-                    var f = <Cloud.Workspace>{
-                        scripts: [{
-                            header: World.stripHeaderForSave(header),
-                            source: text,
-                        }]
-                    };
-                    json = JSON.stringify(f, null, 1);
-                    return lzmaCompressAsync(json).then((jsonz: Uint8Array) => {
-                        var fileName = Util.toFileName(this.cloudHeader.name, 'script');
-                        if (jsonz) HTML.browserDownloadUInt8Array(jsonz, fileName + ".jsz");
-                        else HTML.browserDownloadText(json, fileName + ".json");
-                    });
+                    var json: string;
+                    if (migration) {
+                        json = JSON.stringify({
+                                meta: World.stripHeaderForSave(header),
+                                source: text,
+                            }, null, 1);
+                    } else {
+                        var f = <Cloud.Workspace>{
+                            scripts: [{
+                                header: World.stripHeaderForSave(header),
+                                source: text,
+                            }]
+                        };
+                        json = JSON.stringify(f, null, 1);
+                    }
+                    return Promise.as(json);
                 });
         }
 
@@ -6941,8 +6962,8 @@ module TDev.Browser {
                 if (!this.willWork()) {
                     wontWork.className = "sdWarning";
                     wontWork.setChildren([span("symbol", "⚠"),
-                        lf("This script is using the following capabilities that might be missing on your current device: {0}",
-                            AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
+                    lf("This script is using the following capabilities that might be missing on your current device: {0}",
+                        AST.App.capabilityName(this.app.getPlatform() & ~api.core.currentPlatform))]);
                 }
 
                 if (this.jsonScript.meta) {
@@ -7422,6 +7443,17 @@ module TDev.Browser {
                 this.addShare(m, { tickCallback: (s) => Ticker.rawTick("publishShareScript_" + s), justButtons: true })
         }
 
+        private migrateToPXT() {
+            return this.internalSaveToJSONAsync(true)
+                .then((json: string) => {
+                    return lzmaCompressAsync(json)
+                        .then((jsonz: Uint8Array) => {
+                            var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
+                            Util.navigateNewWindow("https://pxt.microbit.org/#project:" + buf);
+                        })
+                });
+        }
+
         private moderate() {
             ModalDialog.ask(
                 lf("Did you make sure there is no personal data about the kid in the script? The script will be available on the internet."),
@@ -7548,28 +7580,28 @@ module TDev.Browser {
             ScriptProperties.showDiff(
                 Promise.join([id ? ScriptCache.getScriptAsync(id)
                     : this.getScriptTextAsync(),
-                    this.getScriptTextAsync()]).then(scrs => {
-                        if (!scrs[0] || !scrs[1]) {
-                            if (Cloud.isOffline()) {
-                                Cloud.showModalOnlineInfo(lf("comparing cancelled"));
-                            }
-                            return;
+                this.getScriptTextAsync()]).then(scrs => {
+                    if (!scrs[0] || !scrs[1]) {
+                        if (Cloud.isOffline()) {
+                            Cloud.showModalOnlineInfo(lf("comparing cancelled"));
                         }
-                        function prep(s: string) {
-                            var app = AST.Parser.parseScript(s, [])
-                            app.isTopLevel = true;
-                            AST.TypeChecker.tcScript(app, true);
-                            return app;
-                        }
-                        var a0 = prep(scrs[0])
-                        var a1 = prep(scrs[1])
-                        new AST.InitIdVisitor(false).dispatch(a0)
-                        AST.Diff.diffApps(a0, a1, {
-                            useStableNames: /diffNoStable/.test(document.URL) ? false : true,
-                            tutorialMode: /tutorialDiff/.test(document.URL)
-                        })
-                        return a1
-                    }))
+                        return;
+                    }
+                    function prep(s: string) {
+                        var app = AST.Parser.parseScript(s, [])
+                        app.isTopLevel = true;
+                        AST.TypeChecker.tcScript(app, true);
+                        return app;
+                    }
+                    var a0 = prep(scrs[0])
+                    var a1 = prep(scrs[1])
+                    new AST.InitIdVisitor(false).dispatch(a0)
+                    AST.Diff.diffApps(a0, a1, {
+                        useStableNames: /diffNoStable/.test(document.URL) ? false : true,
+                        tutorialMode: /tutorialDiff/.test(document.URL)
+                    })
+                    return a1
+                }))
         }
 
         public diffToBase() {
@@ -7693,7 +7725,7 @@ module TDev.Browser {
             m.show()
 
             Promise.join([TheApiCacheMgr.getAsync("config/promo"),
-                Cloud.getPrivateApiAsync(id + "/promo")])
+            Cloud.getPrivateApiAsync(id + "/promo")])
                 .done(arr => {
                     var cfg = arr[0]
                     var promo = arr[1]
@@ -9506,10 +9538,10 @@ module TDev.Browser {
                 //nums.style.background = d.style.background;
 
                 d.setChildren([div("hubTileIcon", HTML.mkImg("svg:callout,white")),
-                    div("hubTileTitleBar",
-                        div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
-                        div("hubTileSubtitle",
-                            div("hubTileAuthor", spanDirAuto(u.username), nums)))])
+                div("hubTileTitleBar",
+                    div("hubTileTitle", "on " + spanDirAuto(u.publicationname)),
+                    div("hubTileSubtitle",
+                        div("hubTileAuthor", spanDirAuto(u.username), nums)))])
             });
         }
 
@@ -10248,10 +10280,10 @@ module TDev.Browser {
                 d.setChildren([div("hubTileIcon", HTML.mkImg("svg:script,white")),
                     bigIcon,
                     smallIcon,
-                    div("hubTileTitleBar",
-                        div("hubTileTitle", spanDirAuto(this.json.name)),
-                        div("hubTileSubtitle",
-                            div("hubTileAuthor", spanDirAuto(this.json.username), nums)))])
+                div("hubTileTitleBar",
+                    div("hubTileTitle", spanDirAuto(this.json.name)),
+                    div("hubTileSubtitle",
+                        div("hubTileAuthor", spanDirAuto(this.json.username), nums)))])
             });
         }
 
@@ -10430,7 +10462,7 @@ module TDev.Browser {
                         })
                 else if (this.ptr.scriptid) {
                     Promise.join([ScriptCache.getScriptAsync(this.ptr.scriptid),
-                        TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
+                    TheApiCacheMgr.getAsync(this.ptr.scriptid, true)])
                         .done(rr => {
                             this.text = rr[0]
                             this.script = rr[1]
