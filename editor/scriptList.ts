@@ -6717,6 +6717,11 @@ module TDev.Browser {
                 migrate.classList.add("sdMigrate");
             }
 
+            if (ed == "python") {
+                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate"), null, () => this.migrateToPythonEditor());
+                migrate.classList.add("sdMigrate");
+            }
+
             if (this.jsonScript && this.jsonScript.unmoderated && Cloud.hasPermission("adult")) {
                 moderate = mkBtn(Ticks.browseModerate, "svg:fa-globe,white", lf("make public"), null, () => this.moderate())
             }
@@ -7446,10 +7451,25 @@ module TDev.Browser {
         private migrateToPXT() {
             return this.internalSaveToJSONAsync(true)
                 .then((json: string) => {
+                    console.log(json);
                     return lzmaCompressAsync(json)
                         .then((jsonz: Uint8Array) => {
                             var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
-                            Util.navigateNewWindow("https://pxt.microbit.org/#project:" + buf);
+                            Util.navigateNewWindow("https://makecode.microbit.org/#project:" + buf);
+                        })
+                });
+        }
+
+        private migrateToPythonEditor() {
+            return this.internalSaveToJSONAsync(true)
+                .then((json: string) => {
+                    return lzmaCompressAsync(json)
+                        .then((jsonz: Uint8Array) => {
+                            console.log(jsonz);
+                            console.log(Util.toArray(jsonz));
+                            var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
+                            Util.navigateNewWindow("https://python.microbit.org/v/1.1#project:" + buf);
+                            console.log(buf);
                         })
                 });
         }
