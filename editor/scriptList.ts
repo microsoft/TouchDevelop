@@ -6713,12 +6713,12 @@ module TDev.Browser {
             var migrate: HTMLElement;
             var ed = this.editor();
             if (ed == "blockly" || ed == "td" || !ed /* TD script */) {
-                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate"), null, () => this.migrateToPXT());
+                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate to microbit.org"), null, () => this.migrateToPXT());
                 migrate.classList.add("sdMigrate");
             }
 
             if (ed == "python") {
-                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate"), null, () => this.migrateToPythonEditor());
+                migrate = mkBtn(Ticks.browseMigrate, "svg:share,white", lf("Migrate to microbit.org"), null, () => this.migrateToPythonEditor());
                 migrate.classList.add("sdMigrate");
             }
 
@@ -7455,7 +7455,7 @@ module TDev.Browser {
                     return lzmaCompressAsync(json)
                         .then((jsonz: Uint8Array) => {
                             var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
-                            Util.navigateNewWindow("https://makecode.microbit.org/#project:" + buf);
+                            Util.navigateNewWindow("https://makecode.microbit.org/v0/#project:" + buf);
                         })
                 });
         }
