@@ -1668,7 +1668,7 @@ height: 100%;
 }
 
 .beta-note {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   right: 0em;
   left:0em;
