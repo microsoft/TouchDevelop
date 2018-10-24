@@ -51,7 +51,7 @@
 }
 
 #deprecationBannerMB {
-       font-size: 0.6em; background-size: cover; color: #333; padding: 12px 0; background-image: url(https://microbit0.blob.core.windows.net/pub/vkkqeibd); background-repeat: repeat; color: #fff; padding: 2rem;
+       font-size: 0.6em; background-size: cover; color: #333; background-image: url(https://microbit0.blob.core.windows.net/pub/vkkqeibd); background-repeat: repeat; color: #fff; padding: .5rem;
 }
 
 #leftBtnRow, .apiTopDiv {
@@ -475,12 +475,16 @@ li.siteMenuBtn {
   </header>
 
   <div id="deprecationBannerMB">
-          <p style="font-size: 2rem">Hello! This site is no longer being updated. For all the latest on BBC micro:bit please update your bookmarks to go to <a href="https://microbit.org">microbit.org</a>.</p>
+    <p style="font-size: 1.2rem">
+        <b> After 1st January 2019 your scripts will not be available if you have not saved them elsewhere.</b>
+        <p>We're here to help you through this <a href="https://support.microbit.org/support/solutions/articles/19000050402-can-i-still-access-touchdevelop-microsoft-blocks-and-codekingdoms-and-old-python-editors-">migration</a>. Please <a href="http://support.microbit.org/">visit the support site and raise a ticket if you have any questions</a>.</p>
+    </p>
+    <div id="deprecationBannerMBHide">
     <p>As <a href="https://support.microbit.org/support/solutions/articles/19000050402-can-i-still-access-touchdevelop-microsoft-blocks-and-codekingdoms-and-old-python-editors-">announced in May</a>, the code editors at microbit.co.uk will only be available <a href="https://support.microbit.org/support/solutions/articles/19000050402-can-i-still-access-touchdevelop-microsoft-blocks-and-codekingdoms-and-old-python-editors-">until the end of 2018</a>.</p>
     <p>Until 1st January 2019, if you have an account, you can still login to microbit.co.uk in order to download or export your scripts - we've added a new <a href="https://support.microbit.org/support/solutions/articles/19000065686-how-do-i-migrate-content-from-the-legacy-editors-">'Migrate' button for all scripts that can be migrated into the new editors</a>.<b> After 1st January 2019 your scripts will not be available if you have not saved them elsewhere.</b></p>
-    <p>We're here to help you through this migration. Please <a href="http://support.microbit.org/">visit the support site and raise a ticket if you have any questions</a>.</p>
     <p>The data you have given is subject to the following <a href="https://www.microbit.co.uk/privacy">Privacy Policy</a>. The Micro:bit Educational Foundation does not process this data or combine it with data it has collected in other systems. Instructions for deleting your account are available on our support website.</p>
     <p><a href="javascript:hideDeprecation();">Close Message</a></p>
+    </div>
   </div>
 
 <div id="loading" style="width: 40%; margin-left: 30%; margin-top: 10%;text-align: center; color: #81e774; font-family: sans-serif; ">
@@ -674,7 +678,7 @@ statusMsg("js initialized");
 </script>
 <script>
 function hideDeprecation() {
-        document.getElementById('deprecationBannerMB').style.display = 'none';
+        document.getElementById('deprecationBannerMBHide').style.display = 'none';
 }
 </script>
 <script src="./browser.js" type="text/javascript"></script>
