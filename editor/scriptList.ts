@@ -6150,6 +6150,19 @@ module TDev.Browser {
                     TheEditor.loadScriptAsync(this.cloudHeader));
             }
         }
+        
+        public loadForMigration(): Promise {
+             TheEditor.lastListPath = this.browser().getApiPath()
+             if (!this.cloudHeader || this.cloudHeader.status == "deleted") {
+                 if (!this.publicId) return Promise.as(); // hmm?
+                 this.browser().hide();
+                 tick(Ticks.browseEditInstall);
+                 return TheEditor.prepareForLoadAsync(lf("installing and loading script"),
+                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
+            } else {
+                 return TheApiCacheMgr.getAsync(this.publicId, true);
+            }
+        }
 
         public edit() {
             this.editAsync().done(
@@ -7449,29 +7462,37 @@ module TDev.Browser {
         }
 
         private migrateToPXT() {
-            return this.internalSaveToJSONAsync(true)
-                .then((json: string) => {
-                    console.log(json);
-                    return lzmaCompressAsync(json)
-                        .then((jsonz: Uint8Array) => {
-                            var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
-                            Util.navigateNewWindow("https://makecode.microbit.org/v0/#project:" + buf);
-                        })
-                });
+            console.log("Migrating to PXT");
+            this.loadForMigration()
+            .then(() => {
+                return this.internalSaveToJSONAsync(true)
+                    .then((json: string) => {
+                        console.log(json);
+                        return lzmaCompressAsync(json)
+                            .then((jsonz: Uint8Array) => {
+                                var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
+                                Util.navigateNewWindow("https://makecode.microbit.org/v0/#project:" + buf);
+                            })
+                    });
+            });
         }
 
         private migrateToPythonEditor() {
-            return this.internalSaveToJSONAsync(true)
-                .then((json: string) => {
-                    return lzmaCompressAsync(json)
-                        .then((jsonz: Uint8Array) => {
-                            console.log(jsonz);
-                            console.log(Util.toArray(jsonz));
-                            var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
-                            Util.navigateNewWindow("https://python.microbit.org/v/1.1#project:" + buf);
-                            console.log(buf);
-                        })
-                });
+            console.log("Migrating to Python editor");
+            this.loadForMigration()
+            .then(() => {
+                return this.internalSaveToJSONAsync(true)
+                    .then((json: string) => {
+                        return lzmaCompressAsync(json)
+                            .then((jsonz: Uint8Array) => {
+                                console.log(jsonz);
+                                console.log(Util.toArray(jsonz));
+                                var buf = Util.base64EncodeBytes(Util.toArray(jsonz));
+                                Util.navigateNewWindow("https://python.microbit.org/v/1.1#project:" + buf);
+                                console.log(buf);
+                            })
+                    });
+            });
         }
 
         private moderate() {
