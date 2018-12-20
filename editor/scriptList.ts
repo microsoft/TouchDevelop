@@ -6150,6 +6150,17 @@ module TDev.Browser {
                     TheEditor.loadScriptAsync(this.cloudHeader));
             }
         }
+        
+        public loadForMigration(): Promise {
+             TheEditor.lastListPath = this.browser().getApiPath()
+             if (!this.cloudHeader || this.cloudHeader.status == "deleted") {
+                 if (!this.publicId) return Promise.as(); // hmm?
+                 this.browser().hide();
+                 tick(Ticks.browseEditInstall);
+                 return TheEditor.prepareForLoadAsync(lf("installing and loading script"),
+                     () => TheApiCacheMgr.getAsync(this.publicId, true).then((info: JsonScript) => TheEditor.loadPublicScriptAsync(this.publicId, info.userid)));
+             }
+        }
 
         public edit() {
             this.editAsync().done(
@@ -7449,6 +7460,8 @@ module TDev.Browser {
         }
 
         private migrateToPXT() {
+            console.log("Migrating to PXT");
+            this.loadForMigration();
             return this.internalSaveToJSONAsync(true)
                 .then((json: string) => {
                     console.log(json);
@@ -7461,6 +7474,8 @@ module TDev.Browser {
         }
 
         private migrateToPythonEditor() {
+            console.log("Migrating to Python editor");
+            this.loadForMigration();
             return this.internalSaveToJSONAsync(true)
                 .then((json: string) => {
                     return lzmaCompressAsync(json)
